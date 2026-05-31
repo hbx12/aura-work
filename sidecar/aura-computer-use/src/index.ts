@@ -1,5 +1,6 @@
 /**
- * Aura OS Computer Use Helper — Phase 10: experimental screen/app automation
+ * Aura Work Computer Use Helper — experimental screen/app automation.
+ * Disabled by default until the internal sidecar authentication layer is enabled.
  */
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
@@ -9,7 +10,8 @@ import { captureScreenshot, clickAt, focusWindow, listWindows, typeText } from "
 import type { ComputerUseState, ComputerUseStatus } from "./types.js";
 
 const PORT = Number(process.env.AURA_COMPUTER_USE_PORT ?? 47828);
-const VERSION = "0.10.0";
+const VERSION = "0.1.0-alpha.1";
+const ENABLED = process.env.AURA_ENABLE_EXPERIMENTAL_COMPUTER_USE === "1";
 
 let backend: BackendInfo | null = null;
 let state: ComputerUseState = "stopped";
@@ -29,17 +31,29 @@ function json(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
+function disabledMessage() {
+  return "Computer use is disabled by default in this alpha build. Enable it only for local development with AURA_ENABLE_EXPERIMENTAL_COMPUTER_USE=1 after reviewing the security implications.";
+}
+
+function ensureEnabled(res: ServerResponse): boolean {
+  if (ENABLED) return true;
+  json(res, 403, { error: disabledMessage(), experimental: true, enabled: false });
+  return false;
+}
+
 function statusPayload(): ComputerUseStatus {
   const b = backend!;
   return {
     state,
     backend: b.id,
     backendLabel: b.label,
-    experimental: b.experimental,
+    experimental: true,
     startedAt,
-    lastError,
-    remediation: b.remediation,
-    running: state === "running",
+    lastError: ENABLED ? lastError : disabledMessage(),
+    remediation: ENABLED
+      ? b.remediation
+      : "Computer use remains disabled until internal sidecar authentication and a full local security review are completed.",
+    running: ENABLED && state === "running",
   };
 }
 
@@ -55,18 +69,23 @@ const server = createServer(async (req, res) => {
 
     if (method === "GET" && url === "/health") {
       return json(res, 200, {
-        status: state === "running" ? "ok" : "idle",
+        status: ENABLED && state === "running" ? "ok" : "disabled",
         phase: 10,
         version: VERSION,
         backend: backend!.id,
         experimental: true,
-        message: "Computer use helper — experimental screen capture and desktop automation.",
+        enabled: ENABLED,
+        message: ENABLED
+          ? "Computer use helper — experimental screen capture and desktop automation."
+          : disabledMessage(),
       });
     }
 
     if (method === "GET" && url === "/status") {
       return json(res, 200, statusPayload());
     }
+
+    if (!ensureEnabled(res)) return;
 
     if (method === "POST" && url === "/start") {
       state = "running";
@@ -77,65 +96,53 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/stop") {
       state = "stopped";
+      startedAt = undefined;
       return json(res, 200, statusPayload());
     }
 
     if (method === "GET" && url === "/windows") {
-      if (state !== "running") {
-        return json(res, 503, { error: "Computer use helper is not running. POST /start first." });
-      }
+      if (state !== "running") return json(res, 503, { error: "Computer use helper is not running. POST /start first." });
       const windows = await listWindows();
       return json(res, 200, { windows, count: windows.length });
     }
 
     if (method === "POST" && url === "/screenshot") {
-      if (state !== "running") {
-        return json(res, 503, { error: "Computer use helper is not running." });
-      }
+      if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
       const body = await parseJson<{ windowId?: string }>(req);
       const shot = await captureScreenshot(body.windowId);
       return json(res, 200, shot);
     }
 
     if (method === "POST" && url === "/focus") {
-      if (state !== "running") {
-        return json(res, 503, { error: "Computer use helper is not running." });
-      }
+      if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
       const body = await parseJson<{ windowId: string }>(req);
       if (!body.windowId) return json(res, 400, { error: "windowId is required" });
-      const result = await focusWindow(body.windowId);
-      return json(res, 200, result);
+      return json(res, 200, await focusWindow(body.windowId));
     }
 
     if (method === "POST" && url === "/click") {
-      if (state !== "running") {
-        return json(res, 503, { error: "Computer use helper is not running." });
-      }
+      if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
       const body = await parseJson<{ x: number; y: number; button?: "left" | "right" }>(req);
       if (typeof body.x !== "number" || typeof body.y !== "number") {
         return json(res, 400, { error: "x and y are required numbers" });
       }
-      const result = await clickAt(body.x, body.y, body.button ?? "left");
-      return json(res, 200, result);
+      return json(res, 200, await clickAt(body.x, body.y, body.button ?? "left"));
     }
 
     if (method === "POST" && url === "/type") {
-      if (state !== "running") {
-        return json(res, 503, { error: "Computer use helper is not running." });
-      }
+      if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
       const body = await parseJson<{ text: string }>(req);
       if (!body.text) return json(res, 400, { error: "text is required" });
-      const result = await typeText(body.text);
-      return json(res, 200, result);
+      return json(res, 200, await typeText(body.text));
     }
 
-    json(res, 404, { error: "Not found" });
+    return json(res, 404, { error: "Not found" });
   } catch (err) {
     lastError = err instanceof Error ? err.message : String(err);
-    json(res, 500, { error: lastError, ...statusPayload() });
+    return json(res, 500, { error: lastError, ...statusPayload() });
   }
 });
 
 server.listen(PORT, "127.0.0.1", () => {
-  console.log(`[aura-computer-use] listening on http://127.0.0.1:${PORT} (experimental)`);
+  console.log(`[aura-computer-use] listening on http://127.0.0.1:${PORT} (experimental, enabled=${ENABLED})`);
 });
