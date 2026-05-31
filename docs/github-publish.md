@@ -12,12 +12,13 @@ Repository: **https://github.com/hbx12/aura-work**
 
 | Excluded | Reason |
 |----------|--------|
+| `PRD/` | Private product requirements and internal planning |
 | `design-system/`, `design-system-extract/`, `*.zip` | Design reference archives |
 | `website/` | Marketing site (separate) |
 | `img/` | Local logo source (icon in `apps/desktop/public/aura-logo.png`) |
 | `node_modules/`, `target/`, `dist/`, `sidecar/*/dist/` | Build output |
 | `.env`, `*.db`, `*.key`, `auth.json`, `credentials.json` | Secrets & local data |
-| `.cursor/`, `.agents/` | IDE / internal tooling |
+| `.agents/` | Internal tooling |
 
 ## Security check before push
 
@@ -38,7 +39,7 @@ git init
 git remote add origin https://github.com/hbx12/aura-work.git
 powershell -ExecutionPolicy Bypass -File scripts/pre-push-check.ps1
 git add .
-git status   # confirm: NO website/, design-system/, *.zip, .env, *.db
+git status   # confirm: NO PRD/, website/, design-system/, *.zip, .env, *.db
 git commit -m "Initial release: Aura Work desktop app"
 git branch -M main
 git push -u origin main
