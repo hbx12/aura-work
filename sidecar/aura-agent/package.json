@@ -14,7 +14,7 @@
     "@aura-os/shared": "*"
   },
   "devDependencies": {
-    "typescript": "~5.8.3",
+    "typescript": "~6.0.3",
     "@types/node": "^22.0.0"
   }
 }
