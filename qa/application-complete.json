@@ -1,0 +1,24 @@
+{
+  "phase": 12,
+  "title": "Full Integration QA and Application Complete Verification",
+  "version": "0.12.0",
+  "platforms": ["macOS", "Windows", "Linux"],
+  "automatedCommands": [
+    "npm run build:sidecars",
+    "npm run build:cloud",
+    "npm run test:rust",
+    "npm run test:acceptance"
+  ],
+  "suites": [
+    { "id": "5.1", "title": "Local Project Coding Flow", "automated": "partial", "manualRequired": true },
+    { "id": "5.2", "title": "Local-Only Ollama Flow", "automated": "partial", "manualRequired": true },
+    { "id": "5.3", "title": "Scheduled Task Permissions", "automated": "rust-unit", "manualRequired": true },
+    { "id": "5.4", "title": "Remote Dispatch Closed App", "automated": "full", "manualRequired": true },
+    { "id": "5.5", "title": "Remote Dispatch Sleeping Device", "automated": "full", "manualRequired": true },
+    { "id": "5.6", "title": "Chrome Extension Approval", "automated": "partial", "manualRequired": true },
+    { "id": "5.7", "title": "Office Add-in Delegation", "automated": "partial", "manualRequired": true },
+    { "id": "5.8", "title": "E2EE Cloud Sync", "automated": "full", "manualRequired": true },
+    { "id": "5.9", "title": "High-Impact Actions", "automated": "rust-unit", "manualRequired": true },
+    { "id": "5.10", "title": "Computer Use Safety", "automated": "rust-unit", "manualRequired": true }
+  ]
+}

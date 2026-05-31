@@ -1,0 +1,20 @@
+{
+  "name": "@aura-os/agent",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura OS agent sidecar — task engine, VM shell, providers, routing (Phase 4)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@aura-os/shared": "*"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3",
+    "@types/node": "^22.0.0"
+  }
+}

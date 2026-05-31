@@ -1,0 +1,31 @@
+# Weblate component configuration (import into Weblate project)
+# Docs: https://docs.weblate.org/en/latest/admin/projects.html
+
+[weblate]
+name = Aura OS UI
+slug = aura-os
+source_language = en
+
+[[weblate.component]]
+name = Desktop UI strings
+slug = desktop-ui
+repo = https://github.com/hbx12/aura-work
+branch = main
+filemask = packages/i18n/locales/*.json
+template = packages/i18n/locales/en.json
+file_format = json
+new_base = packages/i18n/locales/en.json
+edit_template = false
+translation_propagation = true
+merge_style = rebase
+commit_message = "i18n: update translations from Weblate (%(component_name)s)"
+addition_commit_message = "i18n: added new language %(language_name)s"
+
+# RTL languages
+[[weblate.language]]
+code = ar
+direction = rtl
+
+[[weblate.language]]
+code = fa
+direction = rtl

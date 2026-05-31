@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & support
+    url: https://github.com/hbx12/aura-work/discussions
+    about: Ask questions or get help from the community
+  - name: Security report
+    url: https://github.com/hbx12/aura-work/security/advisories/new
+    about: Report a vulnerability privately

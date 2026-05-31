@@ -1,0 +1,13 @@
+Aura OS
+Copyright 2026 Aura OS Contributors
+
+This product includes software developed by the Aura OS project
+(https://github.com/hbx12/aura-work).
+
+Bundled runtime and platform components (distributed with installers):
+
+- Node.js runtime (bundled sidecar host) — see Node.js license in THIRD-PARTY-NOTICES
+- Chromium / WebView2 automation stack — see browser helper dependencies in THIRD-PARTY-NOTICES
+- Linux workspace VM image components — see bundle/vm-image/ and THIRD-PARTY-NOTICES
+
+For a complete list of third-party licenses, see THIRD-PARTY-NOTICES.

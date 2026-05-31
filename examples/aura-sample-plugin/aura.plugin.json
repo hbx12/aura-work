@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "id": "com.aura.sample",
+  "name": "Aura Sample Plugin",
+  "version": "0.1.0",
+  "publisher": "Aura OS",
+  "description": "Sample plugin for Phase 6 — demonstrates local install and tool calls.",
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "Apache-2.0",
+  "entrypoints": {
+    "tools": "./tools/index.js"
+  },
+  "permissions": {
+    "files": [],
+    "network": [],
+    "shell": [],
+    "browser": [],
+    "secrets": []
+  },
+  "tools": [
+    {
+      "id": "sample.greet",
+      "name": "Greet",
+      "description": "Returns a greeting for the given name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" }
+        }
+      }
+    },
+    {
+      "id": "sample.echo",
+      "name": "Echo",
+      "description": "Echoes back the input arguments as JSON.",
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  ],
+  "subagents": [],
+  "skills": []
+}

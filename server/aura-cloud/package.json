@@ -1,0 +1,17 @@
+{
+  "name": "@aura-os/cloud",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura Cloud — self-hostable sync relay and remote dispatch (Phase 7)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.3"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "version": "1.0.0",
+  "productName": "Aura OS",
+  "nodeRuntime": {
+    "bundled": true,
+    "minVersion": "20.0.0",
+    "resourcePath": "resources/node",
+    "note": "Node sidecars ship with the installer; dev uses system Node via npm."
+  },
+  "vmImage": {
+    "imageId": "aura-linux-workspace",
+    "version": "1.0.0",
+    "manifestPath": "resources/vm-image/manifest.json",
+    "signatureRequired": true
+  },
+  "sidecars": [
+    { "id": "aura-agent", "port": 47821, "resourcePath": "resources/sidecars/aura-agent" },
+    { "id": "aura-vm-helper", "port": 47822, "resourcePath": "resources/sidecars/aura-vm-helper" },
+    { "id": "aura-browser-helper", "port": 47823, "resourcePath": "resources/sidecars/aura-browser-helper" },
+    { "id": "aura-plugins-helper", "port": 47824, "resourcePath": "resources/sidecars/aura-plugins-helper" },
+    { "id": "aura-cloud-sync", "port": 47825, "resourcePath": "resources/sidecars/aura-cloud-sync" },
+    { "id": "aura-bridge", "port": 47826, "resourcePath": "resources/sidecars/aura-bridge" },
+    { "id": "aura-computer-use", "port": 47828, "resourcePath": "resources/sidecars/aura-computer-use" }
+  ],
+  "updates": {
+    "source": "github-releases",
+    "verification": "minisign",
+    "endpointTemplate": "https://github.com/hbx12/aura-work/releases/latest/download/latest.json"
+  }
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aura OS</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 12px;
+        font-size: 13px;
+      }
+      label {
+        display: block;
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+      }
+      button {
+        margin-top: 10px;
+        width: 100%;
+        padding: 8px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 8px;
+        color: #555;
+      }
+      .err {
+        color: #b00020;
+      }
+      #result {
+        margin-top: 8px;
+        white-space: pre-wrap;
+        background: #f4f4f4;
+        padding: 8px;
+        min-height: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Aura OS</h3>
+    <p>Delegates AI execution to local Aura desktop. No API keys stored here.</p>
+    <div id="pair-section">
+      <label>Pairing code</label>
+      <input id="pair-code" maxlength="6" />
+      <label>Name</label>
+      <input id="client-name" value="Office" />
+      <button id="pair-btn">Pair with Aura</button>
+    </div>
+    <div id="task-section" style="display: none">
+      <p id="paired-as"></p>
+      <label>Project</label>
+      <select id="project"></select>
+      <label>Prompt</label>
+      <textarea id="prompt" rows="4"></textarea>
+      <label><input type="checkbox" id="include-doc" checked /> Include document context</label>
+      <button id="run-btn">Send to Aura</button>
+      <label>Result (confirm before apply)</label>
+      <div id="result"></div>
+      <button id="apply-btn">Apply to selection</button>
+    </div>
+    <div id="status"></div>
+    <script src="taskpane.js"></script>
+  </body>
+</html>

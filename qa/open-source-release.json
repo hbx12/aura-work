@@ -1,0 +1,37 @@
+{
+  "phase": 14,
+  "title": "Open-Source Release and Community Launch",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "tag": "v1.0.0",
+  "files": {
+    "license": ["LICENSE", "NOTICE", "THIRD-PARTY-NOTICES"],
+    "governance": [
+      "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
+      "SECURITY.md",
+      "SUPPORT.md",
+      "GOVERNANCE.md",
+      "MAINTAINERS",
+      "CHANGELOG.md",
+      "ROADMAP.md"
+    ],
+    "ci": [".github/workflows/ci.yml", ".github/workflows/release.yml"]
+  },
+  "commands": {
+    "auditLicenses": "npm run audit:licenses",
+    "sbom": "npm run sbom",
+    "qa": "npm run qa"
+  },
+  "privacy": {
+    "telemetry": false,
+    "secretScanning": true
+  },
+  "launchPending": [
+    "Make repository public on GitHub",
+    "Create signed git tag v1.0.0",
+    "Publish GitHub Release with installers",
+    "Enable GitHub Discussions",
+    "Configure Weblate project from .weblate"
+  ]
+}

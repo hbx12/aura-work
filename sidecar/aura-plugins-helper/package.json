@@ -1,0 +1,20 @@
+{
+  "name": "@aura-os/plugins-helper",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura OS plugins helper — Aura plugins, MCP servers, marketplace (Phase 6)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.3"
+  }
+}

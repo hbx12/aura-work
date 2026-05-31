@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+dist/
+bundle/sidecars/
+target/
+
+# Tauri
+apps/desktop/src-tauri/target/
+
+# --- Not published to GitHub (local / separate products) ---
+# Design reference ZIP extracts — shipped UI is in packages/ui/
+design-system/
+design-system-extract/
+*.zip
+
+# Marketing website (deploy separately)
+website/
+website/dist/
+website/.astro/
+
+# Source asset folder (logo copy lives in apps/desktop/public/)
+img/
+
+# Internal agent tooling
+.agents/
+agent-transcripts/
+
+# Local data / secrets
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.minisig
+minisign.key
+auth.json
+**/auth.json
+vault-export*.json
+secrets/
+credentials.json
+**/aura.db
+
+# Cursor / local IDE
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Build artifacts
+sidecar/*/dist/
+cli/*/dist/
+server/*/dist/
+qa/acceptance-suite/node_modules/.vite/
+apps/desktop/dist/
+
+# Release / SBOM (generated in CI)
+release-artifacts/
+sbom/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/

@@ -1,0 +1,7 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aura OS">
+  <rect width="64" height="64" rx="15" fill="#c2683f"></rect>
+  <circle cx="32" cy="32" r="6.5" fill="#ffffff"></circle>
+  <circle cx="32" cy="32" r="13.5" stroke="#ffffff" stroke-opacity="0.62" stroke-width="2.4"></circle>
+  <path d="M32 11.5 A20.5 20.5 0 0 1 52.5 32" stroke="#ffffff" stroke-opacity="0.9" stroke-width="2.4" stroke-linecap="round"></path>
+  <path d="M32 52.5 A20.5 20.5 0 0 1 11.5 32" stroke="#ffffff" stroke-opacity="0.9" stroke-width="2.4" stroke-linecap="round"></path>
+</svg>

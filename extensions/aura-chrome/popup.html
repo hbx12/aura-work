@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aura OS</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        width: 320px;
+        margin: 0;
+        padding: 12px;
+        font-size: 13px;
+      }
+      label {
+        display: block;
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+      }
+      button {
+        margin-top: 10px;
+        width: 100%;
+        padding: 8px;
+        cursor: pointer;
+      }
+      .status {
+        margin-top: 8px;
+        color: #555;
+        min-height: 1.2em;
+      }
+      .err {
+        color: #b00020;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Aura OS</h3>
+    <div id="pair-section">
+      <label>Pairing code (from Aura desktop)</label>
+      <input id="pair-code" placeholder="6-digit code" maxlength="6" />
+      <label>Client name</label>
+      <input id="client-name" value="Chrome" />
+      <button id="pair-btn">Pair</button>
+    </div>
+    <div id="task-section" hidden>
+      <p id="paired-as"></p>
+      <label>Project</label>
+      <select id="project"></select>
+      <label>Prompt</label>
+      <textarea id="prompt" rows="3" placeholder="Ask Aura about this page…"></textarea>
+      <label><input type="checkbox" id="include-page" checked /> Include current page (requires approval)</label>
+      <button id="run-btn">Send to Aura</button>
+    </div>
+    <div class="status" id="status"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "@aura-os/browser-helper",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura OS browser helper — Chromium automation and per-project profiles (Phase 5)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.3"
+  }
+}
