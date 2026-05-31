@@ -8,7 +8,6 @@ import type { ProviderId } from "@aura-os/shared";
 import {
   briefWriteStatus,
   extractFileWritesFromResponse,
-  inferPathFromPrompt,
   isFileTask,
   stripCodeFences,
 } from "./extract-writes.js";
@@ -53,13 +52,14 @@ const SUBAGENT_ROLES = [
   "computer",
 ] as const;
 
-const TOOLS_PROMPT = `You are an autonomous agent with file-system access — behave like Cowork/Cursor: DO the work, don't show code in chat.
+const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access. Perform the requested work instead of pasting large code blocks in chat.
 
 CRITICAL RULES:
 - NEVER paste full file contents or large code blocks in chat messages.
 - To create or edit files you MUST respond with JSON tool_calls using write_file.
 - Chat messages must be short status updates (1-2 sentences): what you're doing next, not the code itself.
 - After writing files, briefly confirm what was created.
+- NEVER invent placeholder file contents. If you cannot produce the requested file safely, return a blocked message with a clear reason.
 
 Available tools (JSON only for tool calls):
 - read_file { "path": "relative/path" }
@@ -67,7 +67,7 @@ Available tools (JSON only for tool calls):
 - search_files { "query": "search text" }
 - git_status {}
 - git_diff { "path": "optional relative path" }
-- run_shell { "command": "shell command to run in Linux workspace" }
+- run_shell { "command": "shell command to run in isolated workspace" }
 - browse_url { "url": "https://example.com", "extract": "text|links|title" (optional) }
 - computer_list_windows {}
 - computer_screenshot { "windowId": "optional", "processName": "optional", "title": "optional" }
@@ -79,16 +79,19 @@ Available tools (JSON only for tool calls):
 
 When summarizing web content, you MUST cite sources using the [Source: ...] line returned by browse_url.
 Plugin and MCP tool calls require user approval — use them when installed plugins or MCP servers provide needed capabilities.
-Computer use is experimental — each desktop app requires explicit desktop approval; sensitive apps are blocked by default.
+Computer use is experimental, disabled by default, and requires explicit desktop approval when enabled.
 
 When you need a tool, respond with JSON:
 {"type":"tool_calls","role":"coder","toolCalls":[{"id":"1","name":"read_file","arguments":{"path":"README.md"}}]}
 
 For tasks that create or modify files, ALWAYS use write_file with the full file content — do not only describe changes in text.
-Use search_files and read_file first when you need project context. Use run_shell for builds/tests. Use browse_url, plugin_tool, mcp_tool, and computer_* tools when the task requires them.
+Use search_files and read_file first when you need project context. Use run_shell for builds/tests. Use browse_url, plugin_tool, mcp_tool, and computer_* tools only when the task requires them.
 
 When the task is complete, respond with:
 {"type":"complete","role":"reviewer","content":"summary for user","summary":"what was done"}
+
+When blocked, respond with:
+{"type":"blocked","role":"coordinator","content":"clear reason and required next action"}
 
 Otherwise respond with:
 {"type":"message","role":"coordinator","content":"short status — no code blocks"}`;
@@ -112,6 +115,16 @@ function toolCallsFromWrites(
       name: "write_file",
       arguments: { path: w.path, content: w.content },
     })),
+    complete: false,
+  };
+}
+
+function blocked(content: string) {
+  return {
+    type: "blocked" as const,
+    role: "coordinator",
+    content,
+    summary: content,
     complete: false,
   };
 }
@@ -148,13 +161,13 @@ function coerceResponse(
     };
   }
 
+  if (parsed?.type === "blocked") {
+    return blocked(stripCodeFences(body).slice(0, 800) || "Task blocked by the model.");
+  }
+
   if (parsed?.type === "complete" || parsed?.complete) {
     if (fileTask && !wroteFilesYet(messages)) {
-      const path = inferPathFromPrompt(prompt);
-      if (path && body.includes("```")) {
-        const fromBody = extractFileWritesFromResponse(body, prompt);
-        if (fromBody.length) return toolCallsFromWrites(fromBody);
-      }
+      return blocked("The model reported completion without producing a valid file write. No placeholder file was created. Retry with a model that supports structured tool calls or provide a narrower request.");
     }
     const summary = stripCodeFences(body).slice(0, 800) || "Task complete.";
     return {
@@ -178,19 +191,10 @@ function coerceResponse(
   }
 
   if (text.trim() && !parsed) {
-    if (fileTask && !wroteFilesYet(messages)) {
-      const path = inferPathFromPrompt(prompt) ?? "index.txt";
-      if (text.includes("```")) {
-        const fromText = extractFileWritesFromResponse(text, prompt);
-        if (fromText.length) return toolCallsFromWrites(fromText);
-      }
-      if (iteration >= 1) {
-        return toolCallsFromWrites(
-          [{ path, content: stripCodeFences(text).slice(0, 50_000) }],
-        );
-      }
-    }
     const clean = stripCodeFences(text);
+    if (fileTask && !wroteFilesYet(messages)) {
+      return blocked("The model returned unstructured text for a file task. Aura Work refused to write guessed or placeholder content. Use a tool-capable model or retry with a narrower instruction.");
+    }
     if (clean) {
       return {
         type: "message" as const,
@@ -265,7 +269,7 @@ function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: s
 
 export async function generatePlan(req: TaskPlanRequest) {
   const adapter = getAdapter(req.providerId as ProviderId);
-  const system = `You are the Aura OS Coordinator. Create a concise task plan as JSON:
+  const system = `You are the Aura Work Coordinator. Create a concise task plan as JSON:
 {"plan":[{"title":"step","subtitle":"detail","role":"coordinator|research|coder|reviewer|security|data|document|browser"}],"coordinatorMessage":"brief message to user"}
 Roles: ${SUBAGENT_ROLES.join(", ")}. Keep 3-6 steps.`;
 
@@ -306,7 +310,7 @@ export async function iterateTask(req: TaskIterateRequest) {
     .map((m) => `${m.role}${m.agentRole ? ` (${m.agentRole})` : ""}: ${m.content.slice(0, 500)}`)
     .join("\n");
 
-  const system = `You are Aura OS executing a task step-by-step.
+  const system = `You are Aura Work executing a task step-by-step.
 ${TOOLS_PROMPT}
 
 Current iteration: ${req.iteration + 1}
@@ -356,55 +360,5 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
     console.warn("[task] iterate LLM failed:", e);
   }
 
-  // Deterministic fallback for offline / non-JSON models
-  const createHint = isFileTask(req.prompt);
-  if (req.iteration === 0 && createHint) {
-    const pathMatch = req.prompt.match(/(?:file|ملف)\s+[`"']?([\w./-]+\.\w+)/i);
-    const path = pathMatch?.[1] ?? "output.txt";
-    return {
-      type: "tool_calls",
-      role: "coder",
-      toolCalls: [{
-        id: "1",
-        name: "write_file",
-        arguments: { path, content: `// Created for: ${req.prompt.slice(0, 200)}\n` },
-      }],
-      complete: false,
-    };
-  }
-  if (req.iteration === 0) {
-    return {
-      type: "tool_calls",
-      role: "research",
-      toolCalls: [{
-        id: "1",
-        name: "search_files",
-        arguments: { query: req.prompt.split(" ").slice(0, 3).join(" ") },
-      }],
-      complete: false,
-    };
-  }
-  if (req.iteration === 1 && createHint && !wroteFilesYet(req.messages)) {
-    const path = inferPathFromPrompt(req.prompt) ?? "output.txt";
-    return toolCallsFromWrites([{ path, content: `// ${req.prompt.slice(0, 120)}\n` }]);
-  }
-  if (req.iteration === 1) {
-    return {
-      type: "tool_calls",
-      role: "research",
-      toolCalls: [{ id: "1", name: "search_files", arguments: { query: req.prompt.split(" ").slice(0, 3).join(" ") } }],
-      complete: false,
-    };
-  }
-  if (req.iteration === 2 && createHint && !wroteFilesYet(req.messages)) {
-    const path = inferPathFromPrompt(req.prompt) ?? "output.txt";
-    return toolCallsFromWrites([{ path, content: `// ${req.prompt.slice(0, 120)}\n` }]);
-  }
-  return {
-    type: "complete",
-    role: "reviewer",
-    content: "Task iteration complete. Review any pending file edits or Git changes in the Files and Git panels.",
-    summary: "Task finished — check pending approvals for file writes.",
-    complete: true,
-  };
+  return blocked("Task execution stopped safely because the model did not return a valid structured action. Aura Work did not create placeholder files or guess edits. Retry with a tool-capable model or narrow the request.");
 }
