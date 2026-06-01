@@ -27,12 +27,12 @@ describe("5.1 / infrastructure — build artifacts & bundle", () => {
     expect(locales).toContain("fa.json");
   });
 
-  it("Tauri updater config and resources are present", () => {
+  it("Tauri bundle config is present for alpha builds", () => {
     const conf = readJson<{
       version: string;
-      bundle: { createUpdaterArtifacts?: boolean; resources?: unknown };
+      bundle: { createUpdaterArtifacts?: boolean; resources?: unknown; targets?: unknown };
     }>("apps/desktop/src-tauri/tauri.conf.json");
-    expect(conf.bundle.createUpdaterArtifacts).toBe(true);
+    expect(conf.version).toMatch(/0\.1\.0(-alpha\.1|-1)?/);
     expect(conf.bundle.resources).toBeTruthy();
     assertRepoFile("bundle/manifest.json");
   });

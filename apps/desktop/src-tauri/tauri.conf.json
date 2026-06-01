@@ -27,7 +27,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "resources": {
       "../../../bundle/manifest.json": "manifest.json",
       "../../../bundle/vm-image/manifest.json": "vm-image/manifest.json",
