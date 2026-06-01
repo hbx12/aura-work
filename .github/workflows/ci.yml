@@ -51,8 +51,14 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: apps/desktop/src-tauri
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev libsecret-1-dev pkg-config
       - run: npm ci
       - run: npm run build:sidecars
+      - run: npm run stage:bundle
       - run: npm run build:cloud
       - run: npm run build:bridge
       - run: npm run test:rust
@@ -73,7 +79,7 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev libsecret-1-dev pkg-config
       - run: npm ci
       - run: npm run build:sidecars
       - run: npm run stage:bundle
