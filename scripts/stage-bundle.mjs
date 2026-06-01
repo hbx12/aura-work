@@ -7,7 +7,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const isProduction = process.env.NODE_ENV === "production" || process.env.CI === "true";
+const isProduction = process.env.AURA_RELEASE_BUILD === "1";
 
 const sidecars = [
   { id: "aura-agent", src: "sidecar/aura-agent/dist" },
