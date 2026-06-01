@@ -1,38 +1,45 @@
 ## Summary
 
-<!-- What does this PR change and why? -->
+Describe what changed and why.
+
+## Related issue
+
+Closes #
 
 ## Type of change
 
 - [ ] Bug fix
-- [ ] New feature
+- [ ] Feature
 - [ ] Documentation
 - [ ] Translation / i18n
+- [ ] Tests
 - [ ] CI / tooling
+- [ ] Security hardening
 - [ ] Breaking change (describe migration)
 
-## Testing
+## Test plan
 
-<!-- Commands run, manual steps, platforms tested -->
+List the checks you ran locally.
 
 - [ ] `npm run build:sidecars`
+- [ ] `npm run test:sidecars`
 - [ ] `npm run test:acceptance`
 - [ ] `npm run test:rust` (if Rust changed)
-- [ ] `npm run build:website` (if website changed)
-
-## Design system
-
-- [ ] UI changes follow Aura OS Design System (or N/A — no UI)
-
-## Security & privacy
-
-- [ ] No secrets, API keys, or credentials added
-- [ ] No new telemetry or data collection (or documented in PR if intentional)
+- [ ] `npm run audit:licenses` (if dependencies changed)
+- [ ] `npm run qa`
 
 ## Screenshots
 
-<!-- If UI changed, attach before/after -->
+Add before/after screenshots for visible UI changes when relevant.
 
-## Related issues
+## Security impact
 
-<!-- Fixes #123 -->
+Explain whether this change affects permissions, local services, credentials, packaging, browser access, or Computer Use.
+
+## Checklist
+
+- [ ] My change is focused and linked to an issue.
+- [ ] I did not commit secrets, API keys, tokens, or private files.
+- [ ] I updated documentation when needed.
+- [ ] UI changes follow the existing Aura Work design patterns, or this PR does not change UI.
+- [ ] CI is green.
