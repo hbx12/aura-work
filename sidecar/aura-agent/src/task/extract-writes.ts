@@ -1,4 +1,4 @@
-/** Turn markdown code fences in model output into write_file tool targets. */
+/** Detect file-related tasks — does not auto-create files from model output. */
 
 const CREATE_HINT =
   /\b(create|make|write|add|build|scaffold|generate|implement|fix|edit|code|program|انش|إنش|سوي|اعمل|اكتب|برمج|عدّل|عدل|سوّ|سوی)\b/i;
@@ -32,43 +32,14 @@ function headerToPath(header: string): string | null {
   return m?.[1]?.replace(/^\.\//, "") ?? null;
 }
 
-const EXT_BY_LANG: Record<string, string> = {
-  typescript: "ts",
-  ts: "ts",
-  tsx: "tsx",
-  javascript: "js",
-  js: "js",
-  jsx: "jsx",
-  python: "py",
-  py: "py",
-  html: "html",
-  css: "css",
-  json: "json",
-  rust: "rs",
-  go: "go",
-  java: "java",
-  cpp: "cpp",
-  c: "c",
-  markdown: "md",
-  md: "md",
-  shell: "sh",
-  bash: "sh",
-  sql: "sql",
-};
-
-function extFromHeader(header: string): string {
-  const lang = header.split(/[:\s]/)[0]?.toLowerCase() ?? "";
-  return EXT_BY_LANG[lang] ?? "txt";
-}
-
+/** Legacy helper — only returns writes when the model names an explicit path in a fence header. */
 export function extractFileWritesFromResponse(
   text: string,
-  prompt: string,
+  _prompt: string,
 ): { path: string; content: string }[] {
   const files: { path: string; content: string }[] = [];
   const blockRe = /```([^\n]*)\n([\s\S]*?)```/g;
   let match: RegExpExecArray | null;
-  let idx = 0;
 
   while ((match = blockRe.exec(text)) !== null) {
     const header = match[1] ?? "";
@@ -76,17 +47,9 @@ export function extractFileWritesFromResponse(
     if (!content.trim()) continue;
     if (header.trim().toLowerCase() === "json") continue;
 
-    let path = headerToPath(header);
-    if (!path) {
-      const inferred = inferPathFromPrompt(prompt);
-      if (inferred && idx === 0) path = inferred;
-    }
-    if (!path) {
-      const ext = extFromHeader(header);
-      path = idx === 0 ? `index.${ext}` : `file-${idx + 1}.${ext}`;
-    }
+    const path = headerToPath(header);
+    if (!path) continue;
     files.push({ path, content });
-    idx += 1;
   }
 
   return files;
