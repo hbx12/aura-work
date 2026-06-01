@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an improvement or new capability
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Desktop UI
+        - Task engine / agent
+        - VM / shell execution
+        - Browser / web
+        - Plugins / MCP
+        - Aura Cloud / sync
+        - Extensions / bridge
+        - i18n / accessibility
+        - Packaging / updates
+        - Website / docs
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and discussions
+          required: true

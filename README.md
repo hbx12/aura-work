@@ -1,0 +1,76 @@
+# Aura Work
+
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/hbx12/aura-work/actions/workflows/ci.yml/badge.svg)](https://github.com/hbx12/aura-work/actions/workflows/ci.yml)
+
+**Current status: `0.1.0-alpha.1`** — under active security hardening.
+
+Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
+
+> **Alpha warning:** Do not use Aura Work for sensitive workspaces or production automation. VM isolation, signed installers, and several experimental features are incomplete or disabled by default.
+
+## Alpha limitations
+
+| Area | Status |
+|------|--------|
+| **Shell execution** | Host process fallback is **disabled by default**. WSL2 or a verified isolated backend is required. Dev override: `AURA_ALLOW_UNSAFE_HOST_EXECUTION=1` (development only). |
+| **Computer use** | **Disabled by default.** Enable only for local dev: `AURA_ENABLE_EXPERIMENTAL_COMPUTER_USE=1`. |
+| **VM image** | Bundled artifact may be a **development placeholder** until a signed production image ships. |
+| **Signed releases** | Release pipeline requires minisign, SBOM, checksums, and installers — not claimed ready until published. |
+| **Sidecar auth** | Local services require per-session internal Bearer tokens (localhost is not treated as sufficient). |
+
+## Features (alpha)
+
+- Multi-provider AI (OpenAI/ChatGPT Codex, Anthropic, Gemini, DeepSeek, Ollama) with routing
+- Encrypted local vault — keys stored with OS-backed secure storage when available
+- Task agent with file tools, Git, VM shell, browser, plugins/MCP
+- 20 languages with RTL (Arabic, Persian)
+- Integrated docs at [hbx12.github.io/aura-work](https://hbx12.github.io/aura-work) (when deployed)
+
+## Quick start (development)
+
+```powershell
+npm install
+npm run build:sidecars
+npm start
+```
+
+Sidecars start automatically from the Tauri app with per-session internal auth tokens.
+
+Manual sidecar development requires `AURA_SIDECAR_AUTH_TOKEN` (32+ chars) in the environment. See [docs/development.md](./docs/development.md).
+
+## Build from source
+
+```powershell
+npm run build:sidecars
+npm run stage:bundle
+npm run build
+cd apps\desktop
+npm run tauri build
+```
+
+Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` when the build succeeds.
+
+## Privacy & security
+
+- **No telemetry** by default
+- API keys stored encrypted locally; **never** synced to Aura Cloud
+- High-impact actions require explicit approval
+- See [SECURITY.md](./SECURITY.md) for vulnerability reporting
+
+## Documentation
+
+- [docs/README.md](./docs/README.md) — feature index
+- [docs/github-publish.md](./docs/github-publish.md) — what goes on GitHub
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — development and translations
+- [CHANGELOG.md](./CHANGELOG.md) — release history
+- [ROADMAP.md](./ROADMAP.md) — direction after alpha
+
+## Community
+
+- [GitHub Discussions](https://github.com/hbx12/aura-work/discussions)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+
+## License
+
+Apache-2.0 — see [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-NOTICES](./THIRD-PARTY-NOTICES).

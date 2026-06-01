@@ -1,0 +1,349 @@
+use crate::audit::{append_audit, AppendAuditInput};
+use crate::db::DbState;
+use crate::extensions_helper::{
+    call_mcp_tool_remote, McpServerConfig, ProjectMcpSetting,
+};
+use crate::permissions::check_task_permission;
+use crate::plugins::push_config_to_helper;
+use rusqlite::{params, Connection};
+use serde::{Deserialize, Serialize};
+use tauri::State;
+use uuid::Uuid;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct McpServerRecord {
+    pub id: String,
+    pub name: String,
+    pub transport: String,
+    pub command: String,
+    pub args: Vec<String>,
+    pub env: serde_json::Map<String, serde_json::Value>,
+    pub enabled: bool,
+    pub created_at: String,
+}
+
+pub fn init_mcp_tables(conn: &Connection) -> Result<(), String> {
+    conn.execute_batch(
+        "
+        CREATE TABLE IF NOT EXISTS mcp_servers (
+            id TEXT PRIMARY KEY NOT NULL,
+            name TEXT NOT NULL,
+            transport TEXT NOT NULL DEFAULT 'stdio',
+            command TEXT NOT NULL,
+            args_json TEXT NOT NULL DEFAULT '[]',
+            env_json TEXT NOT NULL DEFAULT '{}',
+            enabled INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS project_mcp_settings (
+            project_id TEXT NOT NULL,
+            server_id TEXT NOT NULL,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            PRIMARY KEY (project_id, server_id)
+        );
+        ",
+    )
+    .map_err(|e| e.to_string())
+}
+
+pub fn load_mcp_server_configs(conn: &Connection) -> Result<Vec<McpServerConfig>, String> {
+    let mut stmt = conn
+        .prepare(
+            "SELECT id, name, transport, command, args_json, env_json, enabled FROM mcp_servers",
+        )
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| {
+            let args_json: String = row.get(4)?;
+            let env_json: String = row.get(5)?;
+            Ok(McpServerConfig {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                transport: row.get(2)?,
+                command: row.get(3)?,
+                args: serde_json::from_str(&args_json).unwrap_or_default(),
+                env: serde_json::from_str(&env_json).unwrap_or_default(),
+                enabled: row.get::<_, i64>(6)? != 0,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+pub fn load_project_mcp_settings(conn: &Connection) -> Result<Vec<ProjectMcpSetting>, String> {
+    let mut stmt = conn
+        .prepare("SELECT project_id, server_id, enabled FROM project_mcp_settings")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| {
+            Ok(ProjectMcpSetting {
+                project_id: row.get(0)?,
+                server_id: row.get(1)?,
+                enabled: row.get::<_, i64>(2)? != 0,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+fn load_mcp_servers(conn: &Connection) -> Result<Vec<McpServerRecord>, String> {
+    let mut stmt = conn
+        .prepare(
+            "SELECT id, name, transport, command, args_json, env_json, enabled, created_at
+             FROM mcp_servers ORDER BY name ASC",
+        )
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| {
+            let args_json: String = row.get(4)?;
+            let env_json: String = row.get(5)?;
+            Ok(McpServerRecord {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                transport: row.get(2)?,
+                command: row.get(3)?,
+                args: serde_json::from_str(&args_json).unwrap_or_default(),
+                env: serde_json::from_str(&env_json).unwrap_or_default(),
+                enabled: row.get::<_, i64>(6)? != 0,
+                created_at: row.get(7)?,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    load_mcp_servers(&conn)
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AddMcpServerInput {
+    pub name: String,
+    pub command: String,
+    pub args: Option<Vec<String>>,
+    pub env: Option<serde_json::Map<String, serde_json::Value>>,
+}
+
+#[tauri::command]
+pub async fn add_mcp_server(
+    db: State<'_, DbState>,
+    input: AddMcpServerInput,
+) -> Result<McpServerRecord, String> {
+    let id = Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    let args_json = serde_json::to_string(&input.args.unwrap_or_default()).map_err(|e| e.to_string())?;
+    let env_json = serde_json::to_string(&input.env.unwrap_or_default()).map_err(|e| e.to_string())?;
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            "INSERT INTO mcp_servers (id, name, transport, command, args_json, env_json, enabled, created_at)
+             VALUES (?1, ?2, 'stdio', ?3, ?4, ?5, 1, ?6)",
+            params![id, input.name, input.command, args_json, env_json, now],
+        )
+        .map_err(|e| e.to_string())?;
+        append_audit(
+            &conn,
+            &AppendAuditInput {
+                project_id: None,
+                task_id: None,
+                actor: "user".into(),
+                category: "mcp".into(),
+                action: "add-server".into(),
+                target: Some(input.name.clone()),
+                summary: format!("Added MCP server: {}", input.name),
+                risk: Some("medium".into()),
+                decision: None,
+                result: "succeeded".into(),
+                metadata: None,
+            },
+        )?;
+    }
+    let _ = push_config_to_helper(&db).await;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    load_mcp_servers(&conn)?
+        .into_iter()
+        .find(|s| s.id == id)
+        .ok_or_else(|| "MCP server not found".into())
+}
+
+#[tauri::command]
+pub async fn delete_mcp_server(db: State<'_, DbState>, server_id: String) -> Result<(), String> {
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute("DELETE FROM mcp_servers WHERE id = ?1", params![server_id])
+            .map_err(|e| e.to_string())?;
+        conn.execute(
+            "DELETE FROM project_mcp_settings WHERE server_id = ?1",
+            params![server_id],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+    let _ = push_config_to_helper(&db).await;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn set_mcp_server_enabled(
+    db: State<'_, DbState>,
+    server_id: String,
+    enabled: bool,
+) -> Result<McpServerRecord, String> {
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            "UPDATE mcp_servers SET enabled = ?1 WHERE id = ?2",
+            params![if enabled { 1 } else { 0 }, server_id],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+    let _ = push_config_to_helper(&db).await;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    load_mcp_servers(&conn)?
+        .into_iter()
+        .find(|s| s.id == server_id)
+        .ok_or_else(|| "MCP server not found".into())
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMcpToggleInput {
+    pub project_id: String,
+    pub server_id: String,
+    pub enabled: bool,
+}
+
+#[tauri::command]
+pub async fn set_project_mcp_enabled(
+    db: State<'_, DbState>,
+    input: ProjectMcpToggleInput,
+) -> Result<(), String> {
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            "INSERT INTO project_mcp_settings (project_id, server_id, enabled) VALUES (?1, ?2, ?3)
+             ON CONFLICT(project_id, server_id) DO UPDATE SET enabled = excluded.enabled",
+            params![
+                input.project_id,
+                input.server_id,
+                if input.enabled { 1 } else { 0 }
+            ],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+    let _ = push_config_to_helper(&db).await;
+    Ok(())
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMcpSettingRecord {
+    pub server_id: String,
+    pub enabled: bool,
+}
+
+#[tauri::command]
+pub fn list_project_mcp_settings(
+    db: State<'_, DbState>,
+    project_id: String,
+) -> Result<Vec<ProjectMcpSettingRecord>, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT server_id, enabled FROM project_mcp_settings WHERE project_id = ?1")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map(params![project_id], |row| {
+            Ok(ProjectMcpSettingRecord {
+                server_id: row.get(0)?,
+                enabled: row.get::<_, i64>(1)? != 0,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+/// MCP tool entry used by the task engine.
+pub async fn tool_mcp_call(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    server_id: &str,
+    tool_name: &str,
+    arguments: &serde_json::Value,
+    tool_payload: Option<serde_json::Value>,
+) -> Result<String, String> {
+    let target = format!("{server_id}:{tool_name}");
+
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        let server_enabled: bool = conn
+            .query_row(
+                "SELECT enabled FROM mcp_servers WHERE id = ?1",
+                params![server_id],
+                |row| row.get::<_, i64>(0).map(|v| v != 0),
+            )
+            .unwrap_or(false);
+        if !server_enabled {
+            return Err(format!("MCP server disabled: {server_id}"));
+        }
+        let project_disabled: Option<i64> = conn
+            .query_row(
+                "SELECT enabled FROM project_mcp_settings WHERE project_id = ?1 AND server_id = ?2",
+                params![project_id, server_id],
+                |row| row.get(0),
+            )
+            .ok();
+        if project_disabled == Some(0) {
+            return Err(format!("MCP server disabled for this project: {server_id}"));
+        }
+    }
+
+    check_task_permission(
+        db,
+        project_id,
+        task_id,
+        "mcp",
+        "call",
+        &target,
+        &format!("Call MCP tool {target}"),
+        "medium",
+        true,
+        tool_payload,
+    )?;
+
+    let _ = push_config_to_helper(db).await?;
+    let result = call_mcp_tool_remote(project_id, server_id, tool_name, arguments).await?;
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    append_audit(
+        &conn,
+        &AppendAuditInput {
+            project_id: Some(project_id.to_string()),
+            task_id: task_id.map(String::from),
+            actor: "coordinator".into(),
+            category: "mcp".into(),
+            action: "call".into(),
+            target: Some(target),
+            summary: format!(
+                "MCP tool {} — {} ({}ms)",
+                result.source, if result.ok { "ok" } else { "failed" }, result.duration_ms
+            ),
+            risk: Some("medium".into()),
+            decision: None,
+            result: if result.ok {
+                "succeeded".into()
+            } else {
+                "failed".into()
+            },
+            metadata: Some(serde_json::json!({ "durationMs": result.duration_ms })),
+        },
+    )?;
+
+    if !result.ok {
+        return Err(result.output);
+    }
+    Ok(result.output.chars().take(10000).collect())
+}

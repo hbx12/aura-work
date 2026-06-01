@@ -1,0 +1,11 @@
+# Aura OS Maintainers
+
+Maintainers are responsible for review, releases, and security response.
+
+| GitHub | Role | Focus |
+|--------|------|-------|
+| @aura-os/core | Core team | Desktop, sidecars, releases |
+
+To propose a new maintainer: open a Discussion with rationale and prior contribution history. Existing maintainers must approve by consensus.
+
+Contact: maintainers@aura-os.dev

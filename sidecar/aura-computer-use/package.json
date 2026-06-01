@@ -1,0 +1,17 @@
+{
+  "name": "@aura-os/computer-use",
+  "version": "0.10.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura OS computer use helper — experimental screen/app automation (Phase 10)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.3"
+  }
+}

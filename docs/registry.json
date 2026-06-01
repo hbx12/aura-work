@@ -1,0 +1,15 @@
+{
+  "plugins": [
+    {
+      "id": "com.aura.sample",
+      "name": "Aura Sample Plugin",
+      "version": "0.1.0",
+      "publisher": "Aura OS",
+      "description": "Sample plugin bundled with Aura OS for Phase 6 testing.",
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/hbx12/aura-work/tree/main/examples/aura-sample-plugin",
+      "tags": ["sample", "demo"]
+    }
+  ]
+}

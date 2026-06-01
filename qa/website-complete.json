@@ -1,0 +1,23 @@
+{
+  "phase": 13,
+  "title": "Marketing and Download Website",
+  "version": "0.13.0",
+  "path": "website/",
+  "locales": ["en", "ar"],
+  "buildCommand": "npm run build:website",
+  "outputDir": "website/dist",
+  "sections": [
+    "hero",
+    "features",
+    "how-it-works",
+    "security",
+    "open-source",
+    "download",
+    "faq",
+    "footer"
+  ],
+  "privacy": {
+    "analytics": false,
+    "cookies": "theme preference in localStorage only"
+  }
+}

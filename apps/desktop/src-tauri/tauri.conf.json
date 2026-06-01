@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Aura Work",
+  "version": "0.1.0-1",
+  "identifier": "com.auraos.desktop",
+  "build": {
+    "beforeDevCommand": "npm run build:sidecars --prefix ../.. && npm run stage:bundle --prefix ../.. && npm run build",
+    "beforeBuildCommand": "npm run build:sidecars --prefix ../.. && npm run stage:bundle --prefix ../.. && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Aura Work",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 960,
+        "minHeight": 640,
+        "decorations": true,
+        "devtools": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' http://127.0.0.1:*; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "resources": {
+      "../../../bundle/manifest.json": "manifest.json",
+      "../../../bundle/vm-image/manifest.json": "vm-image/manifest.json",
+      "../../../bundle/vm-image/aura-linux-workspace.img.placeholder": "vm-image/aura-linux-workspace.img.placeholder",
+      "../../../bundle/sidecars/aura-agent/dist": "sidecars/aura-agent/dist",
+      "../../../bundle/sidecars/aura-vm-helper/dist": "sidecars/aura-vm-helper/dist",
+      "../../../bundle/sidecars/aura-browser-helper/dist": "sidecars/aura-browser-helper/dist",
+      "../../../bundle/sidecars/aura-plugins-helper/dist": "sidecars/aura-plugins-helper/dist",
+      "../../../bundle/sidecars/aura-cloud-sync/dist": "sidecars/aura-cloud-sync/dist",
+      "../../../bundle/sidecars/aura-bridge/dist": "sidecars/aura-bridge/dist",
+      "../../../bundle/sidecars/aura-computer-use/dist": "sidecars/aura-computer-use/dist"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/hbx12/aura-work/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RUE5OEY2QTgzNDdFNjYKUldRNDdGQlJGQ0U2NkYxM0I4Q0EyQjFBRjFFQjJCN0Q4QjQ4QjY4QjY4QjY4QjY4QjY4QjY4QjY4Qgo="
+    }
+  }
+}

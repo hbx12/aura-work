@@ -1,0 +1,17 @@
+{
+  "name": "@aura-os/acceptance-suite",
+  "version": "0.12.0",
+  "private": true,
+  "type": "module",
+  "description": "Aura OS Phase 12 — PRD Section 5 acceptance test suite",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "report": "node dist/report.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

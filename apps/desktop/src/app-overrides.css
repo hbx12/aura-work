@@ -1,0 +1,450 @@
+/* Modal + app-specific overrides */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 19, 16, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 24px;
+}
+.modal {
+  width: min(480px, 100%);
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal h2 {
+  font: var(--text-h2);
+  color: var(--fg-1);
+}
+.modal-desc {
+  font: var(--text-sm);
+  color: var(--fg-3);
+  line-height: 1.5;
+}
+.modal-error {
+  font: var(--text-sm);
+  color: var(--danger);
+  background: var(--danger-subtle);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+}
+.modal .field,
+.vault-box .field,
+.cloud-form label,
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.modal .field > span,
+.vault-box .field > span,
+.cloud-form label,
+.form-grid label {
+  font: var(--text-label);
+  color: var(--fg-2);
+}
+.modal .field input,
+.modal .field textarea,
+.vault-box .field input,
+.vault-box .field textarea,
+.cloud-form input,
+.cloud-form select,
+.cloud-form textarea,
+.form-grid input,
+.form-grid select {
+  font: var(--text-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  outline: none;
+}
+.modal .field input:focus,
+.modal .field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.settings-inner .panel > .field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 14px 16px;
+}
+.settings-inner .panel > .field > span {
+  font: var(--text-label);
+  color: var(--fg-2);
+}
+.settings-inner .panel > .field input,
+.settings-inner .panel > .field textarea {
+  font: var(--text-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+}
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+.field-row input {
+  flex: 1;
+}
+.routecard {
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  background: var(--bg-2);
+}
+.prov-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vault-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+}
+.ws-meta.warn {
+  color: var(--warning, #b8860b);
+}
+.pulse.off {
+  background: var(--fg-3);
+  box-shadow: none;
+}
+
+.files-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) 1fr;
+  gap: 16px;
+  min-height: 420px;
+}
+
+.page-canvas-wide {
+  max-width: none;
+}
+
+.composer-model-select {
+  font: var(--text-caption);
+  color: var(--fg-2);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  max-width: 220px;
+  min-width: 140px;
+}
+
+.composer-model-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.files-list {
+  max-height: 520px;
+  overflow: auto;
+}
+
+.files-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: start;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: var(--text-sm);
+  color: var(--fg-2);
+  border-radius: var(--r-sm);
+}
+
+.files-row:hover,
+.files-row.active {
+  background: var(--bg-3);
+  color: var(--fg-1);
+}
+
+.files-editor {
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+}
+
+.files-editor-head {
+  padding: 10px 14px;
+  font: var(--text-caption);
+  color: var(--fg-3);
+  border-bottom: 1px solid var(--border-1);
+  background: var(--bg-2);
+}
+
+.git-diff-box,
+.diff-preview {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  background: var(--bg-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.git-commit-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.git-commit-box input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-3);
+  background: var(--bg-1);
+}
+
+.git-status-tag {
+  font: var(--text-overline);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  min-width: 64px;
+}
+
+.task-inline-approval {
+  margin: 12px 0;
+}
+
+.res-pill.fail {
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+.res-pill.warn {
+  background: var(--warning-subtle);
+  color: var(--warning);
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.vm-remediation {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+.browser-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.browser-url-input {
+  flex: 1;
+  font: var(--text-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  outline: none;
+}
+
+.browser-url-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.browser-frame {
+  width: 100%;
+  min-height: 480px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  background: var(--bg-1);
+}
+
+.browser-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 320px;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-md);
+  color: var(--fg-3);
+  font: var(--text-sm);
+  text-align: center;
+  padding: 24px;
+}
+
+.plugin-mcp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cloud-recovery-key {
+  display: block;
+  padding: 10px 12px;
+  background: var(--surface-muted, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  word-break: break-all;
+  margin: 8px 0;
+}
+
+.settings-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-section-title {
+  font: var(--text-label);
+  color: var(--fg-2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.settings-card {
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background: var(--bg-2);
+}
+
+.settings-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.settings-select {
+  font: var(--text-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+}
+
+.settings-toast {
+  font: var(--text-sm);
+  color: var(--accent);
+  background: var(--accent-subtle, rgba(100, 93, 78, 0.08));
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin: 0;
+}
+
+.banner {
+  font: var(--text-sm);
+  color: var(--fg-2);
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin-bottom: 4px;
+}
+.banner.err {
+  color: var(--danger);
+  background: var(--danger-subtle);
+  border-color: transparent;
+}
+
+.cloud-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+.cloud-form label {
+  font: var(--text-label);
+  color: var(--fg-2);
+  gap: 6px;
+}
+.cloud-form input,
+.cloud-form select,
+.cloud-form textarea,
+.form-grid input,
+.form-grid select {
+  font: var(--text-body);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.panel-row.stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.panel-row.active {
+  background: var(--accent-subtle);
+}
+
+.stream-cursor {
+  display: inline-block;
+  margin-inline-start: 2px;
+  color: var(--accent, #6366f1);
+  animation: stream-blink 1s step-end infinite;
+}
+
+@keyframes stream-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.msg-live .text {
+  opacity: 0.95;
+}

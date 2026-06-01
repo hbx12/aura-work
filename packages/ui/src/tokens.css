@@ -1,0 +1,218 @@
+/* ============================================================================
+   Aura Work — Design Tokens
+   Warm, calm, Cowork-inspired aesthetic. Original to Aura OS.
+   Constraint: NO gradients anywhere. Flat, solid surfaces only.
+   Themes:  <html data-theme="dark">  /  data-theme="light">  (light is default)
+   RTL-ready: supports Arabic & Persian (dir="rtl").
+   ============================================================================ */
+
+/* ---- Webfonts -------------------------------------------------------------
+   IBM Plex Sans / Mono / Sans Arabic for UI & code.
+   Newsreader (serif) for warm editorial display headings.
+   CDN-linked. For offline builds, vendor into fonts/ and swap the @import.   */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&display=swap');
+
+/* ============================================================================
+   1. PRIMITIVES  (raw values — don't reference these directly in components)
+   ============================================================================ */
+:root {
+  /* Clay accent — warm terracotta, single accent, NO gradients */
+  --clay-300: #e3a48a;
+  --clay-400: #d4855f;
+  --clay-500: #c2683f;  /* core accent (light) */
+  --clay-550: #b85d36;
+  --clay-600: #a44f2c;
+  --clay-warm: #cf7a52;  /* accent on dark */
+
+  /* Warm neutral ramp — sand / clay-gray, warm undertone */
+  --sand-25:  #faf9f5;
+  --sand-50:  #f5f3ec;
+  --sand-100: #efece2;
+  --sand-150: #e7e2d5;
+  --sand-200: #ddd6c6;
+  --sand-300: #c8bfab;
+  --sand-400: #a89e88;
+  --sand-500: #847c69;
+  --sand-600: #645d4e;
+  --sand-700: #464136;
+  --sand-750: #3a352c;
+  --sand-800: #2e2a23;
+  --sand-850: #25221c;
+  --sand-900: #1e1b16;
+  --sand-950: #161310;
+
+  /* Semantic hues (warm-leaning, flat) */
+  --green-500: #5a8a52;
+  --green-fg:  #7fae6e;
+  --amber-500: #c08a2e;
+  --amber-fg:  #d6a64a;
+  --red-500:   #c0503f;
+  --red-fg:    #d97364;
+  --plum-500:  #8a6a9e;  /* "agent / AI" accent, warm violet */
+}
+
+/* ============================================================================
+   2. SEMANTIC TOKENS — LIGHT (default) — warm ivory
+   ============================================================================ */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-base:  #f2efe6;  /* app backdrop */
+  --bg-1:     #faf9f5;  /* primary panel */
+  --bg-2:     #ffffff;  /* elevated card / popover */
+  --bg-3:     #efece2;  /* hover fill / inset chips */
+  --bg-inset: #f3f0e7;  /* code blocks, wells, terminal */
+  --bg-hover: rgba(70,65,54,0.045);
+  --bg-active: rgba(70,65,54,0.08);
+
+  --fg-1: #28241d;  /* primary text — warm near-black */
+  --fg-2: #635c4d;  /* secondary / labels */
+  --fg-3: #938a76;  /* muted / hints */
+  --fg-on-accent: #ffffff;
+
+  --border-1: #e7e1d3;  /* default hairline */
+  --border-2: #ddd5c4;  /* stronger / container */
+  --border-3: #d0c7b3;  /* input borders */
+
+  --accent:        var(--clay-500);
+  --accent-hover:  var(--clay-550);
+  --accent-press:  var(--clay-600);
+  --accent-fg:     #ffffff;
+  --accent-subtle: rgba(194,104,63,0.11);
+  --accent-ring:   rgba(194,104,63,0.32);
+  --accent-border: rgba(194,104,63,0.42);
+
+  --success: #4f7d47;
+  --success-subtle: rgba(90,138,82,0.13);
+  --warning: #a9761f;
+  --warning-subtle: rgba(192,138,46,0.15);
+  --danger: #b8482f;
+  --danger-subtle: rgba(192,80,63,0.12);
+  --agent: #7a5c8e;
+  --agent-subtle: rgba(138,106,158,0.13);
+
+  --shadow-1: 0 1px 2px rgba(54,46,32,0.06);
+  --shadow-2: 0 4px 16px rgba(54,46,32,0.09);
+  --shadow-3: 0 16px 40px rgba(54,46,32,0.13);
+  --shadow-pop: 0 8px 28px rgba(54,46,32,0.15);
+}
+
+/* ============================================================================
+   3. SEMANTIC TOKENS — DARK — warm charcoal
+   ============================================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-base:  #161310;  /* app backdrop */
+  --bg-1:     #1e1b16;  /* primary panel */
+  --bg-2:     #25221c;  /* elevated card / popover */
+  --bg-3:     #2e2a23;  /* hover fill / inset */
+  --bg-inset: #181511;  /* code blocks, terminal */
+  --bg-hover: rgba(245,239,229,0.045);
+  --bg-active: rgba(245,239,229,0.08);
+
+  --fg-1: #ece7dc;  /* primary text — warm ivory */
+  --fg-2: #a89e8b;  /* secondary / labels */
+  --fg-3: #756c5b;  /* muted / hints */
+  --fg-on-accent: #ffffff;
+
+  --border-1: #322d25;  /* default hairline */
+  --border-2: #3d372d;  /* stronger / container */
+  --border-3: #4a4337;  /* input borders */
+
+  --accent:        var(--clay-warm);
+  --accent-hover:  #d98b63;
+  --accent-press:  #b85d36;
+  --accent-fg:     #1e1b16;
+  --accent-subtle: rgba(207,122,82,0.16);
+  --accent-ring:   rgba(207,122,82,0.40);
+  --accent-border: rgba(207,122,82,0.45);
+
+  --success: var(--green-fg);
+  --success-subtle: rgba(127,174,110,0.16);
+  --warning: var(--amber-fg);
+  --warning-subtle: rgba(214,166,74,0.16);
+  --danger: var(--red-fg);
+  --danger-subtle: rgba(217,115,100,0.16);
+  --agent: #b794cc;
+  --agent-subtle: rgba(138,106,158,0.20);
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-2: 0 4px 14px rgba(0,0,0,0.50);
+  --shadow-3: 0 14px 38px rgba(0,0,0,0.60);
+  --shadow-pop: 0 8px 28px rgba(0,0,0,0.62);
+}
+
+/* ============================================================================
+   4. TYPE SYSTEM
+   ============================================================================ */
+:root {
+  --font-sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale — comfortable desktop-app density (Cowork-like) */
+  --text-display: 400 32px/1.16 var(--font-serif);  /* warm serif hero / empty states */
+  --text-h1:      600 22px/1.25 var(--font-sans);   /* screen title */
+  --text-h2:      600 17px/1.3  var(--font-sans);   /* section heading */
+  --text-h3:      600 14px/1.35 var(--font-sans);   /* card / group heading */
+  --text-body:    400 14px/1.6  var(--font-sans);   /* default body */
+  --text-body-strong: 500 14px/1.6 var(--font-sans);
+  --text-sm:      400 13px/1.5  var(--font-sans);   /* secondary / dense rows */
+  --text-label:   500 12px/1.35 var(--font-sans);   /* UI labels */
+  --text-caption: 400 12px/1.4  var(--font-sans);   /* captions / meta */
+  --text-overline:600 11px/1.3  var(--font-sans);   /* eyebrow, uppercase */
+  --text-code:    400 13px/1.6  var(--font-mono);   /* code, paths, tokens */
+  --text-code-sm: 400 12px/1.5  var(--font-mono);
+
+  --tracking-overline: 0.07em;
+  --tracking-tight: -0.01em;
+}
+
+/* ============================================================================
+   5. RADIUS / SPACING / MOTION
+   ============================================================================ */
+:root {
+  /* Radii — soft, warm corners */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* Spacing scale (4px base) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  --space-12: 48px; --space-16: 64px;
+
+  /* Motion — calm. No bounce. */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-med: 200ms;
+  --dur-slow: 320ms;
+}
+
+/* ============================================================================
+   6. SEMANTIC ELEMENT DEFAULTS
+   ============================================================================ */
+body {
+  background: var(--bg-base);
+  color: var(--fg-1);
+  font: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+:where([dir="rtl"]) { font-family: var(--font-arabic); }
+
+h1 { font: var(--text-h1); letter-spacing: var(--tracking-tight); margin: 0; }
+h2 { font: var(--text-h2); margin: 0; }
+h3 { font: var(--text-h3); margin: 0; }
+p  { font: var(--text-body); margin: 0; }
+code, kbd, samp { font: var(--text-code); }
+small { font: var(--text-caption); color: var(--fg-2); }
+a { color: var(--accent); text-decoration: none; }
+::selection { background: var(--accent-subtle); }

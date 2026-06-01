@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "imageId": "aura-linux-workspace",
+  "version": "0.11.0",
+  "description": "Minimal Linux workspace image for Aura OS shell/code execution. Bundled with signed installers (Phase 11).",
+  "sha256": "10ce208f0610236eb6eaca92ceff3f82c20c8bb1f66793ecfae2d91e40d03eee",
+  "signature": "dev-placeholder-signature-replace-in-release-pipeline",
+  "artifact": "aura-linux-workspace.img.placeholder",
+  "minHelperVersion": "0.11.0"
+}

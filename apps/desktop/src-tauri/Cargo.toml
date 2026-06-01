@@ -1,0 +1,36 @@
+[package]
+name = "aura-desktop"
+version = "0.1.0-alpha.1"
+description = "Aura Work desktop application"
+authors = ["Aura OS Contributors"]
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+name = "aura_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["custom-protocol"] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+chacha20poly1305 = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+base64 = "0.22"
+sha2 = "0.10"
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tiny_http = "0.12"
+keyring = "3"
+ureq = "2"
+
