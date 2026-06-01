@@ -89,10 +89,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-vm-helper/package.json
 
-@aura-os/website@1.0.0
-  License: Apache-2.0
-  Source: website/package.json
-
 @babel/code-frame@7.29.7
   License: MIT
   Source: node_modules/@babel/code-frame
@@ -600,10 +596,6 @@ assertion-error@2.0.1
 ast-types@0.13.4
   License: MIT
   Source: node_modules/ast-types
-
-aura-os@0.1.0-alpha.1
-  License: Apache-2.0
-  Source: package.json
 
 b4a@1.8.1
   License: Apache-2.0

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * Audit npm + Rust dependency licenses and emit THIRD-PARTY-NOTICES.
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -91,35 +91,44 @@ function collectCargo() {
   return parseCargoLock(readFileSync(lockPath, "utf8"));
 }
 
-function workspacePackageJsons(dir, acc = []) {
-  for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry === "dist" || entry === "target") continue;
-    const full = join(dir, entry);
-    let st;
-    try {
-      st = statSync(full);
-    } catch {
+function listWorkspacePackageJsons() {
+  const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  const patterns = pkg.workspaces ?? [];
+  const paths = [];
+  for (const pattern of patterns) {
+    if (pattern.endsWith("/*")) {
+      const base = join(ROOT, pattern.slice(0, -2));
+      if (!existsSync(base)) continue;
+      for (const entry of readdirSync(base)) {
+        const pkgJson = join(base, entry, "package.json");
+        if (existsSync(pkgJson)) paths.push(pkgJson);
+      }
       continue;
     }
-    if (st.isDirectory()) workspacePackageJsons(full, acc);
-    else if (entry === "package.json" && !full.includes("node_modules")) {
-      try {
-        const pkg = JSON.parse(readFileSync(full, "utf8"));
-        if (pkg.name) {
-          acc.push({
-            ecosystem: "workspace",
-            name: pkg.name,
-            version: pkg.version ?? "?",
-            license: normalizeLicense(pkg.license ?? "Apache-2.0"),
-            path: relative(ROOT, full).replace(/\\/g, "/"),
-          });
-        }
-      } catch {
-        /* ignore */
-      }
+    const pkgJson = join(ROOT, pattern, "package.json");
+    if (existsSync(pkgJson)) paths.push(pkgJson);
+  }
+  return paths;
+}
+
+function collectWorkspace() {
+  const rows = [];
+  for (const pkgJsonPath of listWorkspacePackageJsons()) {
+    try {
+      const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
+      if (!pkg.name) continue;
+      rows.push({
+        ecosystem: "workspace",
+        name: pkg.name,
+        version: pkg.version ?? "?",
+        license: normalizeLicense(pkg.license ?? "Apache-2.0"),
+        path: relative(ROOT, pkgJsonPath).replace(/\\/g, "/"),
+      });
+    } catch {
+      /* ignore */
     }
   }
-  return acc;
+  return rows;
 }
 
 function dedupe(rows) {
@@ -195,7 +204,7 @@ function render(rows) {
 
 const npmRows = collectNpm(ROOT);
 const cargoRows = collectCargo();
-const workspaceRows = workspacePackageJsons(ROOT);
+const workspaceRows = collectWorkspace();
 const all = dedupe([...npmRows, ...cargoRows, ...workspaceRows]);
 const output = render(all);
 writeFileSync(OUT, output, "utf8");
