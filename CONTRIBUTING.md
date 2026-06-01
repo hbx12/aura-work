@@ -1,6 +1,6 @@
-# Contributing to Aura OS
+# Contributing to Aura Work
 
-Thank you for helping make Aura OS better. This project is Apache-2.0 licensed and welcomes contributions via GitHub pull requests.
+Thank you for helping make Aura Work better. This project is Apache-2.0 licensed and welcomes contributions via GitHub pull requests.
 
 ## Development setup
 
@@ -14,7 +14,7 @@ Thank you for helping make Aura OS better. This project is Apache-2.0 licensed a
 
 ```bash
 git clone https://github.com/hbx12/aura-work.git
-cd aura-os
+cd aura-work
 npm install
 npm run build:sidecars
 ```
@@ -28,26 +28,19 @@ npm run sidecar      # Terminal 2 — agent sidecar
 
 See [docs/development.md](./docs/development.md) and the root [README.md](./README.md) for all sidecars and helpers.
 
-**Marketing website:**
-
-```bash
-npm run dev:website
-```
-
 ### Quality checks before opening a PR
 
 ```bash
 npm run build:sidecars
 npm run test:rust
 npm run test:acceptance
-npm run build:website
 npm run audit:licenses
 ```
 
 ## Coding standards
 
 - Match existing style in each workspace (TypeScript/React, Rust, Astro).
-- Use the [Aura OS Design System](./design-system/) for all UI surfaces.
+- Use the [Aura Work design system](./docs/features/design-system.md) for all UI surfaces.
 - No API keys, tokens, or secrets in code or commits.
 - Prefer focused PRs — one feature or fix per pull request.
 - Run Prettier on changed files: `npx prettier --write <files>`.
@@ -72,7 +65,7 @@ docs(i18n): update Weblate contributor guide
 
 ## Translations
 
-Aura OS ships **20 initial languages**. Locale files live in `packages/i18n/locales/`.
+Aura Work ships **20 initial languages**. Locale files live in `packages/i18n/locales/`.
 
 - **Source language:** English (`en`)
 - **Format:** flat JSON key → string
