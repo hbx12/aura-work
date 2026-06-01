@@ -315,7 +315,7 @@ button{font-family:inherit}
 @keyframes fadeup{from{transform:translateY(5px)}to{transform:none}}
 
 /* ============================================================================
-   CLEANER LAYOUT (Cowork-calm) — overrides earlier rules
+   CLEANER LAYOUT — calmer spacing overrides earlier rules
    ============================================================================ */
 .ws-scroll{padding:36px 24px 28px}
 .ws-canvas{max-width:680px;gap:24px}

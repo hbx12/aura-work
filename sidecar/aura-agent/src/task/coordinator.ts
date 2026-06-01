@@ -5,12 +5,9 @@
 import type { ProviderCredentials } from "../types.js";
 import { getAdapter } from "../providers/index.js";
 import type { ProviderId } from "@aura-os/shared";
-import {
-  briefWriteStatus,
-  extractFileWritesFromResponse,
-  isFileTask,
-  stripCodeFences,
-} from "./extract-writes.js";
+import { isFileTask } from "./extract-writes.js";
+import { coerceAgentResponse } from "./coerce-response.js";
+import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
 
 export interface PlanStep {
   title: string;
@@ -52,7 +49,7 @@ const SUBAGENT_ROLES = [
   "computer",
 ] as const;
 
-const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access. Perform the requested work instead of pasting large code blocks in chat.
+const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access. Perform the requested work safely and use structured tool calls.
 
 CRITICAL RULES:
 - NEVER paste full file contents or large code blocks in chat messages.
@@ -96,29 +93,6 @@ When blocked, respond with:
 Otherwise respond with:
 {"type":"message","role":"coordinator","content":"short status — no code blocks"}`;
 
-function wroteFilesYet(messages: TaskIterateRequest["messages"]): boolean {
-  return messages.some(
-    (m) => m.role === "tool" && /\bWrote\s+[\w./-]+/i.test(m.content),
-  );
-}
-
-function toolCallsFromWrites(
-  writes: { path: string; content: string }[],
-  role = "coder",
-) {
-  return {
-    type: "tool_calls" as const,
-    role,
-    content: briefWriteStatus(writes.map((w) => w.path)),
-    toolCalls: writes.map((w, i) => ({
-      id: String(i + 1),
-      name: "write_file",
-      arguments: { path: w.path, content: w.content },
-    })),
-    complete: false,
-  };
-}
-
 function blocked(content: string) {
   return {
     type: "blocked" as const,
@@ -127,105 +101,6 @@ function blocked(content: string) {
     summary: content,
     complete: false,
   };
-}
-
-function coerceResponse(
-  text: string,
-  prompt: string,
-  messages: TaskIterateRequest["messages"],
-  parsed: {
-    type?: string;
-    role?: string;
-    content?: string;
-    summary?: string;
-    toolCalls?: { id: string; name: string; arguments: Record<string, unknown> }[];
-    complete?: boolean;
-  } | null,
-  iteration: number,
-  planLength: number,
-) {
-  const body = parsed?.content ?? parsed?.summary ?? text;
-  const writes = extractFileWritesFromResponse(text, prompt);
-  const fileTask = isFileTask(prompt);
-
-  if (writes.length > 0) {
-    return toolCallsFromWrites(writes, parsed?.role ?? "coder");
-  }
-
-  if (parsed?.type === "tool_calls" && parsed.toolCalls?.length) {
-    return {
-      type: "tool_calls" as const,
-      role: parsed.role ?? "coder",
-      toolCalls: parsed.toolCalls,
-      complete: false,
-    };
-  }
-
-  if (parsed?.type === "blocked") {
-    return blocked(stripCodeFences(body).slice(0, 800) || "Task blocked by the model.");
-  }
-
-  if (parsed?.type === "complete" || parsed?.complete) {
-    if (fileTask && !wroteFilesYet(messages)) {
-      return blocked("The model reported completion without producing a valid file write. No placeholder file was created. Retry with a model that supports structured tool calls or provide a narrower request.");
-    }
-    const summary = stripCodeFences(body).slice(0, 800) || "Task complete.";
-    return {
-      type: "complete" as const,
-      role: parsed?.role ?? "reviewer",
-      content: summary,
-      summary,
-      complete: true,
-    };
-  }
-
-  if (parsed?.type === "message" && parsed.content) {
-    const clean = stripCodeFences(parsed.content);
-    return {
-      type: "message" as const,
-      role: parsed.role ?? "coordinator",
-      content: clean.slice(0, 600) || parsed.content.slice(0, 200),
-      complete: iteration >= planLength && wroteFilesYet(messages),
-      summary: iteration >= planLength ? clean.slice(0, 800) : undefined,
-    };
-  }
-
-  if (text.trim() && !parsed) {
-    const clean = stripCodeFences(text);
-    if (fileTask && !wroteFilesYet(messages)) {
-      return blocked("The model returned unstructured text for a file task. Aura Work refused to write guessed or placeholder content. Use a tool-capable model or retry with a narrower instruction.");
-    }
-    if (clean) {
-      return {
-        type: "message" as const,
-        role: "coordinator",
-        content: clean.slice(0, 600),
-        complete: false,
-      };
-    }
-  }
-
-  return null;
-}
-
-function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  if (trimmed.startsWith("{")) {
-    try {
-      return JSON.parse(trimmed);
-    } catch {
-      /* fall through */
-    }
-  }
-  const match = trimmed.match(/\{[\s\S]*\}/);
-  if (match) {
-    try {
-      return JSON.parse(match[0]);
-    } catch {
-      return null;
-    }
-  }
-  return null;
 }
 
 function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: string } {
@@ -338,27 +213,22 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
       req.credentials,
     );
 
-    const parsed = extractJson(result.text) as {
-      type?: string;
-      role?: string;
-      content?: string;
-      summary?: string;
-      toolCalls?: { id: string; name: string; arguments: Record<string, unknown> }[];
-      complete?: boolean;
-    } | null;
-
-    const coerced = coerceResponse(
-      result.text,
-      req.prompt,
-      req.messages,
-      parsed,
-      req.iteration,
-      req.plan.length,
-    );
+    const coerced = coerceAgentResponse(result.text, {
+      prompt: req.prompt,
+      messages: req.messages,
+      iteration: req.iteration,
+      planLength: req.plan.length,
+    });
     if (coerced) return coerced;
   } catch (e) {
     console.warn("[task] iterate LLM failed:", e);
   }
 
-  return blocked("Task execution stopped safely because the model did not return a valid structured action. Aura Work did not create placeholder files or guess edits. Retry with a tool-capable model or narrow the request.");
+  if (isFileTask(req.prompt)) {
+    return blocked(BLOCKED_INVALID_STRUCTURE.content);
+  }
+
+  return blocked(
+    "Task execution stopped safely because the model did not return a valid structured action. Aura Work did not create placeholder files or guess edits. Retry with a tool-capable model or narrow the request.",
+  );
 }

@@ -19,8 +19,8 @@ describe("url-guard SSRF protection", () => {
     expect(() => assertSafeRemoteUrl("http://192.168.1.1/")).toThrow(/Blocked URL/);
   });
 
-  it("rejects link-local IPv4", () => {
-    expect(isBlockedHostname("169.254.1.1")).toBe(true);
+  it("rejects link-local metadata IP", () => {
+    expect(() => assertSafeRemoteUrl("http://169.254.169.254/latest/meta-data")).toThrow(/Blocked URL/);
   });
 
   it("allows public https URLs", () => {

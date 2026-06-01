@@ -6,7 +6,10 @@ import { redactSecrets, truncateOutput } from "./redact.js";
 import type { ExecRequest, ExecResult } from "./types.js";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
-const allowUnsafeHostExecution = process.env.AURA_ALLOW_UNSAFE_HOST_EXECUTION === "1";
+
+export function isUnsafeHostExecutionAllowed(): boolean {
+  return process.env.AURA_ALLOW_UNSAFE_HOST_EXECUTION === "1";
+}
 
 const ALLOWED_ENV_KEYS = [
   "PATH",
@@ -26,11 +29,19 @@ const ALLOWED_ENV_KEYS = [
   "TMPDIR",
   "WSLENV",
   "WSL_DISTRO_NAME",
-];
+] as const;
+
+const SENSITIVE_ENV_PATTERN = /(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL|AUTH)/i;
+
+function isAllowedEnvKey(key: string): boolean {
+  if (SENSITIVE_ENV_PATTERN.test(key)) return false;
+  return (ALLOWED_ENV_KEYS as readonly string[]).includes(key);
+}
 
 function sandboxEnv(): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { AURA_VM: "1" };
   for (const key of ALLOWED_ENV_KEYS) {
+    if (!isAllowedEnvKey(key)) continue;
     const value = process.env[key];
     if (value !== undefined) env[key] = value;
   }
@@ -102,7 +113,7 @@ async function execSandbox(
   hostCwd: string,
   timeoutMs: number,
 ): Promise<{ exitCode: number | null; stdout: string; stderr: string; durationMs: number }> {
-  if (!allowUnsafeHostExecution) {
+  if (!isUnsafeHostExecutionAllowed()) {
     throw new Error(
       "UNSAFE host process execution is disabled. Enable WSL2 or another isolated backend, or set AURA_ALLOW_UNSAFE_HOST_EXECUTION=1 for local development only.",
     );
@@ -157,4 +168,4 @@ export async function execCommand(
   };
 }
 
-export { allowUnsafeHostExecution };
+export { isUnsafeHostExecutionAllowed as allowUnsafeHostExecution };
