@@ -43,7 +43,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/acceptance-suite@0.12.0
   License: Apache-2.0
-  Source: qa\acceptance-suite\package.json
+  Source: qa/acceptance-suite/package.json
 
 @aura-os/agent@?
   License: UNKNOWN
@@ -55,7 +55,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/agent@0.4.0
   License: Apache-2.0
-  Source: sidecar\aura-agent\package.json
+  Source: sidecar/aura-agent/package.json
 
 @aura-os/bridge@?
   License: UNKNOWN
@@ -67,7 +67,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/bridge@0.9.0
   License: Apache-2.0
-  Source: sidecar\aura-bridge\package.json
+  Source: sidecar/aura-bridge/package.json
 
 @aura-os/browser-helper@?
   License: UNKNOWN
@@ -79,7 +79,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/browser-helper@0.5.0
   License: Apache-2.0
-  Source: sidecar\aura-browser-helper\package.json
+  Source: sidecar/aura-browser-helper/package.json
 
 @aura-os/cli@?
   License: UNKNOWN
@@ -91,7 +91,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/cli@0.11.0
   License: Apache-2.0
-  Source: cli\aura-cli\package.json
+  Source: cli/aura-cli/package.json
 
 @aura-os/cloud@?
   License: UNKNOWN
@@ -103,7 +103,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/cloud@0.7.0
   License: Apache-2.0
-  Source: server\aura-cloud\package.json
+  Source: server/aura-cloud/package.json
 
 @aura-os/cloud-sync@?
   License: UNKNOWN
@@ -115,7 +115,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/cloud-sync@0.7.0
   License: Apache-2.0
-  Source: sidecar\aura-cloud-sync\package.json
+  Source: sidecar/aura-cloud-sync/package.json
 
 @aura-os/computer-use@?
   License: UNKNOWN
@@ -127,7 +127,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/computer-use@0.10.0
   License: Apache-2.0
-  Source: sidecar\aura-computer-use\package.json
+  Source: sidecar/aura-computer-use/package.json
 
 @aura-os/desktop@?
   License: UNKNOWN
@@ -139,7 +139,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/desktop@0.1.0-alpha.1
   License: Apache-2.0
-  Source: apps\desktop\package.json
+  Source: apps/desktop/package.json
 
 @aura-os/i18n@?
   License: UNKNOWN
@@ -151,7 +151,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/i18n@0.11.0
   License: Apache-2.0
-  Source: packages\i18n\package.json
+  Source: packages/i18n/package.json
 
 @aura-os/plugins-helper@?
   License: UNKNOWN
@@ -163,7 +163,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/plugins-helper@0.6.0
   License: Apache-2.0
-  Source: sidecar\aura-plugins-helper\package.json
+  Source: sidecar/aura-plugins-helper/package.json
 
 @aura-os/shared@?
   License: UNKNOWN
@@ -175,7 +175,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/shared@0.1.0-alpha.1
   License: Apache-2.0
-  Source: packages\shared\package.json
+  Source: packages/shared/package.json
 
 @aura-os/ui@?
   License: UNKNOWN
@@ -187,7 +187,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/ui@0.1.0
   License: Apache-2.0
-  Source: packages\ui\package.json
+  Source: packages/ui/package.json
 
 @aura-os/vm-helper@?
   License: UNKNOWN
@@ -199,7 +199,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/vm-helper@0.4.0
   License: Apache-2.0
-  Source: sidecar\aura-vm-helper\package.json
+  Source: sidecar/aura-vm-helper/package.json
 
 @aura-os/website@1.0.0
   License: UNKNOWN
@@ -207,7 +207,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 @aura-os/website@1.0.0
   License: Apache-2.0
-  Source: website\package.json
+  Source: website/package.json
 
 @babel/code-frame@7.29.7
   License: MIT

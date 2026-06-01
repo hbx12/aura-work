@@ -109,7 +109,7 @@ function workspacePackageJsons(dir, acc = []) {
             name: pkg.name,
             version: pkg.version ?? "?",
             license: normalizeLicense(pkg.license ?? "Apache-2.0"),
-            path: relative(ROOT, full),
+            path: relative(ROOT, full).replace(/\\/g, "/"),
           });
         }
       } catch {
@@ -124,7 +124,15 @@ function dedupe(rows) {
   const map = new Map();
   for (const row of rows) {
     const key = `${row.ecosystem}:${row.name}@${row.version}`;
-    if (!map.has(key)) map.set(key, row);
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, row);
+      continue;
+    }
+    const preferCurrent =
+      (existing.license === "UNKNOWN" && row.license !== "UNKNOWN") ||
+      (existing.ecosystem === "npm" && row.ecosystem === "workspace");
+    if (preferCurrent) map.set(key, row);
   }
   return [...map.values()].sort((a, b) =>
     a.name.localeCompare(b.name) || a.version.localeCompare(b.version),
