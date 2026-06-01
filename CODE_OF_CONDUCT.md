@@ -45,7 +45,7 @@ an individual is officially representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainers at **conduct@aura-os.dev** or via a private GitHub
+reported to the maintainers at **novirstudio@gmail.com** or via a private GitHub
 Security Advisory. All complaints will be reviewed and investigated promptly and
 fairly.
 
