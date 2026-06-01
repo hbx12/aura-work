@@ -104,7 +104,45 @@ fn sha256_file(path: &Path) -> Result<String, String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-pub fn verify_vm_image_at(_app: &AppHandle, manifest_path: &Path) -> VmImageVerification {
+const DEV_PLACEHOLDER_SIGNATURE: &str = "dev-placeholder-signature-replace-in-release-pipeline";
+
+fn is_dev_placeholder_manifest(manifest: &VmImageManifest) -> bool {
+    manifest.artifact.contains("placeholder")
+        || manifest.signature.contains("dev-placeholder")
+        || manifest.sha256.is_empty()
+        || manifest.sha256 == "pending-build"
+}
+
+fn is_release_build() -> bool {
+    !cfg!(debug_assertions)
+}
+
+fn verify_minisign_signature(artifact_path: &Path, signature: &str) -> Result<(), String> {
+    if signature.is_empty() || signature.contains("dev-placeholder") {
+        return Err("Missing or placeholder release signature.".into());
+    }
+    let sig_path = artifact_path.with_extension("minisig");
+    if sig_path.exists() {
+        let output = std::process::Command::new("minisign")
+            .args(["-V", "-p", "-x"])
+            .arg(&sig_path)
+            .arg("-m")
+            .arg(artifact_path)
+            .output()
+            .map_err(|e| format!("minisign not available for signature verification: {e}"))?;
+        if output.status.success() {
+            return Ok(());
+        }
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("VM image signature verification failed: {stderr}"));
+    }
+    if signature.len() < 64 {
+        return Err("Signature field is not a valid minisign release signature.".into());
+    }
+    Err("Detached minisign signature file not found next to VM artifact.".into())
+}
+
+pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
     let raw = match fs::read_to_string(manifest_path) {
         Ok(r) => r,
         Err(e) => {
@@ -134,7 +172,8 @@ pub fn verify_vm_image_at(_app: &AppHandle, manifest_path: &Path) -> VmImageVeri
         }
     };
     let signature_present = !manifest.signature.is_empty()
-        && manifest.signature != "dev-placeholder-signature-replace-in-release-pipeline";
+        && manifest.signature != DEV_PLACEHOLDER_SIGNATURE;
+    let dev_placeholder = is_dev_placeholder_manifest(&manifest);
     let artifact_dir = manifest_path.parent().unwrap_or_else(|| Path::new("."));
     let artifact_path = artifact_dir.join(&manifest.artifact);
     let actual = if artifact_path.exists() {
@@ -146,8 +185,19 @@ pub fn verify_vm_image_at(_app: &AppHandle, manifest_path: &Path) -> VmImageVeri
         .as_ref()
         .map(|a| a.eq_ignore_ascii_case(&manifest.sha256))
         .unwrap_or(false);
-    let ok = hash_ok && !manifest.sha256.is_empty() && manifest.sha256 != "pending-build";
     let missing_artifact = actual.is_none();
+    let signature_ok = if is_release_build() {
+        if dev_placeholder {
+            false
+        } else if signature_present {
+            verify_minisign_signature(&artifact_path, &manifest.signature).is_ok()
+        } else {
+            false
+        }
+    } else {
+        signature_present || dev_placeholder
+    };
+    let ok = hash_ok && !manifest.sha256.is_empty() && signature_ok && !(is_release_build() && dev_placeholder);
     VmImageVerification {
         ok,
         image_id: manifest.image_id,
@@ -155,21 +205,32 @@ pub fn verify_vm_image_at(_app: &AppHandle, manifest_path: &Path) -> VmImageVeri
         expected_sha256: manifest.sha256,
         actual_sha256: actual,
         signature_present,
-        message: if ok {
-            if signature_present {
+        message: if is_release_build() && dev_placeholder {
+            "Production builds reject unsigned VM placeholder artifacts.".into()
+        } else if ok {
+            if signature_present && verify_minisign_signature(&artifact_path, &manifest.signature).is_ok() {
                 "VM image hash and release signature verified.".into()
+            } else if !is_release_build() && dev_placeholder {
+                "VM image hash verified (development placeholder only).".into()
             } else {
-                "VM image hash verified (dev signature placeholder).".into()
+                "VM image hash verified.".into()
             }
         } else if missing_artifact {
             format!(
                 "VM artifact '{}' not found next to manifest.",
                 manifest.artifact
             )
+        } else if is_release_build() && !signature_present {
+            "Release VM image requires a valid minisign signature.".into()
         } else {
-            "VM image SHA-256 mismatch — refuse to use tampered image.".into()
+            "VM image SHA-256 mismatch or signature verification failed — refuse to use tampered image.".into()
         },
     }
+}
+
+pub fn verify_vm_image_at(app: &AppHandle, manifest_path: &Path) -> VmImageVerification {
+    let _ = app;
+    verify_vm_manifest_at(manifest_path)
 }
 
 pub fn load_packaging_info(app: &AppHandle) -> Result<PackagingInfo, String> {
@@ -348,4 +409,73 @@ pub fn list_task_logs(db: &DbState, task_id: &str, limit: u32) -> Result<Vec<cra
         })
         .map_err(|e| e.to_string())?;
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    fn write_manifest(dir: &Path, artifact: &str, sha256: &str, signature: &str) -> PathBuf {
+        let manifest_path = dir.join("manifest.json");
+        let body = format!(
+            r#"{{
+  "schemaVersion": "1",
+  "imageId": "test-image",
+  "version": "0.1.0",
+  "sha256": "{sha256}",
+  "signature": "{signature}",
+  "artifact": "{artifact}"
+}}"#
+        );
+        fs::write(&manifest_path, body).unwrap();
+        manifest_path
+    }
+
+    fn temp_case_dir(name: &str) -> PathBuf {
+        let dir = env::temp_dir().join(format!("aura-packaging-{name}-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn rejects_dev_placeholder_in_release_builds() {
+        let dir = temp_case_dir("placeholder");
+        let artifact = "aura-linux-workspace.img.placeholder";
+        fs::write(dir.join(artifact), b"placeholder").unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(
+            &dir,
+            artifact,
+            &hash,
+            DEV_PLACEHOLDER_SIGNATURE,
+        );
+        let result = verify_vm_manifest_at(&manifest);
+        if is_release_build() {
+            assert!(!result.ok);
+            assert!(result.message.contains("placeholder"));
+        }
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_tampered_hash() {
+        let dir = temp_case_dir("tampered");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"good").unwrap();
+        let manifest = write_manifest(&dir, artifact, "deadbeef", DEV_PLACEHOLDER_SIGNATURE);
+        let result = verify_vm_manifest_at(&manifest);
+        assert!(!result.ok);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_missing_manifest_artifact() {
+        let dir = temp_case_dir("missing");
+        let manifest = write_manifest(&dir, "missing.bin", "abc", DEV_PLACEHOLDER_SIGNATURE);
+        let result = verify_vm_manifest_at(&manifest);
+        assert!(!result.ok);
+        assert!(result.message.contains("not found"));
+        let _ = fs::remove_dir_all(dir);
+    }
 }
