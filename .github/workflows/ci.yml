@@ -59,6 +59,7 @@ jobs:
       - run: npm ci
       - run: npm run build:sidecars
       - run: npm run stage:bundle
+      - run: npm run build -w @aura-os/desktop
       - run: npm run build:cloud
       - run: npm run build:bridge
       - run: npm run test:rust
