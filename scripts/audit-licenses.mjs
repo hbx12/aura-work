@@ -56,6 +56,7 @@ function collectNpm(rootDir) {
   const rows = [];
   for (const [pkgPath, meta] of Object.entries(packages)) {
     if (!pkgPath || pkgPath === "") continue;
+    if (!pkgPath.startsWith("node_modules/")) continue;
     const name = meta.name ?? pkgPath.replace(/^node_modules\//, "");
     const version = meta.version ?? "?";
     if (version === "?") continue;
