@@ -9,6 +9,19 @@ Open-source, multi-provider desktop AI agent platform — local-first, permissio
 
 > **Alpha warning:** Do not use Aura Work for sensitive workspaces or production automation. VM isolation, signed installers, and several experimental features are incomplete or disabled by default.
 
+## Maintainer and contributions
+
+Aura Work is maintained by **Habib (`hbx12`)**. Suggestions are reviewed actively, and useful ideas are turned into tracked implementation work with focused issues so contributors can pick up clear tasks without duplicating effort.
+
+- [Contributors wanted: help build Aura Work alpha](https://github.com/hbx12/aura-work/issues/16)
+- [Alpha release readiness epic](https://github.com/hbx12/aura-work/issues/30)
+- [Computer Use accessibility-tree epic](https://github.com/hbx12/aura-work/issues/22)
+- [Beginner-friendly issues](https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- [Tasks needing help](https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+- [Contribution guide](./CONTRIBUTING.md)
+
+Please comment on an issue before starting work so effort is not duplicated.
+
 ## Alpha limitations
 
 | Area | Status |
