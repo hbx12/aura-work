@@ -58,6 +58,7 @@ function collectNpm(rootDir) {
     if (!pkgPath || pkgPath === "") continue;
     const name = meta.name ?? pkgPath.replace(/^node_modules\//, "");
     const version = meta.version ?? "?";
+    if (version === "?") continue;
     const license = normalizeLicense(meta.license);
     rows.push({ ecosystem: "npm", name, version, license, path: pkgPath });
   }

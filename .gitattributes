@@ -1,0 +1,3 @@
+# Keep VM dev placeholder hashes stable across platforms
+bundle/vm-image/*.placeholder text eol=lf
+sidecar/aura-vm-helper/vm-image/*.placeholder text eol=lf

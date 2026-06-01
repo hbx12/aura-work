@@ -33,10 +33,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 --- npm / workspace packages ---
 
-@aura-os/acceptance-suite@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/acceptance-suite
-
 @aura-os/acceptance-suite@0.12.0
   License: UNKNOWN
   Source: qa/acceptance-suite
@@ -44,10 +40,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/acceptance-suite@0.12.0
   License: Apache-2.0
   Source: qa/acceptance-suite/package.json
-
-@aura-os/agent@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/agent
 
 @aura-os/agent@0.4.0
   License: UNKNOWN
@@ -57,10 +49,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-agent/package.json
 
-@aura-os/bridge@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/bridge
-
 @aura-os/bridge@0.9.0
   License: UNKNOWN
   Source: sidecar/aura-bridge
@@ -68,10 +56,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/bridge@0.9.0
   License: Apache-2.0
   Source: sidecar/aura-bridge/package.json
-
-@aura-os/browser-helper@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/browser-helper
 
 @aura-os/browser-helper@0.5.0
   License: UNKNOWN
@@ -81,10 +65,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-browser-helper/package.json
 
-@aura-os/cli@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/cli
-
 @aura-os/cli@0.11.0
   License: UNKNOWN
   Source: cli/aura-cli
@@ -92,10 +72,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/cli@0.11.0
   License: Apache-2.0
   Source: cli/aura-cli/package.json
-
-@aura-os/cloud@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/cloud
 
 @aura-os/cloud@0.7.0
   License: UNKNOWN
@@ -105,10 +81,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: server/aura-cloud/package.json
 
-@aura-os/cloud-sync@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/cloud-sync
-
 @aura-os/cloud-sync@0.7.0
   License: UNKNOWN
   Source: sidecar/aura-cloud-sync
@@ -116,10 +88,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/cloud-sync@0.7.0
   License: Apache-2.0
   Source: sidecar/aura-cloud-sync/package.json
-
-@aura-os/computer-use@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/computer-use
 
 @aura-os/computer-use@0.10.0
   License: UNKNOWN
@@ -129,10 +97,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-computer-use/package.json
 
-@aura-os/desktop@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/desktop
-
 @aura-os/desktop@0.1.0-alpha.1
   License: UNKNOWN
   Source: apps/desktop
@@ -140,10 +104,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/desktop@0.1.0-alpha.1
   License: Apache-2.0
   Source: apps/desktop/package.json
-
-@aura-os/i18n@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/i18n
 
 @aura-os/i18n@0.11.0
   License: UNKNOWN
@@ -153,10 +113,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: packages/i18n/package.json
 
-@aura-os/plugins-helper@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/plugins-helper
-
 @aura-os/plugins-helper@0.6.0
   License: UNKNOWN
   Source: sidecar/aura-plugins-helper
@@ -164,10 +120,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/plugins-helper@0.6.0
   License: Apache-2.0
   Source: sidecar/aura-plugins-helper/package.json
-
-@aura-os/shared@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/shared
 
 @aura-os/shared@0.1.0-alpha.1
   License: UNKNOWN
@@ -177,10 +129,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: packages/shared/package.json
 
-@aura-os/ui@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/ui
-
 @aura-os/ui@0.1.0
   License: UNKNOWN
   Source: packages/ui
@@ -188,10 +136,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @aura-os/ui@0.1.0
   License: Apache-2.0
   Source: packages/ui/package.json
-
-@aura-os/vm-helper@?
-  License: UNKNOWN
-  Source: node_modules/@aura-os/vm-helper
 
 @aura-os/vm-helper@0.4.0
   License: UNKNOWN
