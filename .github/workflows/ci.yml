@@ -56,6 +56,7 @@ jobs:
       - run: npm run build:cloud
       - run: npm run build:bridge
       - run: npm run test:rust
+      - run: npm run test:sidecars
       - run: npm run test:acceptance
 
   tauri-build:

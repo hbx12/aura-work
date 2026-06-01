@@ -46,9 +46,13 @@
     "cli": "npm run start -w @aura-os/cli",
     "cloud-server": "npm run start -w @aura-os/cloud",
     "test:rust": "npm run test:rust -w @aura-os/desktop",
+    "test:sidecars": "vitest run --config vitest.sidecars.config.ts",
     "test:acceptance": "npm run test -w @aura-os/acceptance-suite",
-    "qa": "npm run build:sidecars && npm run build:cloud && npm run build:bridge && npm run test:rust && npm run test:acceptance",
+    "qa": "npm run build:sidecars && npm run build:cloud && npm run build:bridge && npm run test:sidecars && npm run test:rust && npm run test:acceptance",
     "audit:licenses": "node scripts/audit-licenses.mjs",
     "sbom": "npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
   }
 }
