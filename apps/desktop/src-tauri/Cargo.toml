@@ -1,6 +1,6 @@
 [package]
 name = "aura-desktop"
-version = "0.1.0-alpha.1"
+version = "0.1.1-alpha.1"
 description = "Aura Work desktop application"
 authors = ["Aura OS Contributors"]
 edition = "2021"
