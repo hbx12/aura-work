@@ -89,12 +89,24 @@ jobs:
           AURA_ALLOW_VM_PLACEHOLDER_RELEASE: ${{ contains(inputs.version, '-alpha') && '1' || '0' }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-      - name: Upload installer artifacts
+      - name: Upload installer artifacts only
         uses: actions/upload-artifact@v4
         with:
           name: installers-${{ matrix.target }}
           path: |
-            apps/desktop/src-tauri/target/**/release/bundle/**/*
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.exe
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.exe.sig
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.msi
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.msi.sig
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.AppImage
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.AppImage.sig
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.deb
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.deb.sig
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.rpm
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.rpm.sig
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.dmg
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.app.tar.gz
+            apps/desktop/src-tauri/target/**/release/bundle/**/*.app.tar.gz.sig
           if-no-files-found: error
 
   publish-release:
@@ -114,7 +126,7 @@ jobs:
         run: node scripts/validate-release-version.mjs "${{ inputs.version }}"
       - name: Generate CycloneDX SBOM
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev
-      - name: Download all installer artifacts
+      - name: Download installer artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
@@ -122,7 +134,7 @@ jobs:
           merge-multiple: true
       - name: Verify installer artifacts exist
         run: |
-          count=$(find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" \) | wc -l | tr -d ' ')
+          count=$(find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" \) | wc -l | tr -d ' ')
           if [ "$count" = "0" ]; then
             echo "No installer artifacts found"
             exit 1
@@ -144,13 +156,13 @@ jobs:
             exit 1
           fi
           echo "$MINISIGN_KEY" > minisign.key
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) | while read -r f; do
+          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" \) | while read -r f; do
             minisign -S -s minisign.key -m "$f" -x "$f.minisig"
           done
           rm -f minisign.key
       - name: SHA256 checksums
         run: |
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.sig" -o -name "*.minisig" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
+          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" -o -name "*.sig" -o -name "*.minisig" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
           sha256sum latest.json >> SHA256SUMS.txt
           test -s SHA256SUMS.txt
           cat SHA256SUMS.txt
@@ -164,7 +176,27 @@ jobs:
             sbom.json
             SHA256SUMS.txt
             latest.json
-            release-artifacts/**/*
+            release-artifacts/**/*.exe
+            release-artifacts/**/*.exe.sig
+            release-artifacts/**/*.exe.minisig
+            release-artifacts/**/*.msi
+            release-artifacts/**/*.msi.sig
+            release-artifacts/**/*.msi.minisig
+            release-artifacts/**/*.AppImage
+            release-artifacts/**/*.AppImage.sig
+            release-artifacts/**/*.AppImage.minisig
+            release-artifacts/**/*.deb
+            release-artifacts/**/*.deb.sig
+            release-artifacts/**/*.deb.minisig
+            release-artifacts/**/*.rpm
+            release-artifacts/**/*.rpm.sig
+            release-artifacts/**/*.rpm.minisig
+            release-artifacts/**/*.dmg
+            release-artifacts/**/*.dmg.minisig
+            release-artifacts/**/*.app.tar.gz
+            release-artifacts/**/*.app.tar.gz.sig
+            release-artifacts/**/*.app.tar.gz.minisig
+          fail_on_unmatched_files: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
