@@ -19,15 +19,15 @@ Aura Work publishes optional signed desktop updates from GitHub Releases. Mergin
 ## Preparing a release
 
 1. Merge the selected changes into `main`.
-2. Update the version consistently in:
-   - `package.json`
-   - `apps/desktop/package.json`
-   - `apps/desktop/src-tauri/Cargo.toml`
-   - `apps/desktop/src-tauri/tauri.conf.json`
-3. Run CI and the installer smoke checklist.
-4. Open GitHub Actions, select `Release`, and choose `Run workflow` from `main`.
-5. Enter the new SemVer version, such as `0.1.1-alpha.1`.
-6. Approve the `production` deployment when GitHub requests approval.
+2. Set the version in all required manifests with one command:
+
+   `node scripts/set-release-version.mjs 0.1.1-alpha.1`
+
+3. Review and commit the generated version changes.
+4. Run CI and the installer smoke checklist.
+5. Open GitHub Actions, select `Release`, and choose `Run workflow` from `main`.
+6. Enter the same SemVer version, such as `0.1.1-alpha.1`.
+7. Approve the `production` deployment when GitHub requests approval.
 
 ## Result
 
