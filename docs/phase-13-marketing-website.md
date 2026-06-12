@@ -36,19 +36,14 @@
 - [x] WCAG: skip link، focus-visible، semantic landmarks، reduced-motion
 - [x] No analytics / no personal data collection
 
-## أوامر
+## حالة أوامر الموقع
 
-```powershell
-npm install
-npm run dev:website      # http://localhost:4321
-npm run build:website    # website/dist/
-npm run preview:website
-```
+مساحة عمل `website/` وأوامر تشغيل موقع التسويق غير موجودة في `package.json` الحالي. أبقِ موقع التسويق كمتابعة منفصلة أو أضف مساحة العمل والأوامر في نفس PR قبل توثيقها.
 
 ## كيف تختبر
 
-1. `npm run build:website` — يجب أن ينجح بدون أخطاء
-2. `npm run preview:website` — افتح `/` و`/ar/`
+1. تأكد من وجود مساحة عمل `website/` قبل اختبار موقع التسويق.
+2. إذا أضيفت مساحة العمل، وثّق أوامر التشغيل والبناء المطابقة في `package.json`.
 3. تحقق من RTL في `/ar/` (اتجاه النص، padding منطقي)
 4. في قسم Download — يظهر المثبّت الموصى به لنظامك
 5. روابط GitHub Releases وchecksums تفتح صفحات Release
@@ -56,7 +51,7 @@ npm run preview:website
 
 ## تحديث الإصدار عند Release
 
-عدّل `website/src/config/site.ts` (`version`) و`website/src/config/releases.ts` (أسماء الملفات) لتطابق GitHub Release الموقّع.
+بعد إعادة إضافة مساحة عمل الموقع، عدّل `website/src/config/site.ts` (`version`) و`website/src/config/releases.ts` (أسماء الملفات) لتطابق GitHub Release الموقّع.
 
 ## معايير القبول (Phase 13)
 

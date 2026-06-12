@@ -2,7 +2,7 @@
 
 ## ملخص
 
-تم إعداد Aura OS للإطلاق المفتوح المصدر **v1.0.0** وفق **PRD القسم 10** و**Milestone 13**: Apache-2.0، ملفات المجتمع والحوكمة، CI/CD متعدد المنصات، SBOM، فحص أسرار، وworkflow ترجمة Weblate.
+تم إعداد Aura Work للإطلاق المفتوح المصدر **v1.0.0** وفق **PRD القسم 10** و**Milestone 13**: Apache-2.0، ملفات المجتمع والحوكمة، CI/CD متعدد المنصات، SBOM، فحص أسرار، وworkflow ترجمة Weblate.
 
 ## ما الذي تم بناؤه
 
@@ -46,7 +46,7 @@
 ### الإطلاق (§10.5)
 
 - قنوات مجتمع موثّقة في SUPPORT.md (Discussions + Matrix)
-- موقع التنزيل يشير إلى `v1.0.0` artifacts
+- موقع التنزيل هو متابعة منفصلة حتى تعود مساحة عمل `website/` وأوامرها إلى `package.json`
 - **يتطلب من الم maintainer:** جعل المستودع public + `git tag v1.0.0` + نشر Release
 
 ## أوامر
@@ -55,7 +55,6 @@
 npm run audit:licenses   # THIRD-PARTY-NOTICES
 npm run sbom             # sbom.json
 npm run qa               # acceptance suite
-npm run build:website
 ```
 
 ## كيف تختبر
@@ -63,8 +62,8 @@ npm run build:website
 1. تحقق من وجود `LICENSE`, `NOTICE`, `THIRD-PARTY-NOTICES`
 2. `npm run audit:licenses` — ينجح بدون أخطاء
 3. `npm run qa` — acceptance + rust tests
-4. `npm run build:website` — موقع v1.0.0
-5. راجع `.github/workflows/` — CI matrix ثلاث منصات
+4. راجع `.github/workflows/` — CI matrix ثلاث منصات
+5. لا توثق أوامر موقع التسويق حتى توجد مساحة عمل `website/` مطابقة في `package.json`
 
 ## معايير القبول (Phase 14)
 
@@ -78,4 +77,4 @@ npm run build:website
 
 ## المشروع مكتمل
 
-Phase 14 هي المرحلة الأخيرة في PRD. بعد الموافقة، Aura OS v1.0.0 جاهز للإطلاق المجتمعي.
+Phase 14 هي المرحلة الأخيرة في PRD. بعد الموافقة، Aura Work v1.0.0 جاهز للإطلاق المجتمعي.
