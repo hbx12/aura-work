@@ -6,6 +6,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { isSidecarAuthorized, loadSidecarToken, rejectUnauthorized } from "@aura-os/shared";
 import { BRIDGE_PORT, hashToken, internalFetch } from "./rust-client.js";
 import type { BridgeClientConfig, BridgeConfig, BridgeStatus, HelperState } from "./types.js";
+import { parseJsonBody, RequestBodyError } from "./request-body.js";
 
 let helperState: HelperState = "stopped";
 let config: BridgeConfig = { internalSecret: "", clients: [] };
@@ -20,12 +21,7 @@ function bridgeRequiresSidecarAuth(method: string, url: string): boolean {
   return true;
 }
 
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? (JSON.parse(raw) as T) : ({} as T);
-}
+
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, {
@@ -116,7 +112,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/config") {
-      const body = await parseJson<BridgeConfig>(req);
+      const body = await parseJsonBody<BridgeConfig>(req);
       config = {
         internalSecret: body.internalSecret ?? "",
         clients: body.clients ?? [],
@@ -140,7 +136,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/v1/pair/claim") {
-      const body = await parseJson<{
+      const body = await parseJsonBody<{
         code: string;
         name: string;
         clientType: string;
@@ -171,7 +167,7 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url === "/v1/chrome/page-read/request") {
       const client = requireClient(req, res);
       if (!client) return;
-      const body = await parseJson<Record<string, unknown>>(req);
+      const body = await parseJsonBody<Record<string, unknown>>(req);
       const token = sessionToken(req)!;
       const result = await internalFetch(config.internalSecret, "/internal/chrome/page-read/request", {
         method: "POST",
@@ -195,7 +191,7 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url === "/v1/chrome/page-read/submit") {
       const client = requireClient(req, res);
       if (!client) return;
-      const body = await parseJson<Record<string, unknown>>(req);
+      const body = await parseJsonBody<Record<string, unknown>>(req);
       const token = sessionToken(req)!;
       const result = await internalFetch(config.internalSecret, "/internal/chrome/page-read/submit", {
         method: "POST",
@@ -207,7 +203,7 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url === "/v1/task/create") {
       const client = requireClient(req, res);
       if (!client) return;
-      const body = await parseJson<Record<string, unknown>>(req);
+      const body = await parseJsonBody<Record<string, unknown>>(req);
       const token = sessionToken(req)!;
       const result = await internalFetch(config.internalSecret, "/internal/task/create", {
         method: "POST",
@@ -244,7 +240,7 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url === "/v1/open/task") {
       const client = requireClient(req, res);
       if (!client) return;
-      const body = await parseJson<{ taskId: string }>(req);
+      const body = await parseJsonBody<{ taskId: string }>(req);
       const token = sessionToken(req)!;
       await internalFetch(config.internalSecret, "/internal/open/task", {
         method: "POST",
@@ -254,8 +250,13 @@ const server = createServer(async (req, res) => {
     }
 
     return json(res, 404, { error: "Not found" });
-  } catch (e) {
+    } catch (e) {
     lastError = e instanceof Error ? e.message : String(e);
+
+    if (e instanceof RequestBodyError) {
+      return json(res, e.statusCode, { error: e.message });
+    }
+
     json(res, 500, { error: lastError });
   }
 });
