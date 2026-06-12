@@ -9,7 +9,8 @@
 ## أوامر
 
 ```powershell
-cd D:\Aura_os
+git clone https://github.com/hbx12/aura-work.git
+cd aura-work
 npm install
 
 # تطبيق سطح المكتب (Tauri dev)

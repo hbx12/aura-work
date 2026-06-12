@@ -80,7 +80,7 @@ Aura Work ships **20 initial languages**. Locale files live in `packages/i18n/lo
 
 ### Via Weblate
 
-Community translation workflow is documented in [packages/i18n/WEBLATE.md](./packages/i18n/WEBLATE.md). Weblate projects sync via PR from `weblate/aura-os` branches.
+Community translation workflow is documented in [packages/i18n/WEBLATE.md](./packages/i18n/WEBLATE.md). Weblate projects sync via PR from `weblate/i18n` branches.
 
 ## Security
 
