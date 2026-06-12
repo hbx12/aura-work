@@ -7,6 +7,10 @@ import { isSidecarAuthorized, loadSidecarToken, rejectUnauthorized } from "@aura
 import { BRIDGE_PORT, hashToken, internalFetch } from "./rust-client.js";
 import type { BridgeClientConfig, BridgeConfig, BridgeStatus, HelperState } from "./types.js";
 import { parseJsonBody, RequestBodyError } from "./request-body.js";
+import {
+  PairingRateLimitError,
+  PairingRateLimiter,
+} from "./pairing-rate-limit.js";
 
 let helperState: HelperState = "stopped";
 let config: BridgeConfig = { internalSecret: "", clients: [] };
@@ -14,6 +18,7 @@ let startedAt: string | undefined;
 let lastError: string | undefined;
 const AUTH_TOKEN = loadSidecarToken();
 const connectedClientIds = new Set<string>();
+const pairingRateLimiter = new PairingRateLimiter();
 
 function bridgeRequiresSidecarAuth(method: string, url: string): boolean {
   if (method === "OPTIONS") return false;
@@ -21,14 +26,18 @@ function bridgeRequiresSidecarAuth(method: string, url: string): boolean {
   return true;
 }
 
-
-
-function json(res: ServerResponse, status: number, body: unknown) {
+function json(
+  res: ServerResponse,
+  status: number,
+  body: unknown,
+  extraHeaders: Record<string, string> = {},
+) {
   res.writeHead(status, {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, X-Aura-Session-Token",
+    ...extraHeaders,
   });
   res.end(JSON.stringify(body));
 }
@@ -136,21 +145,32 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/v1/pair/claim") {
+      const rateLimitKey = req.socket.remoteAddress ?? "unknown";
+      pairingRateLimiter.assertAllowed(rateLimitKey);
+
       const body = await parseJsonBody<{
         code: string;
         name: string;
         clientType: string;
         projectId?: string;
       }>(req);
-      const result = await internalFetch<{
-        clientId: string;
-        sessionToken: string;
-        projectId?: string;
-      }>(config.internalSecret, "/internal/pair/claim", {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
-      return json(res, 200, result);
+
+      try {
+        const result = await internalFetch<{
+          clientId: string;
+          sessionToken: string;
+          projectId?: string;
+        }>(config.internalSecret, "/internal/pair/claim", {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+
+        pairingRateLimiter.recordSuccess(rateLimitKey);
+        return json(res, 200, result);
+      } catch (error) {
+        pairingRateLimiter.recordFailure(rateLimitKey);
+        throw error;
+      }
     }
 
     if (method === "GET" && url === "/v1/projects") {
@@ -250,14 +270,28 @@ const server = createServer(async (req, res) => {
     }
 
     return json(res, 404, { error: "Not found" });
-    } catch (e) {
+  } catch (e) {
     lastError = e instanceof Error ? e.message : String(e);
+
+    if (e instanceof PairingRateLimitError) {
+      return json(
+        res,
+        e.statusCode,
+        {
+          error: e.message,
+          retryAfterSeconds: e.retryAfterSeconds,
+        },
+        {
+          "Retry-After": String(e.retryAfterSeconds),
+        },
+      );
+    }
 
     if (e instanceof RequestBodyError) {
       return json(res, e.statusCode, { error: e.message });
     }
 
-    json(res, 500, { error: lastError });
+    return json(res, 500, { error: lastError });
   }
 });
 
