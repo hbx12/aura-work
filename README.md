@@ -7,7 +7,13 @@
 
 Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
 
+![Aura Work application preview](./docs/assets/aura-work-preview.svg)
+
 > **Alpha warning:** Do not use Aura Work for sensitive workspaces or production automation. VM isolation, signed installers, and several experimental features are incomplete or disabled by default.
+
+## Download
+
+Official desktop installers are published on the [GitHub Releases](https://github.com/hbx12/aura-work/releases/latest) page after an approved release. Installed copies receive optional signed update prompts when a newer version is available.
 
 ## Maintainer and contributions
 
@@ -74,6 +80,7 @@ Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` wh
 ## Documentation
 
 - [docs/README.md](./docs/README.md) — feature index
+- [docs/releases.md](./docs/releases.md) — approved GitHub Releases and optional signed updates
 - [docs/github-publish.md](./docs/github-publish.md) — what goes on GitHub
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — development and translations
 - [CHANGELOG.md](./CHANGELOG.md) — release history
