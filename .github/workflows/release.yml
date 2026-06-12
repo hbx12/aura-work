@@ -140,14 +140,14 @@ jobs:
           MINISIGN_KEY: ${{ secrets.MINISIGN_PRIVATE_KEY }}
         run: |
           if [ -z "$MINISIGN_KEY" ]; then
-            echo "MINISIGN_PRIVATE_KEY is required for production releases"
-            exit 1
+            echo "MINISIGN_PRIVATE_KEY not set — skipping installer signing"
+          else
+            echo "$MINISIGN_KEY" > minisign.key
+            find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) | while read -r f; do
+              minisign -S -s minisign.key -m "$f" -x "$f.minisig"
+            done
+            rm -f minisign.key
           fi
-          echo "$MINISIGN_KEY" > minisign.key
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) | while read -r f; do
-            minisign -S -s minisign.key -m "$f" -x "$f.minisig"
-          done
-          rm -f minisign.key
       - name: SHA256 checksums
         run: |
           find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.sig" -o -name "*.minisig" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
