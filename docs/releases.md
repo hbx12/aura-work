@@ -11,23 +11,21 @@ Aura Work publishes optional signed desktop updates from GitHub Releases. Mergin
    `npm run tauri -w @aura-os/desktop -- signer generate -- -w ~/.tauri/aura-work.key`
 
 4. Back up the private key outside the repository. Never commit it.
-5. Add the generated public key as the repository variable `TAURI_UPDATER_PUBLIC_KEY`.
-6. Add the private key contents as the repository secret `TAURI_SIGNING_PRIVATE_KEY`.
-7. Add the optional key password as the repository secret `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
-8. Keep the existing `MINISIGN_PRIVATE_KEY` secret configured for release installer signatures.
+5. Inside the `production` environment, add the generated public key as the environment variable `TAURI_UPDATER_PUBLIC_KEY`.
+6. Inside the `production` environment, add the private key contents as the environment secret `TAURI_SIGNING_PRIVATE_KEY`.
+7. Inside the `production` environment, add the optional key password as the environment secret `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+8. Inside the `production` environment, keep `MINISIGN_PRIVATE_KEY` configured for release installer signatures.
+
+The release build jobs and the final publish job both use the `production` environment. GitHub requires maintainer approval before the protected updater signing values become available.
 
 ## Preparing a release
 
 1. Merge the selected changes into `main`.
-2. Set the version in all required manifests with one command:
+2. Open GitHub Actions, select `Release`, and choose `Run workflow` from `main`.
+3. Enter the SemVer version, such as `0.1.1-alpha.1`.
+4. Approve the `production` deployment when GitHub requests approval.
 
-   `node scripts/set-release-version.mjs 0.1.1-alpha.1`
-
-3. Review and commit the generated version changes.
-4. Run CI and the installer smoke checklist.
-5. Open GitHub Actions, select `Release`, and choose `Run workflow` from `main`.
-6. Enter the same SemVer version, such as `0.1.1-alpha.1`.
-7. Approve the `production` deployment when GitHub requests approval.
+The workflow applies the entered release version to the temporary build manifests automatically. The source manifests do not need a separate version-bump commit for each release.
 
 ## Result
 
