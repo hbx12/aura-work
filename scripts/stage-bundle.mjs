@@ -8,6 +8,10 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const isProduction = process.env.AURA_RELEASE_BUILD === "1";
+const releaseVersion = process.env.AURA_RELEASE_VERSION ?? "";
+const allowAlphaVmPlaceholder =
+  process.env.AURA_ALLOW_VM_PLACEHOLDER_RELEASE === "1" &&
+  releaseVersion.includes("-alpha");
 
 const sidecars = [
   { id: "aura-agent", src: "sidecar/aura-agent/dist" },
@@ -50,11 +54,18 @@ if (isProduction) {
   if (existsSync(vmManifest)) {
     const raw = readFileSync(vmManifest, "utf8");
     const manifest = JSON.parse(raw);
-    if (
+    const hasPlaceholder =
       String(manifest.signature ?? "").includes("dev-placeholder") ||
-      String(manifest.artifact ?? "").includes("placeholder")
-    ) {
-      console.error("[stage-bundle] ERROR: VM placeholder artifact detected in production build.");
+      String(manifest.artifact ?? "").includes("placeholder");
+
+    if (hasPlaceholder && allowAlphaVmPlaceholder) {
+      console.warn(
+        `[stage-bundle] WARNING: VM placeholder artifact allowed for alpha release ${releaseVersion}. VM-backed isolation remains unavailable until a signed VM image is published.`,
+      );
+    } else if (hasPlaceholder) {
+      console.error(
+        "[stage-bundle] ERROR: VM placeholder artifact detected. Stable releases require a signed production VM image.",
+      );
       process.exit(1);
     }
   }
