@@ -29,7 +29,46 @@ describe("url-guard SSRF protection", () => {
   });
 
   it("rejects link-local metadata IP", () => {
-    expect(() => assertSafeRemoteUrl("http://169.254.169.254/latest/meta-data")).toThrow(/Blocked URL/);
+    expect(() =>
+      assertSafeRemoteUrl("http://169.254.169.254/latest/meta-data"),
+    ).toThrow(/Blocked URL/);
+  });
+
+  it("rejects IPv4-mapped IPv6 loopback", () => {
+    expect(() => assertSafeRemoteUrl("http://[::ffff:127.0.0.1]/")).toThrow(
+      /Blocked URL/,
+    );
+  });
+
+  it("rejects IPv4-mapped IPv6 private address", () => {
+    expect(() => assertSafeRemoteUrl("http://[::ffff:192.168.1.1]/")).toThrow(
+      /Blocked URL/,
+    );
+  });
+
+  it("rejects expanded IPv6 loopback", () => {
+    expect(() => assertSafeRemoteUrl("http://[0:0:0:0:0:0:0:1]/")).toThrow(
+      /Blocked URL/,
+    );
+  });
+
+  it("rejects IPv6 unique-local addresses", () => {
+    expect(() => assertSafeRemoteUrl("http://[fc00::1]/")).toThrow(/Blocked URL/);
+    expect(() => assertSafeRemoteUrl("http://[fd12::1]/")).toThrow(/Blocked URL/);
+  });
+
+  it("rejects IPv6 link-local addresses", () => {
+    expect(() => assertSafeRemoteUrl("http://[fe80::1]/")).toThrow(/Blocked URL/);
+  });
+
+  it("rejects IPv6 multicast addresses", () => {
+    expect(() => assertSafeRemoteUrl("http://[ff02::1]/")).toThrow(/Blocked URL/);
+  });
+
+  it("allows public IPv6 URLs", () => {
+    expect(assertSafeRemoteUrl("https://[2606:4700:4700::1111]/").hostname).toBe(
+      "[2606:4700:4700::1111]",
+    );
   });
 
   it("allows public https URLs", () => {
@@ -37,7 +76,9 @@ describe("url-guard SSRF protection", () => {
   });
 
   it("rejects non-http protocols", () => {
-    expect(() => assertSafeRemoteUrl("file:///etc/passwd")).toThrow(/Only http and https/);
+    expect(() => assertSafeRemoteUrl("file:///etc/passwd")).toThrow(
+      /Only http and https/,
+    );
   });
 
   it("resolves public hostnames safely", async () => {
