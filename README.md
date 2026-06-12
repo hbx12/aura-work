@@ -87,3 +87,7 @@ Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` wh
 ## License
 
 Apache-2.0 — see [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-NOTICES](./THIRD-PARTY-NOTICES).
+
+## Clean-machine installer smoke test
+
+For installed Windows build validation, see [docs/clean-machine-installer-smoke.md](./docs/clean-machine-installer-smoke.md).
