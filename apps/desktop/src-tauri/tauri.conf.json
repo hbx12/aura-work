@@ -27,7 +27,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis", "deb", "dmg", "app"],
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "resources": {
       "../../../bundle/manifest.json": "manifest.json",
       "../../../bundle/vm-image/manifest.json": "vm-image/manifest.json",
@@ -52,7 +52,10 @@
       "endpoints": [
         "https://github.com/hbx12/aura-work/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RUE5OEY2QTgzNDdFNjYKUldRNDdGQlJGQ0U2NkYxM0I4Q0EyQjFBRjFFQjJCN0Q4QjQ4QjY4QjY4QjY4QjY4QjY4QjY4QjY4Qgo="
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RUE5OEY2QTgzNDdFNjYKUldRNDdGQlJGQ0U2NkYxM0I4Q0EyQjFBRjFFQjJCN0Q4QjQ4QjY4QjY4QjY4QjY4QjY4QjY4QjY4Qgo=",
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }
