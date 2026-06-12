@@ -31,6 +31,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             rust_targets: x86_64-unknown-linux-gnu
     runs-on: ${{ matrix.os }}
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
