@@ -1,6 +1,7 @@
 use crate::packaging::load_packaging_info;
 use crate::sidecar_auth::{generate_sidecar_token, register_sidecar_token, sidecar_bearer};
 use std::collections::HashMap;
+use std::fs::{create_dir_all, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
@@ -128,8 +129,7 @@ fn node_binary(app: &AppHandle) -> String {
 }
 
 fn sidecar_entry(app: &AppHandle, def: &SidecarDef) -> Option<(PathBuf, PathBuf)> {
-    // Dev: always prefer workspace sidecars (have access to hoisted node_modules).
-    // Bundled copies under resources/ only contain dist/ and crash on import.
+    // Development: workspace sidecars use hoisted node_modules.
     if let Some(root) = find_workspace_root() {
         let pkg_dir = root.join(def.rel_dir);
         let script = pkg_dir.join("dist").join("index.js");
@@ -138,6 +138,7 @@ fn sidecar_entry(app: &AppHandle, def: &SidecarDef) -> Option<(PathBuf, PathBuf)
         }
     }
 
+    // Installed app: bundled sidecars are self-contained single-file JS bundles.
     if let Ok(resource) = app.path().resource_dir() {
         let pkg_dir = resource.join("sidecars").join(def.id);
         let script = pkg_dir.join("dist").join("index.js");
@@ -149,9 +150,24 @@ fn sidecar_entry(app: &AppHandle, def: &SidecarDef) -> Option<(PathBuf, PathBuf)
     None
 }
 
+fn sidecar_log_stdio(app: &AppHandle, sidecar_id: &str) -> (Stdio, Stdio) {
+    if let Ok(log_dir) = app.path().app_log_dir() {
+        let _ = create_dir_all(&log_dir);
+        let log_path = log_dir.join(format!("{sidecar_id}.log"));
+        if let Ok(stdout) = OpenOptions::new().create(true).append(true).open(&log_path) {
+            if let Ok(stderr) = stdout.try_clone() {
+                return (Stdio::from(stdout), Stdio::from(stderr));
+            }
+        }
+    }
+
+    (Stdio::null(), Stdio::null())
+}
+
 fn spawn_sidecar(app: &AppHandle, def: &SidecarDef, token: &str) -> Option<Child> {
     let (script, workdir) = sidecar_entry(app, def)?;
     let node = node_binary(app);
+    let (stdout, stderr) = sidecar_log_stdio(app, def.id);
 
     let mut cmd = Command::new(&node);
     cmd.arg(&script)
@@ -159,8 +175,8 @@ fn spawn_sidecar(app: &AppHandle, def: &SidecarDef, token: &str) -> Option<Child
         .env(def.env_key, def.port.to_string())
         .env(def.auth_env_key, token)
         .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stdout(stdout)
+        .stderr(stderr);
 
     if let Some(root) = find_workspace_root() {
         let node_modules = root.join("node_modules");
@@ -178,7 +194,12 @@ fn spawn_sidecar(app: &AppHandle, def: &SidecarDef, token: &str) -> Option<Child
 
     match cmd.spawn() {
         Ok(child) => {
-            eprintln!("[sidecars] started {} on port {} ({})", def.id, def.port, script.display());
+            eprintln!(
+                "[sidecars] started {} on port {} ({})",
+                def.id,
+                def.port,
+                script.display()
+            );
             Some(child)
         }
         Err(e) => {
