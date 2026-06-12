@@ -1,10 +1,25 @@
 #!/usr/bin/env node
 /**
- * Stage compiled sidecar dist/ folders into bundle/sidecars/ for Tauri resource bundling.
+ * Stage self-contained Node sidecars and a Node runtime into bundle/ for Tauri.
+ *
+ * Development builds still use workspace sidecars. Installed builds use:
+ *   resources/node/(node.exe|bin/node)
+ *   resources/sidecars/<id>/dist/index.js
  */
-import { cpSync, existsSync, mkdirSync, rmSync, readFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { buildSync } = require("esbuild");
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const isProduction = process.env.AURA_RELEASE_BUILD === "1";
@@ -23,31 +38,64 @@ const sidecars = [
   { id: "aura-computer-use", src: "sidecar/aura-computer-use/dist" },
 ];
 
-const outRoot = join(root, "bundle", "sidecars");
-mkdirSync(outRoot, { recursive: true });
+function stageNodeRuntime() {
+  const nodeRoot = join(root, "bundle", "node");
+  rmSync(nodeRoot, { recursive: true, force: true });
 
-let staged = 0;
-let missing = 0;
-for (const { id, src } of sidecars) {
+  const windows = process.platform === "win32";
+  const destination = windows
+    ? join(nodeRoot, "node.exe")
+    : join(nodeRoot, "bin", "node");
+
+  mkdirSync(dirname(destination), { recursive: true });
+  copyFileSync(process.execPath, destination);
+
+  if (!windows) chmodSync(destination, 0o755);
+
+  console.log(`[stage-bundle] staged Node runtime: ${destination}`);
+}
+
+function bundleSidecar({ id, src }) {
   const srcPath = join(root, src);
-  const destPath = join(outRoot, id);
-  if (!existsSync(srcPath)) {
-    console.error(`[stage-bundle] ERROR: required sidecar missing: ${id} (${srcPath})`);
-    missing++;
-    continue;
+  const entry = join(srcPath, "index.js");
+  const destPath = join(root, "bundle", "sidecars", id);
+  const outfile = join(destPath, "dist", "index.js");
+
+  if (!existsSync(entry)) {
+    throw new Error(
+      `[stage-bundle] required sidecar missing: ${id} (${entry}). Run: npm run build:sidecars`,
+    );
   }
+
   rmSync(destPath, { recursive: true, force: true });
-  cpSync(srcPath, join(destPath, "dist"), { recursive: true });
-  staged++;
-  console.log(`[stage-bundle] staged ${id}`);
+  mkdirSync(dirname(outfile), { recursive: true });
+
+  buildSync({
+    entryPoints: [entry],
+    outfile,
+    bundle: true,
+    platform: "node",
+    format: "esm",
+    target: "node20",
+    packages: "bundle",
+    sourcemap: false,
+    logLevel: "warning",
+    banner: {
+      js: 'import { createRequire as __auraCreateRequire } from "node:module"; const require = __auraCreateRequire(import.meta.url);',
+    },
+  });
+
+  console.log(`[stage-bundle] bundled ${id}`);
 }
 
-if (missing > 0) {
-  console.error(`[stage-bundle] FAILED — ${missing} required sidecar(s) missing. Run: npm run build:sidecars`);
-  process.exit(1);
+mkdirSync(join(root, "bundle", "sidecars"), { recursive: true });
+stageNodeRuntime();
+
+for (const sidecar of sidecars) {
+  bundleSidecar(sidecar);
 }
 
-console.log(`[stage-bundle] done — ${staged}/${sidecars.length} sidecars staged to bundle/sidecars/`);
+console.log(`[stage-bundle] done — ${sidecars.length}/${sidecars.length} sidecars bundled`);
 
 if (isProduction) {
   const vmManifest = join(root, "bundle", "vm-image", "manifest.json");
