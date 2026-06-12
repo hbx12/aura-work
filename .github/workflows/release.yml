@@ -1,227 +1,158 @@
 name: Release
 
-
-
 on:
-
-  push:
-
-    tags:
-
-      - "v*.*.*"
-
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "SemVer release version, for example 0.1.1-alpha.1"
+        required: true
+        type: string
 
 permissions:
-
   contents: write
 
-
+concurrency:
+  group: production-release
+  cancel-in-progress: false
 
 jobs:
-
   build-release:
-
     strategy:
-
       fail-fast: false
-
       matrix:
-
         include:
-
           - os: macos-latest
-
             target: universal-apple-darwin
-
           - os: windows-latest
-
             target: x86_64-pc-windows-msvc
-
           - os: ubuntu-latest
-
             target: x86_64-unknown-linux-gnu
-
     runs-on: ${{ matrix.os }}
-
     steps:
-
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-
         with:
-
           node-version: "20"
-
           cache: npm
-
       - uses: dtolnay/rust-toolchain@stable
-
         with:
-
           targets: ${{ matrix.target }}
-
       - uses: Swatinem/rust-cache@v2
-
         with:
-
           workspaces: apps/desktop/src-tauri
-
-      - name: Install Linux build dependencies
-
-        if: matrix.os == 'ubuntu-latest'
-
+      - name: Require main branch manual release
+        shell: bash
         run: |
-
+          if [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "Official releases must be dispatched from main."
+            exit 1
+          fi
+      - name: Validate release version
+        run: node scripts/validate-release-version.mjs "${{ inputs.version }}"
+      - name: Prepare updater configuration for official release
+        run: node scripts/prepare-tauri-updater-config.mjs
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ vars.TAURI_UPDATER_PUBLIC_KEY }}
+      - name: Require Tauri updater signing key
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY is required for updater artifacts."
+            exit 1
+          fi
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
           sudo apt-get update
-
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
       - run: npm ci
-
       - run: npm run build:sidecars
-
       - run: npm run stage:bundle
         env:
           AURA_RELEASE_BUILD: "1"
-
-      - name: Build Tauri app
-
+      - name: Build Tauri app and signed updater artifacts
         run: npm run tauri build -w @aura-os/desktop
-
         env:
-
           CI: true
-
           AURA_RELEASE_BUILD: "1"
-
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       - name: Upload installer artifacts
-
         uses: actions/upload-artifact@v4
-
         with:
-
           name: installers-${{ matrix.target }}
-
           path: |
-
             apps/desktop/src-tauri/target/release/bundle/**/*
-
           if-no-files-found: error
 
-
-
   publish-release:
-
     needs: build-release
-
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
-
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-
         with:
-
           node-version: "20"
-
           cache: npm
-
       - run: npm ci
-
+      - name: Validate release version
+        run: node scripts/validate-release-version.mjs "${{ inputs.version }}"
       - name: Generate CycloneDX SBOM
-
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev
-
       - name: Download all installer artifacts
-
         uses: actions/download-artifact@v4
-
         with:
-
           path: release-artifacts
-
           pattern: installers-*
-
           merge-multiple: true
-
-      - name: Verify release artifacts exist
-
+      - name: Verify installer artifacts exist
         run: |
-
           count=$(find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" \) | wc -l | tr -d ' ')
-
           if [ "$count" = "0" ]; then
-
             echo "No installer artifacts found"
-
             exit 1
-
           fi
-
           test -f sbom.json
-
-      - name: SHA256 checksums
-
-        run: |
-
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.sig" -o -name "latest.json" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
-
-          test -s SHA256SUMS.txt
-
-          cat SHA256SUMS.txt
-
+      - name: Generate static updater manifest
+        run: node scripts/generate-updater-manifest.mjs
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_TAG: v${{ inputs.version }}
       - name: Install minisign
-
         run: sudo apt-get update && sudo apt-get install -y minisign
-
-      - name: Sign artifacts (required)
-
+      - name: Sign release installers
         env:
-
           MINISIGN_KEY: ${{ secrets.MINISIGN_PRIVATE_KEY }}
-
         run: |
-
           if [ -z "$MINISIGN_KEY" ]; then
-
             echo "MINISIGN_PRIVATE_KEY is required for production releases"
-
             exit 1
-
           fi
-
           echo "$MINISIGN_KEY" > minisign.key
-
           find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" \) | while read -r f; do
-
             minisign -S -s minisign.key -m "$f" -x "$f.minisig"
-
           done
-
           rm -f minisign.key
-
-      - name: Upload release assets
-
+      - name: SHA256 checksums
+        run: |
+          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.sig" -o -name "*.minisig" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
+          sha256sum latest.json >> SHA256SUMS.txt
+          test -s SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Publish approved GitHub Release
         uses: softprops/action-gh-release@v2
-
         with:
-
+          tag_name: v${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Aura Work v${{ inputs.version }}
           files: |
-
             sbom.json
-
             SHA256SUMS.txt
-
+            latest.json
             release-artifacts/**/*
-
           generate_release_notes: true
-
         env:
-
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-

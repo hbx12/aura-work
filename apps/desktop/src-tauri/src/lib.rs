@@ -7,6 +7,7 @@ mod browser;
 mod computer_use;
 mod i18n;
 mod packaging;
+mod updates;
 mod cloud;
 mod cloud_crypto;
 mod cloud_helper;
@@ -193,6 +194,7 @@ pub fn run() {
             packaging::get_packaging_info,
             packaging::verify_vm_image,
             packaging::check_for_updates,
+            updates::install_update,
             packaging::get_pending_open_task,
             packaging::clear_pending_open_task,
         ])
