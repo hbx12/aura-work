@@ -49,6 +49,10 @@ jobs:
           fi
       - name: Validate release version
         run: node scripts/validate-release-version.mjs "${{ inputs.version }}"
+      - name: Prepare updater configuration for official release
+        run: node scripts/prepare-tauri-updater-config.mjs
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ vars.TAURI_UPDATER_PUBLIC_KEY }}
       - name: Require Tauri updater signing key
         shell: bash
         env:
