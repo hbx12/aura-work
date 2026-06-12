@@ -48,6 +48,12 @@ export interface UpdateCheckResult {
   verification: string;
 }
 
+export interface UpdateInstallResult {
+  installed: boolean;
+  version?: string;
+  message: string;
+}
+
 export function useI18n() {
   const [settings, setSettings] = useState<AppLocaleSettings | null>(null);
   const [locales, setLocales] = useState<LocaleInfo[]>([]);
@@ -101,6 +107,7 @@ export function usePackaging() {
   const [info, setInfo] = useState<PackagingInfo | null>(null);
   const [update, setUpdate] = useState<UpdateCheckResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [installing, setInstalling] = useState(false);
 
   const refresh = useCallback(async () => {
     const data = await invoke<PackagingInfo>("get_packaging_info");
@@ -108,22 +115,52 @@ export function usePackaging() {
     return data;
   }, []);
 
-  const checkUpdates = useCallback(async () => {
-    setLoading(true);
+  const installUpdate = useCallback(async () => {
+    setInstalling(true);
     try {
-      const result = await invoke<UpdateCheckResult>("check_for_updates");
-      setUpdate(result);
-      return result;
+      return await invoke<UpdateInstallResult>("install_update");
     } finally {
-      setLoading(false);
+      setInstalling(false);
     }
   }, []);
+
+  const checkUpdates = useCallback(
+    async (promptForInstall = true) => {
+      setLoading(true);
+      try {
+        const result = await invoke<UpdateCheckResult>("check_for_updates");
+        setUpdate(result);
+
+        if (result.available && promptForInstall) {
+          const version = result.latestVersion ?? "the latest version";
+          const accepted = window.confirm(
+            `Aura Work ${version} is available. Download and install this signed update now? Your local data will be preserved.`,
+          );
+
+          if (accepted) await installUpdate();
+        }
+
+        return result;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [installUpdate],
+  );
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  return { info, update, loading, refresh, checkUpdates };
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      checkUpdates(true).catch(console.error);
+    }, 1500);
+
+    return () => window.clearTimeout(timer);
+  }, [checkUpdates]);
+
+  return { info, update, loading, installing, refresh, checkUpdates, installUpdate };
 }
 
 export function usePendingOpenTask(onOpen: (taskId: string) => void) {
