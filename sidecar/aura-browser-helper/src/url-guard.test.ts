@@ -1,10 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("node:dns/promises", () => ({
+  lookup: vi.fn(async () => [{ address: "93.184.216.34", family: 4 }]),
+}));
+
 import {
   assertSafeRemoteUrl,
   fetchSafe,
-  isBlockedHostname,
   resolveHostnameSafe,
 } from "../src/url-guard.js";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
+});
 
 describe("url-guard SSRF protection", () => {
   it("rejects loopback IPv4", () => {
@@ -36,9 +45,19 @@ describe("url-guard SSRF protection", () => {
   });
 
   it("rejects redirect to internal target", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(null, {
+          status: 302,
+          headers: { location: "http://127.0.0.1/" },
+        }),
+      ),
+    );
+
     await expect(
-      fetchSafe("https://httpbin.org/redirect-to?url=http%3A%2F%2F127.0.0.1%2F", {
-        timeoutMs: 15_000,
+      fetchSafe("https://example.com/", {
+        timeoutMs: 1_000,
       }),
     ).rejects.toThrow(/Blocked URL|private|local/i);
   });
