@@ -26,7 +26,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "deb", "dmg", "app"],
+    "targets": ["nsis", "deb", "appimage", "dmg", "app"],
     "createUpdaterArtifacts": false,
     "resources": {
       "../../../bundle/manifest.json": "manifest.json",
