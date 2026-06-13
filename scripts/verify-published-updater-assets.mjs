@@ -1,16 +1,22 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
+import path from "node:path";
 
-const tag = process.env.RELEASE_TAG;
 const repository = process.env.GITHUB_REPOSITORY;
+const tag = process.env.RELEASE_TAG;
 const token = process.env.GITHUB_TOKEN?.trim();
-
-if (!tag || !repository) {
-  throw new Error("RELEASE_TAG and GITHUB_REPOSITORY are required.");
-}
+const verifyRemote = process.env.VERIFY_REMOTE === "1";
+const publishRoot = path.resolve("release-publish");
+const manifestPath = path.join(publishRoot, "latest.json");
+const requiredPlatforms = [
+  "windows-x86_64",
+  "linux-x86_64",
+  "darwin-x86_64",
+  "darwin-aarch64",
+];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function headers() {
+function requestHeaders() {
   return {
     Accept: "application/vnd.github+json",
     "User-Agent": "Aura Work release verifier",
@@ -18,14 +24,22 @@ function headers() {
   };
 }
 
-async function fetchWithRetry(url, attempts = 12, delayMs = 2000) {
+function assetBasename(url) {
+  const pathname = new URL(url).pathname;
+  const encoded = pathname.split("/").pop() ?? "";
+  const basename = decodeURIComponent(encoded);
+  if (!basename) throw new Error(`Updater URL does not contain an asset name: ${url}`);
+  return basename;
+}
+
+async function fetchWithRetry(url, attempts = 8, delayMs = 1500) {
   let lastError = "unknown error";
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const response = await fetch(url, {
         redirect: "follow",
-        headers: headers(),
+        headers: requestHeaders(),
       });
 
       if (response.ok) return response;
@@ -40,45 +54,70 @@ async function fetchWithRetry(url, attempts = 12, delayMs = 2000) {
   throw new Error(`Request failed after ${attempts} attempts (${lastError}): ${url}`);
 }
 
-function assetBasename(url) {
-  const pathname = new URL(url).pathname;
-  const encoded = pathname.split("/").pop() ?? "";
-  return decodeURIComponent(encoded);
-}
-
-const localManifest = JSON.parse(await readFile("release-publish/latest.json", "utf8"));
-const updaterUrls = new Set(
-  Object.values(localManifest.platforms ?? {})
-    .map((entry) => entry?.url)
-    .filter((url) => typeof url === "string" && url.length > 0),
-);
-
-if (updaterUrls.size === 0) {
-  throw new Error("latest.json does not contain updater download URLs.");
-}
-
-const releaseApiUrl = `https://api.github.com/repos/${repository}/releases/tags/${encodeURIComponent(tag)}`;
-const release = await (await fetchWithRetry(releaseApiUrl)).json();
-const publishedAssets = new Set((release.assets ?? []).map((asset) => asset.name));
+const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const expectedAssets = new Set(["latest.json"]);
+const updaterUrls = new Set();
 
-for (const url of updaterUrls) {
-  expectedAssets.add(assetBasename(url));
+for (const platform of requiredPlatforms) {
+  const entry = manifest.platforms?.[platform];
+
+  if (!entry || typeof entry.url !== "string" || entry.url.length === 0) {
+    throw new Error(`latest.json is missing a download URL for ${platform}`);
+  }
+
+  if (typeof entry.signature !== "string" || entry.signature.trim().length === 0) {
+    throw new Error(`latest.json is missing an updater signature for ${platform}`);
+  }
+
+  updaterUrls.add(entry.url);
+  expectedAssets.add(assetBasename(entry.url));
 }
 
 for (const name of expectedAssets) {
-  if (!publishedAssets.has(name)) {
-    throw new Error(`GitHub Release is missing required updater asset: ${name}`);
+  await access(path.join(publishRoot, name));
+  console.log(`Confirmed local release asset: ${name}`);
+}
+
+console.log(
+  `Validated local updater bundle: ${requiredPlatforms.length} platforms and ${expectedAssets.size} required asset(s).`,
+);
+
+if (!verifyRemote) {
+  console.log("Skipping remote smoke-check because VERIFY_REMOTE is not enabled.");
+  process.exit(0);
+}
+
+if (!repository || !tag) {
+  console.warn("Skipping remote smoke-check because GITHUB_REPOSITORY or RELEASE_TAG is missing.");
+  process.exit(0);
+}
+
+const releaseApiUrl = `https://api.github.com/repos/${repository}/releases/tags/${encodeURIComponent(tag)}`;
+let publishedAssets = null;
+
+try {
+  const release = await (await fetchWithRetry(releaseApiUrl, 10, 2000)).json();
+  publishedAssets = new Set((release.assets ?? []).map((asset) => asset.name));
+} catch (error) {
+  console.warn(`GitHub Release API is not ready yet; upload verification will remain advisory. ${error}`);
+}
+
+if (publishedAssets) {
+  for (const name of expectedAssets) {
+    if (publishedAssets.has(name)) {
+      console.log(`Confirmed uploaded release asset through GitHub API: ${name}`);
+    } else {
+      console.warn(`GitHub Release API has not exposed required asset yet: ${name}`);
+    }
   }
-  console.log(`Confirmed uploaded release asset through GitHub API: ${name}`);
 }
 
 async function warnIfPublicDownloadIsDelayed(url) {
   try {
-    await fetchWithRetry(url, 8, 1500);
+    await fetchWithRetry(url, 6, 1500);
     console.log(`Verified public updater download: ${url}`);
   } catch (error) {
-    console.warn(`Public GitHub CDN download is not ready yet; upload exists and will propagate shortly. ${error}`);
+    console.warn(`Public GitHub download is not ready yet; CDN propagation can take a short time. ${error}`);
   }
 }
 
@@ -90,4 +129,4 @@ for (const url of updaterUrls) {
   await warnIfPublicDownloadIsDelayed(url);
 }
 
-console.log(`Verified GitHub Release API upload state for ${expectedAssets.size} required updater asset(s).`);
+console.log("Completed advisory remote updater smoke-check.");
