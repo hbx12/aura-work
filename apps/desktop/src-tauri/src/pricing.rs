@@ -1,10 +1,11 @@
 use crate::db::DbState;
-use rusqlite::params;
+use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use tauri::State;
 
-const PRICING_URL: &str =
+const CURATED_PRICING_URL: &str =
     "https://raw.githubusercontent.com/aura-os/pricing/main/pricing-v1.json";
+const OPENROUTER_MODELS_URL: &str = "https://openrouter.ai/api/v1/models";
 
 const BUNDLED_PRICING: &str = include_str!("../resources/pricing-v1.json");
 
@@ -26,7 +27,7 @@ struct PricingFile {
     models: Vec<PricingFileModel>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct PricingFileModel {
     provider_id: String,
@@ -36,7 +37,46 @@ struct PricingFileModel {
     output_per_million: Option<f64>,
 }
 
-fn upsert_models(conn: &rusqlite::Connection, models: &[PricingFileModel], source: &str) -> Result<usize, String> {
+#[derive(Debug, Deserialize)]
+struct OpenRouterCatalog {
+    data: Vec<OpenRouterModel>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OpenRouterModel {
+    id: String,
+    name: Option<String>,
+    pricing: Option<OpenRouterPricing>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+struct OpenRouterPricing {
+    prompt: Option<PriceValue>,
+    completion: Option<PriceValue>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum PriceValue {
+    Number(f64),
+    Text(String),
+}
+
+impl PriceValue {
+    fn as_f64(&self) -> Option<f64> {
+        match self {
+            Self::Number(value) => Some(*value),
+            Self::Text(value) => value.parse::<f64>().ok(),
+        }
+        .filter(|value| value.is_finite() && *value >= 0.0)
+    }
+}
+
+fn upsert_models(
+    conn: &rusqlite::Connection,
+    models: &[PricingFileModel],
+    source: &str,
+) -> Result<usize, String> {
     let now = chrono::Utc::now().to_rfc3339();
     let mut count = 0usize;
     for m in models {
@@ -66,9 +106,106 @@ fn upsert_models(conn: &rusqlite::Connection, models: &[PricingFileModel], sourc
     Ok(count)
 }
 
-fn load_pricing_json(json: &str, source: &str, conn: &rusqlite::Connection) -> Result<usize, String> {
+fn load_pricing_json(
+    json: &str,
+    source: &str,
+    conn: &rusqlite::Connection,
+) -> Result<usize, String> {
     let file: PricingFile = serde_json::from_str(json).map_err(|e| e.to_string())?;
     upsert_models(conn, &file.models, source)
+}
+
+fn price_per_million(value: Option<&PriceValue>) -> Option<f64> {
+    value.and_then(PriceValue::as_f64).map(|value| value * 1_000_000.0)
+}
+
+fn provider_alias(model_id: &str) -> Option<&'static str> {
+    if model_id.starts_with("deepseek/") {
+        Some("deepseek")
+    } else if model_id.starts_with("openai/") {
+        Some("openai")
+    } else if model_id.starts_with("anthropic/") {
+        Some("anthropic")
+    } else if model_id.starts_with("google/") {
+        Some("gemini")
+    } else {
+        None
+    }
+}
+
+fn parse_openrouter_models(json: &str) -> Result<Vec<PricingFileModel>, String> {
+    let catalog: OpenRouterCatalog = serde_json::from_str(json).map_err(|e| e.to_string())?;
+    let mut models = Vec::new();
+
+    for model in catalog.data {
+        let pricing = model.pricing.unwrap_or_default();
+        let input_per_million = price_per_million(pricing.prompt.as_ref());
+        let output_per_million = price_per_million(pricing.completion.as_ref());
+
+        if input_per_million.is_none() && output_per_million.is_none() {
+            continue;
+        }
+
+        let base = PricingFileModel {
+            provider_id: "openai-compatible".into(),
+            model_id: model.id.clone(),
+            display_name: model.name.clone(),
+            input_per_million,
+            output_per_million,
+        };
+        models.push(base.clone());
+
+        if let Some(alias) = provider_alias(&model.id) {
+            models.push(PricingFileModel {
+                provider_id: alias.into(),
+                ..base
+            });
+        }
+    }
+
+    Ok(models)
+}
+
+async fn fetch_text(client: &reqwest::Client, url: &str) -> Option<String> {
+    match client.get(url).send().await {
+        Ok(response) if response.status().is_success() => response.text().await.ok(),
+        _ => None,
+    }
+}
+
+pub async fn refresh_remote_pricing(db: &DbState) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(15))
+        .user_agent("Aura Work pricing refresh")
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let curated = fetch_text(&client, CURATED_PRICING_URL).await;
+    let openrouter = fetch_text(&client, OPENROUTER_MODELS_URL).await;
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let mut updated = load_pricing_json(BUNDLED_PRICING, "bundled", &conn)?;
+    let mut sources = vec!["bundled"];
+
+    if let Some(text) = curated {
+        if let Ok(count) = load_pricing_json(&text, "curated", &conn) {
+            updated += count;
+            sources.push("curated");
+        }
+    }
+
+    if let Some(text) = openrouter {
+        if let Ok(models) = parse_openrouter_models(&text) {
+            updated += upsert_models(&conn, &models, "openrouter")?;
+            sources.push("openrouter");
+        }
+    }
+
+    Ok(serde_json::json!({
+        "updated": updated,
+        "sources": sources,
+        "message": "Pricing cache refreshed from available sources."
+    }))
 }
 
 pub fn seed_pricing_if_empty(conn: &rusqlite::Connection) -> Result<(), String> {
@@ -76,36 +213,14 @@ pub fn seed_pricing_if_empty(conn: &rusqlite::Connection) -> Result<(), String> 
         .query_row("SELECT COUNT(*) FROM pricing_cache", [], |r| r.get(0))
         .map_err(|e| e.to_string())?;
     if count == 0 {
-        load_pricing_json(BUNDLED_PRICING, "auto", conn)?;
+        load_pricing_json(BUNDLED_PRICING, "bundled", conn)?;
     }
     Ok(())
 }
 
 #[tauri::command]
 pub async fn fetch_pricing(db: State<'_, DbState>) -> Result<serde_json::Value, String> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(15))
-        .build()
-        .map_err(|e| e.to_string())?;
-    let fetched = client.get(PRICING_URL).send().await;
-    let json_text = match fetched {
-        Ok(resp) if resp.status().is_success() => {
-            Some((resp.text().await.map_err(|e| e.to_string())?, "remote"))
-        }
-        _ => None,
-    };
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-    if let Some((text, source)) = json_text {
-        let count = load_pricing_json(&text, "auto", &conn)?;
-        Ok(serde_json::json!({ "updated": count, "source": source }))
-    } else {
-        let count = load_pricing_json(BUNDLED_PRICING, "auto", &conn)?;
-        Ok(serde_json::json!({
-            "updated": count,
-            "source": "bundled",
-            "message": "Remote pricing unavailable; using bundled cache."
-        }))
-    }
+    refresh_remote_pricing(&db).await
 }
 
 pub fn list_pricing_models(db: &DbState) -> Result<Vec<PricingModel>, String> {
@@ -143,16 +258,42 @@ fn read_pricing(conn: &rusqlite::Connection) -> Result<Vec<PricingModel>, String
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
+fn pricing_query(
+    conn: &rusqlite::Connection,
+    provider_id: &str,
+    model_id: &str,
+) -> Result<Option<(Option<f64>, Option<f64>)>, String> {
+    conn.query_row(
+        "SELECT input_per_million, output_per_million FROM pricing_cache
+         WHERE provider_id = ?1 AND model_id = ?2",
+        params![provider_id, model_id],
+        |row| Ok((row.get(0)?, row.get(1)?)),
+    )
+    .optional()
+    .map_err(|e| e.to_string())
+}
+
 pub fn pricing_for_model(
     db: &DbState,
     provider_id: &str,
     model_id: &str,
 ) -> Result<(Option<f64>, Option<f64>), String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    if let Some(pricing) = pricing_query(&conn, provider_id, model_id)? {
+        return Ok(pricing);
+    }
+
+    if let Some(pricing) = pricing_query(&conn, "openai-compatible", model_id)? {
+        return Ok(pricing);
+    }
+
     conn.query_row(
         "SELECT input_per_million, output_per_million FROM pricing_cache
-         WHERE provider_id = ?1 AND model_id = ?2",
-        params![provider_id, model_id],
+         WHERE model_id = ?1
+         ORDER BY CASE source WHEN 'openrouter' THEN 0 WHEN 'curated' THEN 1 ELSE 2 END
+         LIMIT 1",
+        params![model_id],
         |row| Ok((row.get(0)?, row.get(1)?)),
     )
     .map_err(|_| "Pricing not found.".to_string())

@@ -251,6 +251,12 @@ pub fn start_all(app: &AppHandle) {
 
     drop(state);
 
+    if !poll_sidecar_health(47821, "aura-agent", 80) {
+        eprintln!(
+            "[sidecars] WARN: aura-agent did not become ready during startup. Check aura-agent.log in the app log directory."
+        );
+    }
+
     std::thread::spawn({
         let app = app.clone();
         move || {
