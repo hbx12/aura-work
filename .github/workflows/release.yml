@@ -144,8 +144,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y minisign
       - name: SHA256 checksums
         run: |
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.app.tar.gz" -o -name "*.sig" \) -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
-          sha256sum latest.json >> SHA256SUMS.txt
+          find release-publish -type f ! -name "latest.json" -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          sha256sum release-publish/latest.json >> SHA256SUMS.txt
           test -s SHA256SUMS.txt
           cat SHA256SUMS.txt
       - name: Sign checksum manifest
@@ -169,16 +169,12 @@ jobs:
             sbom.json
             SHA256SUMS.txt
             SHA256SUMS.txt.minisig
-            latest.json
-            release-artifacts/**/*.exe
-            release-artifacts/**/*.exe.sig
-            release-artifacts/**/*.AppImage
-            release-artifacts/**/*.AppImage.sig
-            release-artifacts/**/*.deb
-            release-artifacts/**/*.dmg
-            release-artifacts/**/*.app.tar.gz
-            release-artifacts/**/*.app.tar.gz.sig
+            release-publish/*
           fail_on_unmatched_files: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify published updater downloads
+        run: node scripts/verify-published-updater-assets.mjs
+        env:
+          RELEASE_TAG: v${{ inputs.version }}

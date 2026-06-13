@@ -51,6 +51,12 @@ pub fn run() {
             seed_if_empty(&conn)?;
             let db = DbState(Arc::new(Mutex::new(conn)));
             app.manage(db.clone());
+            let pricing_db = db.clone();
+            tauri::async_runtime::spawn(async move {
+                if let Err(error) = pricing::refresh_remote_pricing(&pricing_db).await {
+                    eprintln!("[pricing] WARN: remote pricing refresh failed: {error}");
+                }
+            });
             let vault = VaultState::init(&app.handle())?;
             let vault_handle = VaultHandle(Arc::new(Mutex::new(vault)));
             app.manage(vault_handle.clone());

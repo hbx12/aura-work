@@ -123,7 +123,7 @@ pub async fn sidecar_post<T: for<'de> Deserialize<'de>>(
     let url = format!("{SIDECAR_URL}{path}");
     let mut last_err = String::new();
 
-    for attempt in 0..8 {
+    for attempt in 0..24 {
         match authorized_reqwest(client.post(&url), "aura-agent").json(body).send().await {
             Ok(resp) if resp.status().is_success() => {
                 return resp.json::<T>().await.map_err(|e| e.to_string());
@@ -134,8 +134,8 @@ pub async fn sidecar_post<T: for<'de> Deserialize<'de>>(
             }
             Err(e) => {
                 last_err = e.to_string();
-                if attempt < 7 {
-                    tokio::time::sleep(std::time::Duration::from_millis(400)).await;
+                if attempt < 23 {
+                    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
                     continue;
                 }
             }

@@ -52,7 +52,20 @@ impl VaultState {
         let device_key_path = dir.join("device.key");
         let key = load_or_create_device_key(&device_key_path)?;
         let payload = if path.exists() {
-            decrypt_vault(&path, &key)?
+            match decrypt_vault(&path, &key) {
+                Ok(payload) => payload,
+                Err(error) => {
+                    let backup = quarantine_corrupt_vault(&path)?;
+                    eprintln!(
+                        "[vault] WARN: could not decrypt vault ({error}). Preserved backup at {} and started a new empty vault.",
+                        backup.display()
+                    );
+                    VaultPayload {
+                        version: VAULT_VERSION,
+                        secrets: HashMap::new(),
+                    }
+                }
+            }
         } else {
             VaultPayload {
                 version: VAULT_VERSION,
@@ -240,6 +253,14 @@ impl VaultState {
     fn persist(&self) -> Result<(), String> {
         encrypt_vault(&self.path, &self.key, &self.payload)
     }
+}
+
+fn quarantine_corrupt_vault(path: &Path) -> Result<PathBuf, String> {
+    let stamp = chrono::Utc::now().format("%Y%m%dT%H%M%SZ");
+    let backup = path.with_file_name(format!("vault.enc.corrupt-{stamp}"));
+    fs::rename(path, &backup)
+        .map_err(|e| format!("Failed to preserve unreadable vault before reset: {e}"))?;
+    Ok(backup)
 }
 
 fn load_or_create_device_key(path: &Path) -> Result<[u8; DEVICE_KEY_LEN], String> {
