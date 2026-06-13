@@ -236,30 +236,19 @@ pub fn start_all(app: &AppHandle) {
         return;
     }
 
-    let supervisor = app.state::<SidecarSupervisor>();
-    let Ok(mut state) = supervisor.0.lock() else {
-        return;
-    };
-
-    for def in SIDECARS {
-        let token = generate_sidecar_token();
-        register_sidecar_token(def.id, token.clone());
-        if let Some(child) = spawn_sidecar(app, def, &token) {
-            state.children.push(child);
-        }
-    }
-
-    drop(state);
-
-    if !poll_sidecar_health(47821, "aura-agent", 80) {
-        eprintln!(
-            "[sidecars] WARN: aura-agent did not become ready during startup. Check aura-agent.log in the app log directory."
-        );
-    }
-
+    let app = app.clone();
     std::thread::spawn({
-        let app = app.clone();
         move || {
+            for def in SIDECARS {
+                let token = generate_sidecar_token();
+                register_sidecar_token(def.id, token.clone());
+                if let Ok(mut state) = app.state::<SidecarSupervisor>().0.lock() {
+                    if let Some(child) = spawn_sidecar(&app, def, &token) {
+                        state.children.push(child);
+                    }
+                }
+            }
+
             for def in SIDECARS {
                 if poll_sidecar_health(def.port, def.id, 40) {
                     eprintln!("[sidecars] {} ready on port {}", def.id, def.port);
