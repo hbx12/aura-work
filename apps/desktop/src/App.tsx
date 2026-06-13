@@ -16,6 +16,7 @@ import {
   TitleBar,
   type AppView,
   type ThemeMode,
+  type ThemePreference,
   type TaskItem,
 } from "@aura-os/ui";
 import { PROVIDER_META } from "@aura-os/shared";
@@ -57,6 +58,17 @@ import "@aura-os/ui/app.css";
 import "./app-overrides.css";
 
 const THEME_KEY = "aura-theme";
+const THEME_MODES: ThemeMode[] = ["light", "dark", "amoled", "blue", "high-contrast"];
+const THEME_PREFERENCES: ThemePreference[] = ["system", ...THEME_MODES];
+
+function isThemePreference(value: string | null): value is ThemePreference {
+  return !!value && THEME_PREFERENCES.includes(value as ThemePreference);
+}
+
+function getSystemTheme(): ThemeMode {
+  if (typeof window === "undefined" || !window.matchMedia) return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
 function mapTaskState(state: string): TaskItem["state"] {
   switch (state) {
@@ -102,10 +114,12 @@ export default function App() {
   const providersApi = useProviders();
   const agent = useAgent();
 
-  const [theme, setTheme] = useState<ThemeMode>(() => {
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
     const saved = localStorage.getItem(THEME_KEY);
-    return saved === "dark" ? "dark" : "light";
+    return isThemePreference(saved) ? saved : "system";
   });
+  const [systemTheme, setSystemTheme] = useState<ThemeMode>(() => getSystemTheme());
+  const theme = themePreference === "system" ? systemTheme : themePreference;
   const [view, setView] = useState<AppView>("tasks");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -234,9 +248,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const syncSystemTheme = () => setSystemTheme(media.matches ? "dark" : "light");
+    syncSystemTheme();
+    media.addEventListener("change", syncSystemTheme);
+    return () => media.removeEventListener("change", syncSystemTheme);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
+    localStorage.setItem(THEME_KEY, themePreference);
+  }, [theme, themePreference]);
+
+  const handleToggleTheme = useCallback(() => {
+    setThemePreference((current) => {
+      const currentTheme = current === "system" ? systemTheme : current;
+      return currentTheme === "light" || currentTheme === "blue" ? "dark" : "light";
+    });
+  }, [systemTheme]);
 
   useEffect(() => {
     if (projects.length && !activeProjectId) {
@@ -936,7 +966,8 @@ export default function App() {
           updateLoading={packaging.loading}
           onCheckUpdates={packaging.checkUpdates}
           theme={theme}
-          onToggleTheme={() => setTheme((th) => (th === "dark" ? "light" : "dark"))}
+          themePreference={themePreference}
+          onSetTheme={setThemePreference}
           projectId={activeProjectId}
           cloudStatus={cloudApi.status}
           cloudDevices={cloudApi.devices}
@@ -1061,7 +1092,7 @@ export default function App() {
             brandName={i18n.t("app.name")}
             theme={theme}
             dir={i18n.settings?.locale === "ar" || i18n.settings?.locale === "fa" ? "rtl" : "ltr"}
-            onToggleTheme={() => setTheme((th) => (th === "dark" ? "light" : "dark"))}
+            onToggleTheme={handleToggleTheme}
             onToggleCtx={() => setShowCtx((s) => !s)}
             onToggleDir={() => {
               const isRtl = i18n.settings?.locale === "ar" || i18n.settings?.locale === "fa";

@@ -2,7 +2,7 @@
    Aura Work — Design Tokens
    Warm, calm, Cowork-inspired aesthetic. Original to Aura OS.
    Constraint: NO gradients anywhere. Flat, solid surfaces only.
-   Themes:  <html data-theme="dark">  /  data-theme="light">  (light is default)
+   Themes:  <html data-theme="dark"> / "light" / "amoled" / "blue" / "high-contrast"
    RTL-ready: supports Arabic & Persian (dir="rtl").
    ============================================================================ */
 
@@ -142,6 +142,144 @@
   --shadow-2: 0 4px 14px rgba(0,0,0,0.50);
   --shadow-3: 0 14px 38px rgba(0,0,0,0.60);
   --shadow-pop: 0 8px 28px rgba(0,0,0,0.62);
+}
+
+/* ============================================================================
+   3b. SEMANTIC TOKENS — AMOLED — pure-black focused dark
+   ============================================================================ */
+:root[data-theme="amoled"] {
+  color-scheme: dark;
+
+  --bg-base:  #000000;
+  --bg-1:     #050505;
+  --bg-2:     #0b0b0b;
+  --bg-3:     #151515;
+  --bg-inset: #020202;
+  --bg-hover: rgba(255,255,255,0.07);
+  --bg-active: rgba(255,255,255,0.11);
+
+  --fg-1: #f4f4f4;
+  --fg-2: #b8b8b8;
+  --fg-3: #7d7d7d;
+  --fg-on-accent: #00130e;
+
+  --border-1: #1d1d1d;
+  --border-2: #2a2a2a;
+  --border-3: #3a3a3a;
+
+  --accent:        #3ddc97;
+  --accent-hover:  #5de4aa;
+  --accent-press:  #21b978;
+  --accent-fg:     #00130e;
+  --accent-subtle: rgba(61,220,151,0.18);
+  --accent-ring:   rgba(61,220,151,0.42);
+  --accent-border: rgba(61,220,151,0.50);
+
+  --success: #7fe7a2;
+  --success-subtle: rgba(127,231,162,0.17);
+  --warning: #ffd166;
+  --warning-subtle: rgba(255,209,102,0.17);
+  --danger: #ff7b72;
+  --danger-subtle: rgba(255,123,114,0.17);
+  --agent: #a5b4fc;
+  --agent-subtle: rgba(165,180,252,0.20);
+
+  --shadow-1: none;
+  --shadow-2: 0 0 0 1px rgba(255,255,255,0.03);
+  --shadow-3: 0 18px 44px rgba(0,0,0,0.72);
+  --shadow-pop: 0 10px 34px rgba(0,0,0,0.78);
+}
+
+/* ============================================================================
+   3c. SEMANTIC TOKENS — BLUE — cool light workspace
+   ============================================================================ */
+:root[data-theme="blue"] {
+  color-scheme: light;
+
+  --bg-base:  #eef4f8;
+  --bg-1:     #f8fbfd;
+  --bg-2:     #ffffff;
+  --bg-3:     #e2edf4;
+  --bg-inset: #edf5f9;
+  --bg-hover: rgba(18,70,110,0.055);
+  --bg-active: rgba(18,70,110,0.10);
+
+  --fg-1: #172531;
+  --fg-2: #496171;
+  --fg-3: #738998;
+  --fg-on-accent: #ffffff;
+
+  --border-1: #d7e4ec;
+  --border-2: #c6d8e2;
+  --border-3: #afc6d4;
+
+  --accent:        #2563eb;
+  --accent-hover:  #1d4ed8;
+  --accent-press:  #1e40af;
+  --accent-fg:     #ffffff;
+  --accent-subtle: rgba(37,99,235,0.11);
+  --accent-ring:   rgba(37,99,235,0.28);
+  --accent-border: rgba(37,99,235,0.40);
+
+  --success: #16805b;
+  --success-subtle: rgba(22,128,91,0.12);
+  --warning: #a16207;
+  --warning-subtle: rgba(161,98,7,0.14);
+  --danger: #b42318;
+  --danger-subtle: rgba(180,35,24,0.12);
+  --agent: #7c3aed;
+  --agent-subtle: rgba(124,58,237,0.12);
+
+  --shadow-1: 0 1px 2px rgba(23,49,70,0.06);
+  --shadow-2: 0 4px 16px rgba(23,49,70,0.09);
+  --shadow-3: 0 16px 40px rgba(23,49,70,0.12);
+  --shadow-pop: 0 8px 28px rgba(23,49,70,0.14);
+}
+
+/* ============================================================================
+   3d. SEMANTIC TOKENS — HIGH CONTRAST — accessibility-first
+   ============================================================================ */
+:root[data-theme="high-contrast"] {
+  color-scheme: dark;
+
+  --bg-base:  #000000;
+  --bg-1:     #000000;
+  --bg-2:     #090909;
+  --bg-3:     #1a1a1a;
+  --bg-inset: #000000;
+  --bg-hover: rgba(255,255,255,0.13);
+  --bg-active: rgba(255,255,255,0.20);
+
+  --fg-1: #ffffff;
+  --fg-2: #f0f0f0;
+  --fg-3: #cfcfcf;
+  --fg-on-accent: #000000;
+
+  --border-1: #6f6f6f;
+  --border-2: #a8a8a8;
+  --border-3: #ffffff;
+
+  --accent:        #ffff00;
+  --accent-hover:  #fff36d;
+  --accent-press:  #e6d800;
+  --accent-fg:     #000000;
+  --accent-subtle: rgba(255,255,0,0.24);
+  --accent-ring:   rgba(255,255,0,0.62);
+  --accent-border: rgba(255,255,0,0.85);
+
+  --success: #00ff66;
+  --success-subtle: rgba(0,255,102,0.22);
+  --warning: #ffff00;
+  --warning-subtle: rgba(255,255,0,0.22);
+  --danger: #ff4d4d;
+  --danger-subtle: rgba(255,77,77,0.22);
+  --agent: #66ccff;
+  --agent-subtle: rgba(102,204,255,0.22);
+
+  --shadow-1: none;
+  --shadow-2: none;
+  --shadow-3: none;
+  --shadow-pop: 0 0 0 2px #ffffff;
 }
 
 /* ============================================================================
