@@ -2,7 +2,6 @@ use crate::sidecar_auth::authorized_reqwest;
 use serde::{Deserialize, Serialize};
 
 pub const BRIDGE_HELPER_URL: &str = "http://127.0.0.1:47826";
-pub const BRIDGE_INTERNAL_URL: &str = "http://127.0.0.1:47827";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
