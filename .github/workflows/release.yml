@@ -178,3 +178,4 @@ jobs:
         run: node scripts/verify-published-updater-assets.mjs
         env:
           RELEASE_TAG: v${{ inputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
