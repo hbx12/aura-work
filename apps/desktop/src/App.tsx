@@ -28,6 +28,7 @@ import { FallbackApprovalDialog } from "./components/FallbackApprovalDialog";
 import { PermissionApprovalDialog } from "./components/PermissionApprovalDialog";
 import { FilesPage } from "./components/FilesPage";
 import { GitPage } from "./components/GitPage";
+import { TerminalPage } from "./components/TerminalPage";
 import { AuditPageLive } from "./components/AuditPageLive";
 import { useProjects } from "./hooks/useProjects";
 import { formatCost, useAgent } from "./hooks/useAgent";
@@ -58,7 +59,25 @@ import "@aura-os/ui/app.css";
 import "./app-overrides.css";
 
 const THEME_KEY = "aura-theme";
-const THEME_MODES: ThemeMode[] = ["light", "dark", "amoled", "blue", "high-contrast"];
+const THEME_MODES: ThemeMode[] = [
+  "light",
+  "dark",
+  "amoled",
+  "blue",
+  "high-contrast",
+  "cyberpunk",
+  "forest",
+  "pastel",
+  "sunset",
+  "sepia",
+  "nord",
+  "dracula",
+  "matrix",
+  "sakura",
+  "sakura-dark",
+  "coffee",
+  "ocean"
+];
 const THEME_PREFERENCES: ThemePreference[] = ["system", ...THEME_MODES];
 
 function isThemePreference(value: string | null): value is ThemePreference {
@@ -234,11 +253,18 @@ export default function App() {
   }, [activeTaskId]);
 
   const navItems = useMemo(
-    () =>
-      NAV_ITEMS.map((item) => ({
+    () => {
+      const list = NAV_ITEMS.map((item) => ({
         ...item,
         label: i18n.t(`nav.${item.id}` as Parameters<typeof i18n.t>[0]),
-      })),
+      }));
+      list.push({
+        id: "terminal" as AppView,
+        icon: "terminal",
+        label: i18n.t("nav.terminal" as any, { defaultValue: "Terminal" }),
+      });
+      return list;
+    },
     [i18n],
   );
 
@@ -437,6 +463,9 @@ export default function App() {
       else if (msg.includes("hamster") || msg.includes("هامستر")) type = "hamster";
       else if (msg.includes("penguin") || msg.includes("بطريق")) type = "penguin";
       else if (msg.includes("koala") || msg.includes("كوالا")) type = "koala";
+      else if (msg.includes("bear") || msg.includes("دب")) type = "bear";
+      else if (msg.includes("pig") || msg.includes("خنزير")) type = "pig";
+      else if (msg.includes("tiger") || msg.includes("نمر")) type = "tiger";
       else if (msg.includes("robot") || msg.includes("روبوت") || msg.includes("بوت")) type = "robot";
 
       invoke("toggle_pet_window", { petType: type }).catch(console.error);
@@ -571,8 +600,17 @@ export default function App() {
   };
 
   const handleContinueTask = async () => {
-    if (!tasks.activeTask || tasks.activeTask.state !== "running") return;
-    await tasks.continueTask(tasks.activeTask.id, mode === "act");
+    if (!tasks.activeTask) return;
+    const task = tasks.activeTask;
+    if (task.state !== "running" && task.state !== "paused") return;
+
+    const msg = composer.trim();
+    if (msg) {
+      setComposer("");
+      await tasks.sendTaskMessage(task.id, msg);
+    } else if (task.state === "running") {
+      await tasks.continueTask(task.id, mode === "act");
+    }
   };
 
   const handleNewTaskWorkspace = () => {
@@ -739,10 +777,10 @@ export default function App() {
               </p>
             )}
 
-            {task && task.state === "running" && !tasks.running && (
+            {task && (task.state === "running" || task.state === "paused") && !tasks.running && (
               <div className="section">
                 <button type="button" className="btn primary sm" onClick={() => void handleContinueTask()}>
-                  {t("chat.continueTask")}
+                  {task.state === "paused" ? t("chat.send") : t("chat.continueTask")}
                 </button>
               </div>
             )}
@@ -795,7 +833,8 @@ export default function App() {
             if (
               mode === "act" &&
               task &&
-              task.state !== "running"
+              task.state !== "running" &&
+              task.state !== "paused"
             ) {
               void handleNewTask();
               return;
@@ -1021,6 +1060,7 @@ export default function App() {
           loading={files.loading}
           error={files.error}
           onOpen={(p) => void files.openFile(p)}
+          onSave={files.saveFile}
           onApproveEdit={(id) =>
             void files.approveEdit(id, (taskId) => {
               setView("tasks");
@@ -1047,6 +1087,13 @@ export default function App() {
           onApproveCommit={(id) => void git.approveCommit(id)}
           onSelectFile={(path) => void git.selectFile(path)}
           onInitRepo={() => void git.initRepo()}
+          t={t}
+        />
+      );
+    if (view === "terminal")
+      return (
+        <TerminalPage
+          folderPath={activeProject?.folderPath ?? null}
           t={t}
         />
       );

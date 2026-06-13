@@ -335,6 +335,115 @@ export function PetSprite({ type, tiltX, tiltY, facing, isWalking = false }: Pet
           </svg>
         );
 
+      case "bear":
+        return (
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            {/* Body */}
+            <g transform={`translate(${bounceY * 0.2}, ${bounceY})`}>
+              <ellipse cx="40" cy="58" rx="19" ry="14" fill="#9C6644" />
+              <circle cx="28" cy="72" r="5" fill="#7F5539" />
+              <circle cx="52" cy="72" r="5" fill="#7F5539" />
+            </g>
+            {/* Head */}
+            <g transform={`translate(${headX + 40}, ${headY + 36})`}>
+              {/* Bear Ears */}
+              <circle cx="-15" cy="-14" r="7" fill="#7F5539" />
+              <circle cx="-15" cy="-14" r="4.5" fill="#DDB892" />
+              <circle cx="16" cy="-14" r="7" fill="#7F5539" />
+              <circle cx="16" cy="-14" r="4.5" fill="#DDB892" />
+              {/* Head Base */}
+              <circle cx="0" cy="0" r="19.5" fill="#9C6644" />
+              <circle cx="-11" cy="4" r="3" fill="#FFCCD5" opacity="0.6" />
+              <circle cx="11" cy="4" r="3" fill="#FFCCD5" opacity="0.6" />
+              {/* Face */}
+              <g transform={`translate(${headX * 0.4}, ${headY * 0.4})`}>
+                <circle cx="-6.5" cy="-2.5" r="2.5" fill="#271c19" />
+                <circle cx="6.5" cy="-2.5" r="2.5" fill="#271c19" />
+                {/* Tan Snout & Nose */}
+                <ellipse cx="0" cy="3" rx="5" ry="3.5" fill="#DDB892" />
+                <ellipse cx="0" cy="1.5" rx="2" ry="1.2" fill="#271c19" />
+                <path d="M-1.5 4.5 Q0 5.5, 1.5 4.5" stroke="#271c19" strokeWidth="1" fill="none" />
+              </g>
+            </g>
+          </svg>
+        );
+
+      case "pig":
+        return (
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            {/* Body */}
+            <g transform={`translate(${bounceY * 0.2}, ${bounceY})`}>
+              <ellipse cx="40" cy="58" rx="19" ry="14" fill="#FFB5A7" />
+              <circle cx="28" cy="72" r="5" fill="#F8AD9D" />
+              <circle cx="52" cy="72" r="5" fill="#F8AD9D" />
+              {/* Curly Tail */}
+              <path d="M22 62 Q18 64, 18 60 Q18 56, 22 58" stroke="#F8AD9D" strokeWidth="3" strokeLinecap="round" fill="none" />
+            </g>
+            {/* Head */}
+            <g transform={`translate(${headX + 40}, ${headY + 36})`}>
+              {/* Pig Ears */}
+              <polygon points="-10,-15 -22,-20 -15,-6" fill="#F8AD9D" />
+              <polygon points="10,-15 22,-20 15,-6" fill="#F8AD9D" />
+              {/* Head Base */}
+              <circle cx="0" cy="0" r="19" fill="#FFB5A7" />
+              <circle cx="-11" cy="5" r="3.5" fill="#F28482" opacity="0.6" />
+              <circle cx="11" cy="5" r="3.5" fill="#F28482" opacity="0.6" />
+              {/* Face */}
+              <g transform={`translate(${headX * 0.4}, ${headY * 0.4})`}>
+                <circle cx="-6.5" cy="-2.5" r="2.5" fill="#3d2c29" />
+                <circle cx="6.5" cy="-2.5" r="2.5" fill="#3d2c29" />
+                {/* Snout */}
+                <rect x="-4.5" y="1" width="9" height="6" rx="2.5" fill="#F8AD9D" />
+                <circle cx="-2" cy="4" r="1" fill="#3d2c29" />
+                <circle cx="2" cy="4" r="1" fill="#3d2c29" />
+              </g>
+            </g>
+          </svg>
+        );
+
+      case "tiger":
+        return (
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            {/* Body */}
+            <g transform={`translate(${bounceY * 0.2}, ${bounceY})`}>
+              <ellipse cx="40" cy="58" rx="19" ry="14" fill="#F4A261" />
+              {/* Tiger body stripes */}
+              <path d="M26 52 L32 54 L26 56 Z" fill="#264653" />
+              <path d="M54 52 L48 54 L54 56 Z" fill="#264653" />
+              {/* Feet */}
+              <circle cx="28" cy="72" r="5" fill="#E76F51" />
+              <circle cx="52" cy="72" r="5" fill="#E76F51" />
+            </g>
+            {/* Head */}
+            <g transform={`translate(${headX + 40}, ${headY + 36})`}>
+              {/* Ears */}
+              <path d="M-20 -10 L-25 -25 L-10 -18 Z" fill="#E76F51" />
+              <path d="M-17 -11 L-21 -21 L-11 -16 Z" fill="#F4A261" />
+              <path d="M20 -10 L25 -25 L10 -18 Z" fill="#E76F51" />
+              <path d="M17 -11 L21 -21 L11 -16 Z" fill="#F4A261" />
+              {/* Head Base */}
+              <circle cx="0" cy="0" r="19.5" fill="#F4A261" />
+              {/* Tiger head stripes */}
+              <path d="M-19 -2 L-13 0 L-19 2 Z" fill="#264653" />
+              <path d="M19 -2 L13 0 L19 2 Z" fill="#264653" />
+              <path d="M-4 -19 L0 -13 L4 -19 Z" fill="#264653" />
+              {/* White muzzle cheeks */}
+              <ellipse cx="-7" cy="6" rx="7" ry="5" fill="#FFF1E6" />
+              <ellipse cx="7" cy="6" rx="7" ry="5" fill="#FFF1E6" />
+              <circle cx="-12" cy="3" r="3" fill="#F28482" opacity="0.6" />
+              <circle cx="12" cy="3" r="3" fill="#F28482" opacity="0.6" />
+              {/* Face */}
+              <g transform={`translate(${headX * 0.4}, ${headY * 0.4})`}>
+                <circle cx="-6.5" cy="-2.5" r="2.5" fill="#264653" />
+                <circle cx="6.5" cy="-2.5" r="2.5" fill="#264653" />
+                {/* Nose & Mouth */}
+                <polygon points="0,3 -2.5,1 2.5,1" fill="#E76F51" />
+                <path d="M-1.5 5 Q0 6, 1.5 5" stroke="#264653" strokeWidth="1" fill="none" />
+              </g>
+            </g>
+          </svg>
+        );
+
       default: // "robot"
         return (
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none">

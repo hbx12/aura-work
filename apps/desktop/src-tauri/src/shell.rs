@@ -1,3 +1,6 @@
+use serde::{Deserialize, Serialize};
+use std::process::Command;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommandCategory {
     SafeRead,
@@ -127,6 +130,42 @@ pub fn is_hard_denied(command: &str) -> bool {
         || lower.contains(":(){ :|:& };:")
         || lower.contains("format c:")
         || lower.contains("del /f /s /q c:\\")
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TerminalResult {
+    pub stdout: String,
+    pub stderr: String,
+    pub success: bool,
+}
+
+#[tauri::command]
+pub fn run_terminal_command(
+    cwd: String,
+    command: String,
+) -> Result<TerminalResult, String> {
+    #[cfg(target_os = "windows")]
+    let (shell, arg) = ("cmd", "/C");
+    #[cfg(not(target_os = "windows"))]
+    let (shell, arg) = ("sh", "-c");
+
+    let output = Command::new(shell)
+        .arg(arg)
+        .arg(&command)
+        .current_dir(&cwd)
+        .output()
+        .map_err(|e| format!("Failed to execute command: {e}"))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    let success = output.status.success();
+
+    Ok(TerminalResult {
+        stdout,
+        stderr,
+        success,
+    })
 }
 
 #[cfg(test)]

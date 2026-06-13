@@ -63,6 +63,11 @@ export function GitPage({
           )}
         </div>
       </div>
+      {error && (
+        <div className="modal-error" style={{ margin: "12px 16px 0 16px", borderRadius: "var(--r-sm)" }}>
+          {error}
+        </div>
+      )}
       <div className="explorer">
         <div className="ex-tree" style={{ width: 320 }}>
           <div className="ex-tree-head">

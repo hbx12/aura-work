@@ -9,9 +9,10 @@ export type AppView =
   | "computer"
   | "memory"
   | "audit"
+  | "terminal"
   | "settings";
 
-export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast";
+export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast" | "cyberpunk" | "forest" | "pastel" | "sunset" | "sepia" | "nord" | "dracula" | "matrix" | "sakura" | "sakura-dark" | "coffee" | "ocean";
 export type ThemePreference = ThemeMode | "system";
 
 export type PermissionMode = "ask-first" | "act-without-asking";

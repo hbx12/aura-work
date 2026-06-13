@@ -118,7 +118,8 @@ export function useTasks(projectId: string | null) {
             task.state === "waiting-for-approval" ||
             task.state === "completed" ||
             task.state === "blocked" ||
-            task.state === "failed"
+            task.state === "failed" ||
+            task.state === "paused"
           ) {
             break;
           }
@@ -251,6 +252,27 @@ export function useTasks(projectId: string | null) {
     [runLoop],
   );
 
+  const sendTaskMessage = useCallback(
+    async (taskId: string, content: string) => {
+      setRunning(true);
+      setError(null);
+      try {
+        const task = await invoke<TaskRecord>("send_task_message", { taskId, content });
+        setActiveTask(task);
+        if (task.state === "running") {
+          return runLoop(task.id);
+        }
+        return task;
+      } catch (e) {
+        setError(String(e));
+        throw e;
+      } finally {
+        setRunning(false);
+      }
+    },
+    [runLoop],
+  );
+
   return {
     tasks,
     activeTask,
@@ -265,6 +287,7 @@ export function useTasks(projectId: string | null) {
     approvePlan,
     runLoop,
     continueTask,
+    sendTaskMessage,
     resumeAfterEdit,
     resolvePermission,
     setActiveTask,

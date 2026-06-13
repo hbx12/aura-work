@@ -34,6 +34,7 @@ export interface TaskIterateRequest {
   providerId: string;
   modelId: string;
   credentials: ProviderCredentials;
+  workspaceFiles?: string;
   onChunk?: (text: string) => void;
 }
 
@@ -49,12 +50,26 @@ const SUBAGENT_ROLES = [
   "computer",
 ] as const;
 
-const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access. Perform the requested work safely and use structured tool calls.
+const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access, designed to work like a highly capable Copilot and OpenCode Interpreter agent. Perform the requested work safely and use structured tool calls.
+
+AGENT PROTOCOLS:
+1. CODEBASE SCANNING & RESEARCH:
+   - Proactively inspect project structures, folders, configuration files, and database schemas using search_files and read_file before proposing edits.
+   - Analyze dependencies, types, and existing APIs to ensure consistent integration.
+2. INTERACTIVE CLARIFICATION:
+   - If a task is ambiguous, has missing requirements, or if multiple implementation paths exist, DO NOT guess or write placeholder code.
+   - Instead, respond with a "message" containing concrete, clear, and structured questions for the user, proposing options for them to choose from.
+3. ROBUST CODE PRODUCTION:
+   - Write fully functional, clean, optimized, production-ready code.
+   - Avoid placeholder code, "TODO" comments, or empty code blocks. Ensure all edge cases and error handling are implemented.
+4. ITERATIVE COMPILATION & TESTING:
+   - Use the run_shell tool to run builds, linters, or test suites to verify correctness.
+   - If tests or compilation fails, analyze the error output and iteratively correct the files.
 
 CRITICAL RULES:
 - NEVER paste full file contents or large code blocks in chat messages.
 - To create or edit files you MUST respond with JSON tool_calls using write_file.
-- Chat messages must be short status updates (1-2 sentences): what you're doing next, not the code itself.
+- Chat messages must be short status updates (1-2 sentences): what you're doing next, or clarifying questions, not the code itself.
 - After writing files, briefly confirm what was created.
 - NEVER invent placeholder file contents. If you cannot produce the requested file safely, return a blocked message with a clear reason.
 
@@ -91,7 +106,7 @@ When blocked, respond with:
 {"type":"blocked","role":"coordinator","content":"clear reason and required next action"}
 
 Otherwise respond with:
-{"type":"message","role":"coordinator","content":"short status — no code blocks"}`;
+{"type":"message","role":"coordinator","content":"your clarifying question or short status update — no code blocks"}`;
 
 function blocked(content: string) {
   return {
@@ -193,6 +208,9 @@ Plan:
 ${planText}`;
 
   const userContent = `Task: ${req.prompt}
+
+Workspace files:
+${req.workspaceFiles || "(none found)"}
 
 Recent context:
 ${history || "(none yet)"}
