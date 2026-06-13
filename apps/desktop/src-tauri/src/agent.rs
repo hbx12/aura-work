@@ -129,7 +129,14 @@ pub async fn sidecar_post<T: for<'de> Deserialize<'de>>(
                 return resp.json::<T>().await.map_err(|e| e.to_string());
             }
             Ok(resp) => {
+                let status = resp.status();
                 let err = resp.text().await.unwrap_or_else(|_| "Sidecar error".into());
+                if status == reqwest::StatusCode::UNAUTHORIZED && err.contains("Unauthorized") {
+                    return Err(
+                        "Agent sidecar authorization is stale. Restart Aura Work and try again."
+                            .into(),
+                    );
+                }
                 return Err(err);
             }
             Err(e) => {

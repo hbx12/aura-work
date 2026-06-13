@@ -27,6 +27,11 @@
   "bundle": {
     "active": true,
     "targets": ["nsis", "deb", "appimage", "dmg", "app"],
+    "windows": {
+      "nsis": {
+        "installerHooks": "nsis/installer-hooks.nsh"
+      }
+    },
     "createUpdaterArtifacts": false,
     "resources": {
       "../../../bundle/manifest.json": "manifest.json",

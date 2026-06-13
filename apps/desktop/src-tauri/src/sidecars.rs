@@ -1,6 +1,8 @@
 use crate::packaging::load_packaging_info;
 use crate::sidecar_auth::{generate_sidecar_token, register_sidecar_token, sidecar_bearer};
 use std::collections::HashMap;
+#[cfg(windows)]
+use std::collections::HashSet;
 use std::fs::{create_dir_all, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -214,6 +216,84 @@ fn sidecar_health_url(port: u16) -> String {
     format!("http://127.0.0.1:{port}/health")
 }
 
+#[cfg(windows)]
+fn parse_listening_pids(netstat: &str, ports: &HashSet<u16>) -> Vec<u32> {
+    let mut pids = HashSet::new();
+    for line in netstat.lines() {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() < 5 || !parts[0].eq_ignore_ascii_case("TCP") {
+            continue;
+        }
+        if !parts[3].eq_ignore_ascii_case("LISTENING") {
+            continue;
+        }
+        let Some(port) = parts[1]
+            .rsplit(':')
+            .next()
+            .and_then(|value| value.parse::<u16>().ok())
+        else {
+            continue;
+        };
+        if ports.contains(&port) {
+            if let Ok(pid) = parts[4].parse::<u32>() {
+                pids.insert(pid);
+            }
+        }
+    }
+    pids.into_iter().collect()
+}
+
+#[cfg(windows)]
+fn run_hidden_command(program: &str, args: &[&str]) -> Option<std::process::Output> {
+    use std::os::windows::process::CommandExt;
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    Command::new(program)
+        .args(args)
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .ok()
+}
+
+#[cfg(windows)]
+fn is_node_process(pid: u32) -> bool {
+    let filter = format!("PID eq {pid}");
+    let Some(output) = run_hidden_command("tasklist", &["/FI", &filter, "/FO", "CSV", "/NH"])
+    else {
+        return false;
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout).to_ascii_lowercase();
+    stdout.contains("\"node.exe\"")
+}
+
+#[cfg(windows)]
+fn kill_stale_sidecar_listeners() {
+    if std::env::var("AURA_SKIP_STALE_SIDECAR_CLEANUP")
+        .ok()
+        .as_deref()
+        == Some("1")
+    {
+        return;
+    }
+
+    let ports: HashSet<u16> = SIDECARS.iter().map(|def| def.port).collect();
+    let Some(output) = run_hidden_command("netstat", &["-ano", "-p", "tcp"]) else {
+        return;
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for pid in parse_listening_pids(&stdout, &ports) {
+        if !is_node_process(pid) {
+            continue;
+        }
+        let pid_arg = pid.to_string();
+        eprintln!("[sidecars] stopping stale node sidecar listener pid {pid}");
+        let _ = run_hidden_command("taskkill", &["/F", "/T", "/PID", &pid_arg]);
+    }
+    std::thread::sleep(std::time::Duration::from_millis(750));
+}
+
+#[cfg(not(windows))]
+fn kill_stale_sidecar_listeners() {}
+
 fn poll_sidecar_health(port: u16, sidecar_id: &str, attempts: u32) -> bool {
     for _ in 0..attempts {
         let mut req = ureq::get(&sidecar_health_url(port));
@@ -240,6 +320,8 @@ pub fn start_all(app: &AppHandle) {
     let app = app.clone();
     std::thread::spawn({
         move || {
+            kill_stale_sidecar_listeners();
+
             for def in SIDECARS {
                 let token = generate_sidecar_token();
                 register_sidecar_token(def.id, token.clone());
@@ -299,4 +381,23 @@ pub fn load_manifest_sidecars(app: &AppHandle) -> Vec<(String, u16)> {
         .iter()
         .map(|d| (d.id.to_string(), d.port))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[cfg(windows)]
+    #[test]
+    fn parses_sidecar_listener_pids_from_netstat() {
+        let ports = HashSet::from([47821, 47828]);
+        let netstat = r#"
+  TCP    127.0.0.1:47821        0.0.0.0:0              LISTENING       1234
+  TCP    0.0.0.0:3000           0.0.0.0:0              LISTENING       5678
+  TCP    [::1]:47828            [::]:0                 LISTENING       9012
+"#;
+        let mut pids = parse_listening_pids(netstat, &ports);
+        pids.sort_unstable();
+        assert_eq!(pids, vec![1234, 9012]);
+    }
 }
