@@ -33,6 +33,8 @@ export function TitleBar({
   onToggleCtx,
   onToggleDir,
 }: TitleBarProps) {
+  const toggleIcon = theme === "light" || theme === "blue" ? "moon" : "sun";
+
   return (
     <div className="titlebar" data-tauri-drag-region>
       <div className="tb-title">
@@ -47,7 +49,7 @@ export function TitleBar({
           </button>
         )}
         <button type="button" className="tb-btn" title="Toggle theme" onClick={onToggleTheme}>
-          <Icon name={theme === "dark" ? "sun" : "moon"} size={16} />
+          <Icon name={toggleIcon} size={16} />
         </button>
         <button type="button" className="tb-btn" title="Toggle context panel" onClick={onToggleCtx}>
           <Icon name="panel-right" size={16} />

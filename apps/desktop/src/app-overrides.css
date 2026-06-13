@@ -374,6 +374,108 @@
   margin: 0;
 }
 
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 10px;
+  padding: 14px 16px 16px;
+}
+
+.theme-option {
+  min-height: 94px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  padding: 10px;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color var(--dur-fast), background var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.theme-option:hover {
+  border-color: var(--accent-border);
+  background: var(--bg-hover);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.theme-preview {
+  --preview-base: #f2efe6;
+  --preview-panel: #ffffff;
+  --preview-muted: #efece2;
+  --preview-accent: #c2683f;
+  height: 42px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-2);
+  background: var(--preview-base);
+  padding: 7px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.theme-preview span {
+  border-radius: 5px;
+  background: var(--preview-panel);
+}
+
+.theme-preview span:first-child {
+  grid-row: 1 / span 2;
+  background: var(--preview-accent);
+}
+
+.theme-preview span:nth-child(2) {
+  background: var(--preview-panel);
+}
+
+.theme-preview span:nth-child(3) {
+  background: var(--preview-muted);
+}
+
+.theme-preview[data-preview-theme="dark"] {
+  --preview-base: #161310;
+  --preview-panel: #25221c;
+  --preview-muted: #2e2a23;
+  --preview-accent: #cf7a52;
+}
+
+.theme-preview[data-preview-theme="amoled"] {
+  --preview-base: #000000;
+  --preview-panel: #0b0b0b;
+  --preview-muted: #151515;
+  --preview-accent: #3ddc97;
+}
+
+.theme-preview[data-preview-theme="blue"] {
+  --preview-base: #eef4f8;
+  --preview-panel: #ffffff;
+  --preview-muted: #e2edf4;
+  --preview-accent: #2563eb;
+}
+
+.theme-preview[data-preview-theme="high-contrast"] {
+  --preview-base: #000000;
+  --preview-panel: #090909;
+  --preview-muted: #1a1a1a;
+  --preview-accent: #ffff00;
+}
+
+.theme-name {
+  font: var(--text-label);
+  color: var(--fg-1);
+}
+
 .banner {
   font: var(--text-sm);
   color: var(--fg-2);

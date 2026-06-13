@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Icon } from "@aura-os/ui";
+import { Icon, type ThemeMode, type ThemePreference } from "@aura-os/ui";
 import type { BrowserStatus, PluginsHelperStatus, VmStatus } from "@aura-os/shared";
 import type { MessageCatalog } from "@aura-os/i18n";
 import type { VaultStatus } from "../hooks/useProviders";
@@ -11,6 +11,15 @@ import { PetSprite } from "./PetSprites";
 import { invoke } from "@tauri-apps/api/core";
 
 type SettingsTab = "general" | "vault" | "vm" | "cloud" | "extension" | "pet";
+
+const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; preview?: ThemeMode }[] = [
+  { id: "system", labelKey: "settings.themeSystem" },
+  { id: "light", labelKey: "settings.themeLight" },
+  { id: "dark", labelKey: "settings.themeDark" },
+  { id: "amoled", labelKey: "settings.themeAmoled" },
+  { id: "blue", labelKey: "settings.themeBlue" },
+  { id: "high-contrast", labelKey: "settings.themeHighContrast" },
+];
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
   { group: "Preferences" },
@@ -48,8 +57,9 @@ interface SettingsPageProps {
   updateResult: UpdateCheckResult | null;
   updateLoading?: boolean;
   onCheckUpdates: () => Promise<UpdateCheckResult>;
-  theme: "light" | "dark";
-  onToggleTheme: () => void;
+  theme: ThemeMode;
+  themePreference: ThemePreference;
+  onSetTheme: (theme: ThemePreference) => void;
   projectId: string | null;
   cloudStatus: CloudAccountStatus | null;
   cloudDevices: CloudDeviceInfo[];
@@ -181,7 +191,8 @@ export function SettingsPage({
   updateLoading,
   onCheckUpdates,
   theme,
-  onToggleTheme,
+  themePreference,
+  onSetTheme,
   projectId,
   cloudStatus,
   cloudDevices,
@@ -349,31 +360,41 @@ export function SettingsPage({
                   </div>
                 </div>
                 <div className="section">
-                  <span className="sec-label">Appearance</span>
+                  <span className="sec-label">{t("settings.appearance")}</span>
                   <div className="panel">
                     <div className="field">
                       <div className="fl">
-                        <div className="fn">Theme</div>
-                      </div>
-                      <div className="fc">
-                        <div className="seg">
-                          <button
-                            type="button"
-                            className={theme === "light" ? "active" : ""}
-                            onClick={() => theme === "dark" && onToggleTheme()}
-                          >
-                            Light
-                          </button>
-                          <button
-                            type="button"
-                            className={theme === "dark" ? "active" : ""}
-                            onClick={() => theme === "light" && onToggleTheme()}
-                          >
-                            Dark
-                          </button>
-                        </div>
+                        <div className="fn">{t("settings.theme")}</div>
+                        <div className="fd">{t("settings.themeDesc")}</div>
                       </div>
                     </div>
+                    <div className="theme-grid" role="radiogroup" aria-label={t("settings.theme")}>
+                      {THEME_OPTIONS.map((option) => {
+                        const previewTheme: ThemeMode =
+                          option.id === "system" ? theme : (option.preview ?? (option.id as ThemeMode));
+                        const selected = themePreference === option.id;
+                        return (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`theme-option${selected ? " active" : ""}`}
+                            aria-checked={selected}
+                            role="radio"
+                            onClick={() => {
+                              onSetTheme(option.id);
+                              showMsg(t("settings.themeUpdated"));
+                            }}
+                          >
+                            <span className="theme-preview" data-preview-theme={previewTheme}>
+                              <span />
+                              <span />
+                              <span />
+                            </span>
+                            <span className="theme-name">{t(option.labelKey)}</span>
+                          </button>
+                        );
+                      })}
+                      </div>
                   </div>
                 </div>
               </>

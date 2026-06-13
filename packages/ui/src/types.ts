@@ -11,7 +11,8 @@ export type AppView =
   | "audit"
   | "settings";
 
-export type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast";
+export type ThemePreference = ThemeMode | "system";
 
 export type PermissionMode = "ask-first" | "act-without-asking";
 
