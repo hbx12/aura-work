@@ -24,12 +24,15 @@ jobs:
           - os: macos-latest
             target: universal-apple-darwin
             rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            bundle_args: "--bundles app"
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             rust_targets: x86_64-pc-windows-msvc
+            bundle_args: ""
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             rust_targets: x86_64-unknown-linux-gnu
+            bundle_args: ""
     runs-on: ${{ matrix.os }}
     environment: production
     steps:
@@ -81,7 +84,7 @@ jobs:
           AURA_RELEASE_VERSION: ${{ inputs.version }}
           AURA_ALLOW_VM_PLACEHOLDER_RELEASE: ${{ contains(inputs.version, '-alpha') && '1' || '0' }}
       - name: Build Tauri app and signed updater artifacts
-        run: npm run tauri build -w @aura-os/desktop -- --target ${{ matrix.target }}
+        run: npm run tauri build -w @aura-os/desktop -- --target ${{ matrix.target }} ${{ matrix.bundle_args }}
         env:
           CI: true
           AURA_RELEASE_BUILD: "1"
