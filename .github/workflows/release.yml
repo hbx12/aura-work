@@ -96,14 +96,9 @@ jobs:
           path: |
             apps/desktop/src-tauri/target/**/release/bundle/**/*.exe
             apps/desktop/src-tauri/target/**/release/bundle/**/*.exe.sig
-            apps/desktop/src-tauri/target/**/release/bundle/**/*.msi
-            apps/desktop/src-tauri/target/**/release/bundle/**/*.msi.sig
             apps/desktop/src-tauri/target/**/release/bundle/**/*.AppImage
             apps/desktop/src-tauri/target/**/release/bundle/**/*.AppImage.sig
             apps/desktop/src-tauri/target/**/release/bundle/**/*.deb
-            apps/desktop/src-tauri/target/**/release/bundle/**/*.deb.sig
-            apps/desktop/src-tauri/target/**/release/bundle/**/*.rpm
-            apps/desktop/src-tauri/target/**/release/bundle/**/*.rpm.sig
             apps/desktop/src-tauri/target/**/release/bundle/**/*.dmg
             apps/desktop/src-tauri/target/**/release/bundle/**/*.app.tar.gz
             apps/desktop/src-tauri/target/**/release/bundle/**/*.app.tar.gz.sig
@@ -134,7 +129,7 @@ jobs:
           merge-multiple: true
       - name: Verify installer artifacts exist
         run: |
-          count=$(find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" \) | wc -l | tr -d ' ')
+          count=$(find release-artifacts -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.app.tar.gz" \) | wc -l | tr -d ' ')
           if [ "$count" = "0" ]; then
             echo "No installer artifacts found"
             exit 1
@@ -147,7 +142,13 @@ jobs:
           RELEASE_TAG: v${{ inputs.version }}
       - name: Install minisign
         run: sudo apt-get update && sudo apt-get install -y minisign
-      - name: Sign release installers
+      - name: SHA256 checksums
+        run: |
+          find release-artifacts -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.app.tar.gz" -o -name "*.sig" \) -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          sha256sum latest.json >> SHA256SUMS.txt
+          test -s SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Sign checksum manifest
         env:
           MINISIGN_KEY: ${{ secrets.MINISIGN_PRIVATE_KEY }}
         run: |
@@ -156,16 +157,8 @@ jobs:
             exit 1
           fi
           echo "$MINISIGN_KEY" > minisign.key
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" \) | while read -r f; do
-            minisign -S -s minisign.key -m "$f" -x "$f.minisig"
-          done
+          minisign -S -s minisign.key -m SHA256SUMS.txt -x SHA256SUMS.txt.minisig
           rm -f minisign.key
-      - name: SHA256 checksums
-        run: |
-          find release-artifacts -type f \( -name "*.dmg" -o -name "*.msi" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.app.tar.gz" -o -name "*.sig" -o -name "*.minisig" \) -print0 | xargs -0 sha256sum > SHA256SUMS.txt
-          sha256sum latest.json >> SHA256SUMS.txt
-          test -s SHA256SUMS.txt
-          cat SHA256SUMS.txt
       - name: Publish approved GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -175,27 +168,16 @@ jobs:
           files: |
             sbom.json
             SHA256SUMS.txt
+            SHA256SUMS.txt.minisig
             latest.json
             release-artifacts/**/*.exe
             release-artifacts/**/*.exe.sig
-            release-artifacts/**/*.exe.minisig
-            release-artifacts/**/*.msi
-            release-artifacts/**/*.msi.sig
-            release-artifacts/**/*.msi.minisig
             release-artifacts/**/*.AppImage
             release-artifacts/**/*.AppImage.sig
-            release-artifacts/**/*.AppImage.minisig
             release-artifacts/**/*.deb
-            release-artifacts/**/*.deb.sig
-            release-artifacts/**/*.deb.minisig
-            release-artifacts/**/*.rpm
-            release-artifacts/**/*.rpm.sig
-            release-artifacts/**/*.rpm.minisig
             release-artifacts/**/*.dmg
-            release-artifacts/**/*.dmg.minisig
             release-artifacts/**/*.app.tar.gz
             release-artifacts/**/*.app.tar.gz.sig
-            release-artifacts/**/*.app.tar.gz.minisig
           fail_on_unmatched_files: false
           generate_release_notes: true
         env:

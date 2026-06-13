@@ -54,6 +54,7 @@
     "sbom": "npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev"
   },
   "devDependencies": {
+    "esbuild": "^0.28.1",
     "vitest": "^3.2.4"
   }
 }

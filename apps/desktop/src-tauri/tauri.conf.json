@@ -30,6 +30,7 @@
     "createUpdaterArtifacts": false,
     "resources": {
       "../../../bundle/manifest.json": "manifest.json",
+      "../../../bundle/node": "node",
       "../../../bundle/vm-image/manifest.json": "vm-image/manifest.json",
       "../../../bundle/sidecars/aura-agent/dist": "sidecars/aura-agent/dist",
       "../../../bundle/sidecars/aura-vm-helper/dist": "sidecars/aura-vm-helper/dist",
