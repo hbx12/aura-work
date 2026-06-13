@@ -1,7 +1,11 @@
 import { lookup } from "node:dns/promises";
 
 function stripIpv6Brackets(hostname: string): string {
-  return hostname.toLowerCase().replace(/^\[|\]$/g, "").split("%")[0];
+  return hostname
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "")
+    .split("%")[0]
+    .replace(/\.+$/g, "");
 }
 
 function parseIpv4(hostname: string): number[] | null {
@@ -15,15 +19,18 @@ function parseIpv4(hostname: string): number[] | null {
 }
 
 function isBlockedIpv4(octets: number[]): boolean {
-  const [a, b] = octets;
+  const [a, b, c] = octets;
 
   return (
     a === 0 ||
     a === 10 ||
     a === 127 ||
+    (a === 100 && b >= 64 && b <= 127) ||
     (a === 169 && b === 254) ||
     (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 0 && c === 0) ||
     (a === 192 && b === 168) ||
+    (a === 198 && (b === 18 || b === 19)) ||
     a >= 224
   );
 }
@@ -85,8 +92,11 @@ function isBlockedIpv6(hostname: string): boolean {
   const isIpv4Mapped =
     groups.slice(0, 5).every((group) => group === 0) &&
     groups[5] === 0xffff;
+  const isIpv4Compatible =
+    groups.slice(0, 6).every((group) => group === 0) &&
+    (groups[6] !== 0 || groups[7] > 1);
 
-  if (isIpv4Mapped) {
+  if (isIpv4Mapped || isIpv4Compatible) {
     const embeddedIpv4 = [
       groups[6] >> 8,
       groups[6] & 0xff,
@@ -165,6 +175,8 @@ export async function resolveHostnameSafe(hostname: string): Promise<void> {
 
 export async function validateUrlForFetch(rawUrl: string): Promise<URL> {
   const parsed = assertSafeRemoteUrl(rawUrl);
+  // Resolve immediately before each fetch/navigation hop so hostnames that
+  // rebind to local or private addresses fail closed before connection.
   await resolveHostnameSafe(parsed.hostname);
   return parsed;
 }
