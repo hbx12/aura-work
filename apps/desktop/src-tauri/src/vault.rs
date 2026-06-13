@@ -8,7 +8,8 @@ use chacha20poly1305::{
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
-use std::fs;
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 
@@ -40,8 +41,29 @@ struct VaultPayload {
 pub struct VaultState {
     pub path: PathBuf,
     pub device_key_path: PathBuf,
+    storage_mode: VaultStorageMode,
     key: [u8; DEVICE_KEY_LEN],
     payload: VaultPayload,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum VaultStorageMode {
+    OsKeychain,
+    FallbackFile,
+}
+
+impl VaultStorageMode {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::OsKeychain => "os-keychain",
+            Self::FallbackFile => "fallback-file",
+        }
+    }
+}
+
+struct LoadedDeviceKey {
+    key: [u8; DEVICE_KEY_LEN],
+    storage_mode: VaultStorageMode,
 }
 
 impl VaultState {
@@ -50,9 +72,9 @@ impl VaultState {
         fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
         let path = dir.join("vault.enc");
         let device_key_path = dir.join("device.key");
-        let key = load_or_create_device_key(&device_key_path)?;
+        let device_key = load_or_create_device_key(&device_key_path)?;
         let payload = if path.exists() {
-            match decrypt_vault(&path, &key) {
+            match decrypt_vault(&path, &device_key.key) {
                 Ok(payload) => payload,
                 Err(error) => {
                     let backup = quarantine_corrupt_vault(&path)?;
@@ -75,7 +97,8 @@ impl VaultState {
         Ok(Self {
             path,
             device_key_path,
-            key,
+            storage_mode: device_key.storage_mode,
+            key: device_key.key,
             payload,
         })
     }
@@ -85,7 +108,10 @@ impl VaultState {
             "unlocked": true,
             "version": self.payload.version,
             "secretCount": self.payload.secrets.len(),
-            "deviceBound": self.device_key_path.exists(),
+            "deviceBound": true,
+            "keyStorage": self.storage_mode.as_str(),
+            "fallbackFile": self.storage_mode == VaultStorageMode::FallbackFile,
+            "legacyDeviceKeyFilePresent": self.device_key_path.exists(),
         })
     }
 
@@ -263,18 +289,98 @@ fn quarantine_corrupt_vault(path: &Path) -> Result<PathBuf, String> {
     Ok(backup)
 }
 
-fn load_or_create_device_key(path: &Path) -> Result<[u8; DEVICE_KEY_LEN], String> {
+fn read_fallback_device_key(path: &Path) -> Result<[u8; DEVICE_KEY_LEN], String> {
+    let bytes = fs::read(path).map_err(|e| e.to_string())?;
+    if bytes.len() != DEVICE_KEY_LEN {
+        return Err("Legacy device key file is corrupt.".into());
+    }
+    enforce_fallback_key_permissions(path)?;
+    let mut key = [0u8; DEVICE_KEY_LEN];
+    key.copy_from_slice(&bytes);
+    Ok(key)
+}
+
+#[cfg(unix)]
+fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(path, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())
+}
+
+#[cfg(not(unix))]
+fn enforce_fallback_key_permissions(_path: &Path) -> Result<(), String> {
+    Ok(())
+}
+
+fn write_fallback_device_key(path: &Path, key: &[u8; DEVICE_KEY_LEN]) -> Result<(), String> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(unix)]
+    let mut file = {
+        use std::os::unix::fs::OpenOptionsExt;
+        OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .open(path)
+    };
+
+    #[cfg(not(unix))]
+    let mut file = OpenOptions::new().write(true).create_new(true).open(path);
+
+    match file.as_mut() {
+        Ok(file) => {
+            file.write_all(key).map_err(|e| e.to_string())?;
+            file.sync_all().map_err(|e| e.to_string())?;
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+            return Err("Fallback device key already exists.".into());
+        }
+        Err(error) => return Err(error.to_string()),
+    }
+
+    enforce_fallback_key_permissions(path)
+}
+
+fn load_or_create_fallback_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
+    if path.exists() {
+        return Ok(LoadedDeviceKey {
+            key: read_fallback_device_key(path)?,
+            storage_mode: VaultStorageMode::FallbackFile,
+        });
+    }
+
+    let mut key = [0u8; DEVICE_KEY_LEN];
+    rand::thread_rng().fill_bytes(&mut key);
+    write_fallback_device_key(path, &key)?;
+    Ok(LoadedDeviceKey {
+        key,
+        storage_mode: VaultStorageMode::FallbackFile,
+    })
+}
+
+fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
     const KEYRING_SERVICE: &str = "Aura Work";
     const KEYRING_USER: &str = "device-vault-key";
 
-    let entry = keyring::Entry::new(KEYRING_SERVICE, KEYRING_USER).map_err(|e| e.to_string())?;
+    let entry = match keyring::Entry::new(KEYRING_SERVICE, KEYRING_USER) {
+        Ok(entry) => entry,
+        Err(error) => {
+            eprintln!("[vault] WARN: OS secure storage unavailable ({error}). Using restricted fallback file.");
+            return load_or_create_fallback_device_key(path);
+        }
+    };
 
     if let Ok(stored) = entry.get_password() {
         if let Ok(bytes) = B64.decode(stored.trim()) {
             if bytes.len() == DEVICE_KEY_LEN {
                 let mut key = [0u8; DEVICE_KEY_LEN];
                 key.copy_from_slice(&bytes);
-                return Ok(key);
+                return Ok(LoadedDeviceKey {
+                    key,
+                    storage_mode: VaultStorageMode::OsKeychain,
+                });
             }
         }
         return Err(
@@ -283,36 +389,50 @@ fn load_or_create_device_key(path: &Path) -> Result<[u8; DEVICE_KEY_LEN], String
     }
 
     if path.exists() {
-        let bytes = fs::read(path).map_err(|e| e.to_string())?;
-        if bytes.len() != DEVICE_KEY_LEN {
-            return Err("Legacy device key file is corrupt.".into());
+        let key = read_fallback_device_key(path)?;
+        let encoded = B64.encode(key);
+        if let Err(error) = entry.set_password(&encoded) {
+            eprintln!(
+                "[vault] WARN: failed to migrate device key to OS secure storage ({error}). Keeping restricted fallback file."
+            );
+            return Ok(LoadedDeviceKey {
+                key,
+                storage_mode: VaultStorageMode::FallbackFile,
+            });
         }
-        let encoded = B64.encode(&bytes);
-        entry
-            .set_password(&encoded)
-            .map_err(|e| format!("Failed to migrate device key to OS secure storage: {e}"))?;
-        if entry.get_password().is_err() {
-            return Err("Device key migration verification failed.".into());
+        match entry.get_password() {
+            Ok(stored) if stored.trim() == encoded => {}
+            _ => {
+                eprintln!(
+                    "[vault] WARN: device key migration verification failed. Keeping restricted fallback file."
+                );
+                return Ok(LoadedDeviceKey {
+                    key,
+                    storage_mode: VaultStorageMode::FallbackFile,
+                });
+            }
         }
         fs::remove_file(path).map_err(|e| e.to_string())?;
-        let mut key = [0u8; DEVICE_KEY_LEN];
-        key.copy_from_slice(&bytes);
-        return Ok(key);
+        return Ok(LoadedDeviceKey {
+            key,
+            storage_mode: VaultStorageMode::OsKeychain,
+        });
     }
 
     let mut key = [0u8; DEVICE_KEY_LEN];
     rand::thread_rng().fill_bytes(&mut key);
-    entry
-        .set_password(&B64.encode(key))
-        .map_err(|e| {
-            if path.parent().is_some() {
-                let _ = fs::write(path, key);
-            }
-            format!(
-                "OS secure storage unavailable ({e}). Device key stored in legacy file with restricted permissions — not recommended for production."
-            )
-        })?;
-    Ok(key)
+    if let Err(error) = entry.set_password(&B64.encode(key)) {
+        eprintln!("[vault] WARN: OS secure storage unavailable ({error}). Using restricted fallback file.");
+        write_fallback_device_key(path, &key)?;
+        return Ok(LoadedDeviceKey {
+            key,
+            storage_mode: VaultStorageMode::FallbackFile,
+        });
+    }
+    Ok(LoadedDeviceKey {
+        key,
+        storage_mode: VaultStorageMode::OsKeychain,
+    })
 }
 
 fn encrypt_vault(path: &Path, key: &[u8; DEVICE_KEY_LEN], payload: &VaultPayload) -> Result<(), String> {
@@ -351,4 +471,86 @@ fn decrypt_vault(path: &Path, key: &[u8; DEVICE_KEY_LEN]) -> Result<VaultPayload
 pub fn derive_fingerprint(input: &str) -> String {
     let digest = Sha256::digest(input.as_bytes());
     format!("{:x}", digest)[..12].to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_vault_dir(name: &str) -> PathBuf {
+        let unique = format!(
+            "aura-vault-test-{name}-{}",
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        );
+        let dir = std::env::temp_dir().join(unique);
+        fs::create_dir_all(&dir).expect("temp dir");
+        dir
+    }
+
+    #[test]
+    fn fallback_device_key_round_trips() {
+        let dir = temp_vault_dir("roundtrip");
+        let path = dir.join("device.key");
+        let key = [7u8; DEVICE_KEY_LEN];
+
+        write_fallback_device_key(&path, &key).expect("write fallback key");
+        let loaded = read_fallback_device_key(&path).expect("read fallback key");
+
+        assert_eq!(loaded, key);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn fallback_device_key_rejects_corrupt_length() {
+        let dir = temp_vault_dir("corrupt");
+        let path = dir.join("device.key");
+        fs::write(&path, [1u8; DEVICE_KEY_LEN - 1]).expect("write corrupt key");
+
+        let error = read_fallback_device_key(&path).expect_err("corrupt key should fail");
+
+        assert!(error.contains("corrupt"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn status_reports_fallback_storage_mode() {
+        let dir = temp_vault_dir("status");
+        let state = VaultState {
+            path: dir.join("vault.enc"),
+            device_key_path: dir.join("device.key"),
+            storage_mode: VaultStorageMode::FallbackFile,
+            key: [0u8; DEVICE_KEY_LEN],
+            payload: VaultPayload {
+                version: VAULT_VERSION,
+                secrets: HashMap::new(),
+            },
+        };
+
+        let status = state.status();
+
+        assert_eq!(status["keyStorage"], "fallback-file");
+        assert_eq!(status["fallbackFile"], true);
+        assert_eq!(status["deviceBound"], true);
+        assert_eq!(status["legacyDeviceKeyFilePresent"], false);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn fallback_device_key_uses_owner_only_permissions() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = temp_vault_dir("permissions");
+        let path = dir.join("device.key");
+        let key = [9u8; DEVICE_KEY_LEN];
+
+        write_fallback_device_key(&path, &key).expect("write fallback key");
+        let mode = fs::metadata(&path).expect("metadata").permissions().mode() & 0o777;
+
+        assert_eq!(mode, 0o600);
+        let _ = fs::remove_dir_all(dir);
+    }
 }
