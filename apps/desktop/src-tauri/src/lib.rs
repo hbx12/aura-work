@@ -55,7 +55,6 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
             .always_on_top(true)
             .resizable(false)
             .skip_taskbar(true);
-        #[cfg(target_os = "macos")]
         let builder = builder.shadow(false);
         if let Err(e) = builder.build() {
             eprintln!("Failed to spawn pet window: {:?}", e);
@@ -147,6 +146,7 @@ pub fn run() {
             tasks::cancel_task,
             tasks::resume_after_permission,
             tasks::resume_after_edit,
+            tasks::send_task_message,
             vm::get_vm_status,
             vm::start_vm,
             vm::stop_vm,
@@ -229,6 +229,7 @@ pub fn run() {
             packaging::get_pending_open_task,
             packaging::clear_pending_open_task,
             toggle_pet_window,
+            shell::run_terminal_command,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

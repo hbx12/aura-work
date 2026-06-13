@@ -471,6 +471,90 @@
   --preview-accent: #ffff00;
 }
 
+.theme-preview[data-preview-theme="cyberpunk"] {
+  --preview-base: #0b0914;
+  --preview-panel: #130f26;
+  --preview-muted: #2e215c;
+  --preview-accent: #ff007f;
+}
+
+.theme-preview[data-preview-theme="forest"] {
+  --preview-base: #141c16;
+  --preview-panel: #1b261e;
+  --preview-muted: #2c3d31;
+  --preview-accent: #8fbc8f;
+}
+
+.theme-preview[data-preview-theme="pastel"] {
+  --preview-base: #f7f4eb;
+  --preview-panel: #fdfbf7;
+  --preview-muted: #ebdcc9;
+  --preview-accent: #ffccd5;
+}
+
+.theme-preview[data-preview-theme="sunset"] {
+  --preview-base: #1a0f18;
+  --preview-panel: #261423;
+  --preview-muted: #472340;
+  --preview-accent: #fd5f00;
+}
+
+.theme-preview[data-preview-theme="sepia"] {
+  --preview-base: #f4ecd8;
+  --preview-panel: #fdf6e3;
+  --preview-muted: #dfd5bc;
+  --preview-accent: #8f6f5e;
+}
+
+.theme-preview[data-preview-theme="nord"] {
+  --preview-base: #2e3440;
+  --preview-panel: #3b4252;
+  --preview-muted: #4c566a;
+  --preview-accent: #88c0d0;
+}
+
+.theme-preview[data-preview-theme="dracula"] {
+  --preview-base: #282a36;
+  --preview-panel: #21222c;
+  --preview-muted: #44475a;
+  --preview-accent: #bd93f9;
+}
+
+.theme-preview[data-preview-theme="matrix"] {
+  --preview-base: #000000;
+  --preview-panel: #050505;
+  --preview-muted: #008800;
+  --preview-accent: #00ff00;
+}
+
+.theme-preview[data-preview-theme="sakura"] {
+  --preview-base: #fff0f5;
+  --preview-panel: #fffaf0;
+  --preview-muted: #ffd1dc;
+  --preview-accent: #ff69b4;
+}
+
+.theme-preview[data-preview-theme="sakura-dark"] {
+  --preview-base: #24121a;
+  --preview-panel: #2f1722;
+  --preview-muted: #3f1e2c;
+  --preview-accent: #ff69b4;
+}
+
+.theme-preview[data-preview-theme="coffee"] {
+  --preview-base: #1c1410;
+  --preview-panel: #241a15;
+  --preview-muted: #382921;
+  --preview-accent: #b08968;
+}
+
+.theme-preview[data-preview-theme="ocean"] {
+  --preview-base: #0b132b;
+  --preview-panel: #1c2541;
+  --preview-muted: #1c2541;
+  --preview-accent: #48cae4;
+}
+
 .theme-name {
   font: var(--text-label);
   color: var(--fg-1);
@@ -562,4 +646,11 @@
 }
 .pet-container.jump {
   animation: pet-bounce 0.45s ease-out;
+}
+
+/* Force LTR direction on Monaco Editor to prevent rendering bugs in RTL (Arabic) mode */
+.monaco-editor,
+.monaco-editor * {
+  direction: ltr !important;
+  text-align: left !important;
 }

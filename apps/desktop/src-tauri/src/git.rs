@@ -60,11 +60,23 @@ pub fn init_git_tables(conn: &rusqlite::Connection) -> Result<(), String> {
 }
 
 fn git_cmd(cwd: &str, args: &[&str]) -> Result<String, String> {
-    let output = Command::new("git")
+    let mut git_path = "git".to_string();
+    #[cfg(target_os = "macos")]
+    {
+        if Command::new("git").arg("--version").output().is_err() {
+            if std::path::Path::new("/opt/homebrew/bin/git").exists() {
+                git_path = "/opt/homebrew/bin/git".to_string();
+            } else if std::path::Path::new("/usr/local/bin/git").exists() {
+                git_path = "/usr/local/bin/git".to_string();
+            }
+        }
+    }
+
+    let output = Command::new(&git_path)
         .args(args)
         .current_dir(cwd)
         .output()
-        .map_err(|e| format!("Git not available: {e}"))?;
+        .map_err(|e| format!("Git not available (using command '{}'): {e}", git_path))?;
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
         return Err(err.trim().to_string());
@@ -73,7 +85,8 @@ fn git_cmd(cwd: &str, args: &[&str]) -> Result<String, String> {
 }
 
 pub fn is_git_repo(root: &str) -> bool {
-    git_cmd(root, &["rev-parse", "--is-inside-work-tree"]).is_ok()
+    let path = std::path::Path::new(root);
+    path.join(".git").exists()
 }
 
 #[tauri::command]
@@ -102,13 +115,26 @@ pub fn git_status_inner(db: &DbState, project_id: &str) -> Result<GitStatusResul
     }
     let branch = git_cmd(&root, &["branch", "--show-current"]).ok();
     let porcelain = git_cmd(&root, &["status", "--porcelain"])?;
+    
+    let prefix = git_cmd(&root, &["rev-parse", "--show-prefix"]).unwrap_or_default();
+    let prefix = prefix.trim().replace('\\', "/");
+
     let mut files = Vec::new();
     for line in porcelain.lines() {
         if line.len() < 4 {
             continue;
         }
         let code = line[..2].trim();
-        let path = line[3..].trim().to_string();
+        let mut path = line[3..].trim().to_string().replace('\\', "/");
+        
+        if !prefix.is_empty() {
+            if path.starts_with(&prefix) {
+                path = path[prefix.len()..].to_string();
+            } else {
+                continue;
+            }
+        }
+
         let status = match code {
             "M" | "MM" => "modified",
             "A" | "AM" => "added",
@@ -148,9 +174,28 @@ pub fn git_diff_inner(
         return Err("Not a Git repository.".into());
     }
     let diff = if let Some(ref fp) = file_path {
-        git_cmd(&root, &["diff", "--", fp])?
+        let is_untracked = if let Ok(status) = git_cmd(&root, &["status", "--porcelain", fp]) {
+            status.starts_with("??")
+        } else {
+            false
+        };
+
+        if is_untracked {
+            let full_path = std::path::Path::new(&root).join(fp);
+            if let Ok(content) = std::fs::read_to_string(&full_path) {
+                let mut fake_diff = format!("--- /dev/null\n+++ b/{}\n@@ -0,0 +1,{} @@\n", fp, content.lines().count());
+                for line in content.lines() {
+                    fake_diff.push_str(&format!("+{}\n", line));
+                }
+                fake_diff
+            } else {
+                git_cmd(&root, &["diff", "--relative", "--", fp])?
+            }
+        } else {
+            git_cmd(&root, &["diff", "--relative", "--", fp])?
+        }
     } else {
-        git_cmd(&root, &["diff"])?
+        git_cmd(&root, &["diff", "--relative"])?
     };
     Ok(GitDiffResult {
         path: file_path.map(String::from),
@@ -178,12 +223,9 @@ pub fn propose_git_commit(
     if input.message.trim().is_empty() {
         return Err("Commit message is required.".into());
     }
+    // Stage all changes (both modified and untracked) so they show up in diff
+    let _ = git_cmd(&root, &["add", "-A"]);
     let diff = git_cmd(&root, &["diff", "--staged"])?;
-    let diff = if diff.is_empty() {
-        git_cmd(&root, &["diff"])?
-    } else {
-        diff
-    };
     if diff.is_empty() {
         return Err("No changes to commit.".into());
     }
@@ -276,7 +318,38 @@ pub fn approve_git_commit(db: State<'_, DbState>, commit_id: String) -> Result<P
     )?;
 
     git_cmd(&root, &["add", "-A"])?;
-    git_cmd(&root, &["commit", "-m", &pending.message])?;
+
+    let has_user = git_cmd(&root, &["config", "user.name"]).is_ok();
+
+    if has_user {
+        git_cmd(&root, &["commit", "-m", &pending.message])?;
+    } else {
+        let mut git_path = "git".to_string();
+        #[cfg(target_os = "macos")]
+        {
+            if Command::new("git").arg("--version").output().is_err() {
+                if std::path::Path::new("/opt/homebrew/bin/git").exists() {
+                    git_path = "/opt/homebrew/bin/git".to_string();
+                } else if std::path::Path::new("/usr/local/bin/git").exists() {
+                    git_path = "/usr/local/bin/git".to_string();
+                }
+            }
+        }
+
+        let output = Command::new(&git_path)
+            .args(&["commit", "-m", &pending.message])
+            .current_dir(&root)
+            .env("GIT_AUTHOR_NAME", "Aura OS")
+            .env("GIT_AUTHOR_EMAIL", "aura@aura-os.org")
+            .env("GIT_COMMITTER_NAME", "Aura OS")
+            .env("GIT_COMMITTER_EMAIL", "aura@aura-os.org")
+            .output()
+            .map_err(|e| format!("Failed to run fallback git commit: {e}"))?;
+        if !output.status.success() {
+            let err = String::from_utf8_lossy(&output.stderr);
+            return Err(err.trim().to_string());
+        }
+    }
 
     conn.execute(
         "UPDATE pending_commits SET status = 'approved' WHERE id = ?1",

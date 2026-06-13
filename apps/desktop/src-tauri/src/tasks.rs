@@ -598,6 +598,24 @@ pub async fn advance_task_inner(
     )
     .await?;
 
+    let files_summary = if let Ok(root) = crate::files::project_folder(db, &project_id) {
+        if let Ok(list) = crate::files::list_dir_internal(&root, None, 5) {
+            let mut summary = String::new();
+            for f in list.iter().take(150) {
+                if f.is_dir {
+                    summary.push_str(&format!("Directory: {}\n", f.path));
+                } else {
+                    summary.push_str(&format!("File: {} ({} bytes)\n", f.path, f.size.unwrap_or(0)));
+                }
+            }
+            summary
+        } else {
+            "(failed to list files)".to_string()
+        }
+    } else {
+        "(failed to resolve project folder)".to_string()
+    };
+
     let iterate_resp: SidecarIterateResponse = sidecar_post(
         "/task/iterate",
         &serde_json::json!({
@@ -611,6 +629,7 @@ pub async fn advance_task_inner(
             "providerId": chat.provider_id,
             "modelId": chat.model_id,
             "credentials": chat.credentials,
+            "workspaceFiles": files_summary,
         }),
     )
     .await?;
@@ -663,7 +682,7 @@ pub async fn advance_task_inner(
         }
     }
 
-    if let Some(tool_calls) = tool_calls {
+    if let Some(ref tool_calls) = tool_calls {
         for tc in tool_calls {
             let mut step = TaskStep {
                 title: format!("Tool: {}", tc.name),
@@ -776,13 +795,26 @@ pub async fn advance_task_inner(
     }
 
     let already_wrote = !task.modified_files.is_empty() || wrote_this_round;
+    let has_no_tools = match &tool_calls {
+        None => true,
+        Some(v) => v.is_empty(),
+    };
 
     if wants_complete && is_file_task_prompt(&prompt) && !already_wrote {
-        task.state = TaskState::Running.as_str().into();
+        task.state = TaskState::Paused.as_str().into();
     } else if wants_complete {
         task.state = TaskState::Completed.as_str().into();
         task.summary = iterate_resp
             .summary
+            .or_else(|| assistant_content.clone())
+            .map(|s| strip_code_fences(&s));
+    } else if iterate_resp.response_type == "message" && has_no_tools {
+        task.state = TaskState::Paused.as_str().into();
+    } else if iterate_resp.response_type == "blocked" {
+        task.state = TaskState::Blocked.as_str().into();
+        task.error = iterate_resp
+            .summary
+            .clone()
             .or_else(|| assistant_content.clone())
             .map(|s| strip_code_fences(&s));
     }
@@ -1124,5 +1156,26 @@ pub async fn resume_after_edit(
         save_task(&conn, &task)?;
     }
 
+    advance_task(db, vault, task_id).await
+}
+
+#[tauri::command]
+pub async fn send_task_message(
+    db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
+    task_id: String,
+    content: String,
+) -> Result<TaskRecord, String> {
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        let mut task = load_task(&conn, &task_id)?;
+        task.messages.push(TaskMessage {
+            role: "user".into(),
+            content: content.trim().to_string(),
+            agent_role: None,
+        });
+        task.state = TaskState::Running.as_str().into();
+        save_task(&conn, &task)?;
+    }
     advance_task(db, vault, task_id).await
 }

@@ -19,6 +19,18 @@ const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; prev
   { id: "amoled", labelKey: "settings.themeAmoled" },
   { id: "blue", labelKey: "settings.themeBlue" },
   { id: "high-contrast", labelKey: "settings.themeHighContrast" },
+  { id: "cyberpunk", labelKey: "settings.themeCyberpunk" },
+  { id: "forest", labelKey: "settings.themeForest" },
+  { id: "pastel", labelKey: "settings.themePastel" },
+  { id: "sunset", labelKey: "settings.themeSunset" },
+  { id: "sepia", labelKey: "settings.themeSepia" },
+  { id: "nord", labelKey: "settings.themeNord" },
+  { id: "dracula", labelKey: "settings.themeDracula" },
+  { id: "matrix", labelKey: "settings.themeMatrix" },
+  { id: "sakura", labelKey: "settings.themeSakura" },
+  { id: "sakura-dark", labelKey: "settings.themeSakuraDark" },
+  { id: "coffee", labelKey: "settings.themeCoffee" },
+  { id: "ocean", labelKey: "settings.themeOcean" },
 ];
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
@@ -162,7 +174,10 @@ const PETS_LIST = [
   { id: "fox", nameEn: "Fox", nameAr: "الثعلب", descEn: "Vibrant orange kit", descAr: "ثعلب برتقالي ذكي" },
   { id: "hamster", nameEn: "Hamster", nameAr: "الهامستر", descEn: "Cheery golden hamster", descAr: "هامستر ذهبي سعيد" },
   { id: "penguin", nameEn: "Penguin", nameAr: "البطريق", descEn: "Penguin with earmuffs", descAr: "بطريق يرتدي غطاء أذن" },
-  { id: "koala", nameEn: "Koala", nameAr: "الكوالا", descEn: "Fluffy gray koala bear", descAr: "دب كوالا رمادي منفوش" }
+  { id: "koala", nameEn: "Koala", nameAr: "الكوالا", descEn: "Fluffy gray koala bear", descAr: "دب كوالا رمادي منفوش" },
+  { id: "bear", nameEn: "Bear", nameAr: "الدب", descEn: "Friendly brown grizzly", descAr: "دب بني لطيف وودود" },
+  { id: "pig", nameEn: "Piggy", nameAr: "الخنزير الصغير", descEn: "Cute pink piglet", descAr: "خنزير وردي صغير ولطيف" },
+  { id: "tiger", nameEn: "Tiger", nameAr: "النمر", descEn: "Little orange tiger cub", descAr: "شبل نمر برتقالي صغير" }
 ];
 
 export function SettingsPage({

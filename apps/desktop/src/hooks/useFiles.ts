@@ -19,7 +19,7 @@ export function useFiles(projectId: string | null) {
         subPath: null,
         depth: 4,
       });
-      setFiles(list.filter((f) => !f.isDir).slice(0, 200));
+      setFiles(list.slice(0, 500));
       const edits = await invoke<PendingEdit[]>("list_pending_edits", {
         projectId,
         taskId: null,
@@ -65,6 +65,32 @@ export function useFiles(projectId: string | null) {
     [refreshFiles, openFile, selectedPath],
   );
 
+  const saveFile = useCallback(
+    async (path: string, newContent: string) => {
+      if (!projectId) return;
+      setLoading(true);
+      setError(null);
+      try {
+        await invoke("write_project_file", {
+          input: {
+            projectId,
+            taskId: null,
+            filePath: path,
+            content: newContent,
+            skipPermission: true,
+          },
+        });
+        setContent(newContent);
+      } catch (e) {
+        setError(String(e));
+        throw e;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [projectId],
+  );
+
   return {
     files,
     content,
@@ -76,5 +102,6 @@ export function useFiles(projectId: string | null) {
     openFile,
     approveEdit,
     setContent,
+    saveFile,
   };
 }

@@ -143,6 +143,18 @@ export type MessageKey =
   | "settings.themeAmoled"
   | "settings.themeBlue"
   | "settings.themeHighContrast"
+  | "settings.themeCyberpunk"
+  | "settings.themeForest"
+  | "settings.themePastel"
+  | "settings.themeSunset"
+  | "settings.themeSepia"
+  | "settings.themeNord"
+  | "settings.themeDracula"
+  | "settings.themeMatrix"
+  | "settings.themeSakura"
+  | "settings.themeSakuraDark"
+  | "settings.themeCoffee"
+  | "settings.themeOcean"
   | "settings.themeUpdated"
   | "settings.vm"
   | "settings.vmStart"
@@ -527,6 +539,18 @@ const en: MessageCatalog = {
   "settings.themeAmoled": "AMOLED",
   "settings.themeBlue": "Blue",
   "settings.themeHighContrast": "High contrast",
+  "settings.themeCyberpunk": "Cyberpunk",
+  "settings.themeForest": "Forest",
+  "settings.themePastel": "Pastel",
+  "settings.themeSunset": "Sunset",
+  "settings.themeSepia": "Sepia",
+  "settings.themeNord": "Nord",
+  "settings.themeDracula": "Dracula",
+  "settings.themeMatrix": "Matrix",
+  "settings.themeSakura": "Sakura",
+  "settings.themeSakuraDark": "Sakura Dark",
+  "settings.themeCoffee": "Coffee",
+  "settings.themeOcean": "Ocean",
   "settings.themeUpdated": "Theme updated.",
   "settings.vm": "Linux workspace (VM)",
   "settings.vmStart": "Start workspace",
@@ -928,6 +952,18 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.themeAmoled": "AMOLED",
     "settings.themeBlue": "أزرق",
     "settings.themeHighContrast": "تباين عالٍ",
+    "settings.themeCyberpunk": "سايبربانك",
+    "settings.themeForest": "غابة",
+    "settings.themePastel": "باستيل",
+    "settings.themeSunset": "غروب الشمس",
+    "settings.themeSepia": "عتيق",
+    "settings.themeNord": "نورد",
+    "settings.themeDracula": "دراكولا",
+    "settings.themeMatrix": "ماتريكس",
+    "settings.themeSakura": "ساكورا",
+    "settings.themeSakuraDark": "ساكورا الداكن",
+    "settings.themeCoffee": "قهوة",
+    "settings.themeOcean": "محيط",
     "settings.themeUpdated": "تم تحديث الثيم.",
     "settings.vm": "مساحة Linux (VM)",
     "settings.vmStart": "تشغيل مساحة Linux",
