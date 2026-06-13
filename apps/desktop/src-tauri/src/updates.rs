@@ -32,7 +32,7 @@ pub async fn install_update(app: AppHandle) -> Result<UpdateInstallResult, Strin
             });
         };
 
-        let version = update.version.clone();
+        let _version = update.version.clone();
         update
             .download_and_install(|_, _| {}, || {})
             .await
@@ -43,7 +43,7 @@ pub async fn install_update(app: AppHandle) -> Result<UpdateInstallResult, Strin
         #[allow(unreachable_code)]
         Ok(UpdateInstallResult {
             installed: true,
-            version: Some(version),
+            version: Some(_version),
             message: "Update installed. Restarting Aura Work.".into(),
         })
     }
