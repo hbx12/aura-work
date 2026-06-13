@@ -168,9 +168,10 @@ fn spawn_sidecar(app: &AppHandle, def: &SidecarDef, token: &str) -> Option<Child
     let (script, workdir) = sidecar_entry(app, def)?;
     let node = node_binary(app);
     let (stdout, stderr) = sidecar_log_stdio(app, def.id);
+    let script_arg = Path::new("dist").join("index.js");
 
     let mut cmd = Command::new(&node);
-    cmd.arg(&script)
+    cmd.arg(&script_arg)
         .current_dir(&workdir)
         .env(def.env_key, def.port.to_string())
         .env(def.auth_env_key, token)
