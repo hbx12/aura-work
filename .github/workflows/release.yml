@@ -140,6 +140,10 @@ jobs:
         env:
           RELEASE_VERSION: ${{ inputs.version }}
           RELEASE_TAG: v${{ inputs.version }}
+      - name: Verify updater payload before publish
+        run: node scripts/verify-published-updater-assets.mjs
+        env:
+          RELEASE_TAG: v${{ inputs.version }}
       - name: Install minisign
         run: sudo apt-get update && sudo apt-get install -y minisign
       - name: SHA256 checksums
@@ -174,8 +178,10 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify published updater downloads
+      - name: Verify published updater downloads (best effort)
+        continue-on-error: true
         run: node scripts/verify-published-updater-assets.mjs
         env:
           RELEASE_TAG: v${{ inputs.version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERIFY_REMOTE: "1"
