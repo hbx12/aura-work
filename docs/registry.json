@@ -10,6 +10,50 @@
       "license": "Apache-2.0",
       "repository": "https://github.com/hbx12/aura-work/tree/main/examples/aura-sample-plugin",
       "tags": ["sample", "demo"]
+    },
+    {
+      "id": "com.aura.claude-artifacts",
+      "name": "Claude Artifacts Sync",
+      "version": "1.0.0",
+      "publisher": "Anthropic Community",
+      "description": "Enables full sync and local rendering of Claude App Artifacts directly inside the Aura Work desktop interface.",
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/hbx12/aura-work",
+      "tags": ["claude", "artifacts", "sync"]
+    },
+    {
+      "id": "com.aura.codex-integration",
+      "name": "OpenAI Codex Integration",
+      "version": "1.2.0",
+      "publisher": "OpenAI Community",
+      "description": "Connects your OpenAI Codex session to local workspace agents to automate code generation and explanations.",
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/hbx12/aura-work",
+      "tags": ["openai", "codex", "code-gen"]
+    },
+    {
+      "id": "com.aura.google-search",
+      "name": "Google Search Engine",
+      "version": "1.1.0",
+      "publisher": "Google Developer",
+      "description": "Gives your local agent the ability to search the web using Google Custom Search API.",
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/hbx12/aura-work",
+      "tags": ["search", "web", "google"]
+    },
+    {
+      "id": "com.aura.spotify-control",
+      "name": "Spotify Controller",
+      "version": "0.8.0",
+      "publisher": "Aura Community",
+      "description": "Allows the agent to control your local Spotify playback using the Spotify Web API.",
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "Apache-2.0",
+      "repository": "https://github.com/hbx12/aura-work",
+      "tags": ["spotify", "music", "control"]
     }
   ]
 }

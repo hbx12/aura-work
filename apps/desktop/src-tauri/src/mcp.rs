@@ -124,6 +124,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
 pub struct AddMcpServerInput {
     pub name: String,
     pub command: String,
+    pub transport: Option<String>,
     pub args: Option<Vec<String>>,
     pub env: Option<serde_json::Map<String, serde_json::Value>>,
 }
@@ -135,14 +136,15 @@ pub async fn add_mcp_server(
 ) -> Result<McpServerRecord, String> {
     let id = Uuid::new_v4().to_string();
     let now = chrono::Utc::now().to_rfc3339();
+    let transport = input.transport.unwrap_or_else(|| "stdio".to_string());
     let args_json = serde_json::to_string(&input.args.unwrap_or_default()).map_err(|e| e.to_string())?;
     let env_json = serde_json::to_string(&input.env.unwrap_or_default()).map_err(|e| e.to_string())?;
     {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         conn.execute(
             "INSERT INTO mcp_servers (id, name, transport, command, args_json, env_json, enabled, created_at)
-             VALUES (?1, ?2, 'stdio', ?3, ?4, ?5, 1, ?6)",
-            params![id, input.name, input.command, args_json, env_json, now],
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, 1, ?7)",
+            params![id, input.name, transport, input.command, args_json, env_json, now],
         )
         .map_err(|e| e.to_string())?;
         append_audit(

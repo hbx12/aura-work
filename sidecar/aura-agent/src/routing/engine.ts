@@ -9,6 +9,9 @@ const QUALITY_ORDER: Record<ProviderId, string[]> = {
   deepseek: ["deepseek-chat", "deepseek-reasoner"],
   ollama: ["llama3.2", "llama3.1"],
   "openai-compatible": [],
+  minimax: ["abab6.5s-chat", "abab6.5g-chat"],
+  qwen: ["qwen-plus", "qwen-max", "qwen-turbo"],
+  lmstudio: [],
 };
 
 function modelCost(pricing: PricingRow[], providerId: string, modelId: string): number {
@@ -45,15 +48,15 @@ function pickModel(
 function providerPriority(policy: RoutingPolicy): ProviderId[] {
   switch (policy) {
     case "local-only":
-      return ["ollama"];
+      return ["ollama", "lmstudio"];
     case "privacy-first":
-      return ["ollama", "openai-compatible", "deepseek", "gemini", "openai", "anthropic"];
+      return ["ollama", "lmstudio", "openai-compatible", "deepseek", "gemini", "openai", "anthropic", "qwen", "minimax"];
     case "cost-first":
-      return ["deepseek", "gemini", "openai", "anthropic", "ollama", "openai-compatible"];
+      return ["deepseek", "gemini", "openai", "anthropic", "qwen", "minimax", "ollama", "lmstudio", "openai-compatible"];
     case "manual":
     case "quality-first":
     default:
-      return ["anthropic", "openai", "gemini", "deepseek", "ollama", "openai-compatible"];
+      return ["anthropic", "openai", "gemini", "deepseek", "qwen", "minimax", "ollama", "lmstudio", "openai-compatible"];
   }
 }
 

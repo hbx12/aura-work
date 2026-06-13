@@ -7,26 +7,37 @@ import type {
   PluginsHelperStatus,
 } from "@aura-os/shared";
 
+export interface SkillInfo {
+  pluginId: string;
+  name: string;
+  description: string;
+  prompt: string;
+  enabled: boolean;
+}
+
 export function usePlugins(projectId: string | null) {
   const [status, setStatus] = useState<PluginsHelperStatus | null>(null);
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
   const [mcpServers, setMcpServers] = useState<McpServerRecord[]>([]);
   const [marketplace, setMarketplace] = useState<MarketplaceEntry[]>([]);
+  const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      const [s, p, m, mk] = await Promise.all([
+      const [s, p, m, mk, sk] = await Promise.all([
         invoke<PluginsHelperStatus>("get_plugins_status"),
         invoke<InstalledPlugin[]>("list_installed_plugins"),
         invoke<McpServerRecord[]>("list_mcp_servers"),
         invoke<MarketplaceEntry[]>("list_marketplace_entries"),
+        invoke<SkillInfo[]>("list_local_skills"),
       ]);
       setStatus(s);
       setPlugins(p);
       setMcpServers(m);
       setMarketplace(mk);
+      setSkills(sk);
       setError(null);
     } catch (e) {
       setError(String(e));
@@ -99,10 +110,10 @@ export function usePlugins(projectId: string | null) {
   );
 
   const addMcpServer = useCallback(
-    async (name: string, command: string, args: string[]) => {
+    async (name: string, command: string, transport: string, args: string[]) => {
       setLoading(true);
       try {
-        await invoke("add_mcp_server", { input: { name, command, args } });
+        await invoke("add_mcp_server", { input: { name, command, transport, args } });
         await refresh();
       } finally {
         setLoading(false);
@@ -177,6 +188,7 @@ export function usePlugins(projectId: string | null) {
     plugins,
     mcpServers,
     marketplace,
+    skills,
     loading,
     error,
     refresh,

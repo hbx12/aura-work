@@ -128,6 +128,12 @@ fn provider_alias(model_id: &str) -> Option<&'static str> {
         Some("anthropic")
     } else if model_id.starts_with("google/") {
         Some("gemini")
+    } else if model_id.starts_with("minimax/") {
+        Some("minimax")
+    } else if model_id.starts_with("qwen/") {
+        Some("qwen")
+    } else if model_id.starts_with("lmstudio/") {
+        Some("lmstudio")
     } else {
         None
     }

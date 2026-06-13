@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Icon } from "@aura-os/ui";
 import type {
@@ -21,14 +21,133 @@ interface PluginsPageProps {
   onInstallLocal: (path: string) => Promise<InstalledPlugin>;
   onUninstall: (pluginId: string) => Promise<void>;
   onSetPluginEnabled: (pluginId: string, enabled: boolean) => Promise<void>;
-  onAddMcpServer: (name: string, command: string, args: string[]) => Promise<void>;
+  onAddMcpServer: (name: string, command: string, transport: string, args: string[]) => Promise<void>;
   onDeleteMcpServer: (serverId: string) => Promise<void>;
   onSetMcpEnabled: (serverId: string, enabled: boolean) => Promise<void>;
   onSyncMarketplace: () => Promise<MarketplaceEntry[]>;
   t?: (key: string, params?: Record<string, string>) => string;
+  locale?: string;
 }
 
 const PLUGIN_COLORS = ["#5a8a52", "#3a6fc4", "#4b5bb0", "#645d8e", "#a44f2c", "#3a352c"];
+
+const MCP_PRESETS_EN = [
+  {
+    name: "Custom (Manual)",
+    transport: "stdio",
+    command: "",
+    args: "",
+    envHelp: "Enter command and arguments manually.",
+  },
+  {
+    name: "Filesystem (Access local files)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-filesystem /path/to/folder",
+    envHelp: "Note: Replace /path/to/folder with your desired local folder path.",
+  },
+  {
+    name: "GitHub (Manage repos and issues)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-github",
+    envHelp: "Note: Requires environment variable: GITHUB_PERSONAL_ACCESS_TOKEN=your_token",
+  },
+  {
+    name: "Postgres Database (Query relational databases)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-postgres postgres://localhost/db",
+    envHelp: "Note: Replace connection string with your Postgres URL.",
+  },
+  {
+    name: "SQLite Database (Query SQLite files)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-sqlite /path/to/db.sqlite",
+    envHelp: "Note: Replace /path/to/db.sqlite with your SQLite file path.",
+  },
+  {
+    name: "Web Browser (Scrape web pages with Puppeteer)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-puppeteer",
+    envHelp: "Runs a headless browser to extract text from web pages.",
+  },
+  {
+    name: "OpenAI Codex Integration (Automate coding)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-codex",
+    envHelp: "Connects to OpenAI Codex. Note: Requires environment variable: CODEX_API_KEY=your_key",
+  },
+  {
+    name: "Claude Desktop Integration (SSE)",
+    transport: "sse",
+    command: "http://localhost:8765/sse",
+    args: "",
+    envHelp: "Connects to Claude Desktop App via SSE. Make sure your Claude Desktop SSE server is running.",
+  },
+];
+
+const MCP_PRESETS_AR = [
+  {
+    name: "مخصص (يدوي)",
+    transport: "stdio",
+    command: "",
+    args: "",
+    envHelp: "أدخل الأمر والوسيطات يدوياً.",
+  },
+  {
+    name: "الملفات المحلية (الوصول للمجلدات)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-filesystem /path/to/folder",
+    envHelp: "ملاحظة: استبدل /path/to/folder بمسار المجلد المحلي على جهازك.",
+  },
+  {
+    name: "مستودعات GitHub (إدارة المشاكل والأكواد)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-github",
+    envHelp: "ملاحظة: يتطلب متغير البيئة: GITHUB_PERSONAL_ACCESS_TOKEN=your_token",
+  },
+  {
+    name: "قاعدة بيانات Postgres (الاستعلام من قاعدة البيانات)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-postgres postgres://localhost/db",
+    envHelp: "ملاحظة: استبدل الرابط بعنوان اتصال قاعدة البيانات الخاص بك.",
+  },
+  {
+    name: "قاعدة بيانات SQLite (الاستعلام من ملفات SQLite)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-sqlite /path/to/db.sqlite",
+    envHelp: "ملاحظة: استبدل المسار بمسار ملف SQLite على جهازك.",
+  },
+  {
+    name: "متصفح الويب (قراءة الصفحات باستخدام Puppeteer)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-puppeteer",
+    envHelp: "يشغل متصفحاً خفياً لاستخراج النصوص والمحتويات من الويب.",
+  },
+  {
+    name: "تكامل OpenAI Codex (أتمتة البرمجة)",
+    transport: "stdio",
+    command: "npx",
+    args: "-y @modelcontextprotocol/server-codex",
+    envHelp: "يتصل بـ OpenAI Codex. ملاحظة: يتطلب متغير البيئة: CODEX_API_KEY=your_key",
+  },
+  {
+    name: "تكامل Claude Desktop (عبر SSE)",
+    transport: "sse",
+    command: "http://localhost:8765/sse",
+    args: "",
+    envHelp: "يتصل بتطبيق كلود عبر SSE. تأكد من تشغيل خادم كلود SSE على جهازك.",
+  },
+];
 
 function pluginColor(id: string) {
   let hash = 0;
@@ -59,15 +178,41 @@ export function PluginsPage({
   onSetMcpEnabled,
   onSyncMarketplace,
   t = (k) => k,
+  locale,
 }: PluginsPageProps) {
   const [showMcpForm, setShowMcpForm] = useState(false);
   const [mcpName, setMcpName] = useState("");
+  const [mcpTransport, setMcpTransport] = useState("stdio");
   const [mcpCommand, setMcpCommand] = useState("npx");
   const [mcpArgs, setMcpArgs] = useState("-y @modelcontextprotocol/server-filesystem .");
   const [message, setMessage] = useState<string | null>(null);
 
+  const [activeTab, setActiveTab] = useState<"plugins" | "skills">("plugins");
+  const [skills, setSkills] = useState<any[]>([]);
+  const [showSkillForm, setShowSkillForm] = useState(false);
+  const [skillName, setSkillName] = useState("");
+  const [skillDesc, setSkillDesc] = useState("");
+  const [skillPrompt, setSkillPrompt] = useState("");
+  const [skillMessage, setSkillMessage] = useState<string | null>(null);
+
+  const refreshSkills = async () => {
+    try {
+      const list = await invoke<any[]>("list_local_skills");
+      setSkills(list);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    void refreshSkills();
+  }, [plugins]);
+
   const activePlugins = plugins.filter((p) => p.enabled).length;
   const runningMcp = mcpServers.filter((s) => s.enabled).length;
+
+  const isAr = locale?.startsWith("ar");
+  const presetsList = isAr ? MCP_PRESETS_AR : MCP_PRESETS_EN;
 
   const pickAndInstall = async () => {
     try {
@@ -86,243 +231,435 @@ export function PluginsPage({
         <div className="ph-row">
           <div className="htext">
             <h1>{t("nav.plugins")}</h1>
-            <p>{t("plugins.subtitle")}</p>
+            <div className="seg" style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                className={activeTab === "plugins" ? "active" : ""}
+                onClick={() => setActiveTab("plugins")}
+              >
+                {isAr ? "الإضافات و MCP" : "Plugins & MCP"}
+              </button>
+              <button
+                type="button"
+                className={activeTab === "skills" ? "active" : ""}
+                onClick={() => setActiveTab("skills")}
+              >
+                {isAr ? "المهارات (Skills)" : "Skills"}
+              </button>
+            </div>
           </div>
           <div className="ph-actions">
-            <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void pickAndInstall()}>
-              <Icon name="plus" size={14} />
-              {t("plugins.addPlugin")}
-            </button>
+            {activeTab === "plugins" ? (
+              <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void pickAndInstall()}>
+                <Icon name="plus" size={14} />
+                {t("plugins.addPlugin")}
+              </button>
+            ) : (
+              <button type="button" className="btn secondary sm" disabled={loading} onClick={() => setShowSkillForm((s) => !s)}>
+                <Icon name="plus" size={14} />
+                {isAr ? "إنشاء مهارة جديدة" : "Create New Skill"}
+              </button>
+            )}
           </div>
         </div>
       </div>
       <div className="page-scroll">
         <div className="page-canvas">
-          {(message || error) && (
-            <div className={`banner${error ? " err" : ""}`}>{error ?? message}</div>
-          )}
+          {activeTab === "plugins" && (
+            <>
+              {(message || error) && (
+                <div className={`banner${error ? " err" : ""}`}>{error ?? message}</div>
+              )}
 
-          {status && !status.running && (
-            <div className="section">
-              <div className="panel">
-                <div className="panel-row">
-                  <div className="prov-logo" style={{ background: "var(--accent)" }}>
-                    <Icon name="puzzle" size={17} />
+              {status && !status.running && (
+                <div className="section">
+                  <div className="panel">
+                    <div className="panel-row">
+                      <div className="prov-logo" style={{ background: "var(--accent)" }}>
+                        <Icon name="puzzle" size={17} />
+                      </div>
+                      <div className="prov-meta">
+                        <div className="prov-name">{t("plugins.helper")}</div>
+                        <div className="prov-sub">{status.remediation ?? t("plugins.helperOffline")}</div>
+                      </div>
+                      <button type="button" className="btn primary sm" disabled={loading} onClick={() => void onStart()}>
+                        {t("common.start")}
+                      </button>
+                    </div>
                   </div>
-                  <div className="prov-meta">
-                    <div className="prov-name">{t("plugins.helper")}</div>
-                    <div className="prov-sub">{status.remediation ?? t("plugins.helperOffline")}</div>
-                  </div>
-                  <button type="button" className="btn primary sm" disabled={loading} onClick={() => void onStart()}>
-                    {t("common.start")}
-                  </button>
+                </div>
+              )}
+
+              <div className="section">
+                <div className="sec-head">
+                  <span className="sec-label">
+                    {t("plugins.installed")}
+                    <span className="count">
+                      {activePlugins} {t("plugins.active")}
+                    </span>
+                  </span>
+                  <span className="muted" style={{ font: "var(--text-caption)" }}>
+                    {status?.running ? t("common.running") : t("common.offline")} · {status?.toolCount ?? 0}{" "}
+                    {t("plugins.tools")}
+                  </span>
+                </div>
+                <div className="panel">
+                  {plugins.length === 0 ? (
+                    <div className="empty" style={{ padding: 28 }}>
+                      <div className="em-ic">
+                        <Icon name="puzzle" size={26} />
+                      </div>
+                      <p>{t("plugins.empty")}</p>
+                    </div>
+                  ) : (
+                    plugins.map((p) => (
+                      <div key={p.id} className="panel-row">
+                        <div className="prov-logo" style={{ background: pluginColor(p.id), color: "#fff" }}>
+                          {pluginInitials(p.name)}
+                        </div>
+                        <div className="prov-meta">
+                          <div className="prov-name">
+                            {p.name}
+                            <span className="ver">v{p.version}</span>
+                          </div>
+                          <div className="prov-sub">
+                            {p.description ?? p.id} · {p.toolCount} {t("plugins.tools")}
+                          </div>
+                          <div className="perm-chips">
+                            <span className="perm-chip">{t("plugins.scopeLocal")}</span>
+                            {!p.enabled && <span className="perm-chip warn">{t("common.stopped")}</span>}
+                          </div>
+                        </div>
+                        <div className="mini-acts">
+                          <button
+                            type="button"
+                            className="btn ghost icon sm"
+                            title={t("plugins.uninstall")}
+                            disabled={loading}
+                            onClick={() => void onUninstall(p.id)}
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
+                          <div
+                            className={`toggle${p.enabled ? " on" : ""}`}
+                            onClick={() => void onSetPluginEnabled(p.id, !p.enabled)}
+                            onKeyDown={(e) => e.key === "Enter" && void onSetPluginEnabled(p.id, !p.enabled)}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={p.enabled ? t("common.stop") : t("common.start")}
+                          >
+                            <i />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
-            </div>
-          )}
 
-          <div className="section">
-            <div className="sec-head">
-              <span className="sec-label">
-                {t("plugins.installed")}
-                <span className="count">
-                  {activePlugins} {t("plugins.active")}
-                </span>
-              </span>
-              <span className="muted" style={{ font: "var(--text-caption)" }}>
-                {status?.running ? t("common.running") : t("common.offline")} · {status?.toolCount ?? 0}{" "}
-                {t("plugins.tools")}
-              </span>
-            </div>
-            <div className="panel">
-              {plugins.length === 0 ? (
-                <div className="empty" style={{ padding: 28 }}>
-                  <div className="em-ic">
-                    <Icon name="puzzle" size={26} />
-                  </div>
-                  <p>{t("plugins.empty")}</p>
-                </div>
-              ) : (
-                plugins.map((p) => (
-                  <div key={p.id} className="panel-row">
-                    <div className="prov-logo" style={{ background: pluginColor(p.id), color: "#fff" }}>
-                      {pluginInitials(p.name)}
-                    </div>
-                    <div className="prov-meta">
-                      <div className="prov-name">
-                        {p.name}
-                        <span className="ver">v{p.version}</span>
-                      </div>
-                      <div className="prov-sub">
-                        {p.description ?? p.id} · {p.toolCount} {t("plugins.tools")}
-                      </div>
-                      <div className="perm-chips">
-                        <span className="perm-chip">{t("plugins.scopeLocal")}</span>
-                        {!p.enabled && <span className="perm-chip warn">{t("common.stopped")}</span>}
-                      </div>
-                    </div>
-                    <div className="mini-acts">
-                      <button
-                        type="button"
-                        className="btn ghost icon sm"
-                        title={t("plugins.uninstall")}
-                        disabled={loading}
-                        onClick={() => void onUninstall(p.id)}
-                      >
-                        <Icon name="trash" size={15} />
-                      </button>
-                      <div
-                        className={`toggle${p.enabled ? " on" : ""}`}
-                        onClick={() => void onSetPluginEnabled(p.id, !p.enabled)}
-                        onKeyDown={(e) => e.key === "Enter" && void onSetPluginEnabled(p.id, !p.enabled)}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={p.enabled ? t("common.stop") : t("common.start")}
-                      >
-                        <i />
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="section">
-            <div className="sec-head">
-              <span className="sec-label">
-                {t("plugins.mcpServers")}
-                <span className="count">
-                  {runningMcp} {t("plugins.running")}
-                </span>
-              </span>
-              <button type="button" className="btn ghost sm" onClick={() => setShowMcpForm((s) => !s)}>
-                <Icon name="plus" size={14} />
-                {t("plugins.addServer")}
-              </button>
-            </div>
-            {showMcpForm && (
-              <div className="panel cloud-form" style={{ marginBottom: 12 }}>
-                <div className="form-grid">
-                  <label>
-                    {t("plugins.serverName")}
-                    <input value={mcpName} onChange={(e) => setMcpName(e.target.value)} placeholder="filesystem" />
-                  </label>
-                  <label>
-                    {t("plugins.command")}
-                    <input value={mcpCommand} onChange={(e) => setMcpCommand(e.target.value)} placeholder="npx" />
-                  </label>
-                </div>
-                <label>
-                  {t("plugins.args")}
-                  <input
-                    value={mcpArgs}
-                    onChange={(e) => setMcpArgs(e.target.value)}
-                    placeholder="-y @modelcontextprotocol/server-filesystem ."
-                  />
-                </label>
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="btn primary sm"
-                    disabled={loading || !mcpName.trim() || !mcpCommand.trim()}
-                    onClick={() => {
-                      const args = mcpArgs.trim() ? mcpArgs.trim().split(/\s+/) : [];
-                      void onAddMcpServer(mcpName.trim(), mcpCommand.trim(), args).then(() => {
-                        setMcpName("");
-                        setShowMcpForm(false);
-                        setMessage(`${t("plugins.added")}: ${mcpName}`);
-                      });
-                    }}
-                  >
+              <div className="section">
+                <div className="sec-head">
+                  <span className="sec-label">
+                    {t("plugins.mcpServers")}
+                    <span className="count">
+                      {runningMcp} {t("plugins.running")}
+                    </span>
+                  </span>
+                  <button type="button" className="btn ghost sm" onClick={() => setShowMcpForm((s) => !s)}>
+                    <Icon name="plus" size={14} />
                     {t("plugins.addServer")}
                   </button>
                 </div>
-              </div>
-            )}
-            <div className="panel">
-              {mcpServers.length === 0 ? (
-                <div className="panel-row muted">{t("plugins.noMcp")}</div>
-              ) : (
-                mcpServers.map((s) => (
-                  <div key={s.id} className="panel-row">
-                    <div
-                      className="prov-logo"
-                      style={{
-                        background: s.enabled ? "var(--agent)" : "var(--bg-3)",
-                        color: s.enabled ? "#fff" : "var(--fg-3)",
-                      }}
-                    >
-                      <Icon name="plug" size={17} />
+                {showMcpForm && (
+                  <div className="panel cloud-form" style={{ marginBottom: 12, gap: 14 }}>
+                    <div className="form-grid">
+                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span>{isAr ? "قوالب سريعة للأجهزة المساعدة" : "Server Template Preset"}</span>
+                        <select
+                          className="settings-select"
+                          style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "8px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)" }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const preset = presetsList.find((p) => p.name === val);
+                            if (preset && val !== presetsList[0].name) {
+                              const englishPreset = (isAr ? MCP_PRESETS_EN[presetsList.indexOf(preset)] : preset);
+                              setMcpName(englishPreset.name.split(" ")[0].toLowerCase());
+                              setMcpCommand(preset.command);
+                              setMcpArgs(preset.args);
+                              setMcpTransport(preset.transport || "stdio");
+                              setMessage(preset.envHelp);
+                            }
+                          }}
+                        >
+                          {presetsList.map((p) => (
+                            <option key={p.name} value={p.name}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span>{isAr ? "نوع الاتصال (Transport)" : "Transport Type"}</span>
+                        <select
+                          className="settings-select"
+                          style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "8px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)" }}
+                          value={mcpTransport}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setMcpTransport(val);
+                            if (val === "sse") {
+                              setMcpCommand("http://localhost:8765/sse");
+                              setMcpArgs("");
+                            } else if (val === "websocket") {
+                              setMcpCommand("ws://localhost:8080");
+                              setMcpArgs("");
+                            } else {
+                              setMcpCommand("npx");
+                              setMcpArgs("-y @modelcontextprotocol/server-filesystem .");
+                            }
+                          }}
+                        >
+                          <option value="stdio">{isAr ? "سطر الأوامر (stdio)" : "Command Line (stdio)"}</option>
+                          <option value="sse">{isAr ? "أحداث خادم SSE (sse)" : "Server-Sent Events (sse)"}</option>
+                          <option value="websocket">{isAr ? "ويب سوكيت (websocket)" : "WebSockets (websocket)"}</option>
+                        </select>
+                      </label>
                     </div>
-                    <div className="prov-meta">
-                      <div className="prov-name">
-                        {s.name}
-                        {s.enabled ? (
-                          <span className="tag ok">{t("common.running")}</span>
-                        ) : (
-                          <span className="tag off">{t("common.stopped")}</span>
-                        )}
-                      </div>
-                      <div className="prov-sub endpoint">
-                        {s.command} {s.args.join(" ")}
-                      </div>
+                    <div className="form-grid">
+                      <label>
+                        {t("plugins.serverName")}
+                        <input value={mcpName} onChange={(e) => setMcpName(e.target.value)} placeholder="filesystem" />
+                      </label>
+                      <label>
+                        {mcpTransport === "stdio" ? t("plugins.command") : (isAr ? "رابط الخدمة (URL)" : "Service URL")}
+                        <input value={mcpCommand} onChange={(e) => setMcpCommand(e.target.value)} placeholder={mcpTransport === "stdio" ? "npx" : "http://localhost:8765/sse"} />
+                      </label>
                     </div>
-                    <div className="mini-acts">
+                    {mcpTransport === "stdio" && (
+                      <label>
+                        {t("plugins.args")}
+                        <input
+                          value={mcpArgs}
+                          onChange={(e) => setMcpArgs(e.target.value)}
+                          placeholder="-y @modelcontextprotocol/server-filesystem ."
+                        />
+                      </label>
+                    )}
+                    <div className="form-actions">
                       <button
                         type="button"
-                        className="btn ghost icon sm"
-                        title={t("plugins.remove")}
-                        disabled={loading}
-                        onClick={() => void onDeleteMcpServer(s.id)}
+                        className="btn primary sm"
+                        disabled={loading || !mcpName.trim() || !mcpCommand.trim()}
+                        onClick={() => {
+                          const args = mcpTransport === "stdio" && mcpArgs.trim() ? mcpArgs.trim().split(/\s+/) : [];
+                          void onAddMcpServer(mcpName.trim(), mcpCommand.trim(), mcpTransport, args).then(() => {
+                            setMcpName("");
+                            setMcpTransport("stdio");
+                            setMcpCommand("npx");
+                            setMcpArgs("-y @modelcontextprotocol/server-filesystem .");
+                            setShowMcpForm(false);
+                            setMessage(`${t("plugins.added")}: ${mcpName}`);
+                          });
+                        }}
                       >
-                        <Icon name="trash" size={15} />
+                        {t("plugins.addServer")}
                       </button>
-                      <div
-                        className={`toggle${s.enabled ? " on" : ""}`}
-                        onClick={() => void onSetMcpEnabled(s.id, !s.enabled)}
-                        onKeyDown={(e) => e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <i />
-                      </div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
+                )}
+                <div className="panel">
+                  {mcpServers.length === 0 ? (
+                    <div className="panel-row muted">{t("plugins.noMcp")}</div>
+                  ) : (
+                    mcpServers.map((s) => (
+                      <div key={s.id} className="panel-row">
+                        <div
+                          className="prov-logo"
+                          style={{
+                            background: s.enabled ? "var(--agent)" : "var(--bg-3)",
+                            color: s.enabled ? "#fff" : "var(--fg-3)",
+                          }}
+                        >
+                          <Icon name="plug" size={17} />
+                        </div>
+                        <div className="prov-meta">
+                          <div className="prov-name">
+                            {s.name}
+                            {s.enabled ? (
+                              <span className="tag ok">{t("common.running")}</span>
+                            ) : (
+                              <span className="tag off">{t("common.stopped")}</span>
+                            )}
+                          </div>
+                          <div className="prov-sub endpoint">
+                            {s.command} {s.args.join(" ")}
+                          </div>
+                        </div>
+                        <div className="mini-acts">
+                          <button
+                            type="button"
+                            className="btn ghost icon sm"
+                            title={t("plugins.remove")}
+                            disabled={loading}
+                            onClick={() => void onDeleteMcpServer(s.id)}
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
+                          <div
+                            className={`toggle${s.enabled ? " on" : ""}`}
+                            onClick={() => void onSetMcpEnabled(s.id, !s.enabled)}
+                            onKeyDown={(e) => e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled)}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <i />
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
 
-          {marketplace.length > 0 && (
-            <div className="section">
-              <div className="sec-head">
-                <span className="sec-label">{t("plugins.marketplace")}</span>
-                <button type="button" className="btn ghost sm" disabled={loading} onClick={() => void onSyncMarketplace()}>
-                  {t("plugins.syncRegistry")}
-                </button>
-              </div>
-              <div className="panel">
-                {marketplace.map((e) => (
-                  <div key={e.id} className="panel-row">
-                    <div className="prov-meta">
-                      <div className="prov-name">
-                        {e.name} <span className="ver">v{e.version}</span>
-                      </div>
-                      <div className="prov-sub">{e.description ?? e.id}</div>
-                    </div>
+              {marketplace.length > 0 && (
+                <div className="section">
+                  <div className="sec-head">
+                    <span className="sec-label">{t("plugins.marketplace")}</span>
+                    <button type="button" className="btn ghost sm" disabled={loading} onClick={() => void onSyncMarketplace()}>
+                      {t("plugins.syncRegistry")}
+                    </button>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="panel">
+                    {marketplace.map((e) => (
+                      <div key={e.id} className="panel-row">
+                        <div className="prov-meta">
+                          <div className="prov-name">
+                            {e.name} <span className="ver">v{e.version}</span>
+                          </div>
+                          <div className="prov-sub">{e.description ?? e.id}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {status?.running && (
+                <div className="section">
+                  <button type="button" className="btn sm" disabled={loading} onClick={() => void onStop()}>
+                    {t("plugins.stopHelper")}
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
-          {status?.running && (
-            <div className="section">
-              <button type="button" className="btn sm" disabled={loading} onClick={() => void onStop()}>
-                {t("plugins.stopHelper")}
-              </button>
-            </div>
+          {activeTab === "skills" && (
+            <>
+              {(skillMessage || error) && (
+                <div className={`banner${error ? " err" : ""}`}>{error ?? skillMessage}</div>
+              )}
+
+              {showSkillForm && (
+                <div className="panel cloud-form" style={{ marginBottom: 12, gap: 14 }}>
+                  <div className="form-grid">
+                    <label>
+                      {isAr ? "اسم المهارة" : "Skill Name"}
+                      <input value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="frontend-design" />
+                    </label>
+                    <label>
+                      {isAr ? "وصف المهارة" : "Description"}
+                      <input value={skillDesc} onChange={(e) => setSkillDesc(e.target.value)} placeholder="A skill to design beautiful UIs" />
+                    </label>
+                  </div>
+                  <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <span>{isAr ? "التعليمات والـ Prompt" : "Instructions & Prompt"}</span>
+                    <textarea
+                      value={skillPrompt}
+                      onChange={(e) => setSkillPrompt(e.target.value)}
+                      placeholder={isAr ? "اكتب هنا التعليمات البرمجية للمهارة..." : "Enter the instructions for the skill here..."}
+                      rows={5}
+                      style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
+                    />
+                  </label>
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="btn primary sm"
+                      disabled={loading || !skillName.trim() || !skillPrompt.trim()}
+                      onClick={() => {
+                        void invoke("create_local_skill", {
+                          input: {
+                            name: skillName.trim(),
+                            description: skillDesc.trim(),
+                            prompt: skillPrompt.trim(),
+                          },
+                        }).then(() => {
+                          setSkillName("");
+                          setSkillDesc("");
+                          setSkillPrompt("");
+                          setShowSkillForm(false);
+                          setSkillMessage(isAr ? "تم إنشاء وحفظ المهارة بنجاح" : "Skill created and saved successfully");
+                          void refreshSkills();
+                        }).catch((err) => {
+                          setSkillMessage(String(err));
+                        });
+                      }}
+                    >
+                      {isAr ? "حفظ المهارة" : "Save Skill"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="panel">
+                {skills.length === 0 ? (
+                  <div className="empty" style={{ padding: 28 }}>
+                    <div className="em-ic">
+                      <Icon name="puzzle" size={26} />
+                    </div>
+                    <p>{isAr ? "لا يوجد مهارات مضافة حالياً. أنشئ مهارة جديدة للبدء." : "No skills installed. Create a new skill to get started."}</p>
+                  </div>
+                ) : (
+                  skills.map((s) => (
+                    <div key={s.pluginId} className="panel-row">
+                      <div className="prov-logo" style={{ background: "var(--accent)" }}>
+                        <Icon name="puzzle" size={17} />
+                      </div>
+                      <div className="prov-meta">
+                        <div className="prov-name">
+                          {s.name}
+                        </div>
+                        <div className="prov-sub">
+                          {s.description || s.pluginId}
+                        </div>
+                        <div className="perm-chips" style={{ marginTop: 6 }}>
+                          <span className="perm-chip" style={{ whiteSpace: "pre-wrap", fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--bg-3)", padding: "4px 8px" }}>
+                            {s.prompt.length > 120 ? s.prompt.slice(0, 120) + "..." : s.prompt}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mini-acts">
+                        <button
+                          type="button"
+                          className="btn ghost icon sm"
+                          title={isAr ? "حذف" : "Delete"}
+                          disabled={loading}
+                          onClick={() => {
+                            void onUninstall(s.pluginId).then(() => {
+                              setSkillMessage(isAr ? "تم حذف المهارة بنجاح" : "Skill deleted successfully");
+                              void refreshSkills();
+                            });
+                          }}
+                        >
+                          <Icon name="trash" size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -7,12 +7,15 @@ import type { AppLocaleSettings, LocaleInfo, PackagingInfo, UpdateCheckResult } 
 import { CloudPage } from "./CloudPage";
 import { ExtensionsPage } from "./ExtensionsPage";
 import type { CloudAccountStatus, CloudDeviceInfo, CloudSyncStatus, BridgeClientRecord, BridgeStatus } from "@aura-os/shared";
+import { PetSprite } from "./PetSprites";
+import { invoke } from "@tauri-apps/api/core";
 
-type SettingsTab = "general" | "vault" | "vm" | "cloud" | "extension";
+type SettingsTab = "general" | "vault" | "vm" | "cloud" | "extension" | "pet";
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
   { group: "Preferences" },
   { id: "general", icon: "languages", labelKey: "settings.language" },
+  { id: "pet", icon: "sparkles", labelKey: "settings.pet" },
   { id: "vault", icon: "key-round", labelKey: "settings.vault" },
   { group: "Runtime & connections" },
   { id: "vm", icon: "hard-drive", labelKey: "settings.vm" },
@@ -140,6 +143,18 @@ function ServicePanel({
   );
 }
 
+const PETS_LIST = [
+  { id: "robot", nameEn: "AuraBot", nameAr: "أورابوت", descEn: "Retro computer bot", descAr: "روبوت كلاسيكي لطيف" },
+  { id: "cat", nameEn: "Mochi the Cat", nameAr: "موشي القطة", descEn: "Chubby orange tabby", descAr: "قطة برتقالية سمينة" },
+  { id: "dog", nameEn: "Shiba Inu", nameAr: "شيبا الكلب", descEn: "Gentle cream-tan pup", descAr: "جرو لطيف ومبهج" },
+  { id: "bunny", nameEn: "Bunny", nameAr: "الأرنب", descEn: "White fluffy rabbit", descAr: "أرنب أبيض ناعم" },
+  { id: "panda", nameEn: "Panda", nameAr: "الباندا", descEn: "Classic black & white bear", descAr: "دب الباندا الشهير" },
+  { id: "fox", nameEn: "Fox", nameAr: "الثعلب", descEn: "Vibrant orange kit", descAr: "ثعلب برتقالي ذكي" },
+  { id: "hamster", nameEn: "Hamster", nameAr: "الهامستر", descEn: "Cheery golden hamster", descAr: "هامستر ذهبي سعيد" },
+  { id: "penguin", nameEn: "Penguin", nameAr: "البطريق", descEn: "Penguin with earmuffs", descAr: "بطريق يرتدي غطاء أذن" },
+  { id: "koala", nameEn: "Koala", nameAr: "الكوالا", descEn: "Fluffy gray koala bear", descAr: "دب كوالا رمادي منفوش" }
+];
+
 export function SettingsPage({
   vaultStatus,
   vmStatus,
@@ -201,6 +216,7 @@ export function SettingsPage({
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<SettingsTab>("general");
+  const [selectedPet, setSelectedPet] = useState(() => localStorage.getItem("selected-pet") || "robot");
 
   const showMsg = (m: string) => setMessage(m);
   const localeKey = (id: string) => `lang.${id}` as keyof MessageCatalog;
@@ -579,6 +595,82 @@ export function SettingsPage({
                       }
                     }}
                   />
+                </div>
+              </>
+            )}
+
+            {tab === "pet" && (
+              <>
+                <div className="s-title">{t("settings.pet")}</div>
+                <p className="s-sub">{t("settings.petDesc")}</p>
+                <div className="section">
+                  <div className="panel" style={{ padding: "20px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                      <span className="sec-label" style={{ margin: 0 }}>
+                        {localeSettings?.locale === "ar" ? "اختر حيوانك الأليف النشط" : "Select Your Active Pet"}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn primary"
+                        onClick={() => {
+                          const current = localStorage.getItem("selected-pet") || "robot";
+                          invoke("toggle_pet_window", { petType: current }).catch(console.error);
+                        }}
+                      >
+                        {localeSettings?.locale === "ar" ? "تشغيل / إخفاء الأليف" : "Toggle Pet Window"}
+                      </button>
+                    </div>
+
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                      gap: "16px",
+                      marginTop: "16px"
+                    }}>
+                      {PETS_LIST.map((pet) => {
+                        const isSelected = selectedPet === pet.id;
+                        const name = localeSettings?.locale === "ar" ? pet.nameAr : pet.nameEn;
+                        const desc = localeSettings?.locale === "ar" ? pet.descAr : pet.descEn;
+                        return (
+                          <div
+                            key={pet.id}
+                            onClick={() => {
+                              localStorage.setItem("selected-pet", pet.id);
+                              setSelectedPet(pet.id);
+                              window.dispatchEvent(new StorageEvent("storage", {
+                                key: "selected-pet",
+                                newValue: pet.id,
+                                storageArea: localStorage
+                              }));
+                            }}
+                            style={{
+                              border: isSelected ? "2px solid var(--accent, #4EA8DE)" : "1px solid var(--border-2, #30303b)",
+                              borderRadius: "12px",
+                              padding: "16px",
+                              background: isSelected ? "var(--accent-dim, rgba(78, 168, 222, 0.08))" : "var(--bg-2, #1e1e24)",
+                              cursor: "pointer",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              textAlign: "center",
+                              transition: "all 0.2s ease-in-out",
+                              boxShadow: isSelected ? "0 4px 12px rgba(78, 168, 222, 0.15)" : "none"
+                            }}
+                          >
+                            <div style={{ width: "64px", height: "64px", marginBottom: "12px" }}>
+                              <PetSprite type={pet.id} tiltX={0} tiltY={0} facing="left" />
+                            </div>
+                            <div style={{ fontWeight: "600", fontSize: "14px", color: "var(--fg-1, #e3e3e8)", marginBottom: "4px" }}>
+                              {name}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "var(--fg-3, #8e8e93)" }}>
+                              {desc}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </>
             )}

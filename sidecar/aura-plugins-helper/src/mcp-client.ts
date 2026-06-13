@@ -1,5 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { WebSocketClientTransport } from "@modelcontextprotocol/sdk/client/websocket.js";
 import type {
   CallResult,
   HelperConfig,
@@ -40,15 +42,23 @@ export async function reloadMcp(config: HelperConfig) {
 }
 
 async function connectServer(server: McpServerConfig) {
-  const baseEnv: Record<string, string> = {};
-  for (const [k, v] of Object.entries(process.env)) {
-    if (typeof v === "string") baseEnv[k] = v;
+  let transport;
+  if (server.transport === "sse") {
+    transport = new SSEClientTransport(new URL(server.command));
+  } else if (server.transport === "websocket" || server.transport === "ws") {
+    transport = new WebSocketClientTransport(new URL(server.command));
+  } else {
+    const baseEnv: Record<string, string> = {};
+    for (const [k, v] of Object.entries(process.env)) {
+      if (typeof v === "string") baseEnv[k] = v;
+    }
+    transport = new StdioClientTransport({
+      command: server.command,
+      args: server.args,
+      env: { ...baseEnv, ...envToStrings(server.env as Record<string, unknown>) },
+    });
   }
-  const transport = new StdioClientTransport({
-    command: server.command,
-    args: server.args,
-    env: { ...baseEnv, ...envToStrings(server.env as Record<string, unknown>) },
-  });
+
   const client = new Client({ name: "aura-plugins-helper", version: "0.6.0" });
   await client.connect(transport);
   const listed = await client.listTools();

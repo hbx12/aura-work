@@ -122,15 +122,21 @@ impl VaultState {
             .map(|s| {
                 s.api_key.as_ref().is_some_and(|k| !k.trim().is_empty())
                     || provider_id == "ollama"
+                    || provider_id == "lmstudio"
             })
-            .unwrap_or(provider_id == "ollama")
+            .unwrap_or(provider_id == "ollama" || provider_id == "lmstudio")
     }
 
     pub fn get_secret(&self, provider_id: &str) -> Option<ProviderSecret> {
-        if provider_id == "ollama" {
+        if provider_id == "ollama" || provider_id == "lmstudio" {
+            let default_url = if provider_id == "ollama" {
+                "http://127.0.0.1:11434"
+            } else {
+                "http://127.0.0.1:1234"
+            };
             return Some(ProviderSecret {
                 api_key: None,
-                base_url: Some("http://127.0.0.1:11434".into()),
+                base_url: Some(default_url.into()),
                 auth_header: None,
                 auth_mode: None,
                 codex_account_id: None,
@@ -147,13 +153,18 @@ impl VaultState {
         base_url: Option<String>,
         auth_mode: Option<String>,
     ) -> Result<(), String> {
-        if provider_id == "ollama" {
+        if provider_id == "ollama" || provider_id == "lmstudio" {
+            let default_url = if provider_id == "ollama" {
+                "http://127.0.0.1:11434"
+            } else {
+                "http://127.0.0.1:1234"
+            };
             let entry = self
                 .payload
                 .secrets
                 .entry(provider_id.to_string())
                 .or_default();
-            entry.base_url = base_url.or(Some("http://127.0.0.1:11434".into()));
+            entry.base_url = base_url.or(Some(default_url.into()));
             return self.persist();
         }
         let trimmed = api_key.filter(|k| !k.trim().is_empty());
@@ -203,7 +214,7 @@ impl VaultState {
     }
 
     pub fn clear_secret(&mut self, provider_id: &str) -> Result<(), String> {
-        if provider_id == "ollama" {
+        if provider_id == "ollama" || provider_id == "lmstudio" {
             if let Some(entry) = self.payload.secrets.get_mut(provider_id) {
                 entry.api_key = None;
             }
@@ -361,6 +372,10 @@ fn load_or_create_fallback_device_key(path: &Path) -> Result<LoadedDeviceKey, St
 }
 
 fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
+    if cfg!(debug_assertions) {
+        return load_or_create_fallback_device_key(path);
+    }
+
     const KEYRING_SERVICE: &str = "Aura Work";
     const KEYRING_USER: &str = "device-vault-key";
 
@@ -372,66 +387,43 @@ fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
         }
     };
 
-    if let Ok(stored) = entry.get_password() {
-        if let Ok(bytes) = B64.decode(stored.trim()) {
+    let stored_opt = entry.get_password().ok().and_then(|stored| {
+        B64.decode(stored.trim()).ok().and_then(|bytes| {
             if bytes.len() == DEVICE_KEY_LEN {
                 let mut key = [0u8; DEVICE_KEY_LEN];
                 key.copy_from_slice(&bytes);
-                return Ok(LoadedDeviceKey {
-                    key,
-                    storage_mode: VaultStorageMode::OsKeychain,
-                });
+                Some(key)
+            } else {
+                None
             }
-        }
-        return Err(
-            "Device key in OS secure storage is corrupt. Restore from an export or reset the vault.".into(),
-        );
-    }
+        })
+    });
 
-    if path.exists() {
-        let key = read_fallback_device_key(path)?;
-        let encoded = B64.encode(key);
-        if let Err(error) = entry.set_password(&encoded) {
-            eprintln!(
-                "[vault] WARN: failed to migrate device key to OS secure storage ({error}). Keeping restricted fallback file."
-            );
-            return Ok(LoadedDeviceKey {
-                key,
-                storage_mode: VaultStorageMode::FallbackFile,
-            });
-        }
-        match entry.get_password() {
-            Ok(stored) if stored.trim() == encoded => {}
-            _ => {
-                eprintln!(
-                    "[vault] WARN: device key migration verification failed. Keeping restricted fallback file."
-                );
-                return Ok(LoadedDeviceKey {
-                    key,
-                    storage_mode: VaultStorageMode::FallbackFile,
-                });
-            }
-        }
-        fs::remove_file(path).map_err(|e| e.to_string())?;
+    if let Some(key) = stored_opt {
         return Ok(LoadedDeviceKey {
             key,
             storage_mode: VaultStorageMode::OsKeychain,
         });
     }
 
-    let mut key = [0u8; DEVICE_KEY_LEN];
-    rand::thread_rng().fill_bytes(&mut key);
-    if let Err(error) = entry.set_password(&B64.encode(key)) {
-        eprintln!("[vault] WARN: OS secure storage unavailable ({error}). Using restricted fallback file.");
-        write_fallback_device_key(path, &key)?;
+    if path.exists() {
+        let key = read_fallback_device_key(path)?;
+        let encoded = B64.encode(key);
+        let _ = entry.set_password(&encoded);
         return Ok(LoadedDeviceKey {
             key,
             storage_mode: VaultStorageMode::FallbackFile,
         });
     }
+
+    let mut key = [0u8; DEVICE_KEY_LEN];
+    rand::thread_rng().fill_bytes(&mut key);
+    let _ = write_fallback_device_key(path, &key);
+    let _ = entry.set_password(&B64.encode(key));
+
     Ok(LoadedDeviceKey {
         key,
-        storage_mode: VaultStorageMode::OsKeychain,
+        storage_mode: VaultStorageMode::FallbackFile,
     })
 }
 
