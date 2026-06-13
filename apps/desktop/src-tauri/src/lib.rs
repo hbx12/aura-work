@@ -47,7 +47,7 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
     } else {
         let url_str = format!("index.html?view=pet&type={}", pet_type);
         let url = tauri::WebviewUrl::App(std::path::PathBuf::from(url_str));
-        let mut builder = tauri::WebviewWindowBuilder::new(&app, "pet-window", url)
+        let builder = tauri::WebviewWindowBuilder::new(&app, "pet-window", url)
             .title("Pet")
             .inner_size(150.0, 150.0)
             .transparent(true)
@@ -56,9 +56,7 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
             .resizable(false)
             .skip_taskbar(true);
         #[cfg(target_os = "macos")]
-        {
-            builder = builder.shadow(false);
-        }
+        let builder = builder.shadow(false);
         if let Err(e) = builder.build() {
             eprintln!("Failed to spawn pet window: {:?}", e);
         }
