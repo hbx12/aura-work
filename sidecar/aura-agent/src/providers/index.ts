@@ -56,6 +56,23 @@ const DEFAULT_MODELS: Record<ProviderId, ModelInfo[]> = {
     },
   ],
   "openai-compatible": [],
+  minimax: [
+    {
+      id: "abab6.5s-chat",
+      providerId: "minimax",
+      displayName: "Minimax abab6.5s",
+      capabilities: ["text"],
+    },
+  ],
+  qwen: [
+    {
+      id: "qwen-plus",
+      providerId: "qwen",
+      displayName: "Qwen Plus",
+      capabilities: ["text"],
+    },
+  ],
+  lmstudio: [],
 };
 
 function baseUrl(credentials: ProviderCredentials, fallback: string): string {
@@ -100,7 +117,7 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
       if (id === "openai" && isCodexAccount(credentials)) {
         return codexValidateCredentials(credentials);
       }
-      if (!credentials.apiKey && id !== "ollama") {
+      if (!credentials.apiKey && id !== "ollama" && id !== "lmstudio") {
         return { valid: false, message: "API key is required." };
       }
       try {
@@ -309,6 +326,9 @@ const adapters: Record<ProviderId, ProviderAdapter> = {
   deepseek: openAiAdapter("deepseek", "https://api.deepseek.com/v1"),
   ollama: ollamaAdapter,
   "openai-compatible": openAiAdapter("openai-compatible", "http://127.0.0.1:8080/v1"),
+  minimax: openAiAdapter("minimax", "https://api.minimax.chat/v1"),
+  qwen: openAiAdapter("qwen", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+  lmstudio: openAiAdapter("lmstudio", "http://127.0.0.1:1234/v1"),
 };
 
 export function getAdapter(id: ProviderId): ProviderAdapter {

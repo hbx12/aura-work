@@ -484,3 +484,129 @@ pub async fn tool_plugin_call(
     }
     Ok(result.output.chars().take(10000).collect())
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateSkillInput {
+    pub name: String,
+    pub description: String,
+    pub prompt: String,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillInfo {
+    pub plugin_id: String,
+    pub name: String,
+    pub description: String,
+    pub prompt: String,
+    pub enabled: bool,
+}
+
+#[tauri::command]
+pub async fn create_local_skill(
+    db: State<'_, DbState>,
+    input: CreateSkillInput,
+) -> Result<InstalledPlugin, String> {
+    let slug = input.name.to_lowercase().replace(|c: char| !c.is_alphanumeric(), "-");
+    let plugin_id = format!("com.aura.skill.{}", slug);
+    let root = plugins_root()?;
+    let dest = root.join(&plugin_id);
+    if dest.exists() {
+        fs::remove_dir_all(&dest).map_err(|e| e.to_string())?;
+    }
+    fs::create_dir_all(&dest).map_err(|e| e.to_string())?;
+
+    let manifest_json = serde_json::json!({
+        "schemaVersion": "1.0",
+        "id": plugin_id,
+        "name": input.name,
+        "version": "1.0.0",
+        "publisher": "User",
+        "description": input.description,
+        "skills": [
+            {
+                "name": input.name,
+                "prompt": input.prompt
+            }
+        ]
+    });
+
+    let manifest_str = serde_json::to_string_pretty(&manifest_json).map_err(|e| e.to_string())?;
+    fs::write(dest.join("aura.plugin.json"), &manifest_str).map_err(|e| e.to_string())?;
+
+    let now = chrono::Utc::now().to_rfc3339();
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.execute(
+            "INSERT INTO installed_plugins (id, name, version, publisher, description, install_path, manifest_json, enabled, installed_at)
+             VALUES (?1, ?2, '1.0.0', 'User', ?3, ?4, ?5, 1, ?6)
+             ON CONFLICT(id) DO UPDATE SET
+               name=excluded.name, description=excluded.description, install_path=excluded.install_path,
+               manifest_json=excluded.manifest_json, installed_at=excluded.installed_at",
+            params![
+                plugin_id,
+                input.name,
+                input.description,
+                dest.to_string_lossy().to_string(),
+                manifest_str,
+                now
+            ],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    let _ = push_config_to_helper(&db).await;
+
+    Ok(InstalledPlugin {
+        id: plugin_id,
+        name: input.name,
+        version: "1.0.0".into(),
+        publisher: Some("User".into()),
+        description: Some(input.description),
+        install_path: dest.to_string_lossy().to_string(),
+        enabled: true,
+        installed_at: now,
+        tool_count: 0,
+    })
+}
+
+#[tauri::command]
+pub fn list_local_skills(db: State<'_, DbState>) -> Result<Vec<SkillInfo>, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT id, manifest_json, enabled FROM installed_plugins")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| {
+            let id: String = row.get(0)?;
+            let manifest_json: String = row.get(1)?;
+            let enabled: i64 = row.get(2)?;
+            Ok((id, manifest_json, enabled != 0))
+        })
+        .map_err(|e| e.to_string())?;
+
+    let mut list = Vec::new();
+    for row in rows {
+        let (id, json_str, enabled) = row.map_err(|e| e.to_string())?;
+        if let Ok(val) = serde_json::from_str::<serde_json::Value>(&json_str) {
+            if let Some(skills_arr) = val.get("skills").and_then(|s| s.as_array()) {
+                for skill in skills_arr {
+                    let name = skill.get("name").and_then(|n| n.as_str()).unwrap_or("").to_string();
+                    let prompt = skill.get("prompt").and_then(|p| p.as_str()).unwrap_or("").to_string();
+                    let description = val.get("description").and_then(|d| d.as_str()).unwrap_or("").to_string();
+                    if !name.is_empty() {
+                        list.push(SkillInfo {
+                            plugin_id: id.clone(),
+                            name,
+                            description,
+                            prompt,
+                            enabled,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    Ok(list)
+}

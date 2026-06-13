@@ -4,7 +4,10 @@ export type ProviderId =
   | "gemini"
   | "deepseek"
   | "ollama"
-  | "openai-compatible";
+  | "openai-compatible"
+  | "minimax"
+  | "qwen"
+  | "lmstudio";
 
 export type RoutingPolicy =
   | "quality-first"
@@ -582,6 +585,9 @@ export const PROVIDER_META: Record<
     logo: "{}",
     color: "#645d4e",
   },
+  minimax: { displayName: "Minimax", logo: "M", color: "#e05c2b" },
+  qwen: { displayName: "Qwen", logo: "Q", color: "#4f35b3" },
+  lmstudio: { displayName: "LM Studio", logo: "L", color: "#1988a2", local: true },
 };
 
 export const ROUTING_POLICIES: {

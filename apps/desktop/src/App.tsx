@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Composer,
@@ -51,6 +51,7 @@ import { useMemory } from "./hooks/useMemory";
 import { useI18n, usePackaging, usePendingOpenTask } from "./hooks/useI18n";
 import type { MessageCatalog } from "@aura-os/i18n";
 import { useChatModels, parseModelSelection } from "./hooks/useChatModels";
+import { PetWindowContent } from "./components/PetWindowContent";
 import "@aura-os/ui/tokens.css";
 import "@aura-os/ui/app.css";
 import "./app-overrides.css";
@@ -88,6 +89,15 @@ function formatTaskTime(iso: string) {
 }
 
 export default function App() {
+  // Check if this is the pet window view
+  const params = new URLSearchParams(window.location.search);
+  const isPetView = params.get("view") === "pet";
+
+  if (isPetView) {
+    const type = params.get("type") || "robot";
+    return <PetWindowContent initialType={type} />;
+  }
+
   const { projects, loading, error, createProject, pickFolder, refresh: refreshProjects } = useProjects();
   const providersApi = useProviders();
   const agent = useAgent();
@@ -109,7 +119,9 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<
     { role: "user" | "assistant"; content: string; model?: string }[]
   >([]);
-  const [selectedModel, setSelectedModel] = useState("auto");
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem("selected-model") || "auto";
+  });
   const [chatError, setChatError] = useState<string | null>(null);
   const [fallbackApproval, setFallbackApproval] = useState<{
     from?: string | null;
@@ -119,6 +131,49 @@ export default function App() {
     pendingMessage: string;
     pendingHistory: { role: string; content: string }[];
   } | null>(null);
+
+  const [chatStreamText, setChatStreamText] = useState<string | null>(null);
+  const [chatStreamModel, setChatStreamModel] = useState<string>("");
+  const chatStreamTimerRef = useRef<any>(null);
+
+  const startTypingSimulation = (text: string, model: string) => {
+    if (chatStreamTimerRef.current) {
+      clearInterval(chatStreamTimerRef.current);
+    }
+    setChatStreamText("");
+    setChatStreamModel(model);
+    let index = 0;
+    
+    chatStreamTimerRef.current = setInterval(() => {
+      if (index <= text.length) {
+        setChatStreamText(text.slice(0, index));
+        index += Math.max(2, Math.floor(text.length / 150));
+      } else {
+        setChatStreamText(text);
+        if (chatStreamTimerRef.current) {
+          clearInterval(chatStreamTimerRef.current);
+          chatStreamTimerRef.current = null;
+        }
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: text,
+            model,
+          },
+        ]);
+        setChatStreamText(null);
+      }
+    }, 15);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (chatStreamTimerRef.current) {
+        clearInterval(chatStreamTimerRef.current);
+      }
+    };
+  }, []);
 
   const handlePendingOpenTask = useCallback(async (taskId: string) => {
     try {
@@ -156,7 +211,8 @@ export default function App() {
   useEffect(() => {
     setChatMessages([]);
     setChatError(null);
-    setSelectedModel("auto");
+    const saved = localStorage.getItem("selected-model") || "auto";
+    setSelectedModel(saved);
   }, [activeProjectId]);
 
   useEffect(() => {
@@ -171,6 +227,11 @@ export default function App() {
       })),
     [i18n],
   );
+
+  const handleModelChange = useCallback((model: string) => {
+    setSelectedModel(model);
+    localStorage.setItem("selected-model", model);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -333,7 +394,30 @@ export default function App() {
     [t],
   );
 
+  const handleCheckPetCommand = (text: string): boolean => {
+    const msg = text.trim().toLowerCase();
+    if (msg.startsWith("/pet") || msg.startsWith("/أليف")) {
+      let type = localStorage.getItem("selected-pet") || "robot";
+      
+      if (msg.includes("cat") || msg.includes("قط") || msg.includes("بسة")) type = "cat";
+      else if (msg.includes("dog") || msg.includes("كلب") || msg.includes("شيبا")) type = "dog";
+      else if (msg.includes("bunny") || msg.includes("أرنب") || msg.includes("ارنب")) type = "bunny";
+      else if (msg.includes("panda") || msg.includes("باندا")) type = "panda";
+      else if (msg.includes("fox") || msg.includes("ثعلب")) type = "fox";
+      else if (msg.includes("hamster") || msg.includes("هامستر")) type = "hamster";
+      else if (msg.includes("penguin") || msg.includes("بطريق")) type = "penguin";
+      else if (msg.includes("koala") || msg.includes("كوالا")) type = "koala";
+      else if (msg.includes("robot") || msg.includes("روبوت") || msg.includes("بوت")) type = "robot";
+
+      invoke("toggle_pet_window", { petType: type }).catch(console.error);
+      setComposer("");
+      return true;
+    }
+    return false;
+  };
+
   const handleSendChat = async (fallbackApproved = false) => {
+    if (handleCheckPetCommand(composer)) return;
     const msg = composer.trim();
     if (!msg || agent.running || tasks.running) return;
     if (activeTaskId) return;
@@ -363,14 +447,10 @@ export default function App() {
         });
         return;
       }
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: result.text || t("chat.emptyResponse"),
-          model: `${result.providerId}/${result.modelId}`,
-        },
-      ]);
+      startTypingSimulation(
+        result.text || t("chat.emptyResponse"),
+        `${result.providerId}/${result.modelId}`
+      );
     } catch (e) {
       const err = String(e);
       setChatError(err);
@@ -401,14 +481,10 @@ export default function App() {
         preferredModel,
         fallbackApproved: true,
       });
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: result.text || t("chat.emptyResponse"),
-          model: `${result.providerId}/${result.modelId}`,
-        },
-      ]);
+      startTypingSimulation(
+        result.text || t("chat.emptyResponse"),
+        `${result.providerId}/${result.modelId}`
+      );
     } catch (e) {
       setChatError(String(e));
     }
@@ -427,6 +503,7 @@ export default function App() {
   };
 
   const handleNewTask = async () => {
+    if (handleCheckPetCommand(composer)) return;
     const msg = composer.trim();
     if (!msg || tasks.running) return;
     setComposer("");
@@ -507,6 +584,17 @@ export default function App() {
                     {m.content}
                   </Msg>
                 ))}
+                {chatStreamText !== null && (
+                  <StreamingMsg
+                    who={t("chat.aura")}
+                    agent
+                    role={chatStreamModel}
+                    streaming
+                    liveText={chatStreamText}
+                  >
+                    {chatStreamText}
+                  </StreamingMsg>
+                )}
                 {chatError && <p className="modal-error">{chatError}</p>}
                 {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
               </div>
@@ -518,11 +606,13 @@ export default function App() {
               onRunTask={() => void handleNewTask()}
               mode={mode}
               onToggleMode={() => void handleToggleMode()}
-              disabled={agent.running || tasks.running}
+              disabled={agent.running || tasks.running || chatStreamText !== null}
               models={chatModels.models}
               selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
+              onModelChange={handleModelChange}
               labels={composerLabels}
+              locale={i18n.locale}
+              skills={pluginsApi.skills}
               showRunTask
             />
           </>
@@ -540,11 +630,13 @@ export default function App() {
                 onRunTask={mode === "ask" ? () => void handleNewTask() : undefined}
                 mode={mode}
                 onToggleMode={() => void handleToggleMode()}
-                disabled={agent.running || tasks.running}
+                disabled={agent.running || tasks.running || chatStreamText !== null}
                 models={chatModels.models}
                 selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
+                onModelChange={handleModelChange}
                 labels={composerLabels}
+                locale={i18n.locale}
+                skills={pluginsApi.skills}
                 showRunTask={mode === "ask"}
               />
             </div>
@@ -669,6 +761,7 @@ export default function App() {
           value={composer}
           onChange={setComposer}
           onSend={() => {
+            if (handleCheckPetCommand(composer)) return;
             if (
               mode === "act" &&
               task &&
@@ -689,7 +782,7 @@ export default function App() {
           }
           models={chatModels.models}
           selectedModel={selectedModel}
-          onModelChange={setSelectedModel}
+          onModelChange={handleModelChange}
           labels={{
             ...composerLabels,
             send:
@@ -701,6 +794,8 @@ export default function App() {
                 ? t("chat.placeholder")
                 : t("chat.taskPlaceholder"),
           }}
+          locale={i18n.locale}
+          skills={pluginsApi.skills}
         />
       </>
     );
@@ -944,6 +1039,7 @@ export default function App() {
           onSetMcpEnabled={pluginsApi.setMcpEnabled}
           onSyncMarketplace={pluginsApi.syncMarketplace}
           t={t}
+          locale={i18n.locale}
         />
       );
     return null;

@@ -182,10 +182,25 @@ button{font-family:inherit}
 
 /* ---- Composer ------------------------------------------------------------- */
 .composer-wrap{flex-shrink:0;padding:14px 24px 18px;background:var(--bg-base)}
-.composer{max-width:740px;margin:0 auto;background:var(--bg-2);border:1px solid var(--border-2);
+.composer{position:relative;display:flex;flex-direction:column;max-width:740px;margin:0 auto;background:var(--bg-2);border:1px solid var(--border-2);
   border-radius:var(--r-lg);box-shadow:var(--shadow-1);transition:border-color var(--dur-fast),box-shadow var(--dur-fast)}
 .composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring)}
-.composer textarea{all:unset;display:block;width:100%;padding:14px 16px 4px;font:var(--text-body);color:var(--fg-1);resize:none;line-height:1.5}
+
+/* ---- Autocomplete Commands ---- */
+.composer-commands{position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:var(--bg-2);
+  border:1px solid var(--border-2);border-radius:var(--r-md);box-shadow:var(--shadow-2);max-height:260px;
+  overflow-y:auto;z-index:1000;display:flex;flex-direction:column;padding:6px 0}
+.composer-command-item{display:flex;align-items:center;gap:12px;padding:9px 16px;cursor:pointer;
+  font:var(--text-body);color:var(--fg-2);text-align:start;background:transparent;border:none;width:100%;
+  transition:background var(--dur-fast),color var(--dur-fast)}
+.composer-command-item:hover,
+.composer-command-item.active{background:var(--bg-3);color:var(--fg-1)}
+.composer-command-item svg{width:14px;height:14px;color:var(--fg-3);flex-shrink:0}
+.composer-command-item.active svg{color:var(--accent)}
+.composer-command-item .cmd-name{font-weight:600;color:var(--accent);min-width:90px}
+.composer-command-item .cmd-desc{font-size:0.875em;color:var(--fg-3);text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+
+.composer textarea{background:transparent;border:none;outline:none;box-sizing:border-box;display:block;width:100%;padding:14px 16px 4px;font:var(--text-body);color:var(--fg-1);resize:none;line-height:1.5;min-height:56px;overflow-y:auto}
 .composer textarea::placeholder{color:var(--fg-3)}
 .composer .crow{display:flex;align-items:center;gap:8px;padding:8px 10px 10px}
 .chip-btn{display:inline-flex;align-items:center;gap:7px;font:var(--text-label);color:var(--fg-2);

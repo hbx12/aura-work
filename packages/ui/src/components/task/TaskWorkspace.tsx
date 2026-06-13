@@ -103,6 +103,254 @@ export function Msg({
   );
 }
 
+interface SlashCommand {
+  name: string;
+  desc: string;
+  icon: string;
+  prompt: string;
+}
+
+const SLASH_COMMANDS_EN: SlashCommand[] = [
+  {
+    name: "/memory",
+    desc: "Summarize and clean up project memory",
+    icon: "brain",
+    prompt: "Review the current project memories, summarize what has been learned, and clean up any redundant or outdated items.",
+  },
+  {
+    name: "/git",
+    desc: "Check git status and summarize modifications",
+    icon: "git-commit",
+    prompt: "Check git status and diff, summarize all recent code changes in detail, and suggest a clean commit message.",
+  },
+  {
+    name: "/explain",
+    desc: "Scan codebase and explain system architecture",
+    icon: "file-code",
+    prompt: "Scan the project workspace, read key configuration and code files, and write a comprehensive overview of the system's architecture and modules.",
+  },
+  {
+    name: "/todo",
+    desc: "Scan for TODO, FIXME, or HACK comments",
+    icon: "list-checks",
+    prompt: "Scan the codebase files for annotations like TODO, FIXME, or HACK, list them clearly, and organize them into actionable tasks.",
+  },
+  {
+    name: "/test",
+    desc: "Run build and test suite checks",
+    icon: "terminal",
+    prompt: "Run the build command and test suites in this workspace, report the results, and explain any errors found.",
+  },
+  {
+    name: "/clean",
+    desc: "Clean temporary build folders and caches",
+    icon: "trash",
+    prompt: "Search for temporary build files, caches, and dependency directories that can be safely cleaned, and propose a command to remove them.",
+  },
+  {
+    name: "/docs",
+    desc: "Propose edits to README and docs",
+    icon: "file-text",
+    prompt: "Scan the project documentation files (e.g., README.md, docs/) and source code, check for missing or outdated explanations, and propose edits to keep them up to date.",
+  },
+  {
+    name: "/audit",
+    desc: "Audit recent high-risk system executions",
+    icon: "shield",
+    prompt: "List the recent entries from the project's audit log, highlight high-risk actions (like shell executions or plugin calls), and verify their status.",
+  },
+  {
+    name: "/status",
+    desc: "Check readiness of all sidecars and VM",
+    icon: "database",
+    prompt: "Check the status of all sidecars, VM, and browser helper backends, verify database connection, and summarize system readiness.",
+  },
+  {
+    name: "/files",
+    desc: "List recent project files and modifications",
+    icon: "file",
+    prompt: "Scan the project workspace and list all files and folders, highlighting the most important configuration and source files.",
+  },
+  {
+    name: "/search",
+    desc: "Search the codebase for specific terms",
+    icon: "search",
+    prompt: "Scan the codebase files and search for recurring keywords or defined terms to show where they are referenced.",
+  },
+  {
+    name: "/help",
+    desc: "Show description of all slash commands",
+    icon: "braces",
+    prompt: "Provide instructions on the available slash commands, how they work, and what capabilities the agent has.",
+  },
+  {
+    name: "/pet",
+    desc: "Spawn a cute interactive pet companion on the screen",
+    icon: "sparkles",
+    prompt: "/pet ",
+  },
+];
+
+const SLASH_COMMANDS_AR: SlashCommand[] = [
+  {
+    name: "/ذاكرة",
+    desc: "تلخيص وتنظيف ذاكرة المشروع",
+    icon: "brain",
+    prompt: "راجع ذاكرة المشروع الحالية، ولخص أهم ما تعلمته، ونظف أي نقاط مكررة أو قديمة.",
+  },
+  {
+    name: "/تعديلات",
+    desc: "فحص حالة Git وتلخيص التعديلات",
+    icon: "git-commit",
+    prompt: "افحص حالة Git والتغييرات الأخيرة (diff)، ولخص جميع تعديلات الكود بالتفصيل، واقترح رسالة commit واضحة.",
+  },
+  {
+    name: "/شرح",
+    desc: "شرح بنية المشروع وهيكله البرمجي",
+    icon: "file-code",
+    prompt: "قم بمسح مساحة عمل المشروع، واقرأ ملفات الإعدادات والكود البرمجي الأساسية، واكتب نظرة شاملة تشرح البنية المعمارية للنظام والملفات.",
+  },
+  {
+    name: "/مهام",
+    desc: "البحث عن التعليقات التنبيهية TODO",
+    icon: "list-checks",
+    prompt: "ابحث في ملفات المشروع عن التعليقات التنبيهية مثل TODO أو FIXME أو HACK، واعرضها بشكل منظم كقائمة مهام قابلة للتنفيذ.",
+  },
+  {
+    name: "/اختبار",
+    desc: "تشغيل بناء الكود والاختبارات",
+    icon: "terminal",
+    prompt: "قم بتشغيل أمر البناء وحزمة الاختبارات في مساحة العمل هذه، واعرض النتائج بالتفصيل، واشرح أي أخطاء تظهر.",
+  },
+  {
+    name: "/تنظيف",
+    desc: "تنظيف الملفات المؤقتة والمجلدات الزائدة",
+    icon: "trash",
+    prompt: "ابحث عن ملفات البناء المؤقتة ومجلدات الكاش والاعتماديات التي يمكن الاستغناء عنها وتأمين تنظيفها، واقترح أمراً لحذفها بأمان.",
+  },
+  {
+    name: "/توثيق",
+    desc: "مراجعة وتحسين التوثيق وملف README",
+    icon: "file-text",
+    prompt: "افحص ملفات التوثيق الحالية (مثل README.md ومجلد docs) واقرأ الكود البرمجي، واقترح تحسينات وتعديلات لإبقائها محدثة.",
+  },
+  {
+    name: "/تدقيق",
+    desc: "مراجعة سجل العمليات الحساسة",
+    icon: "shield",
+    prompt: "اعرض المدخلات الأخيرة في سجل تدقيق المشروع، وسلط الضوء على العمليات عالية التأثير (مثل تشغيل أوامر shell أو أدوات الإضافات) وتحقق من حالتها.",
+  },
+  {
+    name: "/حالة",
+    desc: "فحص حالة الخوادم المساعدة والبيئة",
+    icon: "database",
+    prompt: "تحقق من حالة تشغيل كافة الخوادم المساعدة (sidecars) والبيئة المعزولة ومساعد المتصفح، وافحص اتصال قاعدة البيانات، ولخص مدى جاهزية النظام.",
+  },
+  {
+    name: "/ملفات",
+    desc: "عرض قائمة بجميع ملفات المشروع الأخيرة",
+    icon: "file",
+    prompt: "افحص مجلد المشروع واعرض قائمة بجميع الملفات والمجلدات الموجودة، مع توضيح الملفات الأكثر أهمية وحجمها وتاريخ تعديلها.",
+  },
+  {
+    name: "/بحث",
+    desc: "البحث في الكود البرمجي عن مصطلحات معينة",
+    icon: "search",
+    prompt: "قم بالبحث داخل ملفات المشروع البرمجية عن الكلمات المفتاحية الأكثر تكراراً أو المصطلحات المحددة لتوضيح أين يتم استخدامها.",
+  },
+  {
+    name: "/مساعدة",
+    desc: "عرض شرح الأوامر السريعة المتوفرة",
+    icon: "braces",
+    prompt: "قدم دليلاً إرشادياً يشرح الأوامر السريعة المتاحة (slash commands)، وكيفية عملها، والقدرات التي يمتلكها الوكيل لمساعدة المستخدم.",
+  },
+  // English fallbacks with Arabic prompt/desc
+  {
+    name: "/memory",
+    desc: "تلخيص وتنظيف ذاكرة المشروع",
+    icon: "brain",
+    prompt: "راجع ذاكرة المشروع الحالية، ولخص أهم ما تعلمته، ونظف أي نقاط مكررة أو قديمة.",
+  },
+  {
+    name: "/git",
+    desc: "فحص حالة Git وتلخيص التعديلات",
+    icon: "git-commit",
+    prompt: "افحص حالة Git والتغييرات الأخيرة (diff)، ولخص جميع تعديلات الكود بالتفصيل، واقترح رسالة commit واضحة.",
+  },
+  {
+    name: "/explain",
+    desc: "شرح بنية المشروع وهيكله البرمجي",
+    icon: "file-code",
+    prompt: "قم بمسح مساحة عمل المشروع، واقرأ ملفات الإعدادات والكود البرمجي الأساسية، واكتب نظرة شاملة تشرح البنية المعمارية للنظام والملفات.",
+  },
+  {
+    name: "/todo",
+    desc: "البحث عن التعليقات التنبيهية TODO",
+    icon: "list-checks",
+    prompt: "ابحث في ملفات المشروع عن التعليقات التنبيهية مثل TODO أو FIXME أو HACK، واعرضها بشكل منظم كقائمة مهام قابلة للتنفيذ.",
+  },
+  {
+    name: "/test",
+    desc: "تشغيل بناء الكود والاختبارات",
+    icon: "terminal",
+    prompt: "قم بتشغيل أمر البناء وحزمة الاختبارات في مساحة العمل هذه، واعرض النتائج بالتفصيل، واشرح أي أخطاء تظهر.",
+  },
+  {
+    name: "/clean",
+    desc: "تنظيف الملفات المؤقتة والمجلدات الزائدة",
+    icon: "trash",
+    prompt: "ابحث عن ملفات البناء المؤقتة ومجلدات الكاش والاعتماديات التي يمكن الاستغناء عنها وتأمين تنظيفها، واقترح أمراً لحذفها بأمان.",
+  },
+  {
+    name: "/docs",
+    desc: "مراجعة وتحسين التوثيق وملف README",
+    icon: "file-text",
+    prompt: "افحص ملفات التوثيق الحالية (مثل README.md ومجلد docs) واقرأ الكود البرمجي، واقترح تحسينات وتعديلات لإبقائها محدثة.",
+  },
+  {
+    name: "/audit",
+    desc: "مراجعة سجل العمليات الحساسة",
+    icon: "shield",
+    prompt: "اعرض المدخلات الأخيرة في سجل تدقيق المشروع، وسلط الضوء على العمليات عالية التأثير (مثل تشغيل أوامر shell أو أدوات الإضافات) وتحقق من حالتها.",
+  },
+  {
+    name: "/status",
+    desc: "فحص حالة الخوادم المساعدة والبيئة",
+    icon: "database",
+    prompt: "تحقق من حالة تشغيل كافة الخوادم المساعدة (sidecars) والبيئة المعزولة ومساعد المتصفح، وافحص اتصال قاعدة البيانات، ولخص مدى جاهزية النظام.",
+  },
+  {
+    name: "/files",
+    desc: "عرض قائمة بجميع ملفات المشروع الأخيرة",
+    icon: "file",
+    prompt: "افحص مجلد المشروع واعرض قائمة بجميع الملفات والمجلدات الموجودة، مع توضيح الملفات الأكثر أهمية وحجمها وتاريخ تعديلها.",
+  },
+  {
+    name: "/search",
+    desc: "البحث في الكود البرمجي عن مصطلحات معينة",
+    icon: "search",
+    prompt: "قم بالبحث داخل ملفات المشروع البرمجية عن الكلمات المفتاحية الأكثر تكراراً أو المصطلحات المحددة لتوضيح أين يتم استخدامها.",
+  },
+  {
+    name: "/help",
+    desc: "عرض شرح الأوامر السريعة المتوفرة",
+    icon: "braces",
+    prompt: "قدم دليلاً إرشادياً يشرح الأوامر السريعة المتاحة (slash commands)، وكيفية عملها، والقدرات التي يمتلكها الوكيل لمساعدة المستخدم.",
+  },
+  {
+    name: "/pet",
+    desc: "استدعاء حيوان أليف لطيف وتفاعلي على الشاشة",
+    icon: "sparkles",
+    prompt: "/pet ",
+  },
+  {
+    name: "/أليف",
+    desc: "استدعاء حيوان أليف لطيف وتفاعلي على الشاشة",
+    icon: "sparkles",
+    prompt: "/أليف ",
+  },
+];
+
 export function Composer({
   value,
   onChange,
@@ -124,6 +372,8 @@ export function Composer({
     modeAct: "Act without asking",
     running: "Thinking…",
   },
+  locale,
+  skills = [],
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -145,17 +395,99 @@ export function Composer({
     modeAct: string;
     running: string;
   };
+  locale?: string;
+  skills?: { name: string; prompt: string; description: string }[];
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const showCommands = value.startsWith("/") && !value.includes(" ");
+  const filterText = value.slice(1).toLowerCase();
+  
+  const isAr = locale?.startsWith("ar");
+  const commandsList = isAr ? SLASH_COMMANDS_AR : SLASH_COMMANDS_EN;
+  
+  const customSkills = skills.map((s) => ({
+    name: `/${s.name.replace(/\s+/g, "_")}`,
+    icon: "puzzle",
+    desc: s.description,
+    prompt: s.prompt,
+  }));
+
+  const createSkillCommand = {
+    name: isAr ? "/إنشاء_مهارة" : "/create-skill",
+    icon: "plus",
+    desc: isAr ? "دليل إرشادي لإنشاء مهارة جديدة وحفظها" : "Guide to create and save a new skill",
+    prompt: isAr
+      ? "اشرح لي خطوة بخطوة كيف يمكنني إنشاء مهارة (Skill) جديدة وحفظها في التطبيق، وما هي البنية المطلوبة لملف aura.plugin.json الخاص بالمهارة."
+      : "Explain step-by-step how I can create a new custom Skill and save it in the app, and what is the required structure for the skill's aura.plugin.json.",
+  };
+
+  const finalCommands = [...commandsList, ...customSkills, createSkillCommand];
+
+  const filteredCommands = finalCommands.filter((cmd) =>
+    cmd.name.startsWith(value) ||
+    cmd.name.slice(1).toLowerCase().startsWith(filterText)
+  );
+
+  const handleSelectCommand = (cmd: SlashCommand) => {
+    onChange(cmd.prompt);
+    setActiveIdx(0);
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 10);
+  };
+
   return (
     <div className="composer-wrap">
       <div className="composer">
+        {showCommands && filteredCommands.length > 0 && (
+          <div className="composer-commands">
+            {filteredCommands.map((cmd, i) => (
+              <button
+                key={cmd.name}
+                type="button"
+                className={`composer-command-item${i === activeIdx ? " active" : ""}`}
+                onClick={() => handleSelectCommand(cmd)}
+                onMouseEnter={() => setActiveIdx(i)}
+              >
+                <Icon name={cmd.icon} size={14} />
+                <span className="cmd-name">{cmd.name}</span>
+                <span className="cmd-desc">{cmd.desc}</span>
+              </button>
+            ))}
+          </div>
+        )}
         <textarea
+          ref={textareaRef}
           rows={2}
           placeholder={labels.placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setActiveIdx(0);
+          }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) onSend();
+            if (showCommands && filteredCommands.length > 0) {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActiveIdx((prev) => (prev + 1) % filteredCommands.length);
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActiveIdx((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                handleSelectCommand(filteredCommands[activeIdx]);
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                onChange(value + " ");
+              }
+            } else {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                onSend();
+              }
+            }
           }}
           disabled={disabled}
         />

@@ -26,6 +26,9 @@ const PROVIDERS: &[(&str, &str, bool)] = &[
     ("deepseek", "DeepSeek", false),
     ("ollama", "Ollama", true),
     ("openai-compatible", "Custom endpoint", false),
+    ("minimax", "Minimax", false),
+    ("qwen", "Qwen", false),
+    ("lmstudio", "LM Studio", true),
 ];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,6 +79,8 @@ fn seed_providers(conn: &rusqlite::Connection) -> Result<(), String> {
                 if *local { 1 } else { 0 },
                 if *id == "ollama" {
                     Some("http://127.0.0.1:11434")
+                } else if *id == "lmstudio" {
+                    Some("http://127.0.0.1:1234")
                 } else {
                     None::<&str>
                 },
@@ -265,6 +270,7 @@ pub fn set_provider_secret(
         .map_err(|e| e.to_string())?;
     }
     let has_key = input.provider_id == "ollama"
+        || input.provider_id == "lmstudio"
         || input
             .api_key
             .as_ref()

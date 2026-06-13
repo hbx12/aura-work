@@ -438,7 +438,7 @@ pub async fn run_chat(
     };
     let allowed = enabled_providers(&db, &vault)?;
     if allowed.is_empty() {
-        return Err("Enable at least one provider (Ollama works without an API key).".into());
+        return Err("Enable at least one provider (Ollama and LM Studio work without an API key).".into());
     }
 
     let pricing = crate::pricing::list_pricing_models(&db)?;

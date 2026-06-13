@@ -38,7 +38,7 @@ export interface InstalledPluginConfig {
 export interface McpServerConfig {
   id: string;
   name: string;
-  transport: "stdio";
+  transport: string;
   command: string;
   args: string[];
   env: Record<string, unknown>;

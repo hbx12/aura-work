@@ -40,6 +40,31 @@ use tauri::Manager;
 use sidecars::SidecarSupervisor;
 use vault::VaultState;
 
+#[tauri::command]
+fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
+    if let Some(window) = app.get_webview_window("pet-window") {
+        let _ = window.close();
+    } else {
+        let url_str = format!("index.html?view=pet&type={}", pet_type);
+        let url = tauri::WebviewUrl::App(std::path::PathBuf::from(url_str));
+        let mut builder = tauri::WebviewWindowBuilder::new(&app, "pet-window", url)
+            .title("Pet")
+            .inner_size(150.0, 150.0)
+            .transparent(true)
+            .decorations(false)
+            .always_on_top(true)
+            .resizable(false)
+            .skip_taskbar(true);
+        #[cfg(target_os = "macos")]
+        {
+            builder = builder.shadow(false);
+        }
+        if let Err(e) = builder.build() {
+            eprintln!("Failed to spawn pet window: {:?}", e);
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -140,6 +165,8 @@ pub fn run() {
             plugins::sync_marketplace,
             plugins::list_marketplace_entries,
             plugins::reload_plugins_helper,
+            plugins::create_local_skill,
+            plugins::list_local_skills,
             mcp::list_mcp_servers,
             mcp::add_mcp_server,
             mcp::delete_mcp_server,
@@ -203,6 +230,7 @@ pub fn run() {
             updates::install_update,
             packaging::get_pending_open_task,
             packaging::clear_pending_open_task,
+            toggle_pet_window,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

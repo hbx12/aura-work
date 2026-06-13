@@ -88,6 +88,8 @@ export type MessageKey =
   | "settings.extension"
   | "settings.cliCompanion"
   | "settings.cliDesc"
+  | "settings.pet"
+  | "settings.petDesc"
   | "common.save"
   | "common.loading"
   | "task.welcome.subtitle"
@@ -373,6 +375,10 @@ export type MessageKey =
   | "routing.quality-first.subtitle"
   | "routing.cost-first.title"
   | "routing.cost-first.subtitle"
+  | "routing.privacy-first.title"
+  | "routing.privacy-first.subtitle"
+  | "routing.local-only.title"
+  | "routing.local-only.subtitle"
   | "routing.manual.title"
   | "routing.manual.subtitle"
   | "chat.you"
@@ -454,6 +460,8 @@ const en: MessageCatalog = {
   "settings.cliCompanion": "CLI companion",
   "settings.cliDesc":
     "Pair `aura` CLI via Extensions → pair code. CLI uses the local bridge and cannot bypass permissions.",
+  "settings.pet": "Desktop Pet",
+  "settings.petDesc": "Choose and customize your interactive companion.",
   "common.save": "Save",
   "common.loading": "Loading…",
   "task.welcome.subtitle": "What would you like to work on?",
@@ -753,6 +761,10 @@ const en: MessageCatalog = {
   "routing.quality-first.subtitle": "Best model for the job. Default.",
   "routing.cost-first.title": "Cost-first",
   "routing.cost-first.subtitle": "Cheapest model that can do the task.",
+  "routing.privacy-first.title": "Privacy-first",
+  "routing.privacy-first.subtitle": "Prefer local; redact secrets before cloud.",
+  "routing.local-only.title": "Local-only",
+  "routing.local-only.subtitle": "Ollama only. No cloud requests.",
   "routing.manual.title": "Manual model",
   "routing.manual.subtitle": "Use the model you pick per provider.",
   "chat.you": "You",
@@ -833,6 +845,8 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.cliCompanion": "أداة CLI",
     "settings.extension": "إضافة Chrome",
     "settings.cliDesc": "اربط أداة aura CLI عبر الإضافات. لا يمكن للـ CLI تجاوز الصلاحيات.",
+    "settings.pet": "الحيوان الأليف لسطح المكتب",
+    "settings.petDesc": "اختر رفيقك التفاعلي لسطح المكتب وقم بتخصيصه.",
     "common.save": "حفظ",
     "common.loading": "جارٍ التحميل…",
     "common.cancel": "إلغاء",
@@ -1124,6 +1138,10 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "routing.quality-first.subtitle": "أفضل نموذج للمهمة. الافتراضي.",
     "routing.cost-first.title": "التكلفة أولاً",
     "routing.cost-first.subtitle": "أرخص نموذج يمكنه إنجاز المهمة.",
+    "routing.privacy-first.title": "الخصوصية أولاً",
+    "routing.privacy-first.subtitle": "تفضيل المحلي وحذف الأسرار قبل إرسالها للسحاب.",
+    "routing.local-only.title": "محلي فقط",
+    "routing.local-only.subtitle": "تشغيل عبر Ollama فقط. بدون طلبات سحابية.",
     "routing.manual.title": "نموذج يدوي",
     "routing.manual.subtitle": "استخدم النموذج الذي تختاره لكل مزوّد.",
     "chat.you": "أنت",

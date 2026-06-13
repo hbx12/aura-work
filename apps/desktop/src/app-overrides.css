@@ -101,7 +101,7 @@
 .routecard {
   cursor: pointer;
   border: none;
-  text-align: left;
+  text-align: start;
   width: 100%;
   font: inherit;
   color: inherit;
@@ -447,4 +447,17 @@
 
 .msg-live .text {
   opacity: 0.95;
+}
+
+/* --- Desktop Pets Styles --- */
+@keyframes pet-bounce {
+  0%, 100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -24px;
+  }
+}
+.pet-container.jump {
+  animation: pet-bounce 0.45s ease-out;
 }
