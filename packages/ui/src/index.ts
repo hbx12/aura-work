@@ -9,5 +9,5 @@ export {
   SchedulePage,
 } from "./components/pages/SecondaryPages";
 export { Msg, StreamingMsg, Composer, ContextPanel, TaskWelcome, PlanBlock, Steps, Approval, Summary, Thinking } from "./components/task/TaskWorkspace";
-export type { Project, TaskItem, AppView, ThemeMode, PermissionMode } from "./types";
+export type { Project, TaskItem, AppView, ThemeMode, ThemePreference, PermissionMode } from "./types";
 export { STATE_COLOR } from "./icons/paths";

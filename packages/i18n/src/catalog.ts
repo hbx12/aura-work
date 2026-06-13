@@ -131,6 +131,17 @@ export type MessageKey =
   | "providers.loading"
   | "providers.modelsCount"
   | "settings.languageUpdated"
+  | "settings.appearance"
+  | "settings.appearanceDesc"
+  | "settings.theme"
+  | "settings.themeDesc"
+  | "settings.themeSystem"
+  | "settings.themeLight"
+  | "settings.themeDark"
+  | "settings.themeAmoled"
+  | "settings.themeBlue"
+  | "settings.themeHighContrast"
+  | "settings.themeUpdated"
   | "settings.vm"
   | "settings.vmStart"
   | "settings.vmStop"
@@ -498,6 +509,17 @@ const en: MessageCatalog = {
   "providers.loading": "Loading providers…",
   "providers.modelsCount": "{count} models available",
   "settings.languageUpdated": "Language updated.",
+  "settings.appearance": "Appearance",
+  "settings.appearanceDesc": "Choose a built-in theme or follow the operating system.",
+  "settings.theme": "Theme",
+  "settings.themeDesc": "Switch instantly between built-in themes. System follows Windows, macOS, or Linux color mode.",
+  "settings.themeSystem": "System",
+  "settings.themeLight": "Light",
+  "settings.themeDark": "Dark",
+  "settings.themeAmoled": "AMOLED",
+  "settings.themeBlue": "Blue",
+  "settings.themeHighContrast": "High contrast",
+  "settings.themeUpdated": "Theme updated.",
   "settings.vm": "Linux workspace (VM)",
   "settings.vmStart": "Start workspace",
   "settings.vmStop": "Stop workspace",
@@ -882,6 +904,17 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "providers.loading": "جارٍ تحميل المزوّدين…",
     "providers.modelsCount": "{count} نموذج متاح",
     "settings.languageUpdated": "تم تحديث اللغة.",
+    "settings.appearance": "المظهر",
+    "settings.appearanceDesc": "اختر ثيماً مدمجاً أو اتبع مظهر نظام التشغيل.",
+    "settings.theme": "الثيم",
+    "settings.themeDesc": "بدّل فوراً بين الثيمات المدمجة. خيار النظام يتبع وضع الألوان في Windows أو macOS أو Linux.",
+    "settings.themeSystem": "النظام",
+    "settings.themeLight": "فاتح",
+    "settings.themeDark": "داكن",
+    "settings.themeAmoled": "AMOLED",
+    "settings.themeBlue": "أزرق",
+    "settings.themeHighContrast": "تباين عالٍ",
+    "settings.themeUpdated": "تم تحديث الثيم.",
     "settings.vm": "مساحة Linux (VM)",
     "settings.vmStart": "تشغيل مساحة Linux",
     "settings.vmStop": "إيقاف مساحة Linux",
