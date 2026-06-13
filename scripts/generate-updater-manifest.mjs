@@ -35,6 +35,7 @@ const allowedSuffixes = [
 
 const isPublishAsset = (file) => allowedSuffixes.some((suffix) => file.endsWith(suffix));
 const sourceFiles = (await walk(releaseRoot)).filter(isPublishAsset);
+const githubAssetName = (name) => name.replaceAll(" ", ".");
 
 await rm(publishRoot, { recursive: true, force: true });
 await mkdir(publishRoot, { recursive: true });
@@ -43,7 +44,7 @@ const seen = new Set();
 const files = [];
 
 for (const source of sourceFiles) {
-  const basename = path.basename(source);
+  const basename = githubAssetName(path.basename(source));
   if (seen.has(basename)) {
     throw new Error(`Duplicate release asset basename: ${basename}`);
   }
