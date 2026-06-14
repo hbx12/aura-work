@@ -1093,6 +1093,7 @@ export default function App() {
     if (view === "terminal")
       return (
         <TerminalPage
+          projectId={activeProjectId}
           folderPath={activeProject?.folderPath ?? null}
           t={t}
         />

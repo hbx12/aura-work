@@ -60,17 +60,19 @@ pub fn init_git_tables(conn: &rusqlite::Connection) -> Result<(), String> {
 }
 
 fn git_cmd(cwd: &str, args: &[&str]) -> Result<String, String> {
-    let mut git_path = "git".to_string();
+    let git_path = "git".to_string();
     #[cfg(target_os = "macos")]
-    {
+    let git_path = {
+        let mut path = git_path;
         if Command::new("git").arg("--version").output().is_err() {
             if std::path::Path::new("/opt/homebrew/bin/git").exists() {
-                git_path = "/opt/homebrew/bin/git".to_string();
+                path = "/opt/homebrew/bin/git".to_string();
             } else if std::path::Path::new("/usr/local/bin/git").exists() {
-                git_path = "/usr/local/bin/git".to_string();
+                path = "/usr/local/bin/git".to_string();
             }
         }
-    }
+        path
+    };
 
     let output = Command::new(&git_path)
         .args(args)
@@ -324,17 +326,19 @@ pub fn approve_git_commit(db: State<'_, DbState>, commit_id: String) -> Result<P
     if has_user {
         git_cmd(&root, &["commit", "-m", &pending.message])?;
     } else {
-        let mut git_path = "git".to_string();
+        let git_path = "git".to_string();
         #[cfg(target_os = "macos")]
-        {
+        let git_path = {
+            let mut path = git_path;
             if Command::new("git").arg("--version").output().is_err() {
                 if std::path::Path::new("/opt/homebrew/bin/git").exists() {
-                    git_path = "/opt/homebrew/bin/git".to_string();
+                    path = "/opt/homebrew/bin/git".to_string();
                 } else if std::path::Path::new("/usr/local/bin/git").exists() {
-                    git_path = "/usr/local/bin/git".to_string();
+                    path = "/usr/local/bin/git".to_string();
                 }
             }
-        }
+            path
+        };
 
         let output = Command::new(&git_path)
             .args(&["commit", "-m", &pending.message])

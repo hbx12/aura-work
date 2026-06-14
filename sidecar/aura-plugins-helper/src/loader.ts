@@ -1,5 +1,5 @@
 import { pathToFileURL } from "node:url";
-import { join } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { manifestTools, readManifestFromDir } from "./manifest.js";
 import type {
@@ -46,7 +46,7 @@ async function loadHandlers(
   manifest: { entrypoints?: { tools?: string }; tools?: PluginToolDef[] },
 ): Promise<Record<string, PluginHandler>> {
   const rel = manifest.entrypoints?.tools ?? "./tools/index.js";
-  const abs = join(installPath, rel);
+  const abs = resolvePluginEntrypoint(installPath, rel);
   if (!existsSync(abs)) {
     return buildFallbackHandlers(manifest.tools ?? []);
   }
@@ -55,6 +55,16 @@ async function loadHandlers(
     default?: { handlers?: Record<string, PluginHandler> };
   };
   return mod.handlers ?? mod.default?.handlers ?? buildFallbackHandlers(manifest.tools ?? []);
+}
+
+function resolvePluginEntrypoint(installPath: string, entrypoint: string): string {
+  const root = resolve(installPath);
+  const abs = resolve(root, entrypoint);
+  const rel = relative(root, abs);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    throw new Error("Plugin entrypoint must stay inside the plugin directory");
+  }
+  return abs;
 }
 
 function buildFallbackHandlers(tools: PluginToolDef[]): Record<string, PluginHandler> {

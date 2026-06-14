@@ -229,6 +229,7 @@ pub fn run() {
             packaging::get_pending_open_task,
             packaging::clear_pending_open_task,
             toggle_pet_window,
+            shell::resolve_terminal_cwd,
             shell::run_terminal_command,
         ])
         .build(tauri::generate_context!())

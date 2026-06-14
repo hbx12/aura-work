@@ -53,8 +53,13 @@
     "audit:licenses": "node scripts/audit-licenses.mjs",
     "sbom": "npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev"
   },
+  "overrides": {
+    "dompurify": "^3.4.10",
+    "vite": "^8.0.16",
+    "monaco-editor": "0.53.0"
+  },
   "devDependencies": {
     "esbuild": "^0.28.1",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   }
 }
