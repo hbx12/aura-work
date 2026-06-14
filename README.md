@@ -7,7 +7,11 @@
 
 Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
 
-![Aura Work application preview](./docs/assets/aura-work-preview.svg)
+## Demo
+
+<p align="center">
+  <img src="assets/demo.gif" alt="Aura Work demo" width="900">
+</p>
 
 > **Alpha warning:** Do not use Aura Work for sensitive workspaces or production automation. VM isolation, signed installers, and several experimental features are incomplete or disabled by default.
 
