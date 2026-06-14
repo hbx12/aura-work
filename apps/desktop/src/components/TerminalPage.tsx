@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 interface TerminalPageProps {
+  projectId: string | null;
   folderPath: string | null;
   t: (key: string, params?: Record<string, string>) => string;
 }
@@ -13,7 +14,7 @@ interface CommandHistoryEntry {
   error?: boolean;
 }
 
-export function TerminalPage({ folderPath, t }: TerminalPageProps) {
+export function TerminalPage({ projectId, folderPath, t }: TerminalPageProps) {
   const [cwd, setCwd] = useState<string>("");
   const [inputValue, setInputValue] = useState<string>("");
   const [history, setHistory] = useState<CommandHistoryEntry[]>([]);
@@ -67,7 +68,7 @@ export function TerminalPage({ folderPath, t }: TerminalPageProps) {
 
   const runCommand = async () => {
     const trimmed = inputValue.trim();
-    if (!trimmed) return;
+    if (!trimmed || !projectId) return;
 
     setInputValue("");
     setRecallIndex(-1);
@@ -89,43 +90,21 @@ export function TerminalPage({ folderPath, t }: TerminalPageProps) {
         target = folderPath || ".";
       }
 
-      // Check OS and test cd command to get resolved absolute path
-      const isWindows = navigator.userAgent.includes("Windows");
-      const cmdString = isWindows
-        ? `cd /D "${target}" && cd`
-        : `cd "${target}" && pwd`;
-
       try {
-        const result = await invoke<{ stdout: string; stderr: string; success: boolean }>(
-          "run_terminal_command",
+        const newPath = await invoke<string>("resolve_terminal_cwd", {
+          projectId,
+          cwd: activeCwd,
+          target,
+        });
+        setCwd(newPath);
+        setHistory((prev) => [
+          ...prev,
           {
+            command: trimmed,
             cwd: activeCwd,
-            command: cmdString,
-          }
-        );
-
-        if (result.success) {
-          const newPath = result.stdout.trim();
-          setCwd(newPath);
-          setHistory((prev) => [
-            ...prev,
-            {
-              command: trimmed,
-              cwd: activeCwd,
-              output: "",
-            },
-          ]);
-        } else {
-          setHistory((prev) => [
-            ...prev,
-            {
-              command: trimmed,
-              cwd: activeCwd,
-              output: result.stderr || t("terminal.directoryNotFound", { defaultValue: "Directory not found." }),
-              error: true,
-            },
-          ]);
-        }
+            output: "",
+          },
+        ]);
       } catch (err) {
         setHistory((prev) => [
           ...prev,
@@ -147,6 +126,7 @@ export function TerminalPage({ folderPath, t }: TerminalPageProps) {
       const result = await invoke<{ stdout: string; stderr: string; success: boolean }>(
         "run_terminal_command",
         {
+          projectId,
           cwd: activeCwd,
           command: trimmed,
         }

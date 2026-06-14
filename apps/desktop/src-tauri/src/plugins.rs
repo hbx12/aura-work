@@ -89,10 +89,25 @@ fn read_manifest_file(path: &Path) -> Result<PluginManifest, String> {
             if m.id.is_empty() || m.name.is_empty() || m.version.is_empty() {
                 return Err("Invalid plugin manifest: missing id, name, or version".into());
             }
+            validate_plugin_id(&m.id)?;
             return Ok(m);
         }
     }
     Err(format!("No plugin manifest in {}", path.display()))
+}
+
+fn validate_plugin_id(id: &str) -> Result<(), String> {
+    let valid = !id.is_empty()
+        && id.len() <= 128
+        && !id.contains("..")
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'));
+    if valid {
+        Ok(())
+    } else {
+        Err("Invalid plugin id: use letters, numbers, dots, dashes, or underscores only".into())
+    }
 }
 
 fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), String> {
@@ -101,7 +116,9 @@ fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), String> {
         let entry = entry.map_err(|e| e.to_string())?;
         let ty = entry.file_type().map_err(|e| e.to_string())?;
         let dest = dst.join(entry.file_name());
-        if ty.is_dir() {
+        if ty.is_symlink() {
+            return Err("Plugin source cannot contain symlinks".into());
+        } else if ty.is_dir() {
             copy_dir_all(&entry.path(), &dest)?;
         } else {
             fs::copy(entry.path(), dest).map_err(|e| e.to_string())?;
@@ -510,6 +527,7 @@ pub async fn create_local_skill(
 ) -> Result<InstalledPlugin, String> {
     let slug = input.name.to_lowercase().replace(|c: char| !c.is_alphanumeric(), "-");
     let plugin_id = format!("com.aura.skill.{}", slug);
+    validate_plugin_id(&plugin_id)?;
     let root = plugins_root()?;
     let dest = root.join(&plugin_id);
     if dest.exists() {

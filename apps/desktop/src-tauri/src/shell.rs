@@ -1,5 +1,11 @@
+use crate::audit::{append_audit, AppendAuditInput};
+use crate::db::DbState;
+use crate::files::project_folder;
+use crate::permissions::check_task_permission;
 use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri::State;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommandCategory {
@@ -140,11 +146,115 @@ pub struct TerminalResult {
     pub success: bool,
 }
 
+fn terminal_cwd(root: &str, cwd: Option<&str>) -> Result<PathBuf, String> {
+    let root_path = PathBuf::from(root);
+    let canonical_root = root_path
+        .canonicalize()
+        .map_err(|e| format!("Project folder not accessible: {e}"))?;
+    let requested = cwd
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| canonical_root.clone());
+    let candidate = if requested.is_absolute() {
+        requested
+    } else {
+        canonical_root.join(requested)
+    };
+    let canonical = candidate
+        .canonicalize()
+        .map_err(|e| format!("Terminal directory not accessible: {e}"))?;
+    if !canonical.starts_with(&canonical_root) {
+        return Err("Terminal directory must stay inside the project folder.".into());
+    }
+    if !canonical.is_dir() {
+        return Err("Terminal working directory is not a directory.".into());
+    }
+    Ok(canonical)
+}
+
+fn resolve_cd_target(
+    root: &str,
+    cwd: Option<&str>,
+    target: Option<&str>,
+) -> Result<PathBuf, String> {
+    let current = terminal_cwd(root, cwd)?;
+    let canonical_root = PathBuf::from(root)
+        .canonicalize()
+        .map_err(|e| format!("Project folder not accessible: {e}"))?;
+    let raw = target.map(str::trim).filter(|value| !value.is_empty());
+    let candidate = match raw {
+        None | Some("~") => canonical_root.clone(),
+        Some(value) => {
+            let requested = Path::new(value);
+            if requested.is_absolute() {
+                requested.to_path_buf()
+            } else {
+                current.join(requested)
+            }
+        }
+    };
+    let canonical = candidate
+        .canonicalize()
+        .map_err(|e| format!("Terminal directory not accessible: {e}"))?;
+    if !canonical.starts_with(&canonical_root) {
+        return Err("Terminal directory must stay inside the project folder.".into());
+    }
+    if !canonical.is_dir() {
+        return Err("Terminal target is not a directory.".into());
+    }
+    Ok(canonical)
+}
+
+#[tauri::command]
+pub fn resolve_terminal_cwd(
+    db: State<'_, DbState>,
+    project_id: String,
+    cwd: Option<String>,
+    target: Option<String>,
+) -> Result<String, String> {
+    let root = project_folder(&db, &project_id)?;
+    let resolved = resolve_cd_target(&root, cwd.as_deref(), target.as_deref())?;
+    Ok(resolved.to_string_lossy().to_string())
+}
+
 #[tauri::command]
 pub fn run_terminal_command(
-    cwd: String,
+    db: State<'_, DbState>,
+    project_id: String,
+    cwd: Option<String>,
     command: String,
 ) -> Result<TerminalResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    let cwd = terminal_cwd(&root, cwd.as_deref())?;
+    if is_hard_denied(&command) {
+        return Err("Command denied: destructive pattern blocked by policy.".into());
+    }
+    let (category, risk) = categorize_command(&command);
+    let requires_permission = !matches!(
+        category,
+        CommandCategory::SafeRead | CommandCategory::BuildTest
+    );
+    let payload = serde_json::json!({
+        "command": command.clone(),
+        "cwd": cwd.to_string_lossy(),
+        "category": category.as_action(),
+    });
+    if requires_permission {
+        check_task_permission(
+            &db,
+            &project_id,
+            None,
+            "shell",
+            category.as_action(),
+            &command,
+            &format!("Run terminal command: {command}"),
+            risk,
+            true,
+            Some(payload.clone()),
+        )?;
+    }
+
     #[cfg(target_os = "windows")]
     let (shell, arg) = ("cmd", "/C");
     #[cfg(not(target_os = "windows"))]
@@ -161,6 +271,29 @@ pub fn run_terminal_command(
     let stderr = String::from_utf8_lossy(&output.stderr).to_string();
     let success = output.status.success();
 
+    if let Ok(conn) = db.0.lock() {
+        let _ = append_audit(
+            &conn,
+            &AppendAuditInput {
+                project_id: Some(project_id),
+                task_id: None,
+                actor: "user".into(),
+                category: "shell".into(),
+                action: category.as_action().into(),
+                target: Some(command),
+                summary: format!("Terminal command in {}", cwd.to_string_lossy()),
+                risk: Some(risk.into()),
+                decision: if requires_permission {
+                    Some("allow-once".into())
+                } else {
+                    None
+                },
+                result: if success { "succeeded".into() } else { "failed".into() },
+                metadata: Some(payload),
+            },
+        );
+    }
+
     Ok(TerminalResult {
         stdout,
         stderr,
@@ -171,6 +304,7 @@ pub fn run_terminal_command(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
 
     #[test]
     fn safe_read_commands() {
@@ -186,5 +320,37 @@ mod tests {
     #[test]
     fn hard_deny() {
         assert!(is_hard_denied("rm -rf /"));
+    }
+
+    #[test]
+    fn terminal_cwd_rejects_paths_outside_project() {
+        let root = test_project_root("terminal-cwd");
+        let outside = root.parent().unwrap().to_path_buf();
+
+        let result = terminal_cwd(root.to_str().unwrap(), Some(outside.to_str().unwrap()));
+
+        assert!(result.is_err());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn resolve_cd_target_rejects_parent_escape() {
+        let root = test_project_root("terminal-cd");
+        fs::create_dir_all(root.join("src")).unwrap();
+
+        let result = resolve_cd_target(root.to_str().unwrap(), Some("src"), Some("../.."));
+
+        assert!(result.is_err());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    fn test_project_root(name: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "aura-work-{name}-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        root
     }
 }

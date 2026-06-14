@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import Editor, { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import "monaco-editor/min/vs/editor/editor.main.css";
 import { Icon } from "@aura-os/ui";
 import type { FileEntry, PendingEdit } from "@aura-os/shared";
 
