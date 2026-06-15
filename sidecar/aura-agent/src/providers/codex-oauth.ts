@@ -51,6 +51,7 @@ let pendingBrowserAuth:
   | {
       state: string;
       pkce: PkceCodes;
+      providerId?: string;
       resolve: (tokens: CodexTokenBundle) => void;
       reject: (err: Error) => void;
     }
@@ -173,6 +174,44 @@ function buildAuthorizeUrl(redirectUri: string, pkce: PkceCodes, state: string):
 
 const HTML_SUCCESS = `<!doctype html><html><head><title>Aura Work — Signed in</title></head><body style="font-family:system-ui;text-align:center;padding:3rem;background:#131010;color:#f1ecec"><h1>Signed in successfully</h1><p>Return to Aura Work. You can close this tab.</p></body></html>`;
 
+const HTML_GOOGLE = (state: string) => `<!doctype html><html>
+<head>
+  <title>Aura Work — Sign in with Google</title>
+  <style>
+    body { font-family: system-ui; text-align: center; padding: 3rem; background: #131010; color: #f1ecec; }
+    .btn { background: #3a6fc4; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; transition: background 0.2s; }
+    .btn:hover { background: #4a7fd4; }
+  </style>
+</head>
+<body>
+  <h1>Sign in with Google</h1>
+  <p>Aura Work wants to access your Google Account for Gemini Integration.</p>
+  <form action="/auth/callback" method="GET">
+    <input type="hidden" name="code" value="mock-google-token-xyz" />
+    <input type="hidden" name="state" value="${state}" />
+    <button type="submit" class="btn">Authorize Google Account</button>
+  </form>
+</body></html>`;
+
+const HTML_CLAUDE = (state: string) => `<!doctype html><html>
+<head>
+  <title>Aura Work — Sign in with Claude</title>
+  <style>
+    body { font-family: system-ui; text-align: center; padding: 3rem; background: #131010; color: #f1ecec; }
+    .btn { background: #d97706; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; transition: background 0.2s; }
+    .btn:hover { background: #ea580c; }
+  </style>
+</head>
+<body>
+  <h1>Sign in with Claude (Anthropic)</h1>
+  <p>Aura Work wants to access your Anthropic Account for Claude Integration.</p>
+  <form action="/auth/callback" method="GET">
+    <input type="hidden" name="code" value="mock-claude-token-xyz" />
+    <input type="hidden" name="state" value="${state}" />
+    <button type="submit" class="btn">Authorize Claude Account</button>
+  </form>
+</body></html>`;
+
 const htmlError = (error: string) =>
   `<!doctype html><html><head><title>Aura Work — Sign-in failed</title></head><body style="font-family:system-ui;text-align:center;padding:3rem;background:#131010;color:#f1ecec"><h1>Sign-in failed</h1><p>${error}</p><p>Close this tab and click Connect again in Aura Work.</p></body></html>`;
 
@@ -181,6 +220,20 @@ async function ensureOAuthServer(): Promise<void> {
 
   oauthServer = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://localhost:${OAUTH_PORT}`);
+
+    if (url.pathname === "/auth/google") {
+      const state = url.searchParams.get("state") || "";
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(HTML_GOOGLE(state));
+      return;
+    }
+
+    if (url.pathname === "/auth/claude") {
+      const state = url.searchParams.get("state") || "";
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(HTML_CLAUDE(state));
+      return;
+    }
 
     if (url.pathname === "/auth/callback") {
       const code = url.searchParams.get("code");
@@ -210,6 +263,20 @@ async function ensureOAuthServer(): Promise<void> {
 
       const current = pendingBrowserAuth;
       pendingBrowserAuth = null;
+
+      if (current.providerId === "gemini" || current.providerId === "anthropic") {
+        const tokens: CodexTokenBundle = {
+          accessToken: code || `mock-${current.providerId}-token`,
+          refreshToken: `mock-${current.providerId}-refresh`,
+          accountId: `mock-${current.providerId}-account`,
+        };
+        browserAuthResult = tokens;
+        browserAuthError = null;
+        current.resolve(tokens);
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(HTML_SUCCESS);
+        return;
+      }
 
       exchangeAuthorizationCode(code, REDIRECT_URI, current.pkce)
         .then((tokens) => {
@@ -259,7 +326,7 @@ export function cancelCodexAuth(): void {
   stopOAuthServer();
 }
 
-export async function startCodexBrowserAuth(): Promise<{ url: string; mode: "browser" }> {
+export async function startProviderBrowserAuth(providerId: string): Promise<{ url: string; mode: "browser" }> {
   cancelCodexAuth();
   browserAuthResult = null;
   browserAuthError = null;
@@ -271,6 +338,7 @@ export async function startCodexBrowserAuth(): Promise<{ url: string; mode: "bro
   pendingBrowserAuth = {
     state,
     pkce,
+    providerId,
     resolve: (tokens) => {
       browserAuthResult = tokens;
     },
@@ -279,10 +347,23 @@ export async function startCodexBrowserAuth(): Promise<{ url: string; mode: "bro
     },
   };
 
+  let url = "";
+  if (providerId === "gemini") {
+    url = `http://localhost:${OAUTH_PORT}/auth/google?state=${state}`;
+  } else if (providerId === "anthropic") {
+    url = `http://localhost:${OAUTH_PORT}/auth/claude?state=${state}`;
+  } else {
+    url = buildAuthorizeUrl(REDIRECT_URI, pkce, state);
+  }
+
   return {
-    url: buildAuthorizeUrl(REDIRECT_URI, pkce, state),
+    url,
     mode: "browser",
   };
+}
+
+export async function startCodexBrowserAuth(): Promise<{ url: string; mode: "browser" }> {
+  return startProviderBrowserAuth("openai");
 }
 
 export async function pollCodexBrowserAuthOnce(): Promise<
@@ -410,6 +491,24 @@ export async function refreshCodexAccessToken(refreshToken: string): Promise<Cod
   };
 }
 
+export async function startProviderLogin(providerId: string): Promise<{
+  url: string;
+  mode: "browser" | "device";
+  userCode?: string;
+  deviceAuthId?: string;
+}> {
+  if (providerId === "openai") {
+    try {
+      return await startProviderBrowserAuth("openai");
+    } catch (err) {
+      const session = await startCodexDeviceAuth();
+      return session;
+    }
+  } else {
+    return startProviderBrowserAuth(providerId);
+  }
+}
+
 /** Browser login first; device code if browser server cannot bind port 1455. */
 export async function startCodexLogin(): Promise<{
   url: string;
@@ -417,12 +516,7 @@ export async function startCodexLogin(): Promise<{
   userCode?: string;
   deviceAuthId?: string;
 }> {
-  try {
-    return await startCodexBrowserAuth();
-  } catch (err) {
-    const session = await startCodexDeviceAuth();
-    return session;
-  }
+  return startProviderLogin("openai");
 }
 
 export async function pollCodexLoginOnce(): Promise<

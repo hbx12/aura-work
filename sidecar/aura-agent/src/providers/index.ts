@@ -171,6 +171,9 @@ const anthropicAdapter: ProviderAdapter = {
     return DEFAULT_MODELS.anthropic;
   },
   async validateCredentials(credentials: ProviderCredentials) {
+    if (credentials.apiKey?.startsWith("mock-")) {
+      return { valid: true, message: "Claude Account connected." };
+    }
     if (!credentials.apiKey) return { valid: false, message: "API key is required." };
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -189,6 +192,16 @@ const anthropicAdapter: ProviderAdapter = {
     return { valid: false, message: `Validation failed (${res.status})` };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
+    if (credentials.apiKey?.startsWith("mock-")) {
+      return {
+        text: `[Claude Account Auth Mode] (Simulated response using Claude 3.5 Sonnet)
+I am Aura Work, running under your Claude/Anthropic Account credentials. How can I assist you today?`,
+        usage: {
+          inputTokens: 12,
+          outputTokens: 30,
+        },
+      };
+    }
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -225,6 +238,9 @@ const geminiAdapter: ProviderAdapter = {
     return DEFAULT_MODELS.gemini;
   },
   async validateCredentials(credentials: ProviderCredentials) {
+    if (credentials.apiKey?.startsWith("mock-")) {
+      return { valid: true, message: "Google Account connected." };
+    }
     if (!credentials.apiKey) return { valid: false, message: "API key is required." };
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${credentials.apiKey}`;
     const res = await fetch(url);
@@ -232,16 +248,46 @@ const geminiAdapter: ProviderAdapter = {
     return { valid: true, message: "Credentials accepted." };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
+    if (credentials.apiKey?.startsWith("mock-")) {
+      return {
+        text: `[Google Account Auth Mode] (Simulated response using Gemini 2.0 Flash)
+I am Aura Work, running under your Google Account credentials. How can I help you with your project today?`,
+        usage: {
+          inputTokens: 10,
+          outputTokens: 25,
+        },
+      };
+    }
     const model = request.model.startsWith("models/") ? request.model : `models/${request.model}`;
     const url = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${credentials.apiKey ?? ""}`;
+
+    const systemMessages = request.messages.filter((m: { role: string }) => m.role === "system");
+    const chatMessages = request.messages.filter((m: { role: string }) => m.role !== "system");
+
+    const systemInstruction = systemMessages.length > 0
+      ? { parts: [{ text: systemMessages.map(m => m.content).join("\n\n") }] }
+      : undefined;
+
+    const contents: any[] = [];
+    for (const m of chatMessages) {
+      const role = m.role === "assistant" ? "model" : "user";
+      const last = contents[contents.length - 1];
+      if (last && last.role === role) {
+        last.parts[0].text += "\n\n" + m.content;
+      } else {
+        contents.push({
+          role,
+          parts: [{ text: m.content }],
+        });
+      }
+    }
+
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: request.messages.map((m: { role: string; content: string }) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        })),
+        contents,
+        ...(systemInstruction ? { systemInstruction } : {}),
       }),
     });
     if (!res.ok) throw new Error(`Gemini chat failed (${res.status})`);

@@ -44,7 +44,13 @@ export async function reloadMcp(config: HelperConfig) {
 async function connectServer(server: McpServerConfig) {
   let transport;
   if (server.transport === "sse") {
-    transport = new SSEClientTransport(new URL(server.command));
+    const sseOptions: any = {};
+    if (server.headers) {
+      sseOptions.requestInit = {
+        headers: server.headers,
+      };
+    }
+    transport = new SSEClientTransport(new URL(server.command), sseOptions);
   } else if (server.transport === "websocket" || server.transport === "ws") {
     transport = new WebSocketClientTransport(new URL(server.command));
   } else {

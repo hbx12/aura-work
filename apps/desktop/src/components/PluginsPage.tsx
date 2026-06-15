@@ -27,6 +27,8 @@ interface PluginsPageProps {
   onSyncMarketplace: () => Promise<MarketplaceEntry[]>;
   t?: (key: string, params?: Record<string, string>) => string;
   locale?: string;
+  cloudSignedIn?: boolean;
+  onGoToCloudLogin?: () => void;
 }
 
 const PLUGIN_COLORS = ["#5a8a52", "#3a6fc4", "#4b5bb0", "#645d8e", "#a44f2c", "#3a352c"];
@@ -179,6 +181,8 @@ export function PluginsPage({
   onSyncMarketplace,
   t = (k) => k,
   locale,
+  cloudSignedIn,
+  onGoToCloudLogin,
 }: PluginsPageProps) {
   const [showMcpForm, setShowMcpForm] = useState(false);
   const [mcpName, setMcpName] = useState("");
@@ -194,6 +198,7 @@ export function PluginsPage({
   const [skillDesc, setSkillDesc] = useState("");
   const [skillPrompt, setSkillPrompt] = useState("");
   const [skillMessage, setSkillMessage] = useState<string | null>(null);
+  const [expandedSkills, setExpandedSkills] = useState<Record<string, boolean>>({});
 
   const refreshSkills = async () => {
     try {
@@ -214,6 +219,14 @@ export function PluginsPage({
   const isAr = locale?.startsWith("ar");
   const presetsList = isAr ? MCP_PRESETS_AR : MCP_PRESETS_EN;
 
+  const hasRemoteMcp = mcpServers.some(
+    (s) =>
+      s.transport === "sse" ||
+      s.transport === "websocket" ||
+      s.command.startsWith("http") ||
+      s.command.startsWith("ws"),
+  );
+
   const pickAndInstall = async () => {
     try {
       const folder = await invoke<string | null>("pick_folder");
@@ -231,6 +244,43 @@ export function PluginsPage({
         <div className="ph-row">
           <div className="htext">
             <h1>{t("nav.plugins")}</h1>
+            {hasRemoteMcp && !cloudSignedIn && (
+              <div
+                className="banner warning"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: 12,
+                  padding: "10px 16px",
+                  borderRadius: "var(--r-sm, 6px)",
+                  background: "var(--warning-dim, rgba(234, 179, 8, 0.12))",
+                  border: "1px solid var(--warning, #eab308)",
+                  color: "var(--warning, #eab308)",
+                  fontSize: 13,
+                  gap: 12,
+                }}
+              >
+                <span>
+                  {isAr
+                    ? "تم تكوين خادم MCP بعيد. يرجى تسجيل الدخول إلى Aura Cloud لتفعيل المزامنة والوصول الكامل."
+                    : "A remote MCP server is configured. Please sign in to Aura Cloud for full sync and access."}
+                </span>
+                <button
+                  type="button"
+                  className="btn primary sm"
+                  style={{
+                    background: "var(--warning, #eab308)",
+                    color: "var(--bg-1, #131010)",
+                    border: "none",
+                    fontWeight: 600,
+                  }}
+                  onClick={onGoToCloudLogin}
+                >
+                  {isAr ? "تسجيل الدخول" : "Sign In"}
+                </button>
+              </div>
+            )}
             <div className="seg" style={{ marginTop: 10 }}>
               <button
                 type="button"
@@ -490,6 +540,11 @@ export function PluginsPage({
                             ) : (
                               <span className="tag off">{t("common.stopped")}</span>
                             )}
+                            {s.id.startsWith("aura_config_") && (
+                              <span className="tag" style={{ background: "var(--bg-3)", color: "var(--fg-2)" }}>
+                                {isAr ? "ملف الإعدادات" : "config"}
+                              </span>
+                            )}
                           </div>
                           <div className="prov-sub endpoint">
                             {s.command} {s.args.join(" ")}
@@ -499,18 +554,25 @@ export function PluginsPage({
                           <button
                             type="button"
                             className="btn ghost icon sm"
-                            title={t("plugins.remove")}
-                            disabled={loading}
+                            title={s.id.startsWith("aura_config_") ? (isAr ? "هذا الخادم للقراءة فقط (معرف في ملف الإعدادات)" : "Read-only config-based server") : t("plugins.remove")}
+                            disabled={loading || s.id.startsWith("aura_config_")}
                             onClick={() => void onDeleteMcpServer(s.id)}
                           >
                             <Icon name="trash" size={15} />
                           </button>
                           <div
                             className={`toggle${s.enabled ? " on" : ""}`}
-                            onClick={() => void onSetMcpEnabled(s.id, !s.enabled)}
-                            onKeyDown={(e) => e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled)}
+                            style={s.id.startsWith("aura_config_") ? { pointerEvents: "none", opacity: 0.6 } : undefined}
+                            onClick={() => {
+                              if (s.id.startsWith("aura_config_")) return;
+                              void onSetMcpEnabled(s.id, !s.enabled);
+                            }}
+                            onKeyDown={(e) => {
+                              if (s.id.startsWith("aura_config_")) return;
+                              e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled);
+                            }}
                             role="button"
-                            tabIndex={0}
+                            tabIndex={s.id.startsWith("aura_config_") ? -1 : 0}
                           >
                             <i />
                           </div>
@@ -621,42 +683,77 @@ export function PluginsPage({
                     <p>{isAr ? "لا يوجد مهارات مضافة حالياً. أنشئ مهارة جديدة للبدء." : "No skills installed. Create a new skill to get started."}</p>
                   </div>
                 ) : (
-                  skills.map((s) => (
-                    <div key={s.pluginId} className="panel-row">
-                      <div className="prov-logo" style={{ background: "var(--accent)" }}>
-                        <Icon name="puzzle" size={17} />
-                      </div>
-                      <div className="prov-meta">
-                        <div className="prov-name">
-                          {s.name}
+                  skills.map((s) => {
+                    const skillKey = `${s.pluginId}-${s.name}`;
+                    const isExpanded = !!expandedSkills[skillKey];
+                    const toggleExpand = () => {
+                      setExpandedSkills(prev => ({ ...prev, [skillKey]: !prev[skillKey] }));
+                    };
+                    return (
+                      <div key={skillKey} className="panel-row" style={{ alignItems: "flex-start" }}>
+                        <div className="prov-logo" style={{ background: "var(--accent)", marginTop: 4 }}>
+                          <Icon name="puzzle" size={17} />
                         </div>
-                        <div className="prov-sub">
-                          {s.description || s.pluginId}
+                        <div className="prov-meta" style={{ flex: 1 }}>
+                          <div className="prov-name">
+                            {s.name}
+                            {s.pluginId === "config_skill" && (
+                              <span className="tag" style={{ background: "var(--bg-3)", color: "var(--fg-2)", marginLeft: 6 }}>
+                                {isAr ? "ملف الإعدادات" : "config"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="prov-sub">
+                            {s.description || s.pluginId}
+                          </div>
+                          <div className="perm-chips" style={{ marginTop: 6 }}>
+                            <span
+                              className="perm-chip"
+                              style={{
+                                display: "block",
+                                whiteSpace: "pre-wrap",
+                                fontFamily: "var(--font-mono)",
+                                fontSize: 11,
+                                background: "var(--bg-3)",
+                                padding: "6px 10px",
+                                borderRadius: "var(--r-xs, 4px)",
+                                color: "var(--fg-2)",
+                                transition: "all 0.2s ease-in-out",
+                              }}
+                            >
+                              {isExpanded ? s.prompt : (s.prompt.length > 120 ? s.prompt.slice(0, 120) + "..." : s.prompt)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="perm-chips" style={{ marginTop: 6 }}>
-                          <span className="perm-chip" style={{ whiteSpace: "pre-wrap", fontFamily: "var(--font-mono)", fontSize: 11, background: "var(--bg-3)", padding: "4px 8px" }}>
-                            {s.prompt.length > 120 ? s.prompt.slice(0, 120) + "..." : s.prompt}
-                          </span>
+                        <div className="mini-acts" style={{ marginTop: 4 }}>
+                          {s.prompt.length > 120 && (
+                            <button
+                              type="button"
+                              className="btn ghost icon sm"
+                              title={isExpanded ? (isAr ? "تصغير" : "Collapse") : (isAr ? "توسيع" : "Expand")}
+                              onClick={toggleExpand}
+                            >
+                              <Icon name={isExpanded ? "chevron-up" : "chevron-down"} size={15} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn ghost icon sm"
+                            title={s.pluginId === "config_skill" ? (isAr ? "هذه المهارة للقراءة فقط (معرفة في ملف الإعدادات)" : "Read-only config-based skill") : (isAr ? "حذف" : "Delete")}
+                            disabled={loading || s.pluginId === "config_skill"}
+                            onClick={() => {
+                              void onUninstall(s.pluginId).then(() => {
+                                setSkillMessage(isAr ? "تم حذف المهارة بنجاح" : "Skill deleted successfully");
+                                void refreshSkills();
+                              });
+                            }}
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
                         </div>
                       </div>
-                      <div className="mini-acts">
-                        <button
-                          type="button"
-                          className="btn ghost icon sm"
-                          title={isAr ? "حذف" : "Delete"}
-                          disabled={loading}
-                          onClick={() => {
-                            void onUninstall(s.pluginId).then(() => {
-                              setSkillMessage(isAr ? "تم حذف المهارة بنجاح" : "Skill deleted successfully");
-                              void refreshSkills();
-                            });
-                          }}
-                        >
-                          <Icon name="trash" size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </>

@@ -4,7 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { PROVIDER_META } from "@aura-os/shared";
 import type { MessageCatalog } from "@aura-os/i18n";
 
-type AuthMode = "api-key" | "codex-account";
+type AuthMode = "api-key" | "codex-account" | "google-account" | "claude-account";
 
 const CODEX_LOGIN_URL = "https://auth.openai.com/codex/device";
 
@@ -32,6 +32,7 @@ interface ProviderKeyDialogProps {
   onClear: () => Promise<void>;
   onAfterSave?: (providerId: string) => Promise<string | null>;
   t: (key: keyof MessageCatalog, params?: Record<string, string>) => string;
+  locale?: string;
 }
 
 export function ProviderKeyDialog({
@@ -46,6 +47,7 @@ export function ProviderKeyDialog({
   onClear,
   onAfterSave,
   t,
+  locale,
 }: ProviderKeyDialogProps) {
   const [authMode, setAuthMode] = useState<AuthMode>("api-key");
   const [apiKey, setApiKey] = useState("");
@@ -56,40 +58,45 @@ export function ProviderKeyDialog({
   const [deviceCode, setDeviceCode] = useState<string | null>(null);
   const [deviceUrl, setDeviceUrl] = useState<string | null>(null);
 
-  const supportsCodex = providerId === "openai";
+  const supportsOauth = providerId === "openai" || providerId === "gemini" || providerId === "anthropic";
 
   useEffect(() => {
     if (open) {
       setApiKey("");
       setBaseUrl(existingBaseUrl ?? "");
-      setAuthMode(existingAuthMode === "codex-account" ? "codex-account" : "api-key");
+      const isOauthMode = existingAuthMode === "codex-account" || existingAuthMode === "google-account" || existingAuthMode === "claude-account";
+      setAuthMode(isOauthMode ? (existingAuthMode as AuthMode) : "api-key");
       setError(null);
       setNotice(null);
       setDeviceCode(null);
       setDeviceUrl(null);
     }
-  }, [open, existingBaseUrl, existingAuthMode]);
+  }, [open, existingBaseUrl, existingAuthMode, providerId]);
 
   if (!open || !providerId) return null;
 
   const meta = PROVIDER_META[providerId as keyof typeof PROVIDER_META];
 
-  const handleCodexConnect = async () => {
+  const handleOauthConnect = async () => {
     setSaving(true);
     setError(null);
     setDeviceCode(null);
     setDeviceUrl(null);
-    setNotice(t("provider.key.codexDeviceHint"));
+    if (providerId === "openai") {
+      setNotice(t("provider.key.codexDeviceHint"));
+    } else {
+      setNotice(locale?.startsWith("ar") ? "يجري بدء تسجيل الدخول..." : "Starting sign-in...");
+    }
     try {
       const start = await invoke<{
         status: string;
         mode?: string;
         userCode?: string;
         url?: string;
-      }>("start_codex_device_login", { force: true });
+      }>("start_provider_oauth_login", { providerId, force: true });
 
       if (start.status === "already_authenticated") {
-        const poll = await invoke<{ status: string }>("poll_codex_login");
+        const poll = await invoke<{ status: string }>("poll_provider_oauth_login", { providerId });
         if (poll.status === "connected") {
           if (onAfterSave) {
             const msg = await onAfterSave(providerId);
@@ -99,7 +106,7 @@ export function ProviderKeyDialog({
               return;
             }
           }
-          setNotice(t("provider.key.codexConnected"));
+          setNotice(providerId === "openai" ? t("provider.key.codexConnected") : (locale?.startsWith("ar") ? "تم ربط الحساب بنجاح." : "Account connected successfully."));
           onClose();
           return;
         }
@@ -113,17 +120,17 @@ export function ProviderKeyDialog({
         setDeviceUrl(loginUrl);
         setNotice(t("provider.key.codexDeviceBrowserOpened"));
         await openCodexLoginPage(loginUrl);
-      } else if (start.status === "started") {
+      } else {
         setDeviceUrl(loginUrl);
-        setNotice(t("provider.key.codexBrowserOpened"));
+        setNotice(providerId === "openai" ? t("provider.key.codexBrowserOpened") : (locale?.startsWith("ar") ? "يُفترض أن يفتح المتصفح لتسجيل الدخول. أكمل الدخول هناك." : "Your browser should open for sign-in. Complete login there."));
         await openCodexLoginPage(loginUrl);
       }
 
       const maxWaitSec = 300;
       for (let elapsed = 0; elapsed < maxWaitSec; elapsed += 2) {
-        setNotice(t("provider.key.codexDevicePolling", { seconds: String(elapsed) }));
+        setNotice(providerId === "openai" ? t("provider.key.codexDevicePolling", { seconds: String(elapsed) }) : (locale?.startsWith("ar") ? `بانتظار تسجيل الدخول... (${elapsed} ث)` : `Waiting for sign-in... (${elapsed}s)`));
         await new Promise((r) => setTimeout(r, 2000));
-        const poll = await invoke<{ status: string }>("poll_codex_login");
+        const poll = await invoke<{ status: string }>("poll_provider_oauth_login", { providerId });
         if (poll.status === "connected") {
           if (onAfterSave) {
             const msg = await onAfterSave(providerId);
@@ -133,7 +140,7 @@ export function ProviderKeyDialog({
               return;
             }
           }
-          setNotice(t("provider.key.codexConnected"));
+          setNotice(providerId === "openai" ? t("provider.key.codexConnected") : (locale?.startsWith("ar") ? "تم ربط الحساب بنجاح." : "Account connected successfully."));
           onClose();
           return;
         }
@@ -158,16 +165,23 @@ export function ProviderKeyDialog({
         {error && <p className="modal-error">{error}</p>}
         {notice && <p className="modal-desc">{notice}</p>}
 
-        {supportsCodex && !isLocal && (
+        {supportsOauth && !isLocal && (
           <div className="section" style={{ gap: 10 }}>
             <span className="sec-label">{t("provider.key.authMethod")}</span>
             <div className="seg">
               <button
                 type="button"
-                className={authMode === "codex-account" ? "active" : ""}
-                onClick={() => setAuthMode("codex-account")}
+                className={authMode !== "api-key" ? "active" : ""}
+                onClick={() => {
+                  const mode = providerId === "openai" ? "codex-account" : providerId === "gemini" ? "google-account" : "claude-account";
+                  setAuthMode(mode);
+                }}
               >
-                {t("provider.key.codexAccount")}
+                {providerId === "openai"
+                  ? t("provider.key.codexAccount")
+                  : providerId === "gemini"
+                  ? t("provider.key.googleAccount")
+                  : t("provider.key.claudeAccount")}
               </button>
               <button
                 type="button"
@@ -180,9 +194,15 @@ export function ProviderKeyDialog({
           </div>
         )}
 
-        {supportsCodex && !isLocal && authMode === "codex-account" ? (
+        {supportsOauth && !isLocal && authMode !== "api-key" ? (
           <>
-            <p className="modal-desc">{t("provider.key.codexDesc")}</p>
+            <p className="modal-desc">
+              {providerId === "openai"
+                ? t("provider.key.codexDesc")
+                : providerId === "gemini"
+                ? (locale?.startsWith("ar") ? "استخدم حساب Google الخاص بك لتسجيل الدخول بأمان." : "Use your Google account to sign in securely.")
+                : (locale?.startsWith("ar") ? "استخدم حساب Claude الخاص بك لتسجيل الدخول بأمان." : "Use your Claude account to sign in securely.")}
+            </p>
             {deviceCode && (
               <div className="section" style={{ gap: 8, alignItems: "center" }}>
                 <span className="sec-label">{t("provider.key.codexDeviceCodeLabel")}</span>
@@ -213,8 +233,12 @@ export function ProviderKeyDialog({
               <button type="button" className="btn" onClick={onClose}>
                 {t("common.cancel")}
               </button>
-              <button type="button" className="btn primary" disabled={saving} onClick={() => void handleCodexConnect()}>
-                {t("provider.key.connectCodex")}
+              <button type="button" className="btn primary" disabled={saving} onClick={() => void handleOauthConnect()}>
+                {providerId === "openai"
+                  ? t("provider.key.connectCodex")
+                  : providerId === "gemini"
+                  ? (locale?.startsWith("ar") ? "اتصال بحساب Google" : "Connect Google Account")
+                  : (locale?.startsWith("ar") ? "اتصال بحساب Claude" : "Connect Claude Account")}
               </button>
             </div>
           </>
@@ -277,7 +301,7 @@ export function ProviderKeyDialog({
                     await onSave(
                       isLocal ? null : apiKey.trim() || null,
                       baseUrl.trim() || null,
-                      supportsCodex ? authMode : "api-key",
+                      supportsOauth ? authMode : "api-key",
                     );
                     if (onAfterSave) {
                       const msg = await onAfterSave(providerId);

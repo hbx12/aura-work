@@ -104,6 +104,8 @@ interface SettingsPageProps {
   onBridgeStop: () => Promise<unknown>;
   onBridgeCreatePairing: () => Promise<{ code: string; expiresAt: string }>;
   onBridgeRevokeClient: (clientId: string) => Promise<void>;
+  activeTab?: string;
+  onTabChange?: (tab: any) => void;
 }
 
 function ServicePanel({
@@ -235,13 +237,17 @@ export function SettingsPage({
   onBridgeStop,
   onBridgeCreatePairing,
   onBridgeRevokeClient,
+  activeTab,
+  onTabChange,
 }: SettingsPageProps) {
   const [exportPassword, setExportPassword] = useState("");
   const [importPassword, setImportPassword] = useState("");
   const [importData, setImportData] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<SettingsTab>("general");
+  const [localTab, setLocalTab] = useState<SettingsTab>("general");
+  const tab = activeTab ? (activeTab as SettingsTab) : localTab;
+  const setTab = onTabChange ? onTabChange : setLocalTab;
   const [selectedPet, setSelectedPet] = useState(() => localStorage.getItem("selected-pet") || "robot");
 
   const showMsg = (m: string) => setMessage(m);

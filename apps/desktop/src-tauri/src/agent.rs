@@ -215,7 +215,7 @@ fn build_credentials(
     }))
 }
 
-fn record_usage(
+pub fn record_usage(
     db: &DbState,
     project_id: Option<&str>,
     provider_id: &str,
@@ -274,8 +274,9 @@ pub async fn get_sidecar_status() -> Result<serde_json::Value, String> {
     }
 }
 
-fn persist_codex_credentials_from_json(
+pub fn persist_oauth_credentials_from_json(
     vault: &VaultHandle,
+    provider_id: &str,
     updated: &serde_json::Value,
 ) -> Result<(), String> {
     let access = updated
@@ -293,8 +294,21 @@ fn persist_codex_credentials_from_json(
         .get("refreshToken")
         .and_then(|v| v.as_str())
         .map(|s| s.to_string());
+    let auth_mode = match provider_id {
+        "openai" => "codex-account",
+        "gemini" => "google-account",
+        "anthropic" => "claude-account",
+        _ => "api-key",
+    };
     let mut v = vault.0.lock().map_err(|e| e.to_string())?;
-    v.set_codex_credentials("openai", access.trim().to_string(), account_id, refresh)
+    v.set_oauth_credentials(provider_id, access.trim().to_string(), account_id, refresh, auth_mode)
+}
+
+fn persist_codex_credentials_from_json(
+    vault: &VaultHandle,
+    updated: &serde_json::Value,
+) -> Result<(), String> {
+    persist_oauth_credentials_from_json(vault, "openai", updated)
 }
 
 #[tauri::command]
@@ -310,7 +324,7 @@ pub async fn validate_provider(
     )
     .await?;
     if let Some(updated) = &result.updated_credentials {
-        let _ = persist_codex_credentials_from_json(&vault, updated);
+        let _ = persist_oauth_credentials_from_json(&vault, &provider_id, updated);
     }
     let status = if result.valid { "valid" } else { "invalid" };
     mark_provider_validation(&db, &provider_id, status)?;

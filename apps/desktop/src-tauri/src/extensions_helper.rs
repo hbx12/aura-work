@@ -60,6 +60,10 @@ pub struct McpServerConfig {
     #[serde(default)]
     pub env: serde_json::Map<String, serde_json::Value>,
     pub enabled: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timeout: Option<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
