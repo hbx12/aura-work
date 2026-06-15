@@ -4,7 +4,10 @@ use crate::task_writes::{
 use crate::agent::{build_task_chat_bundle, enabled_providers, sidecar_get_text, sidecar_post};
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
-use crate::files::{tool_read_file, tool_search_files, tool_write_file};
+use crate::files::{
+    tool_delete_file, tool_glob_files, tool_read_file, tool_replace_in_file, tool_search_files,
+    tool_write_file,
+};
 use crate::git::{tool_git_diff, tool_git_status, GitStatusResult};
 use crate::browser::tool_browse_url;
 use crate::computer_use::{
@@ -19,7 +22,7 @@ use crate::providers::VaultHandle;
 use rusqlite::params;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 
 const MAX_ITERATIONS: u32 = 20;
 
@@ -551,17 +554,19 @@ pub fn approve_task_plan_inner(db: &DbState, task_id: &str) -> Result<TaskRecord
 
 #[tauri::command]
 pub async fn advance_task(
+    app: AppHandle,
     db: State<'_, DbState>,
     vault: State<'_, VaultHandle>,
     task_id: String,
 ) -> Result<TaskRecord, String> {
-    advance_task_inner(&db, &vault, &task_id).await
+    advance_task_inner(&db, &vault, &task_id, Some(&app)).await
 }
 
 pub async fn advance_task_inner(
     db: &DbState,
     vault: &VaultHandle,
     task_id: &str,
+    app: Option<&AppHandle>,
 ) -> Result<TaskRecord, String> {
     let (state, iteration, project_id, prompt, plan, steps, messages, plan_approved, provider_id, model_id) = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
@@ -728,7 +733,7 @@ pub async fn advance_task_inner(
                 output: None,
             };
 
-            match execute_tool(&db, &project_id, Some(&task_id), &tc).await {
+            match execute_tool(&db, &project_id, Some(&task_id), &tc, app).await {
                 Ok(output) => {
                     step.status = "done".into();
                     step.tool_ok = Some(true);
@@ -738,7 +743,7 @@ pub async fn advance_task_inner(
                         content: output,
                         agent_role: Some("system".into()),
                     });
-                    if tc.name == "write_file" {
+                    if tc.name == "write_file" || tc.name == "delete_file" || tc.name == "replace_in_file" {
                         if let Some(path) = tc.arguments.get("path").and_then(|v| v.as_str()) {
                             new_modified.push(path.to_string());
                         }
@@ -863,6 +868,7 @@ async fn execute_tool(
     project_id: &str,
     task_id: Option<&str>,
     tc: &SidecarToolCall,
+    app: Option<&AppHandle>,
 ) -> Result<String, String> {
     match tc.name.as_str() {
         "skill" => {
@@ -904,6 +910,93 @@ async fn execute_tool(
             }
             Ok(format!("Wrote {path}"))
         }
+        "replace_in_file" => {
+            let path = tc
+                .arguments
+                .get("path")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing path")?;
+            let old_text = tc
+                .arguments
+                .get("oldText")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing oldText")?;
+            let new_text = tc
+                .arguments
+                .get("newText")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing newText")?;
+            let replace_all = tc
+                .arguments
+                .get("replaceAll")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+            let edit = tool_replace_in_file(
+                db,
+                project_id,
+                task_id,
+                path,
+                old_text,
+                new_text,
+                replace_all,
+            )?;
+            if edit.status == "pending" {
+                return Err(format!("Pending edit approval required: {}", edit.id));
+            }
+            Ok(format!("Edited {path}"))
+        }
+        "delete_file" => {
+            let path = tc
+                .arguments
+                .get("path")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing path")?;
+            tool_delete_file(db, project_id, task_id, path)?;
+            Ok(format!("Deleted {path}"))
+        }
+        "set_theme" => {
+            let theme = tc
+                .arguments
+                .get("theme")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing theme")?;
+            let allowed = [
+                "system",
+                "light",
+                "dark",
+                "amoled",
+                "blue",
+                "high-contrast",
+                "cyberpunk",
+                "forest",
+                "pastel",
+                "sunset",
+                "sepia",
+                "nord",
+                "dracula",
+                "matrix",
+                "sakura",
+                "sakura-dark",
+                "coffee",
+                "ocean",
+            ];
+            if !allowed.contains(&theme) {
+                return Err("Invalid theme.".into());
+            }
+            {
+                let conn = db.0.lock().map_err(|e| e.to_string())?;
+                conn.execute(
+                    "INSERT INTO app_settings (key, value) VALUES ('theme_preference', ?1)
+                     ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                    params![theme],
+                )
+                .map_err(|e| e.to_string())?;
+            }
+            if let Some(app) = app {
+                let _ = app.emit("aura://theme-preference", theme);
+            }
+            Ok(format!("Theme set to {theme}"))
+        }
         "search_files" => {
             let query = tc
                 .arguments
@@ -911,6 +1004,15 @@ async fn execute_tool(
                 .and_then(|v| v.as_str())
                 .ok_or("Missing query")?;
             let matches = tool_search_files(db, project_id, query)?;
+            Ok(serde_json::to_string(&matches).unwrap_or_else(|_| "[]".into()))
+        }
+        "glob_files" => {
+            let pattern = tc
+                .arguments
+                .get("pattern")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing pattern")?;
+            let matches = tool_glob_files(db, project_id, pattern)?;
             Ok(serde_json::to_string(&matches).unwrap_or_else(|_| "[]".into()))
         }
         "git_status" => {
@@ -1150,7 +1252,7 @@ pub async fn resume_after_permission(
                 let conn = db.0.lock().map_err(|e| e.to_string())?;
                 load_task(&conn, &task_id)?.project_id
             };
-            if let Ok(out) = execute_tool(&db, &project_id, Some(&task_id), &tc).await {
+            if let Ok(out) = execute_tool(&db, &project_id, Some(&task_id), &tc, None).await {
                 let conn = db.0.lock().map_err(|e| e.to_string())?;
                 let mut task = load_task(&conn, &task_id)?;
                 task.messages.push(TaskMessage {
@@ -1163,7 +1265,7 @@ pub async fn resume_after_permission(
         }
     }
 
-    advance_task(db, vault, task_id).await
+    advance_task_inner(&db, &vault, &task_id, None).await
 }
 
 #[tauri::command]
@@ -1204,7 +1306,7 @@ pub async fn resume_after_edit(
         save_task(&conn, &task)?;
     }
 
-    advance_task(db, vault, task_id).await
+    advance_task_inner(&db, &vault, &task_id, None).await
 }
 
 #[tauri::command]
@@ -1225,5 +1327,5 @@ pub async fn send_task_message(
         task.state = TaskState::Running.as_str().into();
         save_task(&conn, &task)?;
     }
-    advance_task(db, vault, task_id).await
+    advance_task_inner(&db, &vault, &task_id, None).await
 }

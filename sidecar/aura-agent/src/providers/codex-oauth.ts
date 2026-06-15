@@ -1,6 +1,5 @@
 /**
- * OpenCode-style ChatGPT/Codex OAuth (browser PKCE + device code + token refresh).
- * Reference: https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/plugin/openai/codex.ts
+ * ChatGPT account OAuth using browser PKCE, device code fallback, and token refresh.
  */
 import { createHash, randomBytes } from "node:crypto";
 import { createServer, type Server } from "node:http";
@@ -8,9 +7,9 @@ import { createServer, type Server } from "node:http";
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const ISSUER = "https://auth.openai.com";
 const OAUTH_PORT = 1455;
-/** Must match Codex CLI Hydra allow-list exactly (localhost, not 127.0.0.1). */
+/** Must match the provider allow-list exactly (localhost, not 127.0.0.1). */
 const REDIRECT_URI = `http://localhost:${OAUTH_PORT}/auth/callback`;
-/** Registered first-party originator for CLIENT_ID (same as Codex CLI / OpenCode). */
+/** Registered first-party originator required by the auth provider. */
 const ORIGINATOR = "codex_cli_rs";
 const USER_AGENT = "codex_cli_rs/1.0.0";
 
@@ -327,6 +326,11 @@ export function cancelCodexAuth(): void {
 }
 
 export async function startProviderBrowserAuth(providerId: string): Promise<{ url: string; mode: "browser" }> {
+  if (providerId !== "openai") {
+    throw new Error(
+      "Account sign-in is only available for OpenAI in this build. Google Gemini and Anthropic require API keys for their public APIs.",
+    );
+  }
   cancelCodexAuth();
   browserAuthResult = null;
   browserAuthError = null;
@@ -347,14 +351,7 @@ export async function startProviderBrowserAuth(providerId: string): Promise<{ ur
     },
   };
 
-  let url = "";
-  if (providerId === "gemini") {
-    url = `http://localhost:${OAUTH_PORT}/auth/google?state=${state}`;
-  } else if (providerId === "anthropic") {
-    url = `http://localhost:${OAUTH_PORT}/auth/claude?state=${state}`;
-  } else {
-    url = buildAuthorizeUrl(REDIRECT_URI, pkce, state);
-  }
+  const url = buildAuthorizeUrl(REDIRECT_URI, pkce, state);
 
   return {
     url,
@@ -504,9 +501,10 @@ export async function startProviderLogin(providerId: string): Promise<{
       const session = await startCodexDeviceAuth();
       return session;
     }
-  } else {
-    return startProviderBrowserAuth(providerId);
   }
+  throw new Error(
+    "Account sign-in is only available for OpenAI in this build. Use a Google Gemini or Anthropic API key.",
+  );
 }
 
 /** Browser login first; device code if browser server cannot bind port 1455. */

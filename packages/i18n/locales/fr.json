@@ -156,7 +156,7 @@
   "provider.key.saved": "Key saved. Fetching models…",
   "provider.key.fetchingModels": "Loaded {count} models.",
   "provider.key.authMethod": "Sign-in method",
-  "provider.key.codexAccount": "ChatGPT (Codex)",
+  "provider.key.codexAccount": "ChatGPT Account",
   "provider.key.apiKeyMode": "API key",
   "provider.key.codexDesc": "Use your ChatGPT subscription. Click Connect — a device code appears here. Sign in at the link and enter the code.",
   "provider.key.connectCodex": "Connect ChatGPT account",

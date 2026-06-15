@@ -218,6 +218,17 @@ pub fn write_file_internal(root: &str, rel: &str, content: &str) -> Result<(), S
     fs::write(&path, content).map_err(|e| e.to_string())
 }
 
+pub fn delete_file_internal(root: &str, rel: &str) -> Result<(), String> {
+    if is_excluded(rel, false) {
+        return Err(format!("Path excluded by policy: {rel}"));
+    }
+    let path = resolve_project_path(root, rel)?;
+    if path.is_dir() {
+        return Err("Deleting directories is not supported by this tool.".into());
+    }
+    fs::remove_file(&path).map_err(|e| e.to_string())
+}
+
 pub fn list_dir_internal(root: &str, rel: Option<&str>, depth: u32) -> Result<Vec<FileEntry>, String> {
     let base = if let Some(r) = rel {
         resolve_project_path(root, r)?
@@ -297,6 +308,38 @@ pub fn search_files_internal(root: &str, query: &str, limit: u32) -> Result<Vec<
         }
     }
     Ok(matches)
+}
+
+fn wildcard_match(pattern: &str, text: &str) -> bool {
+    fn inner(p: &[u8], t: &[u8]) -> bool {
+        if p.is_empty() {
+            return t.is_empty();
+        }
+        match p[0] {
+            b'*' => inner(&p[1..], t) || (!t.is_empty() && inner(p, &t[1..])),
+            b'?' => !t.is_empty() && inner(&p[1..], &t[1..]),
+            c => !t.is_empty() && c.eq_ignore_ascii_case(&t[0]) && inner(&p[1..], &t[1..]),
+        }
+    }
+    inner(pattern.as_bytes(), text.as_bytes())
+}
+
+pub fn glob_files_internal(root: &str, pattern: &str, limit: u32) -> Result<Vec<FileEntry>, String> {
+    let pattern = normalize_rel(pattern);
+    if pattern.trim().is_empty() {
+        return Err("Pattern is required.".into());
+    }
+    let files = list_dir_internal(root, None, 8)?;
+    let mut out = Vec::new();
+    for f in files {
+        if wildcard_match(&pattern, &f.path) || wildcard_match(&pattern, &f.name) {
+            out.push(f);
+            if out.len() >= limit as usize {
+                break;
+            }
+        }
+    }
+    Ok(out)
 }
 
 fn looks_textual(path: &str) -> bool {
@@ -627,6 +670,15 @@ pub fn tool_search_files(
     search_files_internal(&root, query, 30)
 }
 
+pub fn tool_glob_files(
+    db: &DbState,
+    project_id: &str,
+    pattern: &str,
+) -> Result<Vec<FileEntry>, String> {
+    let root = project_folder(db, project_id)?;
+    glob_files_internal(&root, pattern, 80)
+}
+
 pub fn tool_write_file(
     db: &DbState,
     project_id: &str,
@@ -644,4 +696,91 @@ pub fn tool_write_file(
             skip_permission: None,
         },
     )
+}
+
+pub fn tool_replace_in_file(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    file_path: &str,
+    old_text: &str,
+    new_text: &str,
+    replace_all: bool,
+) -> Result<PendingEdit, String> {
+    if old_text == new_text {
+        return Err("No changes to apply: oldText and newText are identical.".into());
+    }
+    if old_text.is_empty() {
+        return Err("oldText is required. Use write_file for full-file creation or replacement.".into());
+    }
+    let root = project_folder(db, project_id)?;
+    let rel = normalize_rel(file_path);
+    let original = read_file_internal(&root, &rel)?;
+    let old = if original.contains("\r\n") {
+        old_text.replace('\n', "\r\n")
+    } else {
+        old_text.to_string()
+    };
+    let new = if original.contains("\r\n") {
+        new_text.replace('\n', "\r\n")
+    } else {
+        new_text.to_string()
+    };
+    let count = original.matches(&old).count();
+    if count == 0 {
+        return Err("oldText was not found in the target file.".into());
+    }
+    if count > 1 && !replace_all {
+        return Err("oldText appears multiple times. Set replaceAll to true or provide a more specific oldText.".into());
+    }
+    let next = if replace_all {
+        original.replace(&old, &new)
+    } else {
+        original.replacen(&old, &new, 1)
+    };
+    tool_write_file(db, project_id, task_id, &rel, &next)
+}
+
+pub fn tool_delete_file(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    file_path: &str,
+) -> Result<(), String> {
+    let root = project_folder(db, project_id)?;
+    let rel = normalize_rel(file_path);
+
+    check_task_permission(
+        db,
+        project_id,
+        task_id,
+        "file",
+        "delete",
+        &rel,
+        &format!("Delete file {rel}"),
+        "high",
+        false,
+        None,
+    )?;
+
+    delete_file_internal(&root, &rel)?;
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    append_audit(
+        &conn,
+        &AppendAuditInput {
+            project_id: Some(project_id.to_string()),
+            task_id: task_id.map(String::from),
+            actor: "coordinator".into(),
+            category: "file".into(),
+            action: "delete".into(),
+            target: Some(rel.clone()),
+            summary: format!("Deleted {rel}"),
+            risk: Some("high".into()),
+            decision: None,
+            result: "succeeded".into(),
+            metadata: None,
+        },
+    )?;
+    Ok(())
 }

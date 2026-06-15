@@ -128,6 +128,13 @@ pub fn init_provider_tables(conn: &rusqlite::Connection) -> Result<(), String> {
             routing_policy TEXT NOT NULL,
             created_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS provider_model_visibility (
+            provider_id TEXT NOT NULL,
+            model_id TEXT NOT NULL,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (provider_id, model_id)
+        );
         ",
     )
     .map_err(|e| e.to_string())?;
@@ -411,7 +418,7 @@ fn read_codex_auth_from_file(path: &std::path::Path) -> Option<CodexAuthBundle> 
 }
 
 fn ensure_codex_file_storage() -> Result<std::path::PathBuf, String> {
-    let home = codex_home().ok_or("Cannot locate Codex home directory.")?;
+    let home = codex_home().ok_or("Cannot locate ChatGPT account storage directory.")?;
     std::fs::create_dir_all(&home).map_err(|e| e.to_string())?;
     let config_path = home.join("config.toml");
     let mut contents = if config_path.exists() {
@@ -445,9 +452,9 @@ fn read_codex_auth_bundle() -> Result<CodexAuthBundle, String> {
     try_read_codex_auth_bundle().ok_or_else(|| {
         let path = codex_auth_path()
             .map(|p| p.display().to_string())
-            .unwrap_or_else(|| "~/.codex/auth.json".into());
+            .unwrap_or_else(|| "local account auth file".into());
         format!(
-            "No Codex login found (checked auth file and OS keyring). Complete sign-in in the browser, then try Connect again. Expected: {path}"
+            "No ChatGPT account login found (checked auth file and OS keyring). Complete sign-in in the browser, then try Connect again. Expected: {path}"
         )
     })
 }
@@ -694,7 +701,7 @@ pub async fn start_codex_login(
     start_codex_device_login(app, vault, db, force).await
 }
 
-/// Starts native device-code login (OpenCode-style) via agent sidecar.
+/// Starts native device-code login via agent sidecar.
 #[tauri::command]
 pub async fn start_codex_device_login(
     app: AppHandle,

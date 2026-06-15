@@ -736,7 +736,6 @@ pub fn list_local_skills_internal(db: &DbState) -> Result<Vec<SkillInfo>, String
     // 1. Scan global directories
     if let Ok(home) = dirs_home() {
         let global_paths = [
-            home.join(".config").join("opencode").join("skills"),
             home.join(".config").join("aura").join("skills"),
             home.join(".agents").join("skills"),
             home.join(".claude").join("skills"),
@@ -758,7 +757,6 @@ pub fn list_local_skills_internal(db: &DbState) -> Result<Vec<SkillInfo>, String
     for folder in project_paths {
         let project_dir = Path::new(&folder);
         let project_paths = [
-            project_dir.join(".opencode").join("skills"),
             project_dir.join(".aura").join("skills"),
             project_dir.join(".agents").join("skills"),
             project_dir.join(".claude").join("skills"),

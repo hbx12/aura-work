@@ -23,6 +23,12 @@ export interface VaultStatus {
   deviceBound: boolean;
 }
 
+export interface ProviderModelPublic {
+  id: string;
+  displayName: string;
+  enabled: boolean;
+}
+
 export function useProviders() {
   const [providers, setProviders] = useState<ProviderConfigPublic[]>([]);
   const [routingPolicy, setRoutingPolicyState] = useState<RoutingPolicy>("quality-first");
@@ -101,11 +107,17 @@ export function useProviders() {
   };
 
   const listProviderModels = async (providerId: string) => {
-    const models = await invoke<{ id: string; displayName: string }[]>("list_provider_models", {
+    const models = await invoke<ProviderModelPublic[]>("list_provider_models", {
       providerId,
     });
     await refresh();
     return models;
+  };
+
+  const setProviderModelEnabled = async (providerId: string, modelId: string, enabled: boolean) => {
+    await invoke("set_provider_model_enabled", {
+      input: { providerId, modelId, enabled },
+    });
   };
 
   const exportVault = async (password: string) => {
@@ -133,6 +145,7 @@ export function useProviders() {
     setRoutingPolicy,
     validateProvider,
     listProviderModels,
+    setProviderModelEnabled,
     exportVault,
     importVault,
     fetchPricing,

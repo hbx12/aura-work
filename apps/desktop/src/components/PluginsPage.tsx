@@ -77,13 +77,6 @@ const MCP_PRESETS_EN = [
     envHelp: "Runs a headless browser to extract text from web pages.",
   },
   {
-    name: "OpenAI Codex Integration (Automate coding)",
-    transport: "stdio",
-    command: "npx",
-    args: "-y @modelcontextprotocol/server-codex",
-    envHelp: "Connects to OpenAI Codex. Note: Requires environment variable: CODEX_API_KEY=your_key",
-  },
-  {
     name: "Claude Desktop Integration (SSE)",
     transport: "sse",
     command: "http://localhost:8765/sse",
@@ -134,13 +127,6 @@ const MCP_PRESETS_AR = [
     command: "npx",
     args: "-y @modelcontextprotocol/server-puppeteer",
     envHelp: "يشغل متصفحاً خفياً لاستخراج النصوص والمحتويات من الويب.",
-  },
-  {
-    name: "تكامل OpenAI Codex (أتمتة البرمجة)",
-    transport: "stdio",
-    command: "npx",
-    args: "-y @modelcontextprotocol/server-codex",
-    envHelp: "يتصل بـ OpenAI Codex. ملاحظة: يتطلب متغير البيئة: CODEX_API_KEY=your_key",
   },
   {
     name: "تكامل Claude Desktop (عبر SSE)",

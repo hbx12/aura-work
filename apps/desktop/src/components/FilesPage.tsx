@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ElementType, type ReactNode } from "react";
 import Editor, { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { Icon } from "@aura-os/ui";
@@ -27,6 +27,146 @@ interface TreeNode {
   isDir: boolean;
   size?: number | null;
   children: TreeNode[];
+}
+
+function renderInlineMarkdown(text: string) {
+  const parts: ReactNode[] = [];
+  const pattern = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g;
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text))) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    const token = match[0];
+    const key = `${match.index}-${token}`;
+    if (token.startsWith("`")) {
+      parts.push(<code key={key}>{token.slice(1, -1)}</code>);
+    } else if (token.startsWith("**")) {
+      parts.push(<strong key={key}>{token.slice(2, -2)}</strong>);
+    } else if (token.startsWith("*")) {
+      parts.push(<em key={key}>{token.slice(1, -1)}</em>);
+    } else {
+      const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (link) {
+        parts.push(
+          <a key={key} href={link[2]} target="_blank" rel="noreferrer">
+            {link[1]}
+          </a>,
+        );
+      } else {
+        parts.push(token);
+      }
+    }
+    last = match.index + token.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
+function MarkdownPreview({ content }: { content: string }) {
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const nodes: ReactNode[] = [];
+  let listItems: ReactNode[] = [];
+  let ordered = false;
+  let quoteLines: string[] = [];
+  let codeLines: string[] = [];
+  let inCode = false;
+  let codeLang = "";
+
+  const flushList = () => {
+    if (!listItems.length) return;
+    const key = `list-${nodes.length}`;
+    nodes.push(ordered ? <ol key={key}>{listItems}</ol> : <ul key={key}>{listItems}</ul>);
+    listItems = [];
+  };
+
+  const flushQuote = () => {
+    if (!quoteLines.length) return;
+    nodes.push(
+      <blockquote key={`quote-${nodes.length}`}>
+        {quoteLines.map((line, index) => (
+          <p key={index}>{renderInlineMarkdown(line)}</p>
+        ))}
+      </blockquote>,
+    );
+    quoteLines = [];
+  };
+
+  const flushCode = () => {
+    nodes.push(
+      <pre key={`code-${nodes.length}`} className="md-code-block">
+        {codeLang && <span className="md-code-lang">{codeLang}</span>}
+        <code>{codeLines.join("\n")}</code>
+      </pre>,
+    );
+    codeLines = [];
+    codeLang = "";
+  };
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const fence = line.match(/^```(\w+)?\s*$/);
+    if (fence) {
+      if (inCode) {
+        flushCode();
+        inCode = false;
+      } else {
+        flushList();
+        flushQuote();
+        inCode = true;
+        codeLang = fence[1] ?? "";
+      }
+      continue;
+    }
+    if (inCode) {
+      codeLines.push(raw);
+      continue;
+    }
+    if (!line.trim()) {
+      flushList();
+      flushQuote();
+      continue;
+    }
+    const quote = line.match(/^>\s?(.*)$/);
+    if (quote) {
+      flushList();
+      quoteLines.push(quote[1]);
+      continue;
+    }
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      flushList();
+      flushQuote();
+      const level = heading[1].length;
+      const Tag = `h${level}` as ElementType;
+      nodes.push(<Tag key={`h-${nodes.length}`}>{renderInlineMarkdown(heading[2])}</Tag>);
+      continue;
+    }
+    const bullet = line.match(/^[-*+]\s+(\[[ xX]\]\s+)?(.+)$/);
+    const number = line.match(/^\d+\.\s+(.+)$/);
+    if (bullet || number) {
+      flushQuote();
+      const nextOrdered = Boolean(number);
+      if (listItems.length && ordered !== nextOrdered) flushList();
+      ordered = nextOrdered;
+      const checkbox = bullet?.[1];
+      const body = number?.[1] ?? bullet?.[2] ?? "";
+      listItems.push(
+        <li key={`li-${listItems.length}`}>
+          {checkbox && <input type="checkbox" checked={/[xX]/.test(checkbox)} readOnly />}
+          {renderInlineMarkdown(body)}
+        </li>,
+      );
+      continue;
+    }
+    flushList();
+    flushQuote();
+    nodes.push(<p key={`p-${nodes.length}`}>{renderInlineMarkdown(line)}</p>);
+  }
+  if (inCode) flushCode();
+  flushList();
+  flushQuote();
+
+  return <div className="markdown-preview">{nodes.length ? nodes : <p>No Markdown content.</p>}</div>;
 }
 
 export function FilesPage({
@@ -110,6 +250,12 @@ export function FilesPage({
 
   const tree = buildTree(files);
   const fileName = selectedPath?.split(/[/\\]/).pop() ?? null;
+  const isMarkdown = /\.(md|markdown)$/i.test(selectedPath ?? "");
+  const [markdownMode, setMarkdownMode] = useState<"preview" | "edit">("preview");
+
+  useEffect(() => {
+    setMarkdownMode(isMarkdown ? "preview" : "edit");
+  }, [isMarkdown, selectedPath]);
 
   const renderIndentGuides = (depth: number) => {
     const guides = [];
@@ -297,6 +443,24 @@ export function FilesPage({
                   <b>{selectedPath}</b>
                 </span>
                 <span className="spacer" />
+                {isMarkdown && (
+                  <div className="seg compact">
+                    <button
+                      type="button"
+                      className={markdownMode === "preview" ? "active" : ""}
+                      onClick={() => setMarkdownMode("preview")}
+                    >
+                      Preview
+                    </button>
+                    <button
+                      type="button"
+                      className={markdownMode === "edit" ? "active" : ""}
+                      onClick={() => setMarkdownMode("edit")}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                )}
                 {editedContent !== content && (
                   <button
                     type="button"
@@ -343,28 +507,32 @@ export function FilesPage({
                     </div>
                   </div>
                 )}
-                <Editor
-                  height="100%"
-                  theme="vs-dark"
-                  language={getLanguageFromPath(selectedPath)}
-                  value={editedContent}
-                  onChange={(val) => setEditedContent(val ?? "")}
-                  onMount={(editor, monaco) => {
-                    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-                      const val = editor.getValue();
-                      if (selectedPath && onSave) {
-                        void onSave(selectedPath, val);
-                      }
-                    });
-                  }}
-                  options={{
-                    readOnly: false,
-                    minimap: { enabled: false },
-                    fontSize: 13,
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                  }}
-                />
+                {isMarkdown && markdownMode === "preview" ? (
+                  <MarkdownPreview content={editedContent} />
+                ) : (
+                  <Editor
+                    height="100%"
+                    theme="vs-dark"
+                    language={getLanguageFromPath(selectedPath)}
+                    value={editedContent}
+                    onChange={(val) => setEditedContent(val ?? "")}
+                    onMount={(editor, monaco) => {
+                      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                        const val = editor.getValue();
+                        if (selectedPath && onSave) {
+                          void onSave(selectedPath, val);
+                        }
+                      });
+                    }}
+                    options={{
+                      readOnly: false,
+                      minimap: { enabled: false },
+                      fontSize: 13,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                    }}
+                  />
+                )}
               </div>
             </>
           ) : (

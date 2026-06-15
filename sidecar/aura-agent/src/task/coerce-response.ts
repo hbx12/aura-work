@@ -15,7 +15,7 @@ export interface CoerceContext {
 
 function wroteFilesYet(messages: CoerceContext["messages"]): boolean {
   return messages.some(
-    (m) => m.role === "tool" && /\bWrote\s+[\w./-]+/i.test(m.content),
+    (m) => m.role === "tool" && /\b(Wrote|Edited|Deleted)\s+[\w./-]+/i.test(m.content),
   );
 }
 
@@ -38,9 +38,9 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
         "The model attempted to write placeholder or empty file content. Aura Work refused the write.",
       );
     }
-    if (fileTask && !parsed.toolCalls.some((c) => c.name === "write_file")) {
+    if (fileTask && !parsed.toolCalls.some((c) => c.name === "write_file" || c.name === "replace_in_file" || c.name === "delete_file")) {
       return blocked(
-        "File task requires a write_file tool call. Aura Work did not create guessed files from chat text.",
+        "File task requires a write_file, replace_in_file, or delete_file tool call. Aura Work did not create guessed files from chat text.",
       );
     }
     return {

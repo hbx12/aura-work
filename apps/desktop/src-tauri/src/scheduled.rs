@@ -630,7 +630,7 @@ async fn execute_scheduled_run_internal(
             if current.state != "running" {
                 break;
             }
-            current = advance_task_inner(db, vault, &current.id).await?;
+            current = advance_task_inner(db, vault, &current.id, None).await?;
             if current.state == "waiting-for-approval" {
                 break;
             }

@@ -120,6 +120,7 @@ pub fn run() {
             pricing::list_pricing,
             agent::validate_provider,
             agent::list_provider_models,
+            agent::set_provider_model_enabled,
             agent::list_chat_models,
             agent::run_chat,
             agent::get_latest_usage,
