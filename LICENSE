@@ -4,6 +4,11 @@
 
    Copyright 2026 NOVIR Studio
 
+   NOVIR Studio and this application are maintained and represented by the
+   GitHub account hbx12, which is the responsible account for licensing,
+   redistribution permission, branding approval, and official project release
+   authorization unless otherwise stated in writing by NOVIR Studio.
+
    Licensed under the Apache License, Version 2.0 (the "License"), with
    the additional NOVIR Studio branding and redistribution restriction
    stated below. You may not use this file except in compliance with the
@@ -38,7 +43,9 @@
 
    Any permission to redistribute, publish, commercialize, rebrand, or release
    this software as a separate application or product must be granted in
-   writing by NOVIR Studio.
+   writing by NOVIR Studio through the responsible GitHub account hbx12,
+   unless another official authorization channel is stated in writing by
+   NOVIR Studio.
 
    This additional restriction is intended to protect the NOVIR Studio brand
    and application identity while still allowing development, contribution,
