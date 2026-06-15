@@ -4,7 +4,7 @@ version = "0.1.0-alpha.1"
 description = "Aura Work desktop application"
 authors = ["Aura OS Contributors"]
 edition = "2021"
-license = "Apache-2.0"
+license = "LicenseRef-NOVIR-Studio"
 
 [lib]
 name = "aura_desktop_lib"
@@ -34,4 +34,3 @@ tiny_http = "0.12"
 keyring = "3"
 ureq = "2"
 regex = "1"
-
