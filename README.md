@@ -3,7 +3,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/hbx12/aura-work/actions/workflows/ci.yml/badge.svg)](https://github.com/hbx12/aura-work/actions/workflows/ci.yml)
 
-**Current status: `0.1.0-alpha.1`** — under active security hardening.
+**Current status: `0.1.0-alpha.11`** — under active security hardening.
 
 Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
 
