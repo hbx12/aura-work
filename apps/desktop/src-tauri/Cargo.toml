@@ -33,4 +33,5 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tiny_http = "0.12"
 keyring = "3"
 ureq = "2"
+regex = "1"
 

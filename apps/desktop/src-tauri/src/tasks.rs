@@ -5,8 +5,8 @@ use crate::agent::{build_task_chat_bundle, enabled_providers, sidecar_get_text, 
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
 use crate::files::{
-    tool_delete_file, tool_glob_files, tool_read_file, tool_replace_in_file, tool_search_files,
-    tool_write_file,
+    tool_delete_file, tool_glob_files, tool_grep_files, tool_read_file_window,
+    tool_replace_in_file, tool_search_files, tool_write_file,
 };
 use crate::git::{tool_git_diff, tool_git_status, GitStatusResult};
 use crate::browser::tool_browse_url;
@@ -890,8 +890,18 @@ async fn execute_tool(
                 .get("path")
                 .and_then(|v| v.as_str())
                 .ok_or("Missing path")?;
-            let content = tool_read_file(db, project_id, task_id, path)?;
-            Ok(content.chars().take(8000).collect())
+            let offset = tc
+                .arguments
+                .get("offset")
+                .and_then(|v| v.as_u64())
+                .map(|v| v.min(u32::MAX as u64) as u32);
+            let limit = tc
+                .arguments
+                .get("limit")
+                .and_then(|v| v.as_u64())
+                .map(|v| v.min(u32::MAX as u64) as u32);
+            let window = tool_read_file_window(db, project_id, task_id, path, offset, limit)?;
+            Ok(serde_json::to_string(&window).unwrap_or_else(|_| window.content))
         }
         "write_file" => {
             let path = tc
@@ -1013,6 +1023,17 @@ async fn execute_tool(
                 .and_then(|v| v.as_str())
                 .ok_or("Missing pattern")?;
             let matches = tool_glob_files(db, project_id, pattern)?;
+            Ok(serde_json::to_string(&matches).unwrap_or_else(|_| "[]".into()))
+        }
+        "grep_files" => {
+            let pattern = tc
+                .arguments
+                .get("pattern")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing pattern")?;
+            let path = tc.arguments.get("path").and_then(|v| v.as_str());
+            let include = tc.arguments.get("include").and_then(|v| v.as_str());
+            let matches = tool_grep_files(db, project_id, pattern, path, include)?;
             Ok(serde_json::to_string(&matches).unwrap_or_else(|_| "[]".into()))
         }
         "git_status" => {

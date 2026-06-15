@@ -192,6 +192,24 @@ async fn exec_in_vm(project_id: &str, command: &str) -> Result<VmExecResult, Str
     .await
 }
 
+fn tail_text(text: &str, max_lines: usize, max_chars: usize) -> (String, bool) {
+    if text.chars().count() <= max_chars && text.lines().count() <= max_lines {
+        return (text.to_string(), false);
+    }
+    let mut out = Vec::new();
+    let mut chars = 0usize;
+    for line in text.lines().rev() {
+        let len = line.chars().count() + 1;
+        if out.len() >= max_lines || chars + len > max_chars {
+            break;
+        }
+        out.push(line);
+        chars += len;
+    }
+    out.reverse();
+    (out.join("\n"), true)
+}
+
 /// Shell tool entry used by the task engine.
 pub async fn tool_run_shell(
     db: &DbState,
@@ -282,18 +300,28 @@ pub async fn tool_run_shell(
         },
     )?;
 
-    let mut output = String::new();
+    let mut output = format!("{summary}\n");
     if !result.stdout.is_empty() {
-        output.push_str(&result.stdout);
+        let (stdout, cut) = tail_text(&result.stdout, 180, 12_000);
+        if cut {
+            output.push_str("--- stdout tail (truncated) ---\n");
+        } else {
+            output.push_str("--- stdout ---\n");
+        }
+        output.push_str(&stdout);
     }
     if !result.stderr.is_empty() {
         if !output.is_empty() {
             output.push_str("\n--- stderr ---\n");
         }
-        output.push_str(&result.stderr);
+        let (stderr, cut) = tail_text(&result.stderr, 180, 12_000);
+        if cut {
+            output.push_str("(stderr truncated to tail)\n");
+        }
+        output.push_str(&stderr);
     }
-    if output.is_empty() {
-        output = format!("Command finished with exit code {:?}", result.exit_code);
+    if result.stdout.is_empty() && result.stderr.is_empty() {
+        output.push_str("Command produced no output.");
     }
-    Ok(output.chars().take(8000).collect())
+    Ok(output.chars().take(16_000).collect())
 }
