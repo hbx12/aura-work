@@ -1,21 +1,45 @@
-Copyright (c) 2026 NOVIR Studio. All rights reserved.
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
 
-Proprietary License
+   Copyright 2026 NOVIR Studio
 
-This software and its source code, including all related files, documentation, assets, designs, and materials within this repository, are the exclusive property of NOVIR Studio unless otherwise stated in writing.
+   Licensed under the Apache License, Version 2.0 (the "License"), with
+   the additional NOVIR Studio branding and redistribution restriction
+   stated below. You may not use this file except in compliance with the
+   License and this additional restriction.
 
-Permission is granted to view and use this software only for personal evaluation, review, or internal development purposes as authorized by NOVIR Studio.
+   You may obtain a copy of the Apache License at
 
-You may not, without prior written permission from NOVIR Studio:
+       http://www.apache.org/licenses/LICENSE-2.0
 
-1. Redistribute, publish, share, sublicense, sell, lease, or otherwise make this software or any modified version available to any third party.
-2. Copy, reproduce, or mirror this repository or any substantial portion of it for public or private distribution.
-3. Use this software or any part of it in a commercial product, hosted service, SaaS platform, or public deployment.
-4. Modify, create derivative works from, or relicense this software for redistribution.
-5. Remove, alter, or obscure any copyright notice, license notice, attribution, trademark, or proprietary marking.
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the Apache License for the specific language governing permissions
+   and limitations under the License.
 
-Any use, redistribution, publication, sublicensing, resale, or commercial use of this software requires explicit prior written permission from NOVIR Studio.
+   Additional NOVIR Studio Restriction
 
-This software is provided "as is", without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall NOVIR Studio or its contributors be liable for any claim, damages, or other liability arising from the use of this software.
+   NOVIR Studio permits users and contributors to use, copy, modify, fork,
+   test, develop, and contribute to this project, including submitting changes
+   and uploading files through normal contribution workflows.
 
-For licensing requests, redistribution permission, or commercial usage inquiries, contact NOVIR Studio.
+   However, you may not redistribute, publish, rebrand, sell, sublicense,
+   package, release, or deploy this software, or any modified version of it,
+   as a standalone application, competing product, hosted service, SaaS
+   platform, marketplace listing, or public product under your own name,
+   brand, company, studio, or project identity without prior written
+   permission from NOVIR Studio.
+
+   You may not remove, alter, or obscure NOVIR Studio copyright notices,
+   license notices, attribution notices, trademarks, branding, or proprietary
+   markings included in this project.
+
+   Any permission to redistribute, publish, commercialize, rebrand, or release
+   this software as a separate application or product must be granted in
+   writing by NOVIR Studio.
+
+   This additional restriction is intended to protect the NOVIR Studio brand
+   and application identity while still allowing development, contribution,
+   experimentation, and internal use of the source code.
