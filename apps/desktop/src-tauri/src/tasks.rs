@@ -234,8 +234,9 @@ fn save_task(conn: &Connection, task: &TaskRecord) -> Result<(), String> {
 
 fn title_from_prompt(prompt: &str) -> String {
     let t = prompt.trim().lines().next().unwrap_or("New task");
-    if t.len() > 60 {
-        format!("{}…", &t[..57])
+    if t.chars().count() > 60 {
+        let sliced: String = t.chars().take(57).collect();
+        format!("{}…", sliced)
     } else {
         t.to_string()
     }
@@ -380,6 +381,14 @@ struct SidecarPlanStep {
 }
 
 #[derive(Debug, Deserialize)]
+struct SidecarUsage {
+    #[serde(rename = "inputTokens")]
+    input_tokens: Option<u64>,
+    #[serde(rename = "outputTokens")]
+    output_tokens: Option<u64>,
+}
+
+#[derive(Debug, Deserialize)]
 struct SidecarIterateResponse {
     #[serde(rename = "type")]
     response_type: String,
@@ -389,6 +398,7 @@ struct SidecarIterateResponse {
     tool_calls: Option<Vec<SidecarToolCall>>,
     complete: Option<bool>,
     summary: Option<String>,
+    usage: Option<SidecarUsage>,
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -616,6 +626,7 @@ pub async fn advance_task_inner(
         "(failed to resolve project folder)".to_string()
     };
 
+    let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
     let iterate_resp: SidecarIterateResponse = sidecar_post(
         "/task/iterate",
         &serde_json::json!({
@@ -630,9 +641,33 @@ pub async fn advance_task_inner(
             "modelId": chat.model_id,
             "credentials": chat.credentials,
             "workspaceFiles": files_summary,
+            "skills": skills_list,
         }),
     )
     .await?;
+
+    if let Some(ref usage) = iterate_resp.usage {
+        let provider_id = &chat.provider_id;
+        let model_id = &chat.model_id;
+        let (input_rate, output_rate) =
+            crate::pricing::pricing_for_model(db, provider_id, model_id).unwrap_or((None, None));
+        let estimated = crate::pricing::estimate_cost(
+            usage.input_tokens.unwrap_or(0),
+            usage.output_tokens.unwrap_or(0),
+            input_rate,
+            output_rate,
+        );
+        let _ = crate::agent::record_usage(
+            db,
+            Some(&project_id),
+            provider_id,
+            model_id,
+            usage.input_tokens,
+            usage.output_tokens,
+            estimated,
+            "coding",
+        );
+    }
 
     let mut new_messages: Vec<TaskMessage> = Vec::new();
     let mut new_steps: Vec<TaskStep> = Vec::new();
@@ -830,6 +865,19 @@ async fn execute_tool(
     tc: &SidecarToolCall,
 ) -> Result<String, String> {
     match tc.name.as_str() {
+        "skill" => {
+            let skill_name = tc
+                .arguments
+                .get("name")
+                .and_then(|v| v.as_str())
+                .ok_or("Missing name")?;
+            let skills = crate::plugins::list_local_skills_internal(db)?;
+            let found = skills
+                .iter()
+                .find(|s| s.name.eq_ignore_ascii_case(skill_name))
+                .ok_or_else(|| format!("Skill not found: {skill_name}"))?;
+            Ok(found.prompt.clone())
+        }
         "read_file" => {
             let path = tc
                 .arguments

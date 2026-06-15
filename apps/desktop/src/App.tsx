@@ -142,6 +142,7 @@ export default function App() {
   const [view, setView] = useState<AppView>("tasks");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [settingsTab, setSettingsTab] = useState<string>("general");
   const [showCtx, setShowCtx] = useState(true);
   const [search, setSearch] = useState("");
   const [composer, setComposer] = useState("");
@@ -304,6 +305,12 @@ export default function App() {
     void agent.checkSidecar();
     void agent.loadLatestUsage(activeProjectId);
   }, [activeProjectId]);
+
+  useEffect(() => {
+    if (activeProjectId) {
+      void agent.loadLatestUsage(activeProjectId);
+    }
+  }, [tasks.activeTask?.iteration, tasks.running, activeProjectId]);
 
   useEffect(() => {
     if (activeProjectId) void tasks.refreshTasks();
@@ -1037,6 +1044,8 @@ export default function App() {
           onBridgeStop={bridgeApi.stop}
           onBridgeCreatePairing={bridgeApi.createPairing}
           onBridgeRevokeClient={bridgeApi.revokeClient}
+          activeTab={settingsTab}
+          onTabChange={setSettingsTab}
         />
       );
     if (view === "browser")
@@ -1119,6 +1128,11 @@ export default function App() {
           onSyncMarketplace={pluginsApi.syncMarketplace}
           t={t}
           locale={i18n.locale}
+          cloudSignedIn={cloudApi.status?.signedIn}
+          onGoToCloudLogin={() => {
+            setView("settings");
+            setSettingsTab("cloud");
+          }}
         />
       );
     return null;
@@ -1220,6 +1234,7 @@ export default function App() {
         existingAuthMode={configured?.authMode}
         onClose={() => setConfigureProvider(null)}
         t={i18n.t}
+        locale={i18n.locale}
         onSave={async (apiKey, baseUrl, authMode) => {
           if (!configureProvider) return;
           await providersApi.setProviderSecret(configureProvider, apiKey, baseUrl, authMode);

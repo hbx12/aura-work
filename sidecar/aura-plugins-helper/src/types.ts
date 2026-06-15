@@ -43,6 +43,8 @@ export interface McpServerConfig {
   args: string[];
   env: Record<string, unknown>;
   enabled: boolean;
+  headers?: Record<string, string>;
+  timeout?: number;
 }
 
 export interface ProjectMcpSetting {

@@ -774,6 +774,145 @@ pub fn connect_codex_account(
     store_codex_bundle(&db, &vault, bundle)
 }
 
+fn store_oauth_bundle(
+    db: &DbState,
+    vault: &VaultHandle,
+    provider_id: &str,
+    bundle: CodexAuthBundle,
+) -> Result<Vec<ProviderConfigPublic>, String> {
+    let auth_mode = match provider_id {
+        "openai" => "codex-account",
+        "gemini" => "google-account",
+        "anthropic" => "claude-account",
+        _ => "api-key",
+    };
+    {
+        let mut vault = vault.0.lock().map_err(|e| e.to_string())?;
+        vault.set_oauth_credentials(
+            provider_id,
+            bundle.access_token,
+            bundle.account_id,
+            bundle.refresh_token,
+            auth_mode,
+        )?;
+    }
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let now = chrono::Utc::now().to_rfc3339();
+    conn.execute(
+        "UPDATE provider_configs SET enabled = 1, validation_status = 'unknown', validated_at = NULL, updated_at = ?1
+         WHERE provider_id = ?2",
+        params![now, provider_id],
+    )
+    .map_err(|e| e.to_string())?;
+    let vault = vault.0.lock().map_err(|e| e.to_string())?;
+    read_provider_row(&conn, &vault)
+}
+
+async fn begin_provider_oauth_login(
+    vault: &VaultHandle,
+    _db: &DbState,
+    provider_id: &str,
+) -> Result<serde_json::Value, String> {
+    let has_credentials = {
+        let vault = match vault.0.lock() {
+            Ok(v) => v,
+            Err(_) => return Err("Vault locked".to_string()),
+        };
+        match vault.get_secret(provider_id) {
+            Some(entry) => {
+                let is_oauth = entry.auth_mode.as_deref() == Some("codex-account")
+                    || entry.auth_mode.as_deref() == Some("google-account")
+                    || entry.auth_mode.as_deref() == Some("claude-account");
+                is_oauth && entry.api_key.as_ref().map(|k| !k.trim().is_empty()).unwrap_or(false)
+            }
+            None => false,
+        }
+    };
+
+    if has_credentials {
+        let mut v = vault.0.lock().map_err(|e| e.to_string())?;
+        v.clear_secret(provider_id)?;
+    }
+
+    let path = match provider_id {
+        "gemini" => "/google/login/start",
+        "anthropic" => "/claude/login/start",
+        _ => "/codex/login/start",
+    };
+
+    let body = sidecar_post_json(path).await?;
+    Ok(serde_json::json!({
+        "status": "started",
+        "mode": body.get("mode").and_then(|v| v.as_str()).unwrap_or("browser"),
+        "userCode": body.get("userCode").and_then(|v| v.as_str()).unwrap_or(""),
+        "url": body.get("url").and_then(|v| v.as_str()).unwrap_or(CODEX_DEVICE_LOGIN_URL),
+    }))
+}
+
+async fn poll_provider_oauth_login_helper(
+    db: &DbState,
+    vault: &VaultHandle,
+    provider_id: &str,
+) -> Result<serde_json::Value, String> {
+    let path = match provider_id {
+        "gemini" => "/google/login/poll",
+        "anthropic" => "/claude/login/poll",
+        _ => "/codex/login/poll",
+    };
+    let body = sidecar_post_json(path).await?;
+    let status = body.get("status").and_then(|v| v.as_str()).unwrap_or("waiting");
+
+    if status == "failed" {
+        return Err(
+            body.get("message")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Sign-in failed. Click Connect again.")
+                .to_string(),
+        );
+    }
+
+    if status == "success" {
+        if let Some(tokens) = body.get("tokens") {
+            if let Some(bundle) = bundle_from_sidecar_tokens(tokens) {
+                let providers = store_oauth_bundle(db, vault, provider_id, bundle)?;
+                return Ok(serde_json::json!({
+                    "status": "connected",
+                    "providers": providers,
+                }));
+            }
+        }
+    }
+
+    Ok(serde_json::json!({ "status": "waiting" }))
+}
+
+#[tauri::command]
+pub async fn start_provider_oauth_login(
+    app: AppHandle,
+    vault: State<'_, VaultHandle>,
+    db: State<'_, DbState>,
+    provider_id: String,
+) -> Result<serde_json::Value, String> {
+    let result = begin_provider_oauth_login(&vault, &db, &provider_id).await?;
+    if result.get("status").and_then(|v| v.as_str()) == Some("started") {
+        let url = result
+            .get("url")
+            .and_then(|v| v.as_str())
+            .unwrap_or(CODEX_DEVICE_LOGIN_URL);
+        open_external_url(&app, url)?;
+    }
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn poll_provider_oauth_login(
+    db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
+    provider_id: String,
+) -> Result<serde_json::Value, String> {
+    poll_provider_oauth_login_helper(&db, &vault, &provider_id).await
+}
+
 #[tauri::command]
 pub fn get_routing_policy(db: State<'_, DbState>) -> Result<String, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;

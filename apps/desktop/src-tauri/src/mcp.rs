@@ -4,7 +4,7 @@ use crate::extensions_helper::{
     call_mcp_tool_remote, McpServerConfig, ProjectMcpSetting,
 };
 use crate::permissions::check_task_permission;
-use crate::plugins::push_config_to_helper;
+use crate::plugins::{push_config_to_helper, load_aura_config, APP_DATA_DIR};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use tauri::State;
@@ -65,6 +65,8 @@ pub fn load_mcp_server_configs(conn: &Connection) -> Result<Vec<McpServerConfig>
                 args: serde_json::from_str(&args_json).unwrap_or_default(),
                 env: serde_json::from_str(&env_json).unwrap_or_default(),
                 enabled: row.get::<_, i64>(6)? != 0,
+                headers: None,
+                timeout: None,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -116,7 +118,52 @@ fn load_mcp_servers(conn: &Connection) -> Result<Vec<McpServerRecord>, String> {
 #[tauri::command]
 pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
-    load_mcp_servers(&conn)
+    let mut list = load_mcp_servers(&conn)?;
+
+    // 1. Load global config-based servers
+    if let Some(app_data) = APP_DATA_DIR.get() {
+        let (global_servers, _) = load_aura_config(app_data, "");
+        for s in global_servers {
+            list.push(McpServerRecord {
+                id: s.id,
+                name: s.name,
+                transport: s.transport,
+                command: s.command,
+                args: s.args,
+                env: s.env,
+                enabled: s.enabled,
+                created_at: "".to_string(),
+            });
+        }
+    }
+
+    // 2. Load project-specific config-based servers
+    let mut stmt = conn.prepare("SELECT id, folder_path FROM projects").map_err(|e| e.to_string())?;
+    let projects: Vec<(String, String)> = stmt
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+        .map_err(|e| e.to_string())?
+        .flatten()
+        .collect();
+
+    for (project_id, folder_path) in &projects {
+        let (project_servers, _) = load_aura_config(std::path::Path::new(folder_path), project_id);
+        for s in project_servers {
+            if !list.iter().any(|existing| existing.id == s.id) {
+                list.push(McpServerRecord {
+                    id: s.id,
+                    name: s.name,
+                    transport: s.transport,
+                    command: s.command,
+                    args: s.args,
+                    env: s.env,
+                    enabled: s.enabled,
+                    created_at: "".to_string(),
+                });
+            }
+        }
+    }
+
+    Ok(list)
 }
 
 #[derive(Debug, Deserialize)]
@@ -174,6 +221,9 @@ pub async fn add_mcp_server(
 
 #[tauri::command]
 pub async fn delete_mcp_server(db: State<'_, DbState>, server_id: String) -> Result<(), String> {
+    if server_id.starts_with("aura_config_") {
+        return Err("Configuration-based MCP servers are read-only. Remove them from aura.json/aura.jsonc instead.".to_string());
+    }
     {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         conn.execute("DELETE FROM mcp_servers WHERE id = ?1", params![server_id])
@@ -194,6 +244,9 @@ pub async fn set_mcp_server_enabled(
     server_id: String,
     enabled: bool,
 ) -> Result<McpServerRecord, String> {
+    if server_id.starts_with("aura_config_") {
+        return Err("Configuration-based MCP servers are read-only. Edit aura.json/aura.jsonc to enable or disable them.".to_string());
+    }
     {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         conn.execute(

@@ -35,6 +35,7 @@ export interface TaskIterateRequest {
   modelId: string;
   credentials: ProviderCredentials;
   workspaceFiles?: string;
+  skills?: { name: string; description: string; prompt: string }[];
   onChunk?: (text: string) => void;
 }
 
@@ -86,6 +87,7 @@ Available tools (JSON only for tool calls):
 - computer_click { "x": 100, "y": 200, "processName": "AppName", "title": "Window title" }
 - computer_type { "text": "hello", "processName": "AppName", "title": "Window title" }
 - computer_focus { "windowId": "123", "processName": "AppName", "title": "Window title" }
+- skill { "name": "skill-name" }
 - plugin_tool { "pluginId": "com.example.plugin", "toolId": "tool.id", "arguments": {} (optional) }
 - mcp_tool { "serverId": "mcp-server-uuid", "toolName": "tool_name", "arguments": {} (optional) }
 
@@ -200,8 +202,12 @@ export async function iterateTask(req: TaskIterateRequest) {
     .map((m) => `${m.role}${m.agentRole ? ` (${m.agentRole})` : ""}: ${m.content.slice(0, 500)}`)
     .join("\n");
 
+  const skillsXml = req.skills && req.skills.length > 0
+    ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
+    : "";
+
   const system = `You are Aura Work executing a task step-by-step.
-${TOOLS_PROMPT}
+${TOOLS_PROMPT}${skillsXml}
 
 Current iteration: ${req.iteration + 1}
 Plan:
@@ -237,7 +243,7 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
       iteration: req.iteration,
       planLength: req.plan.length,
     });
-    if (coerced) return coerced;
+    if (coerced) return { ...coerced, usage: result.usage };
   } catch (e) {
     console.warn("[task] iterate LLM failed:", e);
   }

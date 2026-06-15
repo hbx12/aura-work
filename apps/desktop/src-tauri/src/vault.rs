@@ -194,12 +194,13 @@ impl VaultState {
         self.persist()
     }
 
-    pub fn set_codex_credentials(
+    pub fn set_oauth_credentials(
         &mut self,
         provider_id: &str,
         access_token: String,
         account_id: Option<String>,
         refresh_token: Option<String>,
+        auth_mode: &str,
     ) -> Result<(), String> {
         let entry = self
             .payload
@@ -207,10 +208,20 @@ impl VaultState {
             .entry(provider_id.to_string())
             .or_default();
         entry.api_key = Some(access_token);
-        entry.auth_mode = Some("codex-account".into());
+        entry.auth_mode = Some(auth_mode.to_string());
         entry.codex_account_id = account_id.filter(|s| !s.trim().is_empty());
         entry.refresh_token = refresh_token.filter(|s| !s.trim().is_empty());
         self.persist()
+    }
+
+    pub fn set_codex_credentials(
+        &mut self,
+        provider_id: &str,
+        access_token: String,
+        account_id: Option<String>,
+        refresh_token: Option<String>,
+    ) -> Result<(), String> {
+        self.set_oauth_credentials(provider_id, access_token, account_id, refresh_token, "codex-account")
     }
 
     pub fn clear_secret(&mut self, provider_id: &str) -> Result<(), String> {

@@ -205,9 +205,13 @@ export type MessageKey =
   | "provider.key.fetchingModels"
   | "provider.key.authMethod"
   | "provider.key.codexAccount"
+  | "provider.key.googleAccount"
+  | "provider.key.claudeAccount"
   | "provider.key.apiKeyMode"
   | "provider.key.codexDesc"
   | "provider.key.connectCodex"
+  | "provider.key.connectGoogle"
+  | "provider.key.connectClaude"
   | "provider.key.codexConnected"
   | "provider.key.codexWaiting"
   | "provider.key.codexDeviceHint"
@@ -604,10 +608,14 @@ const en: MessageCatalog = {
   "provider.key.fetchingModels": "Loaded {count} models.",
   "provider.key.authMethod": "Sign-in method",
   "provider.key.codexAccount": "ChatGPT (Codex)",
+  "provider.key.googleAccount": "Google Account",
+  "provider.key.claudeAccount": "Claude Account",
   "provider.key.apiKeyMode": "API key",
   "provider.key.codexDesc":
     "Use your ChatGPT subscription. Click Connect — a device code appears here. Sign in at the link and enter the code.",
   "provider.key.connectCodex": "Connect ChatGPT account",
+  "provider.key.connectGoogle": "Connect Google Account",
+  "provider.key.connectClaude": "Connect Claude Account",
   "provider.key.codexConnected": "ChatGPT account connected.",
   "provider.key.codexWaiting": "Waiting for browser sign-in… Complete login in the browser window.",
   "provider.key.codexDeviceHint": "Starting device sign-in…",
@@ -1008,9 +1016,13 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "provider.key.fetchingModels": "تم تحميل {count} نموذج.",
     "provider.key.authMethod": "طريقة تسجيل الدخول",
     "provider.key.codexAccount": "ChatGPT (Codex)",
+    "provider.key.googleAccount": "حساب Google",
+    "provider.key.claudeAccount": "حساب Claude",
     "provider.key.apiKeyMode": "مفتاح API",
     "provider.key.codexDesc": "استخدم اشتراك ChatGPT. اضغط اتصال — يظهر رمز الجهاز هنا. سجّل الدخول من الرابط وأدخل الرمز.",
     "provider.key.connectCodex": "ربط حساب ChatGPT",
+    "provider.key.connectGoogle": "ربط حساب Google",
+    "provider.key.connectClaude": "ربط حساب Claude",
     "provider.key.codexConnected": "تم ربط حساب ChatGPT.",
     "provider.key.codexWaiting": "بانتظار تسجيل الدخول من المتصفح… أكمل الدخول في نافذة المتصفح.",
     "provider.key.codexDeviceHint": "جارٍ بدء تسجيل الدخول برمز الجهاز…",

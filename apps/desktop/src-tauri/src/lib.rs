@@ -69,10 +69,13 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
-            let conn = init_db(&app.handle())?;
-            seed_if_empty(&conn)?;
-            let db = DbState(Arc::new(Mutex::new(conn)));
+            let db_conn = db::init_db(&app.handle())?;
+            seed_if_empty(&db_conn)?;
+            let db = DbState(Arc::new(Mutex::new(db_conn)));
             app.manage(db.clone());
+            if let Ok(dir) = app.path().app_data_dir() {
+                let _ = crate::plugins::APP_DATA_DIR.set(dir);
+            }
             let pricing_db = db.clone();
             tauri::async_runtime::spawn(async move {
                 if let Err(error) = pricing::refresh_remote_pricing(&pricing_db).await {
@@ -105,6 +108,8 @@ pub fn run() {
             providers::start_codex_device_login,
             providers::open_codex_login_page,
             providers::poll_codex_login,
+            providers::start_provider_oauth_login,
+            providers::poll_provider_oauth_login,
             providers::clear_provider_secret,
             providers::get_routing_policy,
             providers::set_routing_policy,
