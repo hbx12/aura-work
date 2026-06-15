@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0-alpha.1",
   "description": "Aura Work — open-source multi-provider desktop AI agent platform (alpha)",
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN LICENSE",
   "workspaces": [
     "apps/*",
     "packages/*",
