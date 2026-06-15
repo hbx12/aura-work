@@ -1,6 +1,6 @@
 # Aura Work
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![License: Custom](https://img.shields.io/badge/License-See%20LICENSE-blue.svg)](LICENSE)
 [![CI](https://github.com/hbx12/aura-work/actions/workflows/ci.yml/badge.svg)](https://github.com/hbx12/aura-work/actions/workflows/ci.yml)
 
 **Current status: `0.1.0-alpha.11`** — under active security hardening.
@@ -97,7 +97,7 @@ Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` wh
 
 ## License
 
-Apache-2.0 — see [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-NOTICES](./THIRD-PARTY-NOTICES).
+See [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-NOTICES](./THIRD-PARTY-NOTICES). Aura Work is licensed under the terms in `LICENSE`, including NOVIR Studio's additional branding and redistribution restriction.
 
 ## Clean-machine installer smoke test
 
