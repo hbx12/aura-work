@@ -111,6 +111,22 @@ struct SidecarModelInfo {
     display_name: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderModelPublic {
+    pub id: String,
+    pub display_name: String,
+    pub enabled: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SetProviderModelEnabledInput {
+    pub provider_id: String,
+    pub model_id: String,
+    pub enabled: bool,
+}
+
 pub async fn sidecar_post<T: for<'de> Deserialize<'de>>(
     path: &str,
     body: &serde_json::Value,
@@ -352,13 +368,59 @@ async fn fetch_provider_models(
     Ok(result.models)
 }
 
+fn sync_model_visibility(
+    db: &DbState,
+    provider_id: &str,
+    models: &[SidecarModelInfo],
+) -> Result<(), String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let now = chrono::Utc::now().to_rfc3339();
+    for model in models {
+        conn.execute(
+            "INSERT OR IGNORE INTO provider_model_visibility
+             (provider_id, model_id, enabled, updated_at)
+             VALUES (?1, ?2, 1, ?3)",
+            params![provider_id, model.id, now],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+fn is_model_enabled(db: &DbState, provider_id: &str, model_id: &str) -> Result<bool, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let enabled: Option<i64> = conn
+        .query_row(
+            "SELECT enabled FROM provider_model_visibility WHERE provider_id = ?1 AND model_id = ?2",
+            params![provider_id, model_id],
+            |row| row.get(0),
+        )
+        .ok();
+    Ok(enabled.unwrap_or(1) != 0)
+}
+
+fn to_provider_model_public(
+    db: &DbState,
+    provider_id: &str,
+    model: SidecarModelInfo,
+) -> Result<ProviderModelPublic, String> {
+    let enabled = is_model_enabled(db, provider_id, &model.id)?;
+    let display_name = model.display_name.unwrap_or_else(|| model.id.clone());
+    Ok(ProviderModelPublic {
+        id: model.id,
+        display_name,
+        enabled,
+    })
+}
+
 #[tauri::command]
 pub async fn list_provider_models(
     db: State<'_, DbState>,
     vault: State<'_, VaultHandle>,
     provider_id: String,
-) -> Result<Vec<serde_json::Value>, String> {
+) -> Result<Vec<ProviderModelPublic>, String> {
     let result = fetch_provider_models(&vault, &db, &provider_id).await?;
+    sync_model_visibility(&db, &provider_id, &result)?;
     if !result.is_empty() {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         let ids: std::collections::HashSet<String> = result.iter().map(|m| m.id.clone()).collect();
@@ -383,15 +445,37 @@ pub async fn list_provider_models(
             .map_err(|e| e.to_string())?;
         }
     }
-    Ok(result
+    result
         .into_iter()
-        .map(|m| {
-            serde_json::json!({
-                "id": m.id,
-                "displayName": m.display_name.unwrap_or(m.id.clone()),
-            })
-        })
-        .collect())
+        .map(|m| to_provider_model_public(&db, &provider_id, m))
+        .collect()
+}
+
+#[tauri::command]
+pub fn set_provider_model_enabled(
+    db: State<'_, DbState>,
+    input: SetProviderModelEnabledInput,
+) -> Result<(), String> {
+    if input.provider_id.trim().is_empty() || input.model_id.trim().is_empty() {
+        return Err("Provider and model are required.".into());
+    }
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let now = chrono::Utc::now().to_rfc3339();
+    conn.execute(
+        "INSERT INTO provider_model_visibility (provider_id, model_id, enabled, updated_at)
+         VALUES (?1, ?2, ?3, ?4)
+         ON CONFLICT(provider_id, model_id) DO UPDATE SET
+           enabled = excluded.enabled,
+           updated_at = excluded.updated_at",
+        params![
+            input.provider_id,
+            input.model_id,
+            if input.enabled { 1 } else { 0 },
+            now
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -417,6 +501,9 @@ pub async fn list_chat_models(
             }
         };
         for m in models {
+            if !is_model_enabled(&db, &pid, &m.id)? {
+                continue;
+            }
             let label = format!(
                 "{} — {}",
                 pid,

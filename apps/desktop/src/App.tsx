@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   Composer,
   ContextPanel,
@@ -165,6 +166,20 @@ export default function App() {
     pendingMessage: string;
     pendingHistory: { role: string; content: string }[];
   } | null>(null);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void listen<string>("aura://theme-preference", (event) => {
+      if (isThemePreference(event.payload)) {
+        setThemePreference(event.payload);
+      }
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   const [chatStreamText, setChatStreamText] = useState<string | null>(null);
   const [chatStreamModel, setChatStreamModel] = useState<string>("");
@@ -924,6 +939,10 @@ export default function App() {
           onConfigure={setConfigureProvider}
           onValidate={providersApi.validateProvider}
           onFetchModels={providersApi.listProviderModels}
+          onSetModelEnabled={async (providerId, modelId, enabled) => {
+            await providersApi.setProviderModelEnabled(providerId, modelId, enabled);
+            await chatModels.refresh();
+          }}
           t={i18n.t}
         />
       );

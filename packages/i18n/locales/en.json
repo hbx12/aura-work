@@ -156,7 +156,7 @@
   "provider.key.saved": "Key saved. Fetching models…",
   "provider.key.fetchingModels": "Loaded {count} models.",
   "provider.key.authMethod": "Sign-in method",
-  "provider.key.codexAccount": "ChatGPT (Codex)",
+  "provider.key.codexAccount": "ChatGPT Account",
   "provider.key.googleAccount": "Google Account",
   "provider.key.claudeAccount": "Claude Account",
   "provider.key.apiKeyMode": "API key",

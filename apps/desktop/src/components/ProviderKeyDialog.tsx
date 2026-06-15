@@ -58,7 +58,7 @@ export function ProviderKeyDialog({
   const [deviceCode, setDeviceCode] = useState<string | null>(null);
   const [deviceUrl, setDeviceUrl] = useState<string | null>(null);
 
-  const supportsOauth = providerId === "openai" || providerId === "gemini" || providerId === "anthropic";
+  const supportsOauth = providerId === "openai";
 
   useEffect(() => {
     if (open) {

@@ -82,6 +82,7 @@ function baseUrl(credentials: ProviderCredentials, fallback: string): string {
 async function openAiListModels(
   credentials: ProviderCredentials,
   fallbackBase: string,
+  providerId: ProviderId,
 ): Promise<ModelInfo[]> {
   const url = `${baseUrl(credentials, fallbackBase)}/models`;
   const res = await fetch(url, {
@@ -89,9 +90,9 @@ async function openAiListModels(
   });
   if (!res.ok) throw new Error(`Models request failed (${res.status})`);
   const data = (await res.json()) as { data?: { id: string }[] };
-  return (data.data ?? []).slice(0, 20).map((m) => ({
+  return (data.data ?? []).map((m) => ({
     id: m.id,
-    providerId: "openai" as ProviderId,
+    providerId,
     displayName: m.id,
     capabilities: ["text"],
   }));
@@ -108,7 +109,7 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         return DEFAULT_MODELS["openai-compatible"];
       }
       try {
-        return await openAiListModels(credentials, defaultBase);
+        return await openAiListModels(credentials, defaultBase, id);
       } catch {
         return DEFAULT_MODELS[id === "openai-compatible" ? "openai" : id] ?? [];
       }
@@ -121,7 +122,7 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         return { valid: false, message: "API key is required." };
       }
       try {
-        await openAiListModels(credentials, defaultBase);
+        await openAiListModels(credentials, defaultBase, id);
         return { valid: true, message: "Credentials accepted." };
       } catch (e) {
         return { valid: false, message: String(e) };
@@ -167,13 +168,33 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
 
 const anthropicAdapter: ProviderAdapter = {
   id: "anthropic",
-  async listModels() {
-    return DEFAULT_MODELS.anthropic;
+  async listModels(credentials: ProviderCredentials) {
+    if (!credentials.apiKey) return DEFAULT_MODELS.anthropic;
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/models", {
+        headers: {
+          "x-api-key": credentials.apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+      });
+      if (!res.ok) return DEFAULT_MODELS.anthropic;
+      const data = (await res.json()) as {
+        data?: { id?: string; display_name?: string; displayName?: string; type?: string }[];
+      };
+      const models = (data.data ?? [])
+        .filter((m) => typeof m.id === "string" && m.id.trim())
+        .map((m) => ({
+          id: m.id!,
+          providerId: "anthropic" as ProviderId,
+          displayName: m.display_name ?? m.displayName ?? m.id!,
+          capabilities: ["text", "tool-calling"] as ModelInfo["capabilities"],
+        }));
+      return models.length ? models : DEFAULT_MODELS.anthropic;
+    } catch {
+      return DEFAULT_MODELS.anthropic;
+    }
   },
   async validateCredentials(credentials: ProviderCredentials) {
-    if (credentials.apiKey?.startsWith("mock-")) {
-      return { valid: true, message: "Claude Account connected." };
-    }
     if (!credentials.apiKey) return { valid: false, message: "API key is required." };
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -192,16 +213,6 @@ const anthropicAdapter: ProviderAdapter = {
     return { valid: false, message: `Validation failed (${res.status})` };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
-    if (credentials.apiKey?.startsWith("mock-")) {
-      return {
-        text: `[Claude Account Auth Mode] (Simulated response using Claude 3.5 Sonnet)
-I am Aura Work, running under your Claude/Anthropic Account credentials. How can I assist you today?`,
-        usage: {
-          inputTokens: 12,
-          outputTokens: 30,
-        },
-      };
-    }
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -234,13 +245,40 @@ I am Aura Work, running under your Claude/Anthropic Account credentials. How can
 
 const geminiAdapter: ProviderAdapter = {
   id: "gemini",
-  async listModels() {
-    return DEFAULT_MODELS.gemini;
+  async listModels(credentials: ProviderCredentials) {
+    if (!credentials.apiKey) return DEFAULT_MODELS.gemini;
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${credentials.apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) return DEFAULT_MODELS.gemini;
+      const data = (await res.json()) as {
+        models?: {
+          name?: string;
+          baseModelId?: string;
+          displayName?: string;
+          supportedGenerationMethods?: string[];
+        }[];
+      };
+      const models = (data.models ?? [])
+        .filter((m) => (m.supportedGenerationMethods ?? []).includes("generateContent"))
+        .map((m) => {
+          const id = (m.baseModelId || m.name?.replace(/^models\//, "") || "").trim();
+          return id
+            ? {
+                id,
+                providerId: "gemini" as ProviderId,
+                displayName: m.displayName ?? id,
+                capabilities: ["text", "vision"] as ModelInfo["capabilities"],
+              }
+            : null;
+        })
+        .filter((m): m is ModelInfo => Boolean(m));
+      return models.length ? models : DEFAULT_MODELS.gemini;
+    } catch {
+      return DEFAULT_MODELS.gemini;
+    }
   },
   async validateCredentials(credentials: ProviderCredentials) {
-    if (credentials.apiKey?.startsWith("mock-")) {
-      return { valid: true, message: "Google Account connected." };
-    }
     if (!credentials.apiKey) return { valid: false, message: "API key is required." };
     const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${credentials.apiKey}`;
     const res = await fetch(url);
@@ -248,16 +286,6 @@ const geminiAdapter: ProviderAdapter = {
     return { valid: true, message: "Credentials accepted." };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
-    if (credentials.apiKey?.startsWith("mock-")) {
-      return {
-        text: `[Google Account Auth Mode] (Simulated response using Gemini 2.0 Flash)
-I am Aura Work, running under your Google Account credentials. How can I help you with your project today?`,
-        usage: {
-          inputTokens: 10,
-          outputTokens: 25,
-        },
-      };
-    }
     const model = request.model.startsWith("models/") ? request.model : `models/${request.model}`;
     const url = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${credentials.apiKey ?? ""}`;
 

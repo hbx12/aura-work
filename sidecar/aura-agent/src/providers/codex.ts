@@ -5,10 +5,10 @@ import { extractAccountIdFromToken, refreshCodexAccessToken } from "./codex-oaut
 const CODEX_BASE = "https://chatgpt.com/backend-api/codex";
 const CODEX_API = `${CODEX_BASE}/responses`;
 const MODELS_DEV_URL = "https://models.dev/api.json";
-/** Must match Codex CLI `client_version` query param (see openai/codex codex-api). */
+/** Must match the upstream account API client version expected by the service. */
 const CLIENT_VERSION = "1.0.0";
 
-/** OpenCode Codex subscription allow-list (May 2026). */
+/** ChatGPT subscription model allow-list. */
 const ALLOWED_MODELS = new Set([
   "gpt-5.5",
   "gpt-5.2",
@@ -137,7 +137,7 @@ async function verifyCodexToken(credentials: ProviderCredentials): Promise<void>
   }
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Codex auth check failed (${res.status}): ${body.slice(0, 160)}`);
+    throw new Error(`ChatGPT account check failed (${res.status}): ${body.slice(0, 160)}`);
   }
 }
 
@@ -148,7 +148,7 @@ export async function codexListModels(credentials: ProviderCredentials): Promise
   const catalog = await fetchModelsDevCatalog();
   const models = modelsFromCatalog(catalog);
   if (models.length === 0) {
-    throw new Error("No Codex subscription models found in catalog.");
+    throw new Error("No ChatGPT subscription models found in catalog.");
   }
   return models;
 }
@@ -258,7 +258,7 @@ export async function codexChat(request: ChatRequest, credentials: ProviderCrede
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Codex chat failed (${res.status}): ${err.slice(0, 300)}`);
+    throw new Error(`ChatGPT request failed (${res.status}): ${err.slice(0, 300)}`);
   }
 
   if (request.onChunk && res.body) {
