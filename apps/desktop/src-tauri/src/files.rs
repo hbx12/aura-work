@@ -1,6 +1,7 @@
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
 use crate::permissions::{check_task_permission, scheduled_auto_write_allowed};
+use regex::Regex;
 use rusqlite::params;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
@@ -38,6 +39,17 @@ pub struct SearchMatch {
     pub path: String,
     pub line: u32,
     pub snippet: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReadFileWindow {
+    pub path: String,
+    pub content: String,
+    pub line_start: u32,
+    pub line_end: u32,
+    pub total_lines: u32,
+    pub truncated: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -207,6 +219,45 @@ pub fn read_file_internal(root: &str, rel: &str) -> Result<String, String> {
     fs::read_to_string(&path).map_err(|e| e.to_string())
 }
 
+pub fn read_file_window_internal(
+    root: &str,
+    rel: &str,
+    offset: Option<u32>,
+    limit: Option<u32>,
+) -> Result<ReadFileWindow, String> {
+    let content = read_file_internal(root, rel)?;
+    let total_lines = content.lines().count() as u32;
+    let line_start = offset.unwrap_or(1).max(1);
+    let requested_limit = limit.unwrap_or(400).clamp(1, 2_000);
+    let start_index = line_start.saturating_sub(1) as usize;
+    let selected: Vec<&str> = content
+        .lines()
+        .skip(start_index)
+        .take(requested_limit as usize)
+        .collect();
+    let line_end = if selected.is_empty() {
+        line_start.saturating_sub(1)
+    } else {
+        line_start + selected.len() as u32 - 1
+    };
+    let mut window = selected.join("\n");
+    let mut truncated = line_end < total_lines;
+    const MAX_BYTES: usize = 64 * 1024;
+    if window.len() > MAX_BYTES {
+        window.truncate(MAX_BYTES);
+        window.push_str("\n... (content truncated)");
+        truncated = true;
+    }
+    Ok(ReadFileWindow {
+        path: normalize_rel(rel),
+        content: window,
+        line_start,
+        line_end,
+        total_lines,
+        truncated,
+    })
+}
+
 pub fn write_file_internal(root: &str, rel: &str, content: &str) -> Result<(), String> {
     if is_excluded(rel, false) {
         return Err(format!("Path excluded by policy: {rel}"));
@@ -230,20 +281,23 @@ pub fn delete_file_internal(root: &str, rel: &str) -> Result<(), String> {
 }
 
 pub fn list_dir_internal(root: &str, rel: Option<&str>, depth: u32) -> Result<Vec<FileEntry>, String> {
+    let root_path = PathBuf::from(root)
+        .canonicalize()
+        .map_err(|e| format!("Project folder not accessible: {e}"))?;
     let base = if let Some(r) = rel {
         resolve_project_path(root, r)?
     } else {
-        PathBuf::from(root)
+        root_path.clone()
     };
     let mut out = Vec::new();
-    walk_dir(&base, root, depth, &mut out)?;
+    walk_dir(&base, &root_path, depth, &mut out)?;
     out.sort_by(|a, b| a.path.cmp(&b.path));
     Ok(out)
 }
 
 fn walk_dir(
     dir: &Path,
-    root: &str,
+    root: &Path,
     depth: u32,
     out: &mut Vec<FileEntry>,
 ) -> Result<(), String> {
@@ -300,6 +354,50 @@ pub fn search_files_internal(root: &str, query: &str, limit: u32) -> Result<Vec<
                     path: f.path.clone(),
                     line: (i + 1) as u32,
                     snippet: line.chars().take(200).collect(),
+                });
+                if matches.len() >= limit as usize {
+                    return Ok(matches);
+                }
+            }
+        }
+    }
+    Ok(matches)
+}
+
+pub fn grep_files_internal(
+    root: &str,
+    pattern: &str,
+    search_path: Option<&str>,
+    include: Option<&str>,
+    limit: u32,
+) -> Result<Vec<SearchMatch>, String> {
+    if pattern.trim().is_empty() {
+        return Err("Pattern is required.".into());
+    }
+    let re = Regex::new(pattern).map_err(|e| format!("Invalid regex pattern: {e}"))?;
+    let base_rel = search_path.map(normalize_rel);
+    let files = list_dir_internal(root, base_rel.as_deref(), 8)?;
+    let include = include.map(normalize_rel);
+    let mut matches = Vec::new();
+    for f in files {
+        if f.is_dir || !looks_textual(&f.path) {
+            continue;
+        }
+        if let Some(include) = &include {
+            if !wildcard_match(include, &f.path) && !wildcard_match(include, &f.name) {
+                continue;
+            }
+        }
+        let content = match read_file_internal(root, &f.path) {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+        for (i, line) in content.lines().enumerate() {
+            if re.is_match(line) {
+                matches.push(SearchMatch {
+                    path: f.path.clone(),
+                    line: (i + 1) as u32,
+                    snippet: line.chars().take(240).collect(),
                 });
                 if matches.len() >= limit as usize {
                     return Ok(matches);
@@ -616,13 +714,14 @@ pub fn list_pending_edits(
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
-/// Tool execution entry used by task engine (read with permission + audit).
-pub fn tool_read_file(
+pub fn tool_read_file_window(
     db: &DbState,
     project_id: &str,
     task_id: Option<&str>,
     file_path: &str,
-) -> Result<String, String> {
+    offset: Option<u32>,
+    limit: Option<u32>,
+) -> Result<ReadFileWindow, String> {
     let root = project_folder(db, project_id)?;
     let rel = normalize_rel(file_path);
 
@@ -639,7 +738,7 @@ pub fn tool_read_file(
         None,
     )?;
 
-    let content = read_file_internal(&root, &rel)?;
+    let window = read_file_window_internal(&root, &rel, offset, limit)?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     append_audit(
@@ -658,7 +757,7 @@ pub fn tool_read_file(
             metadata: None,
         },
     )?;
-    Ok(content)
+    Ok(window)
 }
 
 pub fn tool_search_files(
@@ -668,6 +767,17 @@ pub fn tool_search_files(
 ) -> Result<Vec<SearchMatch>, String> {
     let root = project_folder(db, project_id)?;
     search_files_internal(&root, query, 30)
+}
+
+pub fn tool_grep_files(
+    db: &DbState,
+    project_id: &str,
+    pattern: &str,
+    search_path: Option<&str>,
+    include: Option<&str>,
+) -> Result<Vec<SearchMatch>, String> {
+    let root = project_folder(db, project_id)?;
+    grep_files_internal(&root, pattern, search_path, include, 100)
 }
 
 pub fn tool_glob_files(
@@ -783,4 +893,60 @@ pub fn tool_delete_file(
         },
     )?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    fn temp_root(name: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "aura-work-files-{name}-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        root
+    }
+
+    #[test]
+    fn read_file_window_returns_requested_lines() {
+        let root = temp_root("window");
+        fs::write(root.join("notes.md"), "one\ntwo\nthree\nfour\n").unwrap();
+
+        let window = read_file_window_internal(root.to_str().unwrap(), "notes.md", Some(2), Some(2)).unwrap();
+
+        assert_eq!(window.content, "two\nthree");
+        assert_eq!(window.line_start, 2);
+        assert_eq!(window.line_end, 3);
+        assert_eq!(window.total_lines, 4);
+        assert!(window.truncated);
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn grep_files_supports_regex_and_include_filter() {
+        let root = temp_root("grep");
+        fs::create_dir_all(root.join("src")).unwrap();
+        fs::write(root.join("src").join("app.ts"), "const answer = 42;\nfunction run() {}\n").unwrap();
+        fs::write(root.join("src").join("app.md"), "const answer = 42;\n").unwrap();
+
+        let matches = grep_files_internal(root.to_str().unwrap(), "answer\\s*=\\s*42", Some("src"), Some("*.ts"), 10).unwrap();
+
+        assert_eq!(matches.len(), 1);
+        assert_eq!(matches[0].path, "src/app.ts");
+        assert_eq!(matches[0].line, 1);
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn grep_files_rejects_invalid_regex() {
+        let root = temp_root("grep-invalid");
+
+        let err = grep_files_internal(root.to_str().unwrap(), "(", None, None, 10).unwrap_err();
+
+        assert!(err.contains("Invalid regex pattern"));
+        let _ = fs::remove_dir_all(root);
+    }
 }
