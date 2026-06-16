@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * Aura OS Agent Sidecar — v1.0.0 open-source release — task engine + VM + browser + computer use + plugins/MCP + cloud sync + scheduled tasks + local bridge + i18n/packaging + providers + routing
  */
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { createServer, type ServerResponse } from "node:http";
 import { getAdapter } from "./providers/index.js";
 import { routeRequest } from "./routing/engine.js";
 import { generatePlan, iterateTask } from "./task/coordinator.js";
@@ -19,7 +19,7 @@ import type {
   ValidateRequestBody,
 } from "./types.js";
 import type { ProviderId } from "@aura-os/shared";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 
 const PORT = Number(process.env.AURA_AGENT_PORT ?? 47821);
 const AUTH_TOKEN = loadSidecarToken();
@@ -31,20 +31,6 @@ export function setTaskStreamChunk(taskId: string, text: string) {
 
 export function clearTaskStream(taskId: string) {
   taskStreamBuffers.delete(taskId);
-}
-
-function readBody(req: IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on("data", (c) => chunks.push(c));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-    req.on("error", reject);
-  });
-}
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const raw = await readBody(req);
-  return JSON.parse(raw) as T;
 }
 
 function json(res: ServerResponse, status: number, body: unknown) {
@@ -76,7 +62,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/providers/validate") {
-      const body = await parseJson<ValidateRequestBody>(req);
+      const body = await readJsonBody<ValidateRequestBody>(req);
       console.log("[aura-agent] validate", body.providerId);
       const adapter = getAdapter(body.providerId);
       const result = await adapter.validateCredentials(body.credentials);
@@ -90,7 +76,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/providers/models") {
-      const body = await parseJson<ValidateRequestBody>(req);
+      const body = await readJsonBody<ValidateRequestBody>(req);
       const adapter = getAdapter(body.providerId);
       if (body.providerId === "openai" && isCodexAccount(body.credentials)) {
         const { codexListModelsWithSession } = await import("./providers/codex.js");
@@ -102,14 +88,14 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/route") {
-      const body = await parseJson<RouteRequestBody>(req);
+      const body = await readJsonBody<RouteRequestBody>(req);
       console.log("[aura-agent] route", body.policy, body.context.allowedProviders);
       const decision = routeRequest(body);
       return json(res, 200, decision);
     }
 
     if (method === "POST" && url === "/chat") {
-      const body = await parseJson<ChatRequestBody>(req);
+      const body = await readJsonBody<ChatRequestBody>(req);
       console.log("[aura-agent] chat", body.providerId, body.modelId, redactForLog(body));
       const adapter = getAdapter(body.providerId as ProviderId);
       const result = await adapter.chat(
@@ -165,7 +151,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/task/plan") {
-      const body = await parseJson<Parameters<typeof generatePlan>[0]>(req);
+      const body = await readJsonBody<Parameters<typeof generatePlan>[0]>(req);
       console.log("[aura-agent] task/plan", body.projectId);
       const plan = await generatePlan(body);
       return json(res, 200, plan);
@@ -178,7 +164,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/task/iterate") {
-      const body = await parseJson<Parameters<typeof iterateTask>[0]>(req);
+      const body = await readJsonBody<Parameters<typeof iterateTask>[0]>(req);
       const streamKey = body.taskId ?? body.projectId;
       console.log("[aura-agent] task/iterate", body.projectId, "iter", body.iteration);
       taskStreamBuffers.set(streamKey, "");

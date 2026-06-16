@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
 export const SIDECAR_AUTH_ENV = "AURA_SIDECAR_AUTH_TOKEN";
+export const DEFAULT_JSON_BODY_LIMIT_BYTES = 1024 * 1024;
 
 export function loadSidecarToken(): string {
   const token = process.env[SIDECAR_AUTH_ENV]?.trim();
@@ -39,4 +40,26 @@ export function requireSidecarAuth(
   if (isSidecarAuthorized(req, expectedToken)) return true;
   rejectUnauthorized(res);
   return false;
+}
+
+export async function readJsonBody<T>(
+  req: IncomingMessage,
+  options: { maxBytes?: number; allowEmpty?: boolean } = {},
+): Promise<T> {
+  const maxBytes = options.maxBytes ?? DEFAULT_JSON_BODY_LIMIT_BYTES;
+  const chunks: Buffer[] = [];
+  let total = 0;
+
+  for await (const chunk of req) {
+    const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buf.byteLength;
+    if (total > maxBytes) {
+      throw new Error(`Request body too large; limit is ${maxBytes} bytes.`);
+    }
+    chunks.push(buf);
+  }
+
+  const raw = Buffer.concat(chunks).toString("utf8");
+  if (!raw.trim() && options.allowEmpty) return {} as T;
+  return JSON.parse(raw) as T;
 }

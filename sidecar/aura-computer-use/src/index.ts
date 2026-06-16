@@ -3,8 +3,8 @@
  * Disabled by default until the internal sidecar authentication layer is enabled.
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { createServer, type ServerResponse } from "node:http";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 import { detectBackend } from "./backend.js";
 import type { BackendInfo } from "./types.js";
 import { captureScreenshot, clickAt, focusWindow, listWindows, typeText } from "./platform.js";
@@ -19,14 +19,6 @@ let backend: BackendInfo | null = null;
 let state: ComputerUseState = "stopped";
 let startedAt: string | undefined;
 let lastError: string | undefined;
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  if (!raw.trim()) return {} as T;
-  return JSON.parse(raw) as T;
-}
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
@@ -124,7 +116,7 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/screenshot") {
       if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
-      const body = await parseJson<{ windowId?: string }>(req);
+      const body = await readJsonBody<{ windowId?: string }>(req, { allowEmpty: true });
       auditLog("screenshot", { windowId: body.windowId ?? null, persisted: false });
       const shot = await captureScreenshot(body.windowId);
       return json(res, 200, shot);
@@ -132,14 +124,14 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/focus") {
       if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
-      const body = await parseJson<{ windowId: string }>(req);
+      const body = await readJsonBody<{ windowId: string }>(req);
       if (!body.windowId) return json(res, 400, { error: "windowId is required" });
       return json(res, 200, await focusWindow(body.windowId));
     }
 
     if (method === "POST" && url === "/click") {
       if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
-      const body = await parseJson<{ x: number; y: number; button?: "left" | "right" }>(req);
+      const body = await readJsonBody<{ x: number; y: number; button?: "left" | "right" }>(req);
       if (typeof body.x !== "number" || typeof body.y !== "number") {
         return json(res, 400, { error: "x and y are required numbers" });
       }
@@ -148,7 +140,7 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/type") {
       if (state !== "running") return json(res, 503, { error: "Computer use helper is not running." });
-      const body = await parseJson<{ text: string }>(req);
+      const body = await readJsonBody<{ text: string }>(req);
       if (!body.text) return json(res, 400, { error: "text is required" });
       return json(res, 200, await typeText(body.text));
     }
