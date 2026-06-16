@@ -1,7 +1,9 @@
 use crate::db::DbState;
+use minisign_verify::{PublicKey, Signature};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::fs;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, State};
 
@@ -117,32 +119,77 @@ fn is_release_build() -> bool {
     !cfg!(debug_assertions)
 }
 
-fn verify_minisign_signature(artifact_path: &Path, signature: &str) -> Result<(), String> {
-    if signature.is_empty() || signature.contains("dev-placeholder") {
-        return Err("Missing or placeholder release signature.".into());
+fn pinned_vm_public_key() -> Option<&'static str> {
+    option_env!("AURA_VM_MINISIGN_PUBLIC_KEY")
+        .map(str::trim)
+        .filter(|key| {
+            !key.is_empty()
+                && !key.contains("REPLACE_WITH")
+                && !key.contains("dev-placeholder")
+                && key.len() >= 40
+        })
+}
+
+fn expected_signature_filename(artifact: &str) -> String {
+    format!("{artifact}.minisig")
+}
+
+fn parse_minisign_public_key(public_key: &str) -> Result<PublicKey, String> {
+    if public_key.lines().count() > 1 {
+        PublicKey::decode(public_key).map_err(|e| format!("Invalid pinned VM public key: {e}"))
+    } else {
+        PublicKey::from_base64(public_key)
+            .map_err(|e| format!("Invalid pinned VM public key: {e}"))
     }
-    let sig_path = artifact_path.with_extension("minisig");
-    if sig_path.exists() {
-        let output = std::process::Command::new("minisign")
-            .args(["-V", "-p", "-x"])
-            .arg(&sig_path)
-            .arg("-m")
-            .arg(artifact_path)
-            .output()
-            .map_err(|e| format!("minisign not available for signature verification: {e}"))?;
-        if output.status.success() {
-            return Ok(());
+}
+
+fn verify_minisign_signature_with_key(
+    artifact_path: &Path,
+    signature_path: &Path,
+    public_key: &str,
+) -> Result<(), String> {
+    let public_key = parse_minisign_public_key(public_key)?;
+    let signature = Signature::from_file(signature_path)
+        .map_err(|e| format!("Invalid VM minisign signature: {e}"))?;
+
+    match public_key.verify_stream(&signature) {
+        Ok(mut verifier) => {
+            let mut file = fs::File::open(artifact_path)
+                .map_err(|e| format!("Cannot read VM artifact for signature verification: {e}"))?;
+            let mut buffer = [0u8; 8192];
+            loop {
+                let read = file
+                    .read(&mut buffer)
+                    .map_err(|e| format!("Cannot read VM artifact for signature verification: {e}"))?;
+                if read == 0 {
+                    break;
+                }
+                verifier.update(&buffer[..read]);
+            }
+            verifier
+                .finalize()
+                .map_err(|e| format!("VM image signature verification failed: {e}"))
         }
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("VM image signature verification failed: {stderr}"));
+        Err(minisign_verify::Error::UnsupportedLegacyMode) => {
+            let bytes = fs::read(artifact_path)
+                .map_err(|e| format!("Cannot read VM artifact for signature verification: {e}"))?;
+            public_key
+                .verify(&bytes, &signature, true)
+                .map_err(|e| format!("VM image signature verification failed: {e}"))
+        }
+        Err(e) => Err(format!("VM image signature verification failed: {e}")),
     }
-    if signature.len() < 64 {
-        return Err("Signature field is not a valid minisign release signature.".into());
-    }
-    Err("Detached minisign signature file not found next to VM artifact.".into())
 }
 
 pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
+    verify_vm_manifest_at_with_policy(manifest_path, is_release_build(), pinned_vm_public_key())
+}
+
+fn verify_vm_manifest_at_with_policy(
+    manifest_path: &Path,
+    release_build: bool,
+    public_key: Option<&str>,
+) -> VmImageVerification {
     let raw = match fs::read_to_string(manifest_path) {
         Ok(r) => r,
         Err(e) => {
@@ -171,11 +218,15 @@ pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
             };
         }
     };
-    let signature_present = !manifest.signature.is_empty()
-        && manifest.signature != DEV_PLACEHOLDER_SIGNATURE;
     let dev_placeholder = is_dev_placeholder_manifest(&manifest);
     let artifact_dir = manifest_path.parent().unwrap_or_else(|| Path::new("."));
     let artifact_path = artifact_dir.join(&manifest.artifact);
+    let expected_signature = expected_signature_filename(&manifest.artifact);
+    let signature_name_ok = manifest.signature == expected_signature;
+    let signature_path = artifact_dir.join(&manifest.signature);
+    let signature_present = !manifest.signature.is_empty()
+        && manifest.signature != DEV_PLACEHOLDER_SIGNATURE
+        && signature_path.exists();
     let actual = if artifact_path.exists() {
         sha256_file(&artifact_path).ok()
     } else {
@@ -186,18 +237,36 @@ pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
         .map(|a| a.eq_ignore_ascii_case(&manifest.sha256))
         .unwrap_or(false);
     let missing_artifact = actual.is_none();
-    let signature_ok = if is_release_build() {
+    let signature_check = if release_build {
         if dev_placeholder {
-            false
-        } else if signature_present {
-            verify_minisign_signature(&artifact_path, &manifest.signature).is_ok()
+            Err("Production builds reject unsigned VM placeholder artifacts.".to_string())
+        } else if public_key.is_none() {
+            Err("Pinned VM minisign public key is missing from this build.".to_string())
+        } else if !signature_name_ok {
+            Err(format!(
+                "VM signature filename must be '{}'.",
+                expected_signature
+            ))
+        } else if !signature_present {
+            Err(format!(
+                "Detached minisign signature '{}' not found next to VM artifact.",
+                manifest.signature
+            ))
         } else {
-            false
+            verify_minisign_signature_with_key(
+                &artifact_path,
+                &signature_path,
+                public_key.expect("checked above"),
+            )
         }
     } else {
-        signature_present || dev_placeholder
+        Ok(())
     };
-    let ok = hash_ok && !manifest.sha256.is_empty() && signature_ok && !(is_release_build() && dev_placeholder);
+    let signature_ok = signature_check.is_ok();
+    let ok = hash_ok
+        && !manifest.sha256.is_empty()
+        && signature_ok
+        && !(release_build && dev_placeholder);
     VmImageVerification {
         ok,
         image_id: manifest.image_id,
@@ -205,12 +274,12 @@ pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
         expected_sha256: manifest.sha256,
         actual_sha256: actual,
         signature_present,
-        message: if is_release_build() && dev_placeholder {
+        message: if release_build && dev_placeholder {
             "Production builds reject unsigned VM placeholder artifacts.".into()
         } else if ok {
-            if signature_present && verify_minisign_signature(&artifact_path, &manifest.signature).is_ok() {
+            if release_build {
                 "VM image hash and release signature verified.".into()
-            } else if !is_release_build() && dev_placeholder {
+            } else if dev_placeholder {
                 "VM image hash verified (development placeholder only).".into()
             } else {
                 "VM image hash verified.".into()
@@ -220,8 +289,10 @@ pub fn verify_vm_manifest_at(manifest_path: &Path) -> VmImageVerification {
                 "VM artifact '{}' not found next to manifest.",
                 manifest.artifact
             )
-        } else if is_release_build() && !signature_present {
-            "Release VM image requires a valid minisign signature.".into()
+        } else if !hash_ok {
+            "VM image SHA-256 mismatch — refuse to use tampered image.".into()
+        } else if let Err(error) = signature_check {
+            error
         } else {
             "VM image SHA-256 mismatch or signature verification failed — refuse to use tampered image.".into()
         },
@@ -432,6 +503,13 @@ mod tests {
         manifest_path
     }
 
+    const TEST_PUBLIC_KEY: &str = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
+    const TEST_SIGNATURE: &str = "untrusted comment: signature from minisign secret key
+RWQf6LRCGA9i59SLOFxz6NxvASXDJeRtuZykwQepbDEGt87ig1BNpWaVWuNrm73YiIiJbq71Wi+dP9eKL8OC351vwIasSSbXxwA=
+trusted comment: timestamp:1555779966\tfile:test
+QtKMXWyYcwdpZAlPF7tE2ENJkRd1ujvKjlj1m9RtHTBnZPa5WKU5uWRs5GoP5M/VqE81QFuMKI5k/SfNQUaOAA==
+";
+
     fn temp_case_dir(name: &str) -> PathBuf {
         let dir = env::temp_dir().join(format!("aura-packaging-{name}-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&dir).unwrap();
@@ -450,11 +528,9 @@ mod tests {
             &hash,
             DEV_PLACEHOLDER_SIGNATURE,
         );
-        let result = verify_vm_manifest_at(&manifest);
-        if is_release_build() {
-            assert!(!result.ok);
-            assert!(result.message.contains("placeholder"));
-        }
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, Some(TEST_PUBLIC_KEY));
+        assert!(!result.ok);
+        assert!(result.message.contains("placeholder"));
         let _ = fs::remove_dir_all(dir);
     }
 
@@ -476,6 +552,115 @@ mod tests {
         let result = verify_vm_manifest_at(&manifest);
         assert!(!result.ok);
         assert!(result.message.contains("not found"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_missing_manifest_file() {
+        let dir = temp_case_dir("missing-manifest");
+        let result = verify_vm_manifest_at(&dir.join("manifest.json"));
+
+        assert!(!result.ok);
+        assert!(result.message.contains("Cannot read VM manifest"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn verifies_signed_release_artifact() {
+        let dir = temp_case_dir("signed");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"test").unwrap();
+        fs::write(dir.join(expected_signature_filename(artifact)), TEST_SIGNATURE).unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(
+            &dir,
+            artifact,
+            &hash,
+            &expected_signature_filename(artifact),
+        );
+
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, Some(TEST_PUBLIC_KEY));
+
+        assert!(result.ok, "{}", result.message);
+        assert_eq!(result.message, "VM image hash and release signature verified.");
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_missing_release_signature_file() {
+        let dir = temp_case_dir("missing-signature");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"test").unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(
+            &dir,
+            artifact,
+            &hash,
+            &expected_signature_filename(artifact),
+        );
+
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, Some(TEST_PUBLIC_KEY));
+
+        assert!(!result.ok);
+        assert!(result.message.contains("not found"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_wrong_release_signature() {
+        let dir = temp_case_dir("wrong-signature");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"Test").unwrap();
+        fs::write(dir.join(expected_signature_filename(artifact)), TEST_SIGNATURE).unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(
+            &dir,
+            artifact,
+            &hash,
+            &expected_signature_filename(artifact),
+        );
+
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, Some(TEST_PUBLIC_KEY));
+
+        assert!(!result.ok);
+        assert!(result.message.contains("signature verification failed"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_inconsistent_signature_filename() {
+        let dir = temp_case_dir("signature-name");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"test").unwrap();
+        fs::write(dir.join("image.minisig"), TEST_SIGNATURE).unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(&dir, artifact, &hash, "image.minisig");
+
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, Some(TEST_PUBLIC_KEY));
+
+        assert!(!result.ok);
+        assert!(result.message.contains("signature filename"));
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn rejects_release_without_pinned_public_key() {
+        let dir = temp_case_dir("missing-public-key");
+        let artifact = "image.bin";
+        fs::write(dir.join(artifact), b"test").unwrap();
+        fs::write(dir.join(expected_signature_filename(artifact)), TEST_SIGNATURE).unwrap();
+        let hash = sha256_file(&dir.join(artifact)).unwrap();
+        let manifest = write_manifest(
+            &dir,
+            artifact,
+            &hash,
+            &expected_signature_filename(artifact),
+        );
+
+        let result = verify_vm_manifest_at_with_policy(&manifest, true, None);
+
+        assert!(!result.ok);
+        assert!(result.message.contains("public key"));
         let _ = fs::remove_dir_all(dir);
     }
 }
