@@ -727,6 +727,16 @@ button{font-family:inherit}
 .msg .text a:hover{color:var(--accent-hover,var(--accent))}
 .msg .text ul,.msg .text ol{margin:6px 0 9px;padding-inline-start:20px;display:flex;flex-direction:column;gap:5px}
 .msg .text li{line-height:1.55}
+.msg .text blockquote{margin:8px 0;padding:8px 12px;border-inline-start:3px solid var(--accent);background:var(--bg-inset);color:var(--fg-2);border-radius:var(--r-xs)}
+.msg .text blockquote p{margin:0}
+.msg .text .md-hr{border:0;border-top:1px solid var(--border-1);margin:12px 0}
+.msg .text .md-task-list{list-style:none;padding-inline-start:0}
+.msg .text .md-task-list input{margin-inline-end:7px}
+.msg .text .md-table-wrap{max-width:100%;overflow-x:auto;margin:10px 0;border:1px solid var(--border-1);border-radius:var(--r-sm)}
+.msg .text .md-table{width:100%;border-collapse:collapse;font:var(--text-sm)}
+.msg .text .md-table th,.msg .text .md-table td{padding:7px 9px;border-bottom:1px solid var(--border-1);text-align:start;vertical-align:top}
+.msg .text .md-table th{color:var(--fg-1);background:var(--bg-inset);font-weight:650}
+.msg .text .md-table tr:last-child td{border-bottom:0}
 .msg .text .codeblock{margin:10px 0;background:var(--bg-inset);border:1px solid var(--border-1);border-radius:var(--r-md);
   padding:12px 14px;font:var(--text-code-sm);color:var(--fg-1);white-space:pre;overflow-x:auto;line-height:1.7}
 .msg .text .cite{display:inline-flex;align-items:center;gap:6px;font:var(--text-caption);color:var(--accent);

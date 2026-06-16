@@ -1,7 +1,10 @@
 use crate::task_writes::{
     brief_write_status, extract_markdown_writes, is_file_task_prompt, strip_code_fences,
 };
-use crate::agent::{build_task_chat_bundle, enabled_providers, sidecar_get_text, sidecar_post};
+use crate::agent::{
+    build_task_chat_bundle, enabled_providers, record_usage, sidecar_get_text, sidecar_post,
+    ChatResult, RunChatInput,
+};
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
 use crate::files::{
@@ -25,6 +28,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, State};
 
 const MAX_ITERATIONS: u32 = 20;
+const MAX_CHAT_AGENT_ITERATIONS: u32 = 8;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
@@ -562,6 +566,28 @@ pub async fn advance_task(
     advance_task_inner(&db, &vault, &task_id, Some(&app)).await
 }
 
+fn workspace_files_summary(db: &DbState, project_id: &str, depth: u32, limit: usize) -> String {
+    let Ok(root) = crate::files::project_folder(db, project_id) else {
+        return "(failed to resolve project folder)".to_string();
+    };
+    let Ok(list) = crate::files::list_dir_internal(&root, None, depth) else {
+        return "(failed to list files)".to_string();
+    };
+    let mut summary = String::new();
+    for f in list.iter().take(limit) {
+        if f.is_dir {
+            summary.push_str(&format!("Directory: {}\n", f.path));
+        } else {
+            summary.push_str(&format!(
+                "File: {} ({} bytes)\n",
+                f.path,
+                f.size.unwrap_or(0)
+            ));
+        }
+    }
+    summary
+}
+
 pub async fn advance_task_inner(
     db: &DbState,
     vault: &VaultHandle,
@@ -613,23 +639,7 @@ pub async fn advance_task_inner(
     )
     .await?;
 
-    let files_summary = if let Ok(root) = crate::files::project_folder(db, &project_id) {
-        if let Ok(list) = crate::files::list_dir_internal(&root, None, 5) {
-            let mut summary = String::new();
-            for f in list.iter().take(150) {
-                if f.is_dir {
-                    summary.push_str(&format!("Directory: {}\n", f.path));
-                } else {
-                    summary.push_str(&format!("File: {} ({} bytes)\n", f.path, f.size.unwrap_or(0)));
-                }
-            }
-            summary
-        } else {
-            "(failed to list files)".to_string()
-        }
-    } else {
-        "(failed to resolve project folder)".to_string()
-    };
+    let files_summary = workspace_files_summary(db, &project_id, 5, 150);
 
     let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
     let iterate_resp: SidecarIterateResponse = sidecar_post(
@@ -1210,6 +1220,40 @@ pub fn cancel_task(db: State<'_, DbState>, task_id: String) -> Result<TaskRecord
     load_task(&conn, &task_id)
 }
 
+fn add_one_shot_permission_grant(
+    db: &DbState,
+    permission_id: &str,
+) -> Result<Option<String>, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let (project_id, category, action, target): (String, String, String, String) = conn
+        .query_row(
+            "SELECT project_id, category, action, target FROM pending_permissions WHERE id = ?1",
+            params![permission_id],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+        )
+        .map_err(|_| "Permission not found.".to_string())?;
+    let grant_id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Utc::now().to_rfc3339();
+    conn.execute(
+        "INSERT INTO project_permission_grants (id, project_id, category, action, target_pattern, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![grant_id, project_id, category, action, target, now],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(Some(grant_id))
+}
+
+fn remove_one_shot_permission_grant(db: &DbState, grant_id: Option<String>) {
+    if let Some(grant_id) = grant_id {
+        if let Ok(conn) = db.0.lock() {
+            let _ = conn.execute(
+                "DELETE FROM project_permission_grants WHERE id = ?1",
+                params![grant_id],
+            );
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn resume_after_permission(
     db: State<'_, DbState>,
@@ -1273,6 +1317,11 @@ pub async fn resume_after_permission(
                 let conn = db.0.lock().map_err(|e| e.to_string())?;
                 load_task(&conn, &task_id)?.project_id
             };
+            let one_shot_grant = if decision == "allow-once" {
+                add_one_shot_permission_grant(&db, &permission_id)?
+            } else {
+                None
+            };
             if let Ok(out) = execute_tool(&db, &project_id, Some(&task_id), &tc, None).await {
                 let conn = db.0.lock().map_err(|e| e.to_string())?;
                 let mut task = load_task(&conn, &task_id)?;
@@ -1283,10 +1332,57 @@ pub async fn resume_after_permission(
                 });
                 save_task(&conn, &task)?;
             }
+            remove_one_shot_permission_grant(&db, one_shot_grant);
         }
     }
 
     advance_task_inner(&db, &vault, &task_id, None).await
+}
+
+#[tauri::command]
+pub async fn resolve_workspace_permission(
+    db: State<'_, DbState>,
+    permission_id: String,
+    decision: String,
+) -> Result<String, String> {
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        resolve_permission_in_conn(
+            &conn,
+            &ResolvePermissionInput {
+                permission_id: permission_id.clone(),
+                decision: decision.clone(),
+            },
+        )?;
+    }
+
+    if decision == "deny" {
+        return Ok("Permission denied.".into());
+    }
+
+    let (project_id, payload) = {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        conn.query_row(
+            "SELECT project_id, payload FROM pending_permissions WHERE id = ?1",
+            params![permission_id],
+            |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+        )
+        .map_err(|_| "Permission not found.".to_string())?
+    };
+
+    let Some(payload_str) = payload else {
+        return Ok("Permission resolved.".into());
+    };
+    let tc = serde_json::from_str::<SidecarToolCall>(&payload_str)
+        .map_err(|_| "Permission payload is not a workspace tool call.".to_string())?;
+    let one_shot_grant = if decision == "allow-once" {
+        add_one_shot_permission_grant(&db, &permission_id)?
+    } else {
+        None
+    };
+    let result = execute_tool(&db, &project_id, None, &tc, None).await;
+    remove_one_shot_permission_grant(&db, one_shot_grant);
+    result
 }
 
 #[tauri::command]
@@ -1349,4 +1445,253 @@ pub async fn send_task_message(
         save_task(&conn, &task)?;
     }
     advance_task_inner(&db, &vault, &task_id, None).await
+}
+
+pub async fn run_workspace_chat_agent(
+    db: &DbState,
+    vault: &VaultHandle,
+    input: &RunChatInput,
+) -> Result<ChatResult, String> {
+    let Some(project_id) = input.project_id.as_deref().filter(|v| !v.trim().is_empty()) else {
+        return Err("Project is required for workspace chat.".into());
+    };
+    let allowed = enabled_providers(db, vault)?;
+    if allowed.is_empty() {
+        return Err(
+            "Enable at least one provider (Ollama and LM Studio work without an API key).".into(),
+        );
+    }
+
+    let chat = build_task_chat_bundle(
+        db,
+        vault,
+        &allowed,
+        "coding",
+        input.preferred_provider.as_deref(),
+        input.preferred_model.as_deref(),
+        None,
+        None,
+    )
+    .await?;
+
+    let mut messages: Vec<TaskMessage> = input
+        .messages
+        .as_ref()
+        .map(|items| {
+            items
+                .iter()
+                .map(|m| TaskMessage {
+                    role: m.role.clone(),
+                    content: m.content.clone(),
+                    agent_role: None,
+                })
+                .collect()
+        })
+        .unwrap_or_else(|| {
+            vec![TaskMessage {
+                role: "user".into(),
+                content: input.message.trim().to_string(),
+                agent_role: None,
+            }]
+        });
+
+    if messages.is_empty() {
+        messages.push(TaskMessage {
+            role: "user".into(),
+            content: input.message.trim().to_string(),
+            agent_role: None,
+        });
+    }
+
+    let plan = vec![
+        PlanStep {
+            title: "Understand the request".into(),
+            subtitle: Some("Use the current project context and recent chat history.".into()),
+            role: Some("coordinator".into()),
+        },
+        PlanStep {
+            title: "Inspect or modify workspace files".into(),
+            subtitle: Some("Use file, search, shell, plugin, and MCP tools when needed.".into()),
+            role: Some("coder".into()),
+        },
+        PlanStep {
+            title: "Return a concise result".into(),
+            subtitle: Some("Summarize actions, changed files, and remaining blockers.".into()),
+            role: Some("reviewer".into()),
+        },
+    ];
+    let mut steps: Vec<TaskStep> = Vec::new();
+    let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
+    let mut total_input_tokens = 0u64;
+    let mut total_output_tokens = 0u64;
+    let mut saw_usage = false;
+    let mut modified_files: Vec<String> = Vec::new();
+    let mut last_content = String::new();
+    let mut blocked_reason: Option<String> = None;
+
+    for iteration in 0..MAX_CHAT_AGENT_ITERATIONS {
+        let prompt = format!(
+            "Workspace chat request: {}\n\nYou are running inside Aura Work for this selected project. \
+             If the user asks who you are, answer as Aura Work's workspace agent. \
+             Use tools whenever project files, code search, edits, commands, plugins, or MCP are needed. \
+             Do not claim you cannot access files before trying the available tools.",
+            input.message.trim()
+        );
+        let iterate_resp: SidecarIterateResponse = sidecar_post(
+            "/task/iterate",
+            &serde_json::json!({
+                "prompt": prompt,
+                "plan": plan,
+                "steps": steps,
+                "messages": messages,
+                "iteration": iteration,
+                "projectId": project_id,
+                "providerId": chat.provider_id,
+                "modelId": chat.model_id,
+                "credentials": chat.credentials,
+                "workspaceFiles": workspace_files_summary(db, project_id, 6, 220),
+                "skills": skills_list,
+            }),
+        )
+        .await?;
+
+        if let Some(usage) = &iterate_resp.usage {
+            saw_usage = true;
+            total_input_tokens += usage.input_tokens.unwrap_or(0);
+            total_output_tokens += usage.output_tokens.unwrap_or(0);
+        }
+
+        if let Some(content) = iterate_resp.content.as_ref().or(iterate_resp.summary.as_ref()) {
+            let display = strip_code_fences(content);
+            if !display.trim().is_empty() {
+                last_content = display.clone();
+                messages.push(TaskMessage {
+                    role: "assistant".into(),
+                    content: display,
+                    agent_role: iterate_resp.role.clone(),
+                });
+            }
+        }
+
+        let tool_calls = iterate_resp.tool_calls.clone().unwrap_or_default();
+        if tool_calls.is_empty() {
+            break;
+        }
+
+        for tc in tool_calls {
+            let mut step = TaskStep {
+                title: format!("Tool: {}", tc.name),
+                role: iterate_resp.role.clone(),
+                status: "running".into(),
+                tool: Some(tc.name.clone()),
+                tool_ok: None,
+                output: None,
+            };
+            match execute_tool(db, project_id, None, &tc, None).await {
+                Ok(output) => {
+                    step.status = "done".into();
+                    step.tool_ok = Some(true);
+                    step.output = Some(output.chars().take(500).collect());
+                    if matches!(
+                        tc.name.as_str(),
+                        "write_file" | "delete_file" | "replace_in_file"
+                    ) {
+                        if let Some(path) = tc.arguments.get("path").and_then(|v| v.as_str()) {
+                            if !modified_files.iter().any(|p| p == path) {
+                                modified_files.push(path.to_string());
+                            }
+                        }
+                    }
+                    messages.push(TaskMessage {
+                        role: "tool".into(),
+                        content: output,
+                        agent_role: Some("system".into()),
+                    });
+                }
+                Err(e) if e.starts_with("permission_required:") => {
+                    step.status = "block".into();
+                    step.tool_ok = Some(false);
+                    step.output = Some("Waiting for permission".into());
+                    blocked_reason = Some(
+                        "I need your approval before running that workspace action. Use the pending approval dialog to allow or deny it, then send a follow-up message if you want me to continue.".into(),
+                    );
+                    steps.push(step);
+                    break;
+                }
+                Err(e) if e.starts_with("Pending edit approval required:") => {
+                    step.status = "block".into();
+                    step.tool_ok = Some(false);
+                    step.output = Some("Waiting for edit approval".into());
+                    blocked_reason = Some(
+                        "I prepared a file edit that needs your approval. Open Files, review Pending edits, and approve it to apply the change. Send another message only if you want more changes.".into(),
+                    );
+                    steps.push(step);
+                    break;
+                }
+                Err(e) => {
+                    step.status = "block".into();
+                    step.tool_ok = Some(false);
+                    step.output = Some(e.clone());
+                    messages.push(TaskMessage {
+                        role: "tool".into(),
+                        content: format!("Error: {e}"),
+                        agent_role: Some("system".into()),
+                    });
+                }
+            }
+            steps.push(step);
+        }
+
+        if blocked_reason.is_some() {
+            break;
+        }
+        if iterate_resp.complete.unwrap_or(false) || iterate_resp.response_type == "complete" {
+            break;
+        }
+    }
+
+    let content = blocked_reason.unwrap_or_else(|| {
+        if !last_content.trim().is_empty() {
+            last_content
+        } else if modified_files.is_empty() {
+            "I inspected the workspace and completed the request.".into()
+        } else {
+            format!("Done. Modified files:\n{}", modified_files.join("\n"))
+        }
+    });
+
+    let (input_rate, output_rate) =
+        crate::pricing::pricing_for_model(db, &chat.provider_id, &chat.model_id)
+            .unwrap_or((None, None));
+    let estimated = crate::pricing::estimate_cost(
+        total_input_tokens,
+        total_output_tokens,
+        input_rate,
+        output_rate,
+    );
+    let usage_id = record_usage(
+        db,
+        Some(project_id),
+        &chat.provider_id,
+        &chat.model_id,
+        if saw_usage { Some(total_input_tokens) } else { None },
+        if saw_usage { Some(total_output_tokens) } else { None },
+        estimated,
+        &chat.routing_policy,
+    )?;
+
+    Ok(ChatResult {
+        text: content,
+        provider_id: chat.provider_id,
+        model_id: chat.model_id,
+        routing_policy: chat.routing_policy,
+        routing_reason: "Workspace agent used project context and tools when needed.".into(),
+        input_tokens: if saw_usage { Some(total_input_tokens) } else { None },
+        output_tokens: if saw_usage { Some(total_output_tokens) } else { None },
+        estimated_cost_usd: estimated,
+        cost_unknown: estimated.is_none() && saw_usage,
+        usage_id,
+        requires_fallback_approval: false,
+        fallback_from: None,
+    })
 }

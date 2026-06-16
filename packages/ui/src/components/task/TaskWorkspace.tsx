@@ -367,6 +367,7 @@ export function Composer({
     placeholder: "Ask Aura anything…",
     send: "Send",
     runTask: "Run task",
+    startTask: "Start task",
     autoModel: "Auto (routing)",
     modeAsk: "Ask-first",
     modeAct: "Act without asking",
@@ -390,6 +391,7 @@ export function Composer({
     placeholder: string;
     send: string;
     runTask: string;
+    startTask?: string;
     autoModel: string;
     modeAsk: string;
     modeAct: string;
@@ -519,14 +521,15 @@ export function Composer({
               className="btn sm"
               onClick={onRunTask}
               disabled={disabled || !value.trim()}
+              title={labels.startTask ?? labels.runTask}
             >
               <Icon name="list-checks" size={14} />
-              {labels.runTask}
+              {labels.startTask ?? labels.runTask}
             </button>
           )}
           <button type="button" className="btn primary sm" onClick={onSend} disabled={disabled || !value.trim()}>
             <Icon name="arrow-up" size={14} />
-            {disabled ? labels.running : mode === "act" ? labels.runTask : labels.send}
+            {disabled ? labels.running : mode === "act" ? labels.startTask ?? labels.runTask : labels.send}
           </button>
         </div>
       </div>

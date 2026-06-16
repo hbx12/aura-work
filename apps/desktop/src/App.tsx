@@ -401,6 +401,7 @@ export default function App() {
       placeholder: i18n.t("chat.placeholder"),
       send: i18n.t("chat.send"),
       runTask: i18n.t("chat.runTask"),
+      startTask: i18n.t("chat.startTask"),
       autoModel: i18n.t("chat.autoModel"),
       modeAsk: i18n.t("chat.modeAsk"),
       modeAct: i18n.t("chat.modeAct"),

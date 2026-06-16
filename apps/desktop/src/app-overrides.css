@@ -786,12 +786,54 @@
   margin-inline-end: 0.5rem;
 }
 
+.markdown-preview .md-task-list {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
 .markdown-preview blockquote {
   margin: 1rem 0;
   padding: 0.65rem 1rem;
   border-inline-start: 3px solid var(--accent);
   background: color-mix(in srgb, var(--bg-2) 78%, transparent);
   color: var(--fg-2);
+}
+
+.markdown-preview .md-hr {
+  border: 0;
+  border-top: 1px solid var(--border-2);
+  margin: 1.2rem 0;
+}
+
+.markdown-preview .md-table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid var(--border-2);
+  border-radius: 7px;
+}
+
+.markdown-preview .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--text-body);
+}
+
+.markdown-preview .md-table th,
+.markdown-preview .md-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--border-2);
+  text-align: start;
+  vertical-align: top;
+}
+
+.markdown-preview .md-table th {
+  background: color-mix(in srgb, var(--bg-2) 80%, transparent);
+  color: var(--fg-1);
+  font-weight: 700;
+}
+
+.markdown-preview .md-table tr:last-child td {
+  border-bottom: 0;
 }
 
 .markdown-preview code {
