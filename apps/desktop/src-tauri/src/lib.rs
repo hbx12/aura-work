@@ -62,6 +62,60 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
     }
 }
 
+mod vscode_bridge {
+    use serde::{Deserialize, Serialize};
+    use std::io::Read;
+    use tauri::Emitter;
+
+    #[derive(Serialize, Deserialize, Clone, Debug)]
+    struct ActiveEditorPayload {
+        #[serde(rename = "filePath")]
+        file_path: String,
+        content: String,
+        #[serde(rename = "cursorLine")]
+        cursor_line: Option<i32>,
+    }
+
+    pub fn start_vscode_bridge(app_handle: tauri::AppHandle) {
+        std::thread::spawn(move || {
+            let addr = "127.0.0.1:47890";
+            let server = match tiny_http::Server::http(addr) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("[vscode-bridge] failed to bind {addr}: {e}");
+                    return;
+                }
+            };
+            eprintln!("[vscode-bridge] listening on {addr}");
+            for mut request in server.incoming_requests() {
+                if request.method() == &tiny_http::Method::Post && request.url() == "/active-editor" {
+                    let mut content = String::new();
+                    let _ = request.as_reader().read_to_string(&mut content);
+                    if let Ok(payload) = serde_json::from_str::<ActiveEditorPayload>(&content) {
+                        let _ = app_handle.emit("vs-code-editor-sync", payload);
+                        let response = tiny_http::Response::from_string("{\"ok\":true}");
+                        let _ = request.respond(
+                            response.with_header(
+                                tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap()
+                            )
+                        );
+                    } else {
+                        let _ = request.respond(
+                            tiny_http::Response::from_string("{\"error\":\"invalid json\"}")
+                                .with_status_code(400)
+                        );
+                    }
+                } else {
+                    let _ = request.respond(
+                        tiny_http::Response::from_string("{\"error\":\"not found\"}")
+                            .with_status_code(404)
+                    );
+                }
+            }
+        });
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -89,6 +143,7 @@ pub fn run() {
             scheduled::start_scheduler(app.handle().clone());
             app.manage(SidecarSupervisor::default());
             sidecars::start_all(&app.handle());
+            vscode_bridge::start_vscode_bridge(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -125,6 +180,7 @@ pub fn run() {
             agent::run_chat,
             agent::get_latest_usage,
             agent::list_task_usage,
+            agent::get_monthly_spending,
             audit::list_audit_entries,
             permissions::resolve_permission,
             permissions::list_pending_permissions,
@@ -173,6 +229,8 @@ pub fn run() {
             plugins::create_local_skill,
             plugins::list_local_skills,
             plugins::save_local_skill,
+            plugins::save_text_file,
+            plugins::read_text_file,
             mcp::list_mcp_servers,
             mcp::add_mcp_server,
             mcp::delete_mcp_server,

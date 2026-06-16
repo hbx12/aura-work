@@ -121,6 +121,45 @@ function formatTaskTime(iso: string) {
   }
 }
 
+const applyFonts = (sans: string | null, mono: string | null) => {
+  const root = document.documentElement;
+  if (sans) {
+    if (sans !== "system" && sans !== "IBM Plex Sans") {
+      const linkId = "google-font-sans-link";
+      let link = document.getElementById(linkId) as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(sans)}:wght@400;500;600;700&display=swap`;
+    }
+    root.style.setProperty("--font-sans", `'${sans}', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif`);
+    root.style.setProperty("--font-arabic", `'IBM Plex Sans Arabic', '${sans}', system-ui, sans-serif`);
+  } else {
+    root.style.removeProperty("--font-sans");
+    root.style.removeProperty("--font-arabic");
+  }
+  
+  if (mono) {
+    if (mono !== "system" && mono !== "IBM Plex Mono") {
+      const linkId = "google-font-mono-link";
+      let link = document.getElementById(linkId) as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(mono)}:wght@400;500;600&display=swap`;
+    }
+    root.style.setProperty("--font-mono", `'${mono}', ui-monospace, monospace`);
+  } else {
+    root.style.removeProperty("--font-mono");
+  }
+};
+
 export default function App() {
   // Check if this is the pet window view
   const params = new URLSearchParams(window.location.search);
@@ -134,6 +173,46 @@ export default function App() {
   const { projects, loading, error, createProject, pickFolder, refresh: refreshProjects } = useProjects();
   const providersApi = useProviders();
   const agent = useAgent();
+
+  const [activeEditor, setActiveEditor] = useState<{ filePath: string; content: string; cursorLine?: number } | null>(null);
+
+  // Load typography preferences on mount and listen to changes
+  useEffect(() => {
+    const sans = localStorage.getItem("selected-font-sans");
+    const mono = localStorage.getItem("selected-font-mono");
+    applyFonts(sans, mono);
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "selected-font-sans" || e.key === "selected-font-mono") {
+        const activeSans = localStorage.getItem("selected-font-sans");
+        const activeMono = localStorage.getItem("selected-font-mono");
+        applyFonts(activeSans, activeMono);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
+  // Listen to active editor sync event
+  useEffect(() => {
+    let unlistenEditor: (() => void) | undefined;
+    const listenToEditor = async () => {
+      try {
+        const unlisten = await listen<any>("vs-code-editor-sync", (event) => {
+          setActiveEditor(event.payload);
+        });
+        unlistenEditor = unlisten;
+      } catch (err) {
+        console.error("Failed to listen to vs-code-editor-sync:", err);
+      }
+    };
+    void listenToEditor();
+    return () => {
+      if (unlistenEditor) unlistenEditor();
+    };
+  }, []);
 
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
     const saved = localStorage.getItem(THEME_KEY);
@@ -504,17 +583,43 @@ export default function App() {
     const msg = composer.trim();
     if (!msg || agent.running || tasks.running) return;
     if (activeTaskId) return;
+
+    // Budget check
+    const budget = localStorage.getItem("aura-monthly-budget");
+    if (budget && budget !== "unlimited") {
+      try {
+        const spending = await invoke<number>("get_monthly_spending");
+        if (spending >= parseFloat(budget)) {
+          const errMsg = `API monthly budget limit reached ($${spending.toFixed(2)} >= $${parseFloat(budget).toFixed(2)}). Please increase your budget in Settings.`;
+          setChatError(errMsg);
+          setChatMessages((prev) => [...prev, { role: "assistant", content: errMsg }]);
+          return;
+        }
+      } catch (err) {
+        console.error("Budget check failed:", err);
+      }
+    }
+
     setComposer("");
     setChatError(null);
     const userLine = { role: "user" as const, content: msg };
     const history = [...chatMessages, userLine];
     if (!fallbackApproved) setChatMessages(history);
+
+    let finalMsg = msg;
+    if (activeEditor) {
+      finalMsg = `${msg}\n\n[Context from active file in VS Code: ${activeEditor.filePath}${activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}]\n\`\`\`\n${activeEditor.content}\n\`\`\``;
+    }
+
     const { preferredProvider, preferredModel } = parseModelSelection(selectedModel);
     try {
       const result = await agent.runChat({
-        message: msg,
+        message: finalMsg,
         projectId: activeProjectId,
-        messages: history.map((m) => ({ role: m.role, content: m.content })),
+        messages: [
+          ...chatMessages.map((m) => ({ role: m.role, content: m.content })),
+          { role: "user", content: finalMsg }
+        ],
         preferredProvider,
         preferredModel,
         fallbackApproved,
@@ -589,16 +694,38 @@ export default function App() {
     if (handleCheckPetCommand(composer)) return;
     const msg = composer.trim();
     if (!msg || tasks.running) return;
+
+    // Budget check
+    const budget = localStorage.getItem("aura-monthly-budget");
+    if (budget && budget !== "unlimited") {
+      try {
+        const spending = await invoke<number>("get_monthly_spending");
+        if (spending >= parseFloat(budget)) {
+          const errMsg = `API monthly budget limit reached ($${spending.toFixed(2)} >= $${parseFloat(budget).toFixed(2)}). Please increase your budget in Settings.`;
+          tasks.setError(errMsg);
+          return;
+        }
+      } catch (err) {
+        console.error("Budget check failed:", err);
+      }
+    }
+
     setComposer("");
     setChatMessages([]);
     setChatError(null);
     setActiveTaskId(null);
     tasks.setActiveTask(null);
+
+    let finalMsg = msg;
+    if (activeEditor) {
+      finalMsg = `${msg}\n\n[Context from active file in VS Code: ${activeEditor.filePath}${activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}]\n\`\`\`\n${activeEditor.content}\n\`\`\``;
+    }
+
     const { preferredProvider, preferredModel } = parseModelSelection(selectedModel);
     try {
       if (mode === "act") await ensureActPermissions();
       const task = await tasks.createAndStart({
-        prompt: msg,
+        prompt: finalMsg,
         preferredProvider,
         preferredModel,
         autoApprove: mode === "act",
@@ -846,6 +973,38 @@ export default function App() {
             {tasks.running && <Thinking label={t("task.thinking.coordinator")} labels={thinkingLabels} />}
             {(tasks.error) && (
               <p className="modal-error">{tasks.error}</p>
+            )}
+            
+            {activeEditor && (
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 12px",
+                background: "color-mix(in srgb, var(--accent) 8%, var(--bg-1))",
+                border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--border-1))",
+                borderRadius: "8px",
+                marginBottom: "8px",
+                fontSize: "12px",
+                color: "var(--fg-2)"
+              }}>
+                <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#5a8a52" }} />
+                <span>{t("settings.ideConnected") || "VS Code Connected"}: <strong>{activeEditor.filePath.split('/').pop()}</strong>{activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}</span>
+                <button
+                  onClick={() => setActiveEditor(null)}
+                  style={{
+                    marginLeft: "auto",
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--fg-3)",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    padding: "0 4px"
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             )}
           </div>
         </div>

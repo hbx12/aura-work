@@ -293,6 +293,7 @@ export function useTasks(projectId: string | null) {
     loading,
     running,
     error,
+    setError,
     streamText,
     refreshTasks,
     loadTask,

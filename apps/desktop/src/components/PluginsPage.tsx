@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { save, open } from "@tauri-apps/plugin-dialog";
 import { Icon, MarkdownText } from "@aura-os/ui";
 import type {
   InstalledPlugin,
@@ -187,6 +188,120 @@ export function PluginsPage({
   const [expandedSkills, setExpandedSkills] = useState<Record<string, boolean>>({});
   const [editingSkill, setEditingSkill] = useState<any | null>(null);
 
+  const [chatModels, setChatModels] = useState<any[]>([]);
+  const [sandboxModel, setSandboxModel] = useState<string>("auto");
+  const [sandboxInput, setSandboxInput] = useState<string>("");
+  const [sandboxOutput, setSandboxOutput] = useState<string>("");
+  const [sandboxLoading, setSandboxLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (editingSkill) {
+      void invoke<any[]>("list_chat_models").then((list) => {
+        setChatModels(list);
+        if (list.length > 0) {
+          setSandboxModel(`${list[0].providerId}:${list[0].modelId}`);
+        }
+      }).catch(err => {
+        console.error("Failed to load chat models:", err);
+      });
+    } else {
+      setSandboxInput("");
+      setSandboxOutput("");
+    }
+  }, [editingSkill]);
+
+  const runSandboxTest = async () => {
+    if (!sandboxInput.trim() || !editingSkill) return;
+    setSandboxLoading(true);
+    setSandboxOutput("");
+    try {
+      const sep = sandboxModel.indexOf(":");
+      const preferredProvider = sep > 0 ? sandboxModel.slice(0, sep) : null;
+      const preferredModel = sep > 0 ? sandboxModel.slice(sep + 1) : null;
+
+      const result = await invoke<any>("run_chat", {
+        input: {
+          projectId: null,
+          message: sandboxInput.trim(),
+          taskType: "general",
+          preferredProvider,
+          preferredModel,
+          messages: [
+            { role: "system", content: skillPrompt },
+            { role: "user", content: sandboxInput.trim() }
+          ],
+          fallbackApproved: false
+        }
+      });
+      setSandboxOutput(result.text || (isAr ? "(لا توجد استجابة)" : "(No response content)"));
+    } catch (err) {
+      setSandboxOutput((isAr ? "خطأ: " : "Error: ") + String(err));
+    } finally {
+      setSandboxLoading(false);
+    }
+  };
+
+  const exportSkill = async (s: any) => {
+    try {
+      const exportData = JSON.stringify({
+        name: s.name,
+        description: s.description || "",
+        prompt: s.prompt
+      }, null, 2);
+
+      const filePath = await save({
+        title: isAr ? "تصدير المهارة" : "Export Skill",
+        defaultPath: `${s.name}.aura-skill`,
+        filters: [
+          {
+            name: "Aura Skill",
+            extensions: ["aura-skill", "json"]
+          }
+        ]
+      });
+
+      if (filePath) {
+        await invoke("save_text_file", { path: filePath, content: exportData });
+        setSkillMessage(isAr ? `تم تصدير المهارة بنجاح إلى ${filePath}` : `Skill exported successfully to ${filePath}`);
+      }
+    } catch (err) {
+      setSkillMessage(String(err));
+    }
+  };
+
+  const importSkill = async () => {
+    try {
+      const selected = await open({
+        title: isAr ? "استيراد مهارة" : "Import Skill",
+        multiple: false,
+        filters: [
+          {
+            name: "Aura Skill",
+            extensions: ["aura-skill", "json"]
+          }
+        ]
+      });
+      if (!selected) return;
+      const filePath = Array.isArray(selected) ? selected[0] : selected;
+      const content = await invoke<string>("read_text_file", { path: filePath });
+      const parsed = JSON.parse(content);
+      if (!parsed.name || !parsed.prompt) {
+        throw new Error(isAr ? "الملف غير صالح، يجب أن يحتوي على الاسم والتعليمات" : "Invalid file: name and prompt are required.");
+      }
+      await invoke("create_local_skill", {
+        input: {
+          name: parsed.name.trim(),
+          description: (parsed.description || "").trim(),
+          prompt: parsed.prompt.trim()
+        }
+      });
+      setSkillMessage(isAr ? "تم استيراد المهارة بنجاح" : "Skill imported successfully");
+      void refreshSkills();
+    } catch (err) {
+      setSkillMessage(isAr ? `فشل الاستيراد: ${String(err)}` : `Failed to import: ${String(err)}`);
+    }
+  };
+
   const refreshSkills = async () => {
     try {
       const list = await invoke<any[]>("list_local_skills");
@@ -292,10 +407,16 @@ export function PluginsPage({
                 {t("plugins.addPlugin")}
               </button>
             ) : (
-              <button type="button" className="btn secondary sm" disabled={loading} onClick={() => setShowSkillForm((s) => !s)}>
-                <Icon name="plus" size={14} />
-                {isAr ? "إنشاء مهارة جديدة" : "Create New Skill"}
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void importSkill()}>
+                  <Icon name="plus" size={14} />
+                  {isAr ? "استيراد مهارة" : "Import Skill"}
+                </button>
+                <button type="button" className="btn secondary sm" disabled={loading} onClick={() => setShowSkillForm((s) => !s)}>
+                  <Icon name="plus" size={14} />
+                  {isAr ? "إنشاء مهارة جديدة" : "Create New Skill"}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -682,6 +803,91 @@ export function PluginsPage({
                       style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
                     />
                   </label>
+                  <hr style={{ border: "none", borderTop: "1px solid var(--border-3)", margin: "16px 0" }} />
+                  
+                  {/* Skill Sandbox */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12 }}>
+                    <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--fg-1)" }}>
+                      {isAr ? "بيئة تجربة المهارة (Sandbox)" : "Skill Testing Sandbox"}
+                    </div>
+                    <div className="form-grid" style={{ gridTemplateColumns: "1fr" }}>
+                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span>{isAr ? "النموذج النشط للدردشة" : "Active Model"}</span>
+                        <select
+                          value={sandboxModel}
+                          onChange={(e) => setSandboxModel(e.target.value)}
+                          style={{
+                            background: "var(--bg-1)",
+                            border: "1px solid var(--border-3)",
+                            padding: "8px 12px",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--fg-1)",
+                            font: "inherit"
+                          }}
+                        >
+                          {chatModels.map((m) => (
+                            <option key={`${m.providerId}:${m.modelId}`} value={`${m.providerId}:${m.modelId}`}>
+                              {m.label} ({m.providerId})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <span>{isAr ? "استعلام التجربة / المدخلات" : "Test Query / Input"}</span>
+                      <textarea
+                        value={sandboxInput}
+                        onChange={(e) => setSandboxInput(e.target.value)}
+                        placeholder={isAr ? "اكتب هنا استعلام التجربة..." : "Enter test query..."}
+                        rows={3}
+                        style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
+                      />
+                    </label>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        className="btn primary sm"
+                        disabled={sandboxLoading || !sandboxInput.trim()}
+                        onClick={() => void runSandboxTest()}
+                      >
+                        {sandboxLoading ? (isAr ? "جاري التشغيل..." : "Running...") : (isAr ? "Run Test" : "Run Test")}
+                      </button>
+                      {sandboxOutput && (
+                        <button
+                          type="button"
+                          className="btn secondary sm"
+                          onClick={() => setSandboxOutput("")}
+                        >
+                          {isAr ? "مسح المخرجات" : "Clear Output"}
+                        </button>
+                      )}
+                    </div>
+
+                    {sandboxOutput && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span>{isAr ? "مخرجات استجابة التجربة" : "Sandbox Response Output"}</span>
+                        <div
+                          style={{
+                            background: "var(--bg-inset)",
+                            border: "1px solid var(--border-3)",
+                            padding: "12px",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--fg-2)",
+                            fontFamily: "var(--font-mono, monospace)",
+                            whiteSpace: "pre-wrap",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                            fontSize: "13px"
+                          }}
+                        >
+                          {sandboxOutput}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="form-actions">
                     <button
                       type="button"
@@ -799,6 +1005,15 @@ export function PluginsPage({
                             }}
                           >
                             <Icon name="file-code" size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn ghost icon sm"
+                            title={isAr ? "تصدير المهارة" : "Export Skill"}
+                            disabled={loading}
+                            onClick={() => void exportSkill(s)}
+                          >
+                            <Icon name="download" size={15} />
                           </button>
                           <button
                             type="button"

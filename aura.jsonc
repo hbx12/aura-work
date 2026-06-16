@@ -1,0 +1,16 @@
+{
+  // This is a test project-level MCP server configuration
+  "mcp": {
+    "test-project-server": {
+      "type": "local",
+      "command": [
+        "node",
+        "/Users/hbx/Desktop/aura work/examples/test-mcp-server.js"
+      ],
+      "enabled": true,
+      "environment": {
+        "TEST_ENV_VAR": "Hello from project-level config"
+      }
+    }
+  }
+}

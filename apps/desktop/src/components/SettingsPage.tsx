@@ -32,6 +32,12 @@ const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; prev
   { id: "coffee", labelKey: "settings.themeCoffee" },
   { id: "ocean", labelKey: "settings.themeOcean" },
   { id: "luxury", labelKey: "settings.themeLuxury" },
+  { id: "emerald-luxury", labelKey: "settings.themeEmeraldLuxury", preview: "emerald-luxury" },
+  { id: "rose-luxury", labelKey: "settings.themeRoseLuxury", preview: "rose-luxury" },
+  { id: "velvet-luxury", labelKey: "settings.themeVelvetLuxury", preview: "velvet-luxury" },
+  { id: "bronze-luxury", labelKey: "settings.themeBronzeLuxury", preview: "bronze-luxury" },
+  { id: "platinum-luxury", labelKey: "settings.themePlatinumLuxury", preview: "platinum-luxury" },
+  { id: "crimson-luxury", labelKey: "settings.themeCrimsonLuxury", preview: "crimson-luxury" },
 ];
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
@@ -417,6 +423,134 @@ export function SettingsPage({
                         );
                       })}
                       </div>
+                  </div>
+                </div>
+
+                <div className="section" style={{ marginTop: 24 }}>
+                  <span className="sec-label">{t("settings.fontsTitle") || "Fonts & Typography"}</span>
+                  <div className="panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span style={{ font: "var(--text-label)" }}>{t("settings.uiFont") || "UI Font Family (Sans)"}</span>
+                        <select
+                          value={localStorage.getItem("selected-font-sans") || "IBM Plex Sans"}
+                          onChange={(e) => {
+                            localStorage.setItem("selected-font-sans", e.target.value);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{
+                            background: "var(--bg-1)",
+                            border: "1px solid var(--border-3)",
+                            padding: "8px 12px",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--fg-1)",
+                            font: "inherit"
+                          }}
+                        >
+                          <option value="IBM Plex Sans">IBM Plex Sans (Default)</option>
+                          <option value="Inter" style={{ fontFamily: "Inter, sans-serif" }}>Inter (أبجد هوز)</option>
+                          <option value="Roboto" style={{ fontFamily: "Roboto, sans-serif" }}>Roboto (أبجد هوز)</option>
+                          <option value="Outfit" style={{ fontFamily: "Outfit, sans-serif" }}>Outfit (أبجد هوز)</option>
+                          <option value="Cairo" style={{ fontFamily: "Cairo, sans-serif" }}>Cairo (القاهرة)</option>
+                          <option value="Tajawal" style={{ fontFamily: "Tajawal, sans-serif" }}>Tajawal (تجوال)</option>
+                          <option value="Almarai" style={{ fontFamily: "Almarai, sans-serif" }}>Almarai (المراعي)</option>
+                        </select>
+                      </label>
+                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <span style={{ font: "var(--text-label)" }}>{t("settings.codeFont") || "Code Font Family (Mono)"}</span>
+                        <select
+                          value={localStorage.getItem("selected-font-mono") || "IBM Plex Mono"}
+                          onChange={(e) => {
+                            localStorage.setItem("selected-font-mono", e.target.value);
+                            window.dispatchEvent(new Event("storage"));
+                          }}
+                          style={{
+                            background: "var(--bg-1)",
+                            border: "1px solid var(--border-3)",
+                            padding: "8px 12px",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--fg-1)",
+                            font: "inherit"
+                          }}
+                        >
+                          <option value="IBM Plex Mono">IBM Plex Mono (Default)</option>
+                          <option value="Fira Code" style={{ fontFamily: "Fira Code, monospace" }}>Fira Code (code = 1)</option>
+                          <option value="JetBrains Mono" style={{ fontFamily: "JetBrains Mono, monospace" }}>JetBrains Mono (code = 1)</option>
+                          <option value="Courier New" style={{ fontFamily: "Courier New, monospace" }}>Courier New</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <span style={{ font: "var(--text-label)" }}>{t("settings.importGoogleFont") || "Import Google Font"}</span>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input
+                          type="text"
+                          id="custom-google-font-input"
+                          placeholder="e.g. Poppins, Playfair Display"
+                          style={{
+                            flex: 1,
+                            background: "var(--bg-1)",
+                            border: "1px solid var(--border-3)",
+                            padding: "8px 12px",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--fg-1)",
+                            font: "inherit"
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="btn primary sm"
+                          onClick={() => {
+                            const input = document.getElementById("custom-google-font-input") as HTMLInputElement;
+                            if (input && input.value.trim()) {
+                              const fontName = input.value.trim();
+                              localStorage.setItem("selected-font-sans", fontName);
+                              window.dispatchEvent(new Event("storage"));
+                              showMsg(t("settings.fontImported") || `Imported & applied ${fontName}`);
+                              input.value = "";
+                            }
+                          }}
+                        >
+                          {t("common.apply") || "Apply"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="section" style={{ marginTop: 24 }}>
+                  <span className="sec-label">{t("settings.budgetTitle") || "Meters & Budgeting"}</span>
+                  <div className="panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div className="fl">
+                        <div className="fn">{t("settings.monthlyBudget") || "Monthly API Cost Limit"}</div>
+                        <div className="fd">{t("settings.monthlyBudgetDesc") || "Prevent running agents if spending exceeds this limit."}</div>
+                      </div>
+                      <select
+                        value={localStorage.getItem("aura-monthly-budget") || "unlimited"}
+                        onChange={(e) => {
+                          localStorage.setItem("aura-monthly-budget", e.target.value);
+                          showMsg(t("settings.budgetUpdated") || "Budget updated successfully");
+                        }}
+                        style={{
+                          background: "var(--bg-1)",
+                          border: "1px solid var(--border-3)",
+                          padding: "8px 12px",
+                          borderRadius: "var(--r-sm)",
+                          color: "var(--fg-1)",
+                          font: "inherit"
+                        }}
+                      >
+                        <option value="unlimited">{t("settings.budgetUnlimited") || "No Limit"}</option>
+                        <option value="1.00">$1.00</option>
+                        <option value="5.00">$5.00</option>
+                        <option value="10.00">$10.00</option>
+                        <option value="25.00">$25.00</option>
+                        <option value="50.00">$50.00</option>
+                        <option value="100.00">$100.00</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </>

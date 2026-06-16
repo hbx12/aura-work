@@ -1058,6 +1058,16 @@ pub fn load_aura_config(
     (mcp_servers, project_settings)
 }
 
+#[tauri::command]
+pub fn save_text_file(path: String, content: String) -> Result<(), String> {
+    fs::write(&path, content).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn read_text_file(path: String) -> Result<String, String> {
+    fs::read_to_string(&path).map_err(|e| e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

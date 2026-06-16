@@ -91,6 +91,7 @@ export type MessageKey =
   | "settings.pet"
   | "settings.petDesc"
   | "common.save"
+  | "common.apply"
   | "common.loading"
   | "task.welcome.subtitle"
   | "task.sidecar.ready"
@@ -156,6 +157,23 @@ export type MessageKey =
   | "settings.themeCoffee"
   | "settings.themeOcean"
   | "settings.themeLuxury"
+  | "settings.themeEmeraldLuxury"
+  | "settings.themeRoseLuxury"
+  | "settings.themeVelvetLuxury"
+  | "settings.themeBronzeLuxury"
+  | "settings.themePlatinumLuxury"
+  | "settings.themeCrimsonLuxury"
+  | "settings.fontsTitle"
+  | "settings.uiFont"
+  | "settings.codeFont"
+  | "settings.importGoogleFont"
+  | "settings.fontImported"
+  | "settings.budgetTitle"
+  | "settings.monthlyBudget"
+  | "settings.monthlyBudgetDesc"
+  | "settings.budgetUnlimited"
+  | "settings.budgetUpdated"
+  | "settings.ideConnected"
   | "settings.themeUpdated"
   | "settings.vm"
   | "settings.vmStart"
@@ -492,6 +510,7 @@ const en: MessageCatalog = {
   "settings.pet": "Desktop Pet",
   "settings.petDesc": "Choose and customize your interactive companion.",
   "common.save": "Save",
+  "common.apply": "Apply",
   "common.loading": "Loading…",
   "task.welcome.subtitle": "What would you like to work on?",
   "task.sidecar.ready": "Sidecar ready · v1.0.0",
@@ -558,6 +577,23 @@ const en: MessageCatalog = {
   "settings.themeCoffee": "Coffee",
   "settings.themeOcean": "Ocean",
   "settings.themeLuxury": "Aura Luxury",
+  "settings.themeEmeraldLuxury": "Royal Emerald",
+  "settings.themeRoseLuxury": "Rose Quartz",
+  "settings.themeVelvetLuxury": "Midnight Velvet",
+  "settings.themeBronzeLuxury": "Bronze & Copper",
+  "settings.themePlatinumLuxury": "Silver Platinum",
+  "settings.themeCrimsonLuxury": "Imperial Crimson",
+  "settings.fontsTitle": "Fonts & Typography",
+  "settings.uiFont": "UI Font Family (Sans)",
+  "settings.codeFont": "Code Font Family (Mono)",
+  "settings.importGoogleFont": "Import Google Font",
+  "settings.fontImported": "Imported & applied font",
+  "settings.budgetTitle": "Meters & Budgeting",
+  "settings.monthlyBudget": "Monthly API Cost Limit",
+  "settings.monthlyBudgetDesc": "Prevent running agents if spending exceeds this limit.",
+  "settings.budgetUnlimited": "No Limit",
+  "settings.budgetUpdated": "Budget updated successfully",
+  "settings.ideConnected": "VS Code Connected",
   "settings.themeUpdated": "Theme updated.",
   "settings.vm": "Linux workspace (VM)",
   "settings.vmStart": "Start workspace",
@@ -906,6 +942,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.pet": "الحيوان الأليف لسطح المكتب",
     "settings.petDesc": "اختر رفيقك التفاعلي لسطح المكتب وقم بتخصيصه.",
     "common.save": "حفظ",
+    "common.apply": "تطبيق",
     "common.loading": "جارٍ التحميل…",
     "common.cancel": "إلغاء",
     "common.running": "يعمل",
@@ -977,6 +1014,23 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.themeCoffee": "قهوة",
     "settings.themeOcean": "محيط",
     "settings.themeLuxury": "أورا الفخم",
+    "settings.themeEmeraldLuxury": "الزمرد الملكي",
+    "settings.themeRoseLuxury": "الكوارتز الوردي",
+    "settings.themeVelvetLuxury": "المخمل الليلي",
+    "settings.themeBronzeLuxury": "البرونز والنحاس",
+    "settings.themePlatinumLuxury": "البلاتين الفضي",
+    "settings.themeCrimsonLuxury": "القرمزي الإمبراطوري",
+    "settings.fontsTitle": "الخطوط وتنسيق النصوص",
+    "settings.uiFont": "خط واجهة المستخدم (Sans)",
+    "settings.codeFont": "خط برمجية الأكواد (Mono)",
+    "settings.importGoogleFont": "استيراد خط من Google Fonts",
+    "settings.fontImported": "تم استيراد وتطبيق الخط",
+    "settings.budgetTitle": "العدادات والميزانية",
+    "settings.monthlyBudget": "الحد الشهري لتكلفة الملحقات والـ API",
+    "settings.monthlyBudgetDesc": "منع تشغيل الوكلاء إذا تجاوز الإنفاق هذا الحد.",
+    "settings.budgetUnlimited": "بدون حد أقصى",
+    "settings.budgetUpdated": "تم تحديث الميزانية بنجاح",
+    "settings.ideConnected": "تم ربط VS Code بنجاح",
     "settings.themeUpdated": "تم تحديث الثيم.",
     "settings.vm": "مساحة Linux (VM)",
     "settings.vmStart": "تشغيل مساحة Linux",

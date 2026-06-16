@@ -562,6 +562,48 @@
   --preview-accent: #dfb15b;
 }
 
+.theme-preview[data-preview-theme="emerald-luxury"] {
+  --preview-base: #05120d;
+  --preview-panel: #0a1c15;
+  --preview-muted: #1c3c31;
+  --preview-accent: #d4af37;
+}
+
+.theme-preview[data-preview-theme="rose-luxury"] {
+  --preview-base: #130e10;
+  --preview-panel: #1a1316;
+  --preview-muted: #3a2c33;
+  --preview-accent: #e6c280;
+}
+
+.theme-preview[data-preview-theme="velvet-luxury"] {
+  --preview-base: #0a0614;
+  --preview-panel: #100b20;
+  --preview-muted: #2b2348;
+  --preview-accent: #ffd700;
+}
+
+.theme-preview[data-preview-theme="bronze-luxury"] {
+  --preview-base: #100d0b;
+  --preview-panel: #181310;
+  --preview-muted: #362c26;
+  --preview-accent: #d27d2d;
+}
+
+.theme-preview[data-preview-theme="platinum-luxury"] {
+  --preview-base: #0e1013;
+  --preview-panel: #14171d;
+  --preview-muted: #2e3540;
+  --preview-accent: #e5e5e5;
+}
+
+.theme-preview[data-preview-theme="crimson-luxury"] {
+  --preview-base: #110505;
+  --preview-panel: #1b0a0a;
+  --preview-muted: #3e1d1d;
+  --preview-accent: #dfb15b;
+}
+
 .theme-name {
   font: var(--text-label);
   color: var(--fg-1);
