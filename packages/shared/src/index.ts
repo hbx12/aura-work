@@ -9,6 +9,16 @@ export type ProviderId =
   | "qwen"
   | "lmstudio";
 
+export {
+  DEFAULT_JSON_BODY_LIMIT_BYTES,
+  SIDECAR_AUTH_ENV,
+  isSidecarAuthorized,
+  loadSidecarToken,
+  readJsonBody,
+  rejectUnauthorized,
+  requireSidecarAuth,
+} from "./sidecar-auth.js";
+
 export type RoutingPolicy =
   | "quality-first"
   | "cost-first"
