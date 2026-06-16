@@ -627,7 +627,11 @@ export function SettingsPage({
                         onSelect={(id) => {
                           localStorage.setItem("selected-font-sans", id);
                           setActiveSans(id);
-                          window.dispatchEvent(new Event("storage"));
+                          window.dispatchEvent(new StorageEvent("storage", {
+                            key: "selected-font-sans",
+                            newValue: id,
+                            storageArea: localStorage
+                          }));
                         }}
                       />
                     </div>
@@ -643,7 +647,11 @@ export function SettingsPage({
                         onSelect={(id) => {
                           localStorage.setItem("selected-font-mono", id);
                           setActiveMono(id);
-                          window.dispatchEvent(new Event("storage"));
+                          window.dispatchEvent(new StorageEvent("storage", {
+                            key: "selected-font-mono",
+                            newValue: id,
+                            storageArea: localStorage
+                          }));
                         }}
                         isMono={true}
                       />
@@ -679,7 +687,11 @@ export function SettingsPage({
                               const fontName = input.value.trim();
                               localStorage.setItem("selected-font-sans", fontName);
                               setActiveSans(fontName);
-                              window.dispatchEvent(new Event("storage"));
+                              window.dispatchEvent(new StorageEvent("storage", {
+                                key: "selected-font-sans",
+                                newValue: fontName,
+                                storageArea: localStorage
+                              }));
                               showMsg(t("settings.fontImported") || `Imported & applied ${fontName}`);
                               input.value = "";
                             }
