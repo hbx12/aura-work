@@ -11,6 +11,9 @@
     "dev": "tsc && node dist/index.js",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@aura-os/shared": "*"
+  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "~5.8.3",

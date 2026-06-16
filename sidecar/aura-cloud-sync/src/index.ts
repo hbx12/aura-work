@@ -2,8 +2,8 @@
  * Aura OS Cloud Sync Helper — Phase 7: E2EE sync client + dispatch relay
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { createServer, type ServerResponse } from "node:http";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 import {
   ackDispatch,
   checkCloudHealth,
@@ -27,13 +27,6 @@ let pendingDispatch: { id: string; sourceDeviceId: string; ciphertext: string; n
 let heartbeatTimer: ReturnType<typeof setInterval> | undefined;
 let dispatchTimer: ReturnType<typeof setInterval> | undefined;
 let lastPullSince: string | undefined;
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? (JSON.parse(raw) as T) : ({} as T);
-}
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
@@ -135,7 +128,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/start") {
-      const body = await parseJson<CloudSyncConfig>(req);
+      const body = await readJsonBody<CloudSyncConfig>(req, { allowEmpty: true });
       if (!body.serverUrl || !body.accessToken || !body.accountId || !body.deviceId) {
         return json(res, 400, { error: "serverUrl, accessToken, accountId, deviceId required" });
       }
@@ -149,7 +142,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (method === "POST" && url === "/config") {
-      const body = await parseJson<CloudSyncConfig>(req);
+      const body = await readJsonBody<CloudSyncConfig>(req, { allowEmpty: true });
       if (!body.serverUrl || !body.accessToken || !body.accountId || !body.deviceId) {
         return json(res, 400, { error: "Invalid config" });
       }
@@ -163,7 +156,7 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/sync/push") {
       if (!config) return json(res, 503, { error: "Cloud sync not configured" });
-      const body = await parseJson<{ envelopes: EncryptedSyncEnvelope[] }>(req);
+      const body = await readJsonBody<{ envelopes: EncryptedSyncEnvelope[] }>(req);
       const result = await pushEnvelopes(config, body.envelopes ?? []);
       lastSyncPushCount = result.saved.length;
       lastSyncAt = new Date().toISOString();
@@ -172,7 +165,7 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/sync/pull") {
       if (!config) return json(res, 503, { error: "Cloud sync not configured" });
-      const body = await parseJson<{ since?: string }>(req);
+      const body = await readJsonBody<{ since?: string }>(req, { allowEmpty: true });
       const since = body.since ?? lastPullSince;
       const result = await pullEnvelopes(config, since);
       lastSyncPullCount = result.envelopes.length;
@@ -190,7 +183,7 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url.startsWith("/dispatch/") && url.endsWith("/ack")) {
       if (!config) return json(res, 503, { error: "Cloud sync not configured" });
       const dispatchId = url.slice("/dispatch/".length, -"/ack".length);
-      const body = await parseJson<{
+      const body = await readJsonBody<{
         status: string;
         failureReason?: string;
         responseCiphertext?: string;
@@ -203,7 +196,7 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/dispatch/request") {
       if (!config) return json(res, 503, { error: "Cloud sync not configured" });
-      const body = await parseJson<{
+      const body = await readJsonBody<{
         sourceDeviceId: string;
         targetDeviceId: string;
         ciphertext: string;

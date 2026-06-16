@@ -2,8 +2,8 @@
  * Aura OS Browser Helper — Phase 5: Chromium automation + per-project profiles
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { createServer, type ServerResponse } from "node:http";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 import { detectBackend, type BackendInfo } from "./backend.js";
 import { browsePage } from "./browse.js";
 import { clearProfiles, listProfiles } from "./profiles.js";
@@ -16,13 +16,6 @@ let backend: BackendInfo | null = null;
 let browserState: BrowserState = "stopped";
 let startedAt: string | undefined;
 let lastError: string | undefined;
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return JSON.parse(raw) as T;
-}
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
@@ -86,7 +79,7 @@ const server = createServer(async (req, res) => {
       if (browserState !== "running") {
         return json(res, 409, { error: "Browser helper is not running. POST /start first." });
       }
-      const body = await parseJson<ProfileRequest>(req);
+      const body = await readJsonBody<ProfileRequest>(req);
       const { getOrCreateProfile } = await import("./profiles.js");
       const profile = getOrCreateProfile(body.projectId);
       return json(res, 200, profile);
@@ -99,7 +92,7 @@ const server = createServer(async (req, res) => {
           remediation: "Run: npm run browser-helper",
         });
       }
-      const body = await parseJson<BrowseRequest>(req);
+      const body = await readJsonBody<BrowseRequest>(req);
       try {
         const result = await browsePage(backend!, body);
         return json(res, 200, result);

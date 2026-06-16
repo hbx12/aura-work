@@ -23,6 +23,7 @@ const DEFAULT_EXCLUDES: &[&str] = &[
 ];
 
 const SECRET_EXCLUDES: &[&str] = &[".env", ".env.local", ".env.production", "id_rsa", "id_ed25519"];
+const MAX_TEXT_FILE_BYTES: usize = 2_000_000;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -213,7 +214,7 @@ pub fn read_file_internal(root: &str, rel: &str) -> Result<String, String> {
         return Err("Path is a directory.".into());
     }
     let meta = fs::metadata(&path).map_err(|e| e.to_string())?;
-    if meta.len() > 2_000_000 {
+    if meta.len() > MAX_TEXT_FILE_BYTES as u64 {
         return Err("File too large to read (>2MB).".into());
     }
     fs::read_to_string(&path).map_err(|e| e.to_string())
@@ -261,6 +262,9 @@ pub fn read_file_window_internal(
 pub fn write_file_internal(root: &str, rel: &str, content: &str) -> Result<(), String> {
     if is_excluded(rel, false) {
         return Err(format!("Path excluded by policy: {rel}"));
+    }
+    if content.len() > MAX_TEXT_FILE_BYTES {
+        return Err("File too large to write (>2MB).".into());
     }
     let path = resolve_under_root(root, rel, true)?;
     if let Some(parent) = path.parent() {
@@ -508,8 +512,13 @@ pub fn write_project_file_inner(
     let root = project_folder(&db, &input.project_id)?;
     let mode = project_permission_mode(&db, &input.project_id)?;
     let rel = normalize_rel(&input.file_path);
+    let manual_user_write = input.skip_permission.unwrap_or(false) && input.task_id.is_none();
 
-    if !input.skip_permission.unwrap_or(false) {
+    if input.skip_permission.unwrap_or(false) && input.task_id.is_some() {
+        return Err("skipPermission is only allowed for direct user file saves.".into());
+    }
+
+    if !manual_user_write {
         check_task_permission(
             db,
             &input.project_id,
@@ -528,7 +537,7 @@ pub fn write_project_file_inner(
     let diff = simple_diff(&original, &input.content);
 
     let auto_write = scheduled_auto_write_allowed(db, input.task_id.as_deref(), &rel);
-    if mode == "ask-first" && !auto_write && !input.skip_permission.unwrap_or(false) {
+    if mode == "ask-first" && !auto_write && !manual_user_write {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
@@ -947,6 +956,17 @@ mod tests {
         let err = grep_files_internal(root.to_str().unwrap(), "(", None, None, 10).unwrap_err();
 
         assert!(err.contains("Invalid regex pattern"));
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn write_file_rejects_large_content() {
+        let root = temp_root("large-write");
+        let oversized = "x".repeat(MAX_TEXT_FILE_BYTES + 1);
+
+        let err = write_file_internal(root.to_str().unwrap(), "large.txt", &oversized).unwrap_err();
+
+        assert!(err.contains("File too large to write"));
         let _ = fs::remove_dir_all(root);
     }
 }

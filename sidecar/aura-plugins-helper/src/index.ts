@@ -2,8 +2,8 @@
  * Aura OS Plugins Helper — Phase 6: Aura plugins, MCP servers, marketplace
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { createServer, type ServerResponse } from "node:http";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 import { reloadPlugins, listPluginTools, callPluginTool, pluginCount } from "./loader.js";
 import {
   reloadMcp,
@@ -32,13 +32,6 @@ let currentConfig: HelperConfig = {
   mcpServers: [],
   projectMcpSettings: [],
 };
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return JSON.parse(raw) as T;
-}
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
@@ -107,7 +100,7 @@ const server = createServer(async (req, res) => {
       if (helperState !== "running") {
         return json(res, 409, { error: "Plugins helper is not running. POST /start first." });
       }
-      const body = await parseJson<HelperConfig>(req);
+      const body = await readJsonBody<HelperConfig>(req);
       try {
         await applyConfig(body);
         return json(res, 200, statusPayload());
@@ -132,7 +125,7 @@ const server = createServer(async (req, res) => {
           remediation: "Run: npm run plugins-helper",
         });
       }
-      const body = await parseJson<PluginCallRequest>(req);
+      const body = await readJsonBody<PluginCallRequest>(req);
       const result = await callPluginTool(body);
       return json(res, result.ok ? 200 : 422, result);
     }
@@ -144,13 +137,13 @@ const server = createServer(async (req, res) => {
           remediation: "Run: npm run plugins-helper",
         });
       }
-      const body = await parseJson<McpCallRequest>(req);
+      const body = await readJsonBody<McpCallRequest>(req);
       const result = await callMcpTool(body);
       return json(res, result.ok ? 200 : 422, result);
     }
 
     if (method === "POST" && url === "/marketplace/fetch") {
-      const body = (await parseJson<{ registryUrl?: string }>(req).catch(() => ({}))) as {
+      const body = (await readJsonBody<{ registryUrl?: string }>(req, { allowEmpty: true }).catch(() => ({}))) as {
         registryUrl?: string;
       };
       try {

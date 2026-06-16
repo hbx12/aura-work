@@ -43,6 +43,14 @@ pub fn categorize_command(command: &str) -> (CommandCategory, &'static str) {
         return (CommandCategory::Destructive, "critical");
     }
 
+    if has_shell_write_operator(&lower) {
+        return (CommandCategory::Unknown, "high");
+    }
+
+    if has_shell_control_operator(&lower) {
+        return (CommandCategory::Unknown, "medium");
+    }
+
     let first = trimmed.split_whitespace().next().unwrap_or("").to_lowercase();
 
     match first.as_str() {
@@ -75,9 +83,29 @@ pub fn categorize_command(command: &str) -> (CommandCategory, &'static str) {
         "rm" | "del" | "rmdir" | "format" | "mkfs" | "dd" => {
             (CommandCategory::Destructive, "critical")
         }
+        "cp" | "copy" | "mv" | "move" | "mkdir" | "touch" | "tee" | "set-content"
+        | "add-content" | "out-file" | "new-item" | "remove-item" => {
+            (CommandCategory::Unknown, "high")
+        }
         "curl" | "wget" | "ssh" | "scp" => (CommandCategory::Unknown, "medium"),
         _ => (CommandCategory::Unknown, "medium"),
     }
+}
+
+fn has_shell_control_operator(lower: &str) -> bool {
+    lower.contains("&&") || lower.contains("||") || lower.contains(';') || lower.contains('|')
+}
+
+fn has_shell_write_operator(lower: &str) -> bool {
+    lower.contains(" >")
+        || lower.contains("> ")
+        || lower.contains(">>")
+        || lower.contains(" 1>")
+        || lower.contains(" 2>")
+        || lower.contains("| tee")
+        || lower.contains(" out-file")
+        || lower.contains(" set-content")
+        || lower.contains(" add-content")
 }
 
 fn categorize_git(lower: &str) -> (CommandCategory, &'static str) {
@@ -111,7 +139,7 @@ fn categorize_pkg_manager(lower: &str) -> (CommandCategory, &'static str) {
 pub fn always_requires_approval(category: CommandCategory) -> bool {
     matches!(
         category,
-        CommandCategory::Install | CommandCategory::Destructive
+        CommandCategory::Install | CommandCategory::Destructive | CommandCategory::Unknown
     )
 }
 
@@ -315,6 +343,17 @@ mod tests {
     #[test]
     fn install_commands() {
         assert_eq!(categorize_command("npm install lodash").0, CommandCategory::Install);
+    }
+
+    #[test]
+    fn shell_write_or_chained_commands_require_approval() {
+        let redirect = categorize_command("echo changed > src/main.rs");
+        assert_eq!(redirect.0, CommandCategory::Unknown);
+        assert!(always_requires_approval(redirect.0));
+
+        let chained = categorize_command("cat package.json && npm install");
+        assert_eq!(chained.0, CommandCategory::Unknown);
+        assert!(always_requires_approval(chained.0));
     }
 
     #[test]

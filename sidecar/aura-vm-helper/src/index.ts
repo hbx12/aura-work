@@ -2,8 +2,8 @@
  * Aura OS VM Helper — Phase 4: Linux workspace lifecycle + shell execution
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { loadSidecarToken, requireSidecarAuth } from "@aura-os/shared";
+import { createServer, type ServerResponse } from "node:http";
+import { loadSidecarToken, readJsonBody, requireSidecarAuth } from "@aura-os/shared";
 import { detectBackend, type BackendInfo } from "./backend.js";
 import { execCommand } from "./exec.js";
 import { clearMounts, listMounts, mountProject } from "./mounts.js";
@@ -18,13 +18,6 @@ let backend: BackendInfo | null = null;
 let vmState: VmState = "stopped";
 let startedAt: string | undefined;
 let lastError: string | undefined;
-
-async function parseJson<T>(req: IncomingMessage): Promise<T> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
-  const raw = Buffer.concat(chunks).toString("utf8");
-  return JSON.parse(raw) as T;
-}
 
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
@@ -100,7 +93,7 @@ const server = createServer(async (req, res) => {
       if (vmState !== "running") {
         return json(res, 409, { error: "VM is not running. POST /start first." });
       }
-      const body = await parseJson<MountRequest>(req);
+      const body = await readJsonBody<MountRequest>(req);
       const mount = mountProject(body);
       return json(res, 200, mount);
     }
@@ -112,7 +105,7 @@ const server = createServer(async (req, res) => {
           remediation: "Run: npm run vm-helper",
         });
       }
-      const body = await parseJson<ExecRequest>(req);
+      const body = await readJsonBody<ExecRequest>(req);
       try {
         const result = await execCommand(backend!, body);
         return json(res, 200, result);

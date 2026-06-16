@@ -11,6 +11,7 @@
     "dev": "tsc && node dist/index.js"
   },
   "dependencies": {
+    "@aura-os/shared": "*",
     "puppeteer-core": "^24.8.2"
   },
   "devDependencies": {
