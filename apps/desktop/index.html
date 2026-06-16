@@ -5,6 +5,21 @@
     <link rel="icon" type="image/png" href="/aura-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aura OS</title>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'pet') {
+        document.documentElement.classList.add('pet-window-mode');
+      }
+    </script>
+    <style>
+      html.pet-window-mode,
+      html.pet-window-mode body,
+      html.pet-window-mode #root,
+      html.pet-window-mode #boot-loader {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+    </style>
   </head>
 
   <body>
