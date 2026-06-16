@@ -528,6 +528,14 @@ pub async fn run_chat(
     if input.message.trim().is_empty() {
         return Err("Message is required.".into());
     }
+    if input
+        .project_id
+        .as_deref()
+        .is_some_and(|project_id| !project_id.trim().is_empty())
+    {
+        return crate::tasks::run_workspace_chat_agent(&db, &vault, &input).await;
+    }
+
     let routing_policy = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         conn.query_row(

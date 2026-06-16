@@ -233,6 +233,19 @@ export function useTasks(projectId: string | null) {
       setRunning(true);
       setError(null);
       try {
+        const pending = pendingPermissions.find((permission) => permission.id === permissionId);
+        if (pending && !pending.taskId) {
+          await invoke("resolve_workspace_permission", {
+            permissionId,
+            decision,
+          });
+          const perms = await invoke<PermissionRequest[]>("list_pending_permissions", {
+            projectId,
+            taskId: null,
+          });
+          setPendingPermissions(perms);
+          return null;
+        }
         const task = await invoke<TaskRecord>("resume_after_permission", {
           permissionId,
           decision,
@@ -249,7 +262,7 @@ export function useTasks(projectId: string | null) {
         setRunning(false);
       }
     },
-    [runLoop],
+    [pendingPermissions, projectId, runLoop],
   );
 
   const sendTaskMessage = useCallback(

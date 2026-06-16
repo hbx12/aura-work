@@ -295,6 +295,7 @@ export type MessageKey =
   | "chat.placeholder"
   | "chat.send"
   | "chat.runTask"
+  | "chat.startTask"
   | "chat.autoModel"
   | "chat.modeAsk"
   | "chat.modeAct"
@@ -704,6 +705,7 @@ const en: MessageCatalog = {
   "chat.placeholder": "Ask Aura anything…",
   "chat.send": "Send",
   "chat.runTask": "Run task",
+  "chat.startTask": "Start task",
   "chat.autoModel": "Auto (routing)",
   "chat.modeAsk": "Ask-first",
   "chat.modeAct": "Act without asking",
@@ -1108,6 +1110,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.placeholder": "اسأل Aura أي شيء…",
     "chat.send": "إرسال",
     "chat.runTask": "تشغيل مهمة",
+    "chat.startTask": "بدء مهمة",
     "chat.autoModel": "تلقائي (التوجيه)",
     "chat.modeAsk": "اسأل أولاً",
     "chat.modeAct": "نفّذ بدون سؤال",

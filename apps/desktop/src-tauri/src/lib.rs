@@ -151,6 +151,7 @@ pub fn run() {
             tasks::resume_task,
             tasks::cancel_task,
             tasks::resume_after_permission,
+            tasks::resolve_workspace_permission,
             tasks::resume_after_edit,
             tasks::send_task_message,
             vm::get_vm_status,
