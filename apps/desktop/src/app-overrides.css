@@ -869,3 +869,51 @@
   color: var(--fg-3);
   font: var(--text-mono);
 }
+
+.skill-md-preview {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: normal;
+}
+
+.skill-md-preview > * {
+  margin: 0.35rem 0;
+}
+
+.skill-md-preview h1,
+.skill-md-preview h2,
+.skill-md-preview h3,
+.skill-md-preview h4,
+.skill-md-preview h5,
+.skill-md-preview h6 {
+  color: var(--fg-1);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.skill-md-preview h1 {
+  font-size: 1rem;
+}
+
+.skill-md-preview h2,
+.skill-md-preview h3 {
+  font-size: 0.92rem;
+}
+
+.skill-md-preview p,
+.skill-md-preview li {
+  line-height: 1.55;
+}
+
+.skill-md-preview ul,
+.skill-md-preview ol {
+  padding-inline-start: 1.25rem;
+}
+
+.skill-md-preview .codeblock,
+.skill-md-preview .md-code-block {
+  margin: 0.5rem 0;
+  padding: 0.6rem;
+  max-width: 100%;
+}

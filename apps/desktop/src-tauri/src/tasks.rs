@@ -588,6 +588,14 @@ fn workspace_files_summary(db: &DbState, project_id: &str, depth: u32, limit: us
     summary
 }
 
+fn response_language_for_prompt(prompt: &str) -> &'static str {
+    if prompt.chars().any(|ch| ('\u{0600}'..='\u{06ff}').contains(&ch)) {
+        "Arabic"
+    } else {
+        "the same language as the user's latest message"
+    }
+}
+
 pub async fn advance_task_inner(
     db: &DbState,
     vault: &VaultHandle,
@@ -1533,6 +1541,7 @@ pub async fn run_workspace_chat_agent(
         let prompt = format!(
             "Workspace chat request: {}\n\nYou are running inside Aura Work for this selected project. \
              If the user asks who you are, answer as Aura Work's workspace agent. \
+             Always reply in the same language as the user's latest message. \
              Use tools whenever project files, code search, edits, commands, plugins, or MCP are needed. \
              Do not claim you cannot access files before trying the available tools.",
             input.message.trim()
@@ -1551,6 +1560,8 @@ pub async fn run_workspace_chat_agent(
                 "credentials": chat.credentials,
                 "workspaceFiles": workspace_files_summary(db, project_id, 6, 220),
                 "skills": skills_list,
+                "allowPlainText": true,
+                "responseLanguage": response_language_for_prompt(input.message.trim()),
             }),
         )
         .await?;
