@@ -885,3 +885,26 @@ fn _secret_redacted(secret: &ProviderSecret) -> serde_json::Value {
         "baseUrl": secret.base_url,
     })
 }
+
+#[tauri::command]
+pub fn get_monthly_spending(db: State<'_, DbState>) -> Result<f64, String> {
+    use chrono::{Datelike, Timelike};
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let now = chrono::Utc::now();
+    let start_of_month = now
+        .with_day(1).unwrap()
+        .with_hour(0).unwrap()
+        .with_minute(0).unwrap()
+        .with_second(0).unwrap()
+        .with_nanosecond(0).unwrap()
+        .to_rfc3339();
+
+    let mut stmt = conn.prepare(
+        "SELECT SUM(estimated_cost_usd) FROM task_usage WHERE created_at >= ?1"
+    ).map_err(|e| e.to_string())?;
+    
+    let sum: Option<f64> = stmt.query_row(params![start_of_month], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+        
+    Ok(sum.unwrap_or(0.0))
+}

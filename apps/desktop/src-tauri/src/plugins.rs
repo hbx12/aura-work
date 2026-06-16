@@ -549,7 +549,19 @@ pub struct SkillInfo {
     pub description: String,
     pub prompt: String,
     pub enabled: bool,
+    pub path: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveSkillInput {
+    pub plugin_id: String,
+    pub name: String,
+    pub description: String,
+    pub prompt: String,
+    pub path: Option<String>,
+}
+
 
 #[tauri::command]
 pub async fn create_local_skill(
@@ -672,6 +684,7 @@ fn parse_skill_file(path: &Path) -> Option<SkillInfo> {
         description,
         prompt: body_part,
         enabled: true,
+        path: Some(path.to_string_lossy().to_string()),
     })
 }
 
@@ -726,6 +739,7 @@ pub fn list_local_skills_internal(db: &DbState) -> Result<Vec<SkillInfo>, String
                             description,
                             prompt,
                             enabled,
+                            path: None,
                         });
                     }
                 }
@@ -772,6 +786,70 @@ pub fn list_local_skills_internal(db: &DbState) -> Result<Vec<SkillInfo>, String
 #[tauri::command]
 pub fn list_local_skills(db: State<'_, DbState>) -> Result<Vec<SkillInfo>, String> {
     list_local_skills_internal(&db)
+}
+
+#[tauri::command]
+pub async fn save_local_skill(
+    db: State<'_, DbState>,
+    input: SaveSkillInput,
+) -> Result<(), String> {
+    if input.plugin_id == "config_skill" {
+        // Write to SKILL.md
+        let file_path = input.path.ok_or_else(|| "Missing file path for config skill".to_string())?;
+        let path = Path::new(&file_path);
+        if !path.is_file() {
+            return Err("Skill file does not exist".to_string());
+        }
+        
+        let new_content = format!(
+            "---\nname: {}\ndescription: {}\n---\n{}",
+            input.name, input.description, input.prompt
+        );
+        fs::write(path, new_content).map_err(|e| format!("Failed to write skill file: {}", e))?;
+    } else {
+        // It's a database / plugin skill
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        
+        // Fetch the existing installed plugin info to verify and update
+        let mut stmt = conn
+            .prepare("SELECT install_path FROM installed_plugins WHERE id = ?1")
+            .map_err(|e| e.to_string())?;
+        let install_path: String = stmt
+            .query_row(params![input.plugin_id], |row| row.get(0))
+            .map_err(|e| format!("Skill not found in database: {}", e))?;
+            
+        let manifest_json = serde_json::json!({
+            "schemaVersion": "1.0",
+            "id": input.plugin_id,
+            "name": input.name,
+            "version": "1.0.0",
+            "publisher": "User",
+            "description": input.description,
+            "skills": [
+                {
+                    "name": input.name,
+                    "prompt": input.prompt
+                }
+            ]
+        });
+        
+        let manifest_str = serde_json::to_string_pretty(&manifest_json).map_err(|e| e.to_string())?;
+        
+        // Write to manifest file
+        let dest = Path::new(&install_path);
+        if dest.exists() {
+            fs::write(dest.join("aura.plugin.json"), &manifest_str).map_err(|e| format!("Failed to write manifest: {}", e))?;
+        }
+        
+        // Update database
+        conn.execute(
+            "UPDATE installed_plugins SET name = ?1, description = ?2, manifest_json = ?3 WHERE id = ?4",
+            params![input.name, input.description, manifest_str, input.plugin_id],
+        ).map_err(|e| format!("Failed to update database: {}", e))?;
+    }
+    
+    let _ = push_config_to_helper(&db).await;
+    Ok(())
 }
 
 pub static APP_DATA_DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
@@ -978,6 +1056,16 @@ pub fn load_aura_config(
     }
 
     (mcp_servers, project_settings)
+}
+
+#[tauri::command]
+pub fn save_text_file(path: String, content: String) -> Result<(), String> {
+    fs::write(&path, content).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn read_text_file(path: String) -> Result<String, String> {
+    fs::read_to_string(&path).map_err(|e| e.to_string())
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { LogicalPosition, PhysicalPosition } from "@tauri-apps/api/dpi";
+import { LogicalPosition } from "@tauri-apps/api/dpi";
 import { PetSprite } from "./PetSprites";
 
 interface PetWindowContentProps {
@@ -44,10 +44,10 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
   // Keep track of actual window position
   const positionRef = useRef({ x: 400, y: 400 });
   const targetRef = useRef({ x: 400, y: 400 });
-  const isDraggingRef = useRef<boolean>(false);
   const lastInteractionRef = useRef<number>(Date.now());
   const nextWalkTimeRef = useRef<number>(Date.now() + 3000);
   const bubbleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldSyncPositionRef = useRef<boolean>(true);
 
   // Sync state with local storage on load and on change
   useEffect(() => {
@@ -74,7 +74,7 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Force transparent backgrounds & listen to window move events
+  // Force transparent backgrounds
   useEffect(() => {
     document.documentElement.style.background = "transparent";
     document.body.style.background = "transparent";
@@ -82,24 +82,6 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
     if (root) {
       root.style.background = "transparent";
     }
-
-    let unlisten: (() => void) | undefined;
-    const listenToMove = async () => {
-      try {
-        const appWindow = getCurrentWindow() as any;
-        unlisten = await appWindow.onMoved(async () => {
-          lastInteractionRef.current = Date.now();
-          await syncPosition();
-        });
-      } catch (e) {
-        console.error("Failed to listen to window move:", e);
-      }
-    };
-    void listenToMove();
-
-    return () => {
-      if (unlisten) unlisten();
-    };
   }, []);
 
   // Sync starting position
@@ -146,24 +128,26 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
     void initWindowPosition();
   }, []);
 
-  // Smooth walking animation loop with recursive setTimeout to avoid queue buildup during native drag blocks on Windows
+  // Smooth walking animation loop with recursive setTimeout to avoid queue buildup on Windows
   useEffect(() => {
-    const speed = 1.5; // logical pixels per tick
+    const speed = 4.2; // logical pixels per tick (adjusted for 100ms interval)
     let timeoutId: NodeJS.Timeout | null = null;
     let active = true;
 
     const tick = async () => {
       if (!active) return;
-      if (isDraggingRef.current) {
-        timeoutId = setTimeout(tick, 35);
-        return;
-      }
 
       // If there was a recent user interaction (drag/click), pause walking
       if (Date.now() - lastInteractionRef.current < 6000) {
         setIsWalking(false);
-        timeoutId = setTimeout(tick, 35);
+        shouldSyncPositionRef.current = true;
+        timeoutId = setTimeout(tick, 100);
         return;
+      }
+
+      if (shouldSyncPositionRef.current) {
+        shouldSyncPositionRef.current = false;
+        await syncPosition();
       }
 
       const dx = targetRef.current.x - positionRef.current.x;
@@ -230,11 +214,11 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
       }
       
       // Schedule next tick only after current work finishes
-      timeoutId = setTimeout(tick, 35);
+      timeoutId = setTimeout(tick, 100);
     };
 
     // Start loop
-    timeoutId = setTimeout(tick, 35);
+    timeoutId = setTimeout(tick, 100);
 
     return () => {
       active = false;
@@ -265,104 +249,30 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
     setTilt({ x: 0, y: 0 });
   };
 
-  // Handle Dragging
+  // Handle Dragging using native Tauri startDragging
   const handleMouseDown = async (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    isDraggingRef.current = true;
     lastInteractionRef.current = Date.now();
     setTilt({ x: 0, y: 0 });
 
-    const appWindow = getCurrentWindow() as any;
-    const startX = e.screenX;
-    const startY = e.screenY;
-    const startPos = await appWindow.outerPosition();
-
-    let scaleFactor = 1;
     try {
-      const monitor = await appWindow.currentMonitor();
-      if (monitor) {
-        scaleFactor = monitor.scaleFactor || 1;
-      }
+      const appWindow = getCurrentWindow() as any;
+      await appWindow.startDragging();
     } catch (err) {
-      console.error("Failed to get monitor scale factor:", err);
+      console.error("Failed to start native dragging:", err);
     }
-
-    const handleMouseMove = async (moveEvent: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-      const deltaX = (moveEvent.screenX - startX) * scaleFactor;
-      const deltaY = (moveEvent.screenY - startY) * scaleFactor;
-      try {
-        await appWindow.setPosition(
-          new PhysicalPosition(
-            Math.round(startPos.x + deltaX),
-            Math.round(startPos.y + deltaY)
-          )
-        );
-      } catch (err) {
-        console.error("Drag setPosition error:", err);
-      }
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-      lastInteractionRef.current = Date.now();
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      void syncPosition();
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleTouchStart = async (e: React.TouchEvent) => {
-    isDraggingRef.current = true;
+  const handleTouchStart = async () => {
     lastInteractionRef.current = Date.now();
     setTilt({ x: 0, y: 0 });
 
-    const appWindow = getCurrentWindow() as any;
-    const touch = e.touches[0];
-    const startX = touch.screenX;
-    const startY = touch.screenY;
-    const startPos = await appWindow.outerPosition();
-
-    let scaleFactor = 1;
     try {
-      const monitor = await appWindow.currentMonitor();
-      if (monitor) {
-        scaleFactor = monitor.scaleFactor || 1;
-      }
+      const appWindow = getCurrentWindow() as any;
+      await appWindow.startDragging();
     } catch (err) {
-      console.error("Failed to get monitor scale factor for touch:", err);
+      console.error("Failed to start native dragging for touch:", err);
     }
-
-    const handleTouchMove = async (moveEvent: TouchEvent) => {
-      if (!isDraggingRef.current) return;
-      const currentTouch = moveEvent.touches[0];
-      const deltaX = (currentTouch.screenX - startX) * scaleFactor;
-      const deltaY = (currentTouch.screenY - startY) * scaleFactor;
-      try {
-        await appWindow.setPosition(
-          new PhysicalPosition(
-            Math.round(startPos.x + deltaX),
-            Math.round(startPos.y + deltaY)
-          )
-        );
-      } catch (err) {
-        console.error("Touch drag setPosition error:", err);
-      }
-    };
-
-    const handleTouchEnd = () => {
-      isDraggingRef.current = false;
-      lastInteractionRef.current = Date.now();
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-      void syncPosition();
-    };
-
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd);
   };
 
   return (

@@ -900,6 +900,9 @@ pub async fn start_provider_oauth_login(
     db: State<'_, DbState>,
     provider_id: String,
 ) -> Result<serde_json::Value, String> {
+    if provider_id != "openai" {
+        return Err("Account sign-in is only supported for OpenAI ChatGPT.".to_string());
+    }
     let result = begin_provider_oauth_login(&vault, &db, &provider_id).await?;
     if result.get("status").and_then(|v| v.as_str()) == Some("started") {
         let url = result
@@ -917,6 +920,9 @@ pub async fn poll_provider_oauth_login(
     vault: State<'_, VaultHandle>,
     provider_id: String,
 ) -> Result<serde_json::Value, String> {
+    if provider_id != "openai" {
+        return Err("Account sign-in is only supported for OpenAI ChatGPT.".to_string());
+    }
     poll_provider_oauth_login_helper(&db, &vault, &provider_id).await
 }
 

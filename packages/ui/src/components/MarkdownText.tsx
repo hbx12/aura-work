@@ -1,4 +1,44 @@
-import type { ElementType, ReactNode } from "react";
+import { useState, type ElementType, type ReactNode } from "react";
+
+function CodeBlockComponent({ content, lang }: { content: string; lang: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    void navigator.clipboard.writeText(content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <pre className="codeblock md-code-block" style={{ position: "relative" }}>
+      {lang && <span className="md-code-lang">{lang}</span>}
+      <button
+        type="button"
+        className="chip-btn copy-btn"
+        style={{
+          position: "absolute",
+          top: 6,
+          right: 6,
+          background: "var(--bg-3)",
+          border: "1px solid var(--border-3)",
+          padding: "3.5px 8px",
+          fontSize: "10.5px",
+          color: "var(--fg-2)",
+          cursor: "pointer",
+          borderRadius: "var(--r-xs, 4px)",
+          lineHeight: "1.2",
+          zIndex: 10,
+          transition: "opacity 0.2s",
+        }}
+        onClick={handleCopy}
+      >
+        {copied ? "Copied!" : "Copy"}
+      </button>
+      <code>{content}</code>
+    </pre>
+  );
+}
+
 
 type Block =
   | { type: "blockquote"; lines: string[] }
@@ -241,12 +281,7 @@ function renderBlock(block: Block, index: number): ReactNode {
         </blockquote>
       );
     case "code":
-      return (
-        <pre key={index} className="codeblock md-code-block">
-          {block.lang && <span className="md-code-lang">{block.lang}</span>}
-          <code>{block.content}</code>
-        </pre>
-      );
+      return <CodeBlockComponent key={index} content={block.content} lang={block.lang} />;
     case "heading": {
       const Tag = `h${block.level}` as ElementType;
       return <Tag key={index}>{parseInline(block.text, `h-${index}`)}</Tag>;

@@ -16,7 +16,11 @@
 
     "dialog:default",
 
-    "updater:default"
+    "updater:default",
+
+    "core:window:default",
+
+    "core:window:allow-start-dragging"
 
   ]
 
