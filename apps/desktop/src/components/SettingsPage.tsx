@@ -38,11 +38,31 @@ const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; prev
   { id: "bronze-luxury", labelKey: "settings.themeBronzeLuxury", preview: "bronze-luxury" },
   { id: "platinum-luxury", labelKey: "settings.themePlatinumLuxury", preview: "platinum-luxury" },
   { id: "crimson-luxury", labelKey: "settings.themeCrimsonLuxury", preview: "crimson-luxury" },
+  { id: "sapphire-luxury", labelKey: "settings.themeSapphireLuxury", preview: "sapphire-luxury" },
+  { id: "amethyst-luxury", labelKey: "settings.themeAmethystLuxury", preview: "amethyst-luxury" },
+  { id: "amber-luxury", labelKey: "settings.themeAmberLuxury", preview: "amber-luxury" },
+];
+
+const SANS_FONTS = [
+  { id: "IBM Plex Sans", name: "IBM Plex Sans", preview: "Ab" },
+  { id: "Inter", name: "Inter", preview: "Ab" },
+  { id: "Roboto", name: "Roboto", preview: "Ab" },
+  { id: "Outfit", name: "Outfit", preview: "Ab" },
+  { id: "Cairo", name: "Cairo (القاهرة)", preview: "أب" },
+  { id: "Tajawal", name: "Tajawal (تجوال)", preview: "أب" },
+  { id: "Almarai", name: "Almarai (المراعي)", preview: "أب" },
+];
+
+const MONO_FONTS = [
+  { id: "IBM Plex Mono", name: "IBM Plex Mono", preview: "code" },
+  { id: "Fira Code", name: "Fira Code", preview: "code" },
+  { id: "JetBrains Mono", name: "JetBrains Mono", preview: "code" },
+  { id: "Courier New", name: "Courier New", preview: "code" },
 ];
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
   { group: "Preferences" },
-  { id: "general", icon: "languages", labelKey: "settings.language" },
+  { id: "general", icon: "settings", labelKey: "settings.general" },
   { id: "pet", icon: "sparkles", labelKey: "settings.pet" },
   { id: "vault", icon: "key-round", labelKey: "settings.vault" },
   { group: "Runtime & connections" },
@@ -189,6 +209,170 @@ const PETS_LIST = [
   { id: "tiger", nameEn: "Tiger", nameAr: "النمر", descEn: "Little orange tiger cub", descAr: "شبل نمر برتقالي صغير" }
 ];
 
+interface FontOption {
+  id: string;
+  name: string;
+  preview: string;
+}
+
+function CustomFontDropdown({
+  options,
+  selectedId,
+  onSelect,
+  isMono = false
+}: {
+  options: FontOption[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  isMono?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const selectedOption = options.find(o => o.id === selectedId) || { id: selectedId, name: selectedId, preview: isMono ? "code" : "Ab" };
+
+  return (
+    <div className="custom-select-container" style={{ position: "relative", width: "100%" }}>
+      {/* Dropdown Button */}
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "var(--bg-inset)",
+          border: "1px solid var(--border-3)",
+          borderRadius: "8px",
+          padding: "10px 14px",
+          cursor: "pointer",
+          color: "var(--fg-1)",
+          fontFamily: selectedOption.id,
+          fontSize: "14px",
+          transition: "all 0.2s ease",
+          userSelect: "none"
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {/* Small visual glyph block */}
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "4px",
+              background: "var(--bg-3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: isMono ? "12px" : "15px",
+              fontWeight: "bold",
+              color: "var(--accent)",
+              fontFamily: selectedOption.id
+            }}
+          >
+            {selectedOption.preview}
+          </div>
+          <span style={{ fontWeight: 500 }}>{selectedOption.name}</span>
+        </div>
+        <div style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s ease", display: "flex", alignItems: "center" }}>
+          <Icon name="chevron-down" size={16} />
+        </div>
+      </div>
+
+      {/* Dropdown Options Menu */}
+      {isOpen && (
+        <>
+          <div
+            onClick={() => setIsOpen(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 999,
+              background: "transparent"
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              left: 0,
+              right: 0,
+              background: "var(--bg-1)",
+              border: "1px solid var(--border-2)",
+              borderRadius: "8px",
+              boxShadow: "var(--shadow-2)",
+              zIndex: 1000,
+              maxHeight: "260px",
+              overflowY: "auto",
+              padding: "4px"
+            }}
+          >
+            {options.map((option) => {
+              const isSelected = option.id === selectedId;
+              return (
+                <div
+                  key={option.id}
+                  onClick={() => {
+                    onSelect(option.id);
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    background: isSelected ? "var(--bg-active)" : "transparent",
+                    transition: "background 0.15s ease",
+                    fontFamily: option.id,
+                    userSelect: "none"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "var(--bg-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "4px",
+                        background: "var(--bg-3)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: isMono ? "12px" : "15px",
+                        fontWeight: "bold",
+                        color: isSelected ? "var(--accent)" : "var(--fg-2)",
+                        fontFamily: option.id
+                      }}
+                    >
+                      {option.preview}
+                    </div>
+                    <span style={{ fontSize: "14px", fontWeight: isSelected ? 600 : 400, color: isSelected ? "var(--accent)" : "var(--fg-1)" }}>
+                      {option.name}
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <div style={{ color: "var(--accent)", display: "flex", alignItems: "center" }}>
+                      <Icon name="check" size={16} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function SettingsPage({
   vaultStatus,
   vmStatus,
@@ -248,6 +432,8 @@ export function SettingsPage({
   onTabChange,
 }: SettingsPageProps) {
   const [exportPassword, setExportPassword] = useState("");
+  const [activeSans, setActiveSans] = useState(() => localStorage.getItem("selected-font-sans") || "IBM Plex Sans");
+  const [activeMono, setActiveMono] = useState(() => localStorage.getItem("selected-font-mono") || "IBM Plex Mono");
   const [importPassword, setImportPassword] = useState("");
   const [importData, setImportData] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -290,7 +476,7 @@ export function SettingsPage({
 
             {tab === "general" && (
               <>
-                <div className="s-title">{t("settings.language")}</div>
+                <div className="s-title">{t("settings.general") || "General"}</div>
                 <p className="s-sub">{t("settings.subtitle")}</p>
                 <div className="section">
                   <span className="sec-label">{t("settings.language")}</span>
@@ -428,74 +614,60 @@ export function SettingsPage({
 
                 <div className="section" style={{ marginTop: 24 }}>
                   <span className="sec-label">{t("settings.fontsTitle") || "Fonts & Typography"}</span>
-                  <div className="panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <span style={{ font: "var(--text-label)" }}>{t("settings.uiFont") || "UI Font Family (Sans)"}</span>
-                        <select
-                          value={localStorage.getItem("selected-font-sans") || "IBM Plex Sans"}
-                          onChange={(e) => {
-                            localStorage.setItem("selected-font-sans", e.target.value);
-                            window.dispatchEvent(new Event("storage"));
-                          }}
-                          style={{
-                            background: "var(--bg-1)",
-                            border: "1px solid var(--border-3)",
-                            padding: "8px 12px",
-                            borderRadius: "var(--r-sm)",
-                            color: "var(--fg-1)",
-                            font: "inherit"
-                          }}
-                        >
-                          <option value="IBM Plex Sans">IBM Plex Sans (Default)</option>
-                          <option value="Inter" style={{ fontFamily: "Inter, sans-serif" }}>Inter (أبجد هوز)</option>
-                          <option value="Roboto" style={{ fontFamily: "Roboto, sans-serif" }}>Roboto (أبجد هوز)</option>
-                          <option value="Outfit" style={{ fontFamily: "Outfit, sans-serif" }}>Outfit (أبجد هوز)</option>
-                          <option value="Cairo" style={{ fontFamily: "Cairo, sans-serif" }}>Cairo (القاهرة)</option>
-                          <option value="Tajawal" style={{ fontFamily: "Tajawal, sans-serif" }}>Tajawal (تجوال)</option>
-                          <option value="Almarai" style={{ fontFamily: "Almarai, sans-serif" }}>Almarai (المراعي)</option>
-                        </select>
-                      </label>
-                      <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                        <span style={{ font: "var(--text-label)" }}>{t("settings.codeFont") || "Code Font Family (Mono)"}</span>
-                        <select
-                          value={localStorage.getItem("selected-font-mono") || "IBM Plex Mono"}
-                          onChange={(e) => {
-                            localStorage.setItem("selected-font-mono", e.target.value);
-                            window.dispatchEvent(new Event("storage"));
-                          }}
-                          style={{
-                            background: "var(--bg-1)",
-                            border: "1px solid var(--border-3)",
-                            padding: "8px 12px",
-                            borderRadius: "var(--r-sm)",
-                            color: "var(--fg-1)",
-                            font: "inherit"
-                          }}
-                        >
-                          <option value="IBM Plex Mono">IBM Plex Mono (Default)</option>
-                          <option value="Fira Code" style={{ fontFamily: "Fira Code, monospace" }}>Fira Code (code = 1)</option>
-                          <option value="JetBrains Mono" style={{ fontFamily: "JetBrains Mono, monospace" }}>JetBrains Mono (code = 1)</option>
-                          <option value="Courier New" style={{ fontFamily: "Courier New, monospace" }}>Courier New</option>
-                        </select>
-                      </label>
+                  <div className="panel" style={{ display: "flex", flexDirection: "column", gap: 20, padding: "20px" }}>
+                    
+                    {/* UI Font (Sans) Selection */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <span style={{ font: "var(--text-label)", fontWeight: 600, color: "var(--fg-2)" }}>
+                        {t("settings.uiFont") || "UI Font Family (Sans)"}
+                      </span>
+                      <CustomFontDropdown
+                        options={[...SANS_FONTS, ...( !SANS_FONTS.some(f => f.id === activeSans) ? [{ id: activeSans, name: activeSans, preview: "Ab" }] : [] )]}
+                        selectedId={activeSans}
+                        onSelect={(id) => {
+                          localStorage.setItem("selected-font-sans", id);
+                          setActiveSans(id);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                      />
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      <span style={{ font: "var(--text-label)" }}>{t("settings.importGoogleFont") || "Import Google Font"}</span>
-                      <div style={{ display: "flex", gap: 8 }}>
+                    {/* Code Font (Mono) Selection */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <span style={{ font: "var(--text-label)", fontWeight: 600, color: "var(--fg-2)" }}>
+                        {t("settings.codeFont") || "Code Font Family (Mono)"}
+                      </span>
+                      <CustomFontDropdown
+                        options={[...MONO_FONTS, ...( !MONO_FONTS.some(f => f.id === activeMono) ? [{ id: activeMono, name: activeMono, preview: "code" }] : [] )]}
+                        selectedId={activeMono}
+                        onSelect={(id) => {
+                          localStorage.setItem("selected-font-mono", id);
+                          setActiveMono(id);
+                          window.dispatchEvent(new Event("storage"));
+                        }}
+                        isMono={true}
+                      />
+                    </div>
+
+                    {/* Import custom Google Fonts */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <span style={{ font: "var(--text-label)", fontWeight: 600, color: "var(--fg-2)" }}>
+                        {t("settings.importGoogleFont") || "Import Google Font"}
+                      </span>
+                      <div style={{ display: "flex", gap: 10 }}>
                         <input
                           type="text"
                           id="custom-google-font-input"
-                          placeholder="e.g. Poppins, Playfair Display"
+                          placeholder="e.g. Poppins, Playfair Display, Montserrat"
                           style={{
                             flex: 1,
                             background: "var(--bg-1)",
-                            border: "1px solid var(--border-3)",
-                            padding: "8px 12px",
-                            borderRadius: "var(--r-sm)",
+                            border: "1px solid var(--border-2)",
+                            padding: "10px 14px",
+                            borderRadius: "8px",
                             color: "var(--fg-1)",
-                            font: "inherit"
+                            font: "inherit",
+                            outline: "none"
                           }}
                         />
                         <button
@@ -506,6 +678,7 @@ export function SettingsPage({
                             if (input && input.value.trim()) {
                               const fontName = input.value.trim();
                               localStorage.setItem("selected-font-sans", fontName);
+                              setActiveSans(fontName);
                               window.dispatchEvent(new Event("storage"));
                               showMsg(t("settings.fontImported") || `Imported & applied ${fontName}`);
                               input.value = "";
@@ -516,6 +689,7 @@ export function SettingsPage({
                         </button>
                       </div>
                     </div>
+
                   </div>
                 </div>
 

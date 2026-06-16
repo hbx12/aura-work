@@ -78,7 +78,16 @@ const THEME_MODES: ThemeMode[] = [
   "sakura-dark",
   "coffee",
   "ocean",
-  "luxury"
+  "luxury",
+  "emerald-luxury",
+  "rose-luxury",
+  "velvet-luxury",
+  "bronze-luxury",
+  "platinum-luxury",
+  "crimson-luxury",
+  "sapphire-luxury",
+  "amethyst-luxury",
+  "amber-luxury"
 ];
 const THEME_PREFERENCES: ThemePreference[] = ["system", ...THEME_MODES];
 

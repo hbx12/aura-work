@@ -163,6 +163,10 @@ export type MessageKey =
   | "settings.themeBronzeLuxury"
   | "settings.themePlatinumLuxury"
   | "settings.themeCrimsonLuxury"
+  | "settings.themeSapphireLuxury"
+  | "settings.themeAmethystLuxury"
+  | "settings.themeAmberLuxury"
+  | "settings.general"
   | "settings.fontsTitle"
   | "settings.uiFont"
   | "settings.codeFont"
@@ -583,6 +587,10 @@ const en: MessageCatalog = {
   "settings.themeBronzeLuxury": "Bronze & Copper",
   "settings.themePlatinumLuxury": "Silver Platinum",
   "settings.themeCrimsonLuxury": "Imperial Crimson",
+  "settings.themeSapphireLuxury": "Royal Sapphire",
+  "settings.themeAmethystLuxury": "Imperial Amethyst",
+  "settings.themeAmberLuxury": "Golden Amber",
+  "settings.general": "General",
   "settings.fontsTitle": "Fonts & Typography",
   "settings.uiFont": "UI Font Family (Sans)",
   "settings.codeFont": "Code Font Family (Mono)",
@@ -1020,6 +1028,10 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.themeBronzeLuxury": "البرونز والنحاس",
     "settings.themePlatinumLuxury": "البلاتين الفضي",
     "settings.themeCrimsonLuxury": "القرمزي الإمبراطوري",
+    "settings.themeSapphireLuxury": "الياقوت الملكي",
+    "settings.themeAmethystLuxury": "الجمشت الإمبراطوري",
+    "settings.themeAmberLuxury": "الكهرمان الذهبي",
+    "settings.general": "عام",
     "settings.fontsTitle": "الخطوط وتنسيق النصوص",
     "settings.uiFont": "خط واجهة المستخدم (Sans)",
     "settings.codeFont": "خط برمجية الأكواد (Mono)",
@@ -1324,6 +1336,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "Ajustes",
     "settings.title": "Ajustes y bóveda",
     "settings.language": "Idioma",
+    "settings.general": "General",
     "settings.updates": "Actualizaciones",
     "settings.checkUpdates": "Buscar actualizaciones",
     "common.save": "Guardar",
@@ -1335,6 +1348,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "Paramètres",
     "settings.title": "Paramètres et coffre",
     "settings.language": "Langue",
+    "settings.general": "Général",
     "settings.updates": "Mises à jour",
     "settings.checkUpdates": "Rechercher des mises à jour",
     "common.save": "Enregistrer",
@@ -1345,6 +1359,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "Einstellungen",
     "settings.title": "Einstellungen & Tresor",
     "settings.language": "Sprache",
+    "settings.general": "Allgemein",
     "settings.updates": "Updates",
     "settings.checkUpdates": "Nach Updates suchen",
     "common.save": "Speichern",
@@ -1355,6 +1370,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "Configurações",
     "settings.title": "Configurações e cofre",
     "settings.language": "Idioma",
+    "settings.general": "Geral",
     "common.save": "Salvar",
   },
   "zh-CN": {
@@ -1363,6 +1379,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "设置",
     "settings.title": "设置与保险库",
     "settings.language": "语言",
+    "settings.general": "常规",
     "common.save": "保存",
   },
   "zh-TW": {
@@ -1371,6 +1388,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "設定",
     "settings.title": "設定與保險庫",
     "settings.language": "語言",
+    "settings.general": "一般",
     "common.save": "儲存",
   },
   ja: {
@@ -1379,6 +1397,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "設定",
     "settings.title": "設定とボルト",
     "settings.language": "言語",
+    "settings.general": "一般",
     "common.save": "保存",
   },
   ko: {
@@ -1387,6 +1406,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "설정",
     "settings.title": "설정 및 금고",
     "settings.language": "언어",
+    "settings.general": "일반",
     "common.save": "저장",
   },
   hi: {
@@ -1394,6 +1414,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "फ़ाइलें",
     "nav.settings": "सेटिंग्स",
     "settings.language": "भाषा",
+    "settings.general": "सामान्य",
     "common.save": "सहेजें",
   },
   id: {
@@ -1401,6 +1422,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Berkas",
     "nav.settings": "Pengaturan",
     "settings.language": "Bahasa",
+    "settings.general": "Umum",
     "common.save": "Simpan",
   },
   tr: {
@@ -1408,6 +1430,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Dosyalar",
     "nav.settings": "Ayarlar",
     "settings.language": "Dil",
+    "settings.general": "Genel",
     "common.save": "Kaydet",
   },
   ru: {
@@ -1415,6 +1438,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Файлы",
     "nav.settings": "Настройки",
     "settings.language": "Язык",
+    "settings.general": "Общие",
     "common.save": "Сохранить",
   },
   it: {
@@ -1422,6 +1446,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "File",
     "nav.settings": "Impostazioni",
     "settings.language": "Lingua",
+    "settings.general": "Generale",
     "common.save": "Salva",
   },
   nl: {
@@ -1429,6 +1454,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Bestanden",
     "nav.settings": "Instellingen",
     "settings.language": "Taal",
+    "settings.general": "Algemeen",
     "common.save": "Opslaan",
   },
   pl: {
@@ -1436,6 +1462,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Pliki",
     "nav.settings": "Ustawienia",
     "settings.language": "Język",
+    "settings.general": "Ogólne",
     "common.save": "Zapisz",
   },
   vi: {
@@ -1443,6 +1470,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "Tệp",
     "nav.settings": "Cài đặt",
     "settings.language": "Ngôn ngữ",
+    "settings.general": "Chung",
     "common.save": "Lưu",
   },
   th: {
@@ -1450,6 +1478,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.files": "ไฟล์",
     "nav.settings": "การตั้งค่า",
     "settings.language": "ภาษา",
+    "settings.general": "ทั่วไป",
     "common.save": "บันทึก",
   },
   fa: {
@@ -1459,6 +1488,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "nav.settings": "تنظیمات",
     "settings.title": "تنظیمات و خزانه",
     "settings.language": "زبان",
+    "settings.general": "عمومی",
     "settings.languageDesc": "زبان رابط برنامه. فارسی و عربی از چیدمان RTL استفاده می‌کنند.",
     "common.save": "ذخیره",
     "common.loading": "در حال بارگذاری…",

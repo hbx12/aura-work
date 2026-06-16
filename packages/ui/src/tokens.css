@@ -10,7 +10,7 @@
    IBM Plex Sans / Mono / Sans Arabic for UI & code.
    Newsreader (serif) for warm editorial display headings.
    CDN-linked. For offline builds, vendor into fonts/ and swap the @import.   */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Cairo:wght@400;600;700&family=Fira+Code:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,18..72,400;0,18..72,500;1,18..72,400&family=Outfit:wght@400;500;600;700&family=Roboto:ital,wght@0,400;0,500;0,700;1,400&family=Tajawal:wght@400;500;700&display=swap');
 
 /* ============================================================================
    1. PRIMITIVES  (raw values — don't reference these directly in components)
@@ -1076,6 +1076,117 @@
   --shadow-2: 0 4px 14px rgba(0,0,0,0.65);
   --shadow-3: 0 14px 38px rgba(0,0,0,0.75);
   --shadow-pop: 0 8px 28px rgba(223, 177, 91, 0.20);
+}
+
+:root[data-theme="sapphire-luxury"] {
+  color-scheme: dark;
+  --bg-base:  #040a18;
+  --bg-1:     #081226;
+  --bg-2:     #0e1c38;
+  --bg-3:     #1d325a;
+  --bg-inset: #02050c;
+  --bg-hover: rgba(223, 177, 91, 0.08);
+  --bg-active: rgba(223, 177, 91, 0.16);
+  --fg-1: #f0f4f9;
+  --fg-2: #cedbe9;
+  --fg-3: #7b94ba;
+  --fg-on-accent: #040a18;
+  --border-1: #112242;
+  --border-2: #19315d;
+  --border-3: #32538f;
+  --accent:        #dfb15b;
+  --accent-hover:  #f0cf8e;
+  --accent-press:  #cfa043;
+  --accent-fg:     #040a18;
+  --accent-subtle: rgba(223, 177, 91, 0.12);
+  --accent-ring:   rgba(223, 177, 91, 0.40);
+  --accent-border: rgba(223, 177, 91, 0.45);
+  --success: #88b08b;
+  --success-subtle: rgba(136, 176, 139, 0.12);
+  --warning: #dfb15b;
+  --warning-subtle: rgba(223, 177, 91, 0.12);
+  --danger: #cf6a6a;
+  --danger-subtle: rgba(207, 106, 106, 0.12);
+  --agent: #c09fcc;
+  --agent-subtle: rgba(192, 159, 204, 0.12);
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.60);
+  --shadow-2: 0 4px 14px rgba(0,0,0,0.65);
+  --shadow-3: 0 14px 38px rgba(0,0,0,0.75);
+  --shadow-pop: 0 8px 28px rgba(223, 177, 91, 0.20);
+}
+
+:root[data-theme="amethyst-luxury"] {
+  color-scheme: dark;
+  --bg-base:  #08040d;
+  --bg-1:     #10081a;
+  --bg-2:     #170e28;
+  --bg-3:     #2c1a48;
+  --bg-inset: #040207;
+  --bg-hover: rgba(230, 194, 128, 0.08);
+  --bg-active: rgba(230, 194, 128, 0.16);
+  --fg-1: #f8f4fb;
+  --fg-2: #e9deef;
+  --fg-3: #9b89ab;
+  --fg-on-accent: #08040d;
+  --border-1: #211335;
+  --border-2: #301d4b;
+  --border-3: #50337b;
+  --accent:        #e6c280;
+  --accent-hover:  #f3d59e;
+  --accent-press:  #c6a362;
+  --accent-fg:     #08040d;
+  --accent-subtle: rgba(230, 194, 128, 0.12);
+  --accent-ring:   rgba(230, 194, 128, 0.40);
+  --accent-border: rgba(230, 194, 128, 0.45);
+  --success: #88b08b;
+  --success-subtle: rgba(136, 176, 139, 0.12);
+  --warning: #e6c280;
+  --warning-subtle: rgba(230, 194, 128, 0.12);
+  --danger: #cf6a6a;
+  --danger-subtle: rgba(207, 106, 106, 0.12);
+  --agent: #c09fcc;
+  --agent-subtle: rgba(192, 159, 204, 0.12);
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.60);
+  --shadow-2: 0 4px 14px rgba(0,0,0,0.65);
+  --shadow-3: 0 14px 38px rgba(0,0,0,0.75);
+  --shadow-pop: 0 8px 28px rgba(230, 194, 128, 0.20);
+}
+
+:root[data-theme="amber-luxury"] {
+  color-scheme: dark;
+  --bg-base:  #140c06;
+  --bg-1:     #1c120a;
+  --bg-2:     #291a10;
+  --bg-3:     #422b1c;
+  --bg-inset: #0a0603;
+  --bg-hover: rgba(255, 174, 25, 0.08);
+  --bg-active: rgba(255, 174, 25, 0.16);
+  --fg-1: #fcf9f6;
+  --fg-2: #ebdccf;
+  --fg-3: #a48f7f;
+  --fg-on-accent: #140c06;
+  --border-1: #342214;
+  --border-2: #4b321f;
+  --border-3: #7b5336;
+  --accent:        #ffae19;
+  --accent-hover:  #ffbe47;
+  --accent-press:  #d68a00;
+  --accent-fg:     #140c06;
+  --accent-subtle: rgba(255, 174, 25, 0.12);
+  --accent-ring:   rgba(255, 174, 25, 0.40);
+  --accent-border: rgba(255, 174, 25, 0.45);
+  --success: #88b08b;
+  --success-subtle: rgba(136, 176, 139, 0.12);
+  --warning: #ffae19;
+  --warning-subtle: rgba(255, 174, 25, 0.12);
+  --danger: #cf6a6a;
+  --danger-subtle: rgba(207, 106, 106, 0.12);
+  --agent: #c09fcc;
+  --agent-subtle: rgba(192, 159, 204, 0.12);
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.60);
+  --shadow-2: 0 4px 14px rgba(0,0,0,0.65);
+  --shadow-3: 0 14px 38px rgba(0,0,0,0.75);
+  --shadow-pop: 0 8px 28px rgba(255, 174, 25, 0.20);
 }
 
 /* ============================================================================

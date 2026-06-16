@@ -604,6 +604,27 @@
   --preview-accent: #dfb15b;
 }
 
+.theme-preview[data-preview-theme="sapphire-luxury"] {
+  --preview-base: #040a18;
+  --preview-panel: #081226;
+  --preview-muted: #1d325a;
+  --preview-accent: #dfb15b;
+}
+
+.theme-preview[data-preview-theme="amethyst-luxury"] {
+  --preview-base: #08040d;
+  --preview-panel: #10081a;
+  --preview-muted: #2c1a48;
+  --preview-accent: #e6c280;
+}
+
+.theme-preview[data-preview-theme="amber-luxury"] {
+  --preview-base: #140c06;
+  --preview-panel: #1c120a;
+  --preview-muted: #422b1c;
+  --preview-accent: #ffae19;
+}
+
 .theme-name {
   font: var(--text-label);
   color: var(--fg-1);

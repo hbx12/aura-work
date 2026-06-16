@@ -12,7 +12,7 @@ export type AppView =
   | "terminal"
   | "settings";
 
-export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast" | "cyberpunk" | "forest" | "pastel" | "sunset" | "sepia" | "nord" | "dracula" | "matrix" | "sakura" | "sakura-dark" | "coffee" | "ocean" | "luxury" | "emerald-luxury" | "rose-luxury" | "velvet-luxury" | "bronze-luxury" | "platinum-luxury" | "crimson-luxury";
+export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast" | "cyberpunk" | "forest" | "pastel" | "sunset" | "sepia" | "nord" | "dracula" | "matrix" | "sakura" | "sakura-dark" | "coffee" | "ocean" | "luxury" | "emerald-luxury" | "rose-luxury" | "velvet-luxury" | "bronze-luxury" | "platinum-luxury" | "crimson-luxury" | "sapphire-luxury" | "amethyst-luxury" | "amber-luxury";
 export type ThemePreference = ThemeMode | "system";
 
 export type PermissionMode = "ask-first" | "act-without-asking";
