@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Icon } from "@aura-os/ui";
+import { Icon, MarkdownText } from "@aura-os/ui";
 import type {
   InstalledPlugin,
   MarketplaceEntry,
@@ -693,22 +693,19 @@ export function PluginsPage({
                             {s.description || s.pluginId}
                           </div>
                           <div className="perm-chips" style={{ marginTop: 6 }}>
-                            <span
-                              className="perm-chip"
+                            <div
+                              className="perm-chip skill-md-preview"
                               style={{
                                 display: "block",
-                                whiteSpace: "pre-wrap",
-                                fontFamily: "var(--font-mono)",
-                                fontSize: 11,
                                 background: "var(--bg-3)",
-                                padding: "6px 10px",
+                                padding: "8px 10px",
                                 borderRadius: "var(--r-xs, 4px)",
                                 color: "var(--fg-2)",
                                 transition: "all 0.2s ease-in-out",
                               }}
                             >
-                              {isExpanded ? s.prompt : (s.prompt.length > 120 ? s.prompt.slice(0, 120) + "..." : s.prompt)}
-                            </span>
+                              <MarkdownText text={isExpanded ? s.prompt : (s.prompt.length > 220 ? s.prompt.slice(0, 220) + "..." : s.prompt)} />
+                            </div>
                           </div>
                         </div>
                         <div className="mini-acts" style={{ marginTop: 4 }}>

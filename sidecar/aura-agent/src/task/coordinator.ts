@@ -36,6 +36,8 @@ export interface TaskIterateRequest {
   credentials: ProviderCredentials;
   workspaceFiles?: string;
   skills?: { name: string; description: string; prompt: string }[];
+  allowPlainText?: boolean;
+  responseLanguage?: string;
   onChunk?: (text: string) => void;
 }
 
@@ -131,6 +133,14 @@ function blocked(content: string) {
   };
 }
 
+function localizedInvalidStructure(prompt: string, responseLanguage?: string) {
+  const isArabic =
+    responseLanguage?.toLowerCase().startsWith("arabic") || /[\u0600-\u06ff]/.test(prompt);
+  return isArabic
+    ? "النموذج لم يرجع إجراء أدوات صالحاً. أوقف Aura Work التنفيذ حتى لا ينشئ ملفات وهمية أو يخمن تعديلات."
+    : BLOCKED_INVALID_STRUCTURE.content;
+}
+
 function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: string } {
   const lower = prompt.toLowerCase();
   const plan: PlanStep[] = [
@@ -217,8 +227,13 @@ export async function iterateTask(req: TaskIterateRequest) {
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
+  const languageRule = req.responseLanguage
+    ? `\nResponse language: ${req.responseLanguage}. Reply in that language unless the user explicitly asks for another language.`
+    : "\nReply in the same language as the user's latest message.";
+
   const system = `You are Aura Work executing a task step-by-step.
 ${TOOLS_PROMPT}${skillsXml}
+${languageRule}
 
 Current iteration: ${req.iteration + 1}
 Plan:
@@ -254,16 +269,36 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
       iteration: req.iteration,
       planLength: req.plan.length,
     });
-    if (coerced) return { ...coerced, usage: result.usage };
+    if (coerced) {
+      if (
+        coerced.type === "blocked" &&
+        coerced.content === BLOCKED_INVALID_STRUCTURE.content
+      ) {
+        return {
+          ...blocked(localizedInvalidStructure(req.prompt, req.responseLanguage)),
+          usage: result.usage,
+        };
+      }
+      return { ...coerced, usage: result.usage };
+    }
+
+    if (req.allowPlainText && !isFileTask(req.prompt)) {
+      return {
+        type: "complete" as const,
+        role: "reviewer",
+        content: result.text.trim(),
+        summary: result.text.trim(),
+        complete: true,
+        usage: result.usage,
+      };
+    }
   } catch (e) {
     console.warn("[task] iterate LLM failed:", e);
   }
 
   if (isFileTask(req.prompt)) {
-    return blocked(BLOCKED_INVALID_STRUCTURE.content);
+    return blocked(localizedInvalidStructure(req.prompt, req.responseLanguage));
   }
 
-  return blocked(
-    "Task execution stopped safely because the model did not return a valid structured action. Aura Work did not create placeholder files or guess edits. Retry with a tool-capable model or narrow the request.",
-  );
+  return blocked(localizedInvalidStructure(req.prompt, req.responseLanguage));
 }
