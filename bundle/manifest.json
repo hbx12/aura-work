@@ -5,23 +5,59 @@
   "nodeRuntime": {
     "bundled": true,
     "minVersion": "20.0.0",
-    "resourcePath": "resources/node",
-    "note": "Node sidecars ship with the installer; dev uses system Node via npm."
+    "resourcePath": "node",
+    "executable": "node/node.exe",
+    "note": "Installed builds use this bundled Node runtime; development builds may use workspace Node."
   },
   "vmImage": {
     "imageId": "aura-linux-workspace",
     "version": "0.1.0-alpha.1",
-    "manifestPath": "resources/vm-image/manifest.json",
+    "manifestPath": "vm-image/manifest.json",
     "signatureRequired": true
   },
   "sidecars": [
-    { "id": "aura-agent", "port": 47821, "resourcePath": "resources/sidecars/aura-agent" },
-    { "id": "aura-vm-helper", "port": 47822, "resourcePath": "resources/sidecars/aura-vm-helper" },
-    { "id": "aura-browser-helper", "port": 47823, "resourcePath": "resources/sidecars/aura-browser-helper" },
-    { "id": "aura-plugins-helper", "port": 47824, "resourcePath": "resources/sidecars/aura-plugins-helper" },
-    { "id": "aura-cloud-sync", "port": 47825, "resourcePath": "resources/sidecars/aura-cloud-sync" },
-    { "id": "aura-bridge", "port": 47826, "resourcePath": "resources/sidecars/aura-bridge" },
-    { "id": "aura-computer-use", "port": 47828, "resourcePath": "resources/sidecars/aura-computer-use" }
+    {
+      "id": "aura-agent",
+      "port": 47821,
+      "resourcePath": "sidecars/aura-agent",
+      "entry": "sidecars/aura-agent/dist/index.js"
+    },
+    {
+      "id": "aura-vm-helper",
+      "port": 47822,
+      "resourcePath": "sidecars/aura-vm-helper",
+      "entry": "sidecars/aura-vm-helper/dist/index.js"
+    },
+    {
+      "id": "aura-browser-helper",
+      "port": 47823,
+      "resourcePath": "sidecars/aura-browser-helper",
+      "entry": "sidecars/aura-browser-helper/dist/index.js"
+    },
+    {
+      "id": "aura-plugins-helper",
+      "port": 47824,
+      "resourcePath": "sidecars/aura-plugins-helper",
+      "entry": "sidecars/aura-plugins-helper/dist/index.js"
+    },
+    {
+      "id": "aura-cloud-sync",
+      "port": 47825,
+      "resourcePath": "sidecars/aura-cloud-sync",
+      "entry": "sidecars/aura-cloud-sync/dist/index.js"
+    },
+    {
+      "id": "aura-bridge",
+      "port": 47826,
+      "resourcePath": "sidecars/aura-bridge",
+      "entry": "sidecars/aura-bridge/dist/index.js"
+    },
+    {
+      "id": "aura-computer-use",
+      "port": 47828,
+      "resourcePath": "sidecars/aura-computer-use",
+      "entry": "sidecars/aura-computer-use/dist/index.js"
+    }
   ],
   "updates": {
     "source": "github-releases",

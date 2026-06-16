@@ -47,6 +47,7 @@
     "cloud-server": "npm run start -w @aura-os/cloud",
     "test:rust": "npm run test:rust -w @aura-os/desktop",
     "test:sidecars": "vitest run --config vitest.sidecars.config.ts",
+    "test:sidecar-bundle": "node scripts/test-sidecar-bundle.mjs",
     "test:acceptance": "npm run test -w @aura-os/acceptance-suite",
     "test:installer-smoke": "powershell -ExecutionPolicy Bypass -File scripts/test-installer-smoke.ps1",
     "qa": "npm run build:sidecars && npm run build:cloud && npm run build:bridge && npm run test:sidecars && npm run test:rust && npm run test:acceptance",

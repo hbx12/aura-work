@@ -83,6 +83,7 @@ jobs:
           AURA_RELEASE_BUILD: "1"
           AURA_RELEASE_VERSION: ${{ inputs.version }}
           AURA_ALLOW_VM_PLACEHOLDER_RELEASE: ${{ contains(inputs.version, '-alpha') && '1' || '0' }}
+      - run: npm run test:sidecar-bundle
       - name: Build Tauri app and signed updater artifacts
         run: npm run tauri build -w @aura-os/desktop -- --target ${{ matrix.target }} ${{ matrix.bundle_args }}
         env:
