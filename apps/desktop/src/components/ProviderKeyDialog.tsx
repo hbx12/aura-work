@@ -4,7 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { PROVIDER_META } from "@aura-os/shared";
 import type { MessageCatalog } from "@aura-os/i18n";
 
-type AuthMode = "api-key" | "codex-account" | "google-account" | "claude-account";
+type AuthMode = "api-key" | "codex-account";
 
 const CODEX_LOGIN_URL = "https://auth.openai.com/codex/device";
 
@@ -64,7 +64,7 @@ export function ProviderKeyDialog({
     if (open) {
       setApiKey("");
       setBaseUrl(existingBaseUrl ?? "");
-      const isOauthMode = existingAuthMode === "codex-account" || existingAuthMode === "google-account" || existingAuthMode === "claude-account";
+      const isOauthMode = existingAuthMode === "codex-account";
       setAuthMode(isOauthMode ? (existingAuthMode as AuthMode) : "api-key");
       setError(null);
       setNotice(null);
@@ -171,17 +171,12 @@ export function ProviderKeyDialog({
             <div className="seg">
               <button
                 type="button"
-                className={authMode !== "api-key" ? "active" : ""}
+                className={authMode === "codex-account" ? "active" : ""}
                 onClick={() => {
-                  const mode = providerId === "openai" ? "codex-account" : providerId === "gemini" ? "google-account" : "claude-account";
-                  setAuthMode(mode);
+                  setAuthMode("codex-account");
                 }}
               >
-                {providerId === "openai"
-                  ? t("provider.key.codexAccount")
-                  : providerId === "gemini"
-                  ? t("provider.key.googleAccount")
-                  : t("provider.key.claudeAccount")}
+                {t("provider.key.codexAccount")}
               </button>
               <button
                 type="button"
@@ -194,14 +189,10 @@ export function ProviderKeyDialog({
           </div>
         )}
 
-        {supportsOauth && !isLocal && authMode !== "api-key" ? (
+        {supportsOauth && !isLocal && authMode === "codex-account" ? (
           <>
             <p className="modal-desc">
-              {providerId === "openai"
-                ? t("provider.key.codexDesc")
-                : providerId === "gemini"
-                ? (locale?.startsWith("ar") ? "استخدم حساب Google الخاص بك لتسجيل الدخول بأمان." : "Use your Google account to sign in securely.")
-                : (locale?.startsWith("ar") ? "استخدم حساب Claude الخاص بك لتسجيل الدخول بأمان." : "Use your Claude account to sign in securely.")}
+              {t("provider.key.codexDesc")}
             </p>
             {deviceCode && (
               <div className="section" style={{ gap: 8, alignItems: "center" }}>
@@ -234,11 +225,7 @@ export function ProviderKeyDialog({
                 {t("common.cancel")}
               </button>
               <button type="button" className="btn primary" disabled={saving} onClick={() => void handleOauthConnect()}>
-                {providerId === "openai"
-                  ? t("provider.key.connectCodex")
-                  : providerId === "gemini"
-                  ? (locale?.startsWith("ar") ? "اتصال بحساب Google" : "Connect Google Account")
-                  : (locale?.startsWith("ar") ? "اتصال بحساب Claude" : "Connect Claude Account")}
+                {t("provider.key.connectCodex")}
               </button>
             </div>
           </>

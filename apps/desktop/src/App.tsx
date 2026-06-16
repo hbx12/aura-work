@@ -77,7 +77,8 @@ const THEME_MODES: ThemeMode[] = [
   "sakura",
   "sakura-dark",
   "coffee",
-  "ocean"
+  "ocean",
+  "luxury"
 ];
 const THEME_PREFERENCES: ThemePreference[] = ["system", ...THEME_MODES];
 

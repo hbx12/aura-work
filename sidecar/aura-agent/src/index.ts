@@ -115,25 +115,6 @@ const server = createServer(async (req, res) => {
       return json(res, 200, result);
     }
 
-    if (method === "POST" && url === "/google/login/start") {
-      const session = await startProviderLogin("gemini");
-      return json(res, 200, session);
-    }
-
-    if (method === "POST" && url === "/google/login/poll") {
-      const result = await pollCodexLoginOnce();
-      return json(res, 200, result);
-    }
-
-    if (method === "POST" && url === "/claude/login/start") {
-      const session = await startProviderLogin("anthropic");
-      return json(res, 200, session);
-    }
-
-    if (method === "POST" && url === "/claude/login/poll") {
-      const result = await pollCodexLoginOnce();
-      return json(res, 200, result);
-    }
 
     if (method === "POST" && url === "/codex/login/cancel") {
       cancelCodexAuth();

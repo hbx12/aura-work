@@ -555,6 +555,13 @@
   --preview-accent: #48cae4;
 }
 
+.theme-preview[data-preview-theme="luxury"] {
+  --preview-base: #0c0c0e;
+  --preview-panel: #121216;
+  --preview-muted: #2e2c35;
+  --preview-accent: #dfb15b;
+}
+
 .theme-name {
   font: var(--text-label);
   color: var(--fg-1);
@@ -916,4 +923,54 @@
   margin: 0.5rem 0;
   padding: 0.6rem;
   max-width: 100%;
+}
+
+/* Premium Markdown Preview and Copy Button UX */
+.markdown-preview {
+  padding: 1.5rem;
+  background: var(--bg-2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+  color: var(--accent);
+  margin-top: 1.4rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border-1);
+  padding-bottom: 0.3rem;
+}
+
+.markdown-preview p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--fg-1);
+}
+
+.markdown-preview blockquote, .md-quote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  color: var(--fg-2);
+  font-style: italic;
+  margin: 1rem 0;
+  background: var(--bg-hover);
+}
+
+.codeblock, .md-code-block {
+  position: relative;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.codeblock .copy-btn {
+  opacity: 0;
+}
+
+.codeblock:hover .copy-btn {
+  opacity: 1;
 }

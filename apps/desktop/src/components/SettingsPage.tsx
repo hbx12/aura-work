@@ -31,6 +31,7 @@ const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; prev
   { id: "sakura-dark", labelKey: "settings.themeSakuraDark" },
   { id: "coffee", labelKey: "settings.themeCoffee" },
   { id: "ocean", labelKey: "settings.themeOcean" },
+  { id: "luxury", labelKey: "settings.themeLuxury" },
 ];
 
 const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [

@@ -185,6 +185,7 @@ export function PluginsPage({
   const [skillPrompt, setSkillPrompt] = useState("");
   const [skillMessage, setSkillMessage] = useState<string | null>(null);
   const [expandedSkills, setExpandedSkills] = useState<Record<string, boolean>>({});
+  const [editingSkill, setEditingSkill] = useState<any | null>(null);
 
   const refreshSkills = async () => {
     try {
@@ -660,6 +661,71 @@ export function PluginsPage({
                 </div>
               )}
 
+              {editingSkill && (
+                <div className="panel cloud-form" style={{ marginBottom: 12, gap: 14 }}>
+                  <div className="form-grid">
+                    <label>
+                      {isAr ? "اسم المهارة" : "Skill Name"}
+                      <input value={skillName} disabled={true} style={{ opacity: 0.6 }} />
+                    </label>
+                    <label>
+                      {isAr ? "وصف المهارة" : "Description"}
+                      <input value={skillDesc} onChange={(e) => setSkillDesc(e.target.value)} placeholder="A skill to design UIs" />
+                    </label>
+                  </div>
+                  <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <span>{isAr ? "التعليمات والـ Prompt" : "Instructions & Prompt"}</span>
+                    <textarea
+                      value={skillPrompt}
+                      onChange={(e) => setSkillPrompt(e.target.value)}
+                      rows={5}
+                      style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
+                    />
+                  </label>
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="btn primary sm"
+                      disabled={loading || !skillPrompt.trim()}
+                      onClick={() => {
+                        void invoke("save_local_skill", {
+                          input: {
+                            pluginId: editingSkill.pluginId,
+                            name: editingSkill.name,
+                            description: skillDesc.trim(),
+                            prompt: skillPrompt.trim(),
+                            path: editingSkill.path || null,
+                          },
+                        }).then(() => {
+                          setEditingSkill(null);
+                          setSkillName("");
+                          setSkillDesc("");
+                          setSkillPrompt("");
+                          setSkillMessage(isAr ? "تم تحديث وحفظ المهارة بنجاح" : "Skill updated and saved successfully");
+                          void refreshSkills();
+                        }).catch((err) => {
+                          setSkillMessage(String(err));
+                        });
+                      }}
+                    >
+                      {isAr ? "تحديث المهارة" : "Update Skill"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn secondary sm"
+                      onClick={() => {
+                        setEditingSkill(null);
+                        setSkillName("");
+                        setSkillDesc("");
+                        setSkillPrompt("");
+                      }}
+                    >
+                      {isAr ? "إلغاء" : "Cancel"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="panel">
                 {skills.length === 0 ? (
                   <div className="empty" style={{ padding: 28 }}>
@@ -722,7 +788,22 @@ export function PluginsPage({
                           <button
                             type="button"
                             className="btn ghost icon sm"
-                            title={s.pluginId === "config_skill" ? (isAr ? "هذه المهارة للقراءة فقط (معرفة في ملف الإعدادات)" : "Read-only config-based skill") : (isAr ? "حذف" : "Delete")}
+                            title={isAr ? "تعديل المهارة" : "Edit Skill"}
+                            disabled={loading}
+                            onClick={() => {
+                              setEditingSkill(s);
+                              setSkillName(s.name);
+                              setSkillDesc(s.description || "");
+                              setSkillPrompt(s.prompt);
+                              setShowSkillForm(false);
+                            }}
+                          >
+                            <Icon name="file-code" size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn ghost icon sm"
+                            title={s.pluginId === "config_skill" ? (isAr ? "المهارات من ملف الإعدادات لا يمكن حذفها مباشرة" : "Config-based skills cannot be deleted directly") : (isAr ? "حذف" : "Delete")}
                             disabled={loading || s.pluginId === "config_skill"}
                             onClick={() => {
                               void onUninstall(s.pluginId).then(() => {

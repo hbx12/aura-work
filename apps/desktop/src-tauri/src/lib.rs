@@ -172,6 +172,7 @@ pub fn run() {
             plugins::reload_plugins_helper,
             plugins::create_local_skill,
             plugins::list_local_skills,
+            plugins::save_local_skill,
             mcp::list_mcp_servers,
             mcp::add_mcp_server,
             mcp::delete_mcp_server,

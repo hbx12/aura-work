@@ -48,10 +48,6 @@ export function ProvidersPageLive({
       const parts =
         p.authMode === "codex-account"
           ? [t("provider.key.codexAccount")]
-          : p.authMode === "google-account"
-          ? [t("provider.key.googleAccount")]
-          : p.authMode === "claude-account"
-          ? [t("provider.key.claudeAccount")]
           : [t("providers.keySet")];
       if (p.defaultModel) parts.push(p.defaultModel);
       else if (p.baseUrl) parts.push(p.baseUrl);

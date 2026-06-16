@@ -155,6 +155,7 @@ export type MessageKey =
   | "settings.themeSakuraDark"
   | "settings.themeCoffee"
   | "settings.themeOcean"
+  | "settings.themeLuxury"
   | "settings.themeUpdated"
   | "settings.vm"
   | "settings.vmStart"
@@ -556,6 +557,7 @@ const en: MessageCatalog = {
   "settings.themeSakuraDark": "Sakura Dark",
   "settings.themeCoffee": "Coffee",
   "settings.themeOcean": "Ocean",
+  "settings.themeLuxury": "Aura Luxury",
   "settings.themeUpdated": "Theme updated.",
   "settings.vm": "Linux workspace (VM)",
   "settings.vmStart": "Start workspace",
@@ -974,6 +976,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.themeSakuraDark": "ساكورا الداكن",
     "settings.themeCoffee": "قهوة",
     "settings.themeOcean": "محيط",
+    "settings.themeLuxury": "أورا الفخم",
     "settings.themeUpdated": "تم تحديث الثيم.",
     "settings.vm": "مساحة Linux (VM)",
     "settings.vmStart": "تشغيل مساحة Linux",
