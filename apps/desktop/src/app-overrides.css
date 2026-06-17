@@ -754,6 +754,28 @@
   background: color-mix(in srgb, var(--bg-2) 86%, transparent);
 }
 
+.model-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.model-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  flex-shrink: 0;
+}
+
+.model-meta {
+  min-width: 0;
+}
+
 .model-row:first-child {
   border-radius: 7px 7px 0 0;
 }

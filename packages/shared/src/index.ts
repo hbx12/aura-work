@@ -584,21 +584,21 @@ export interface BridgePairingResult {
 
 export const PROVIDER_META: Record<
   ProviderId,
-  { displayName: string; logo: string; color: string; local?: boolean }
+  { displayName: string; icon: string; color: string; local?: boolean }
 > = {
-  anthropic: { displayName: "Anthropic", logo: "A", color: "#c2683f" },
-  openai: { displayName: "OpenAI", logo: "O", color: "#1a7f64" },
-  gemini: { displayName: "Google Gemini", logo: "G", color: "#3a6fc4" },
-  deepseek: { displayName: "DeepSeek", logo: "D", color: "#4b5bb0" },
-  ollama: { displayName: "Ollama", logo: "Ω", color: "#7a5c8e", local: true },
+  anthropic: { displayName: "Anthropic", icon: "brain", color: "#c2683f" },
+  openai: { displayName: "OpenAI", icon: "sparkles", color: "#1a7f64" },
+  gemini: { displayName: "Google Gemini", icon: "sparkles", color: "#3a6fc4" },
+  deepseek: { displayName: "DeepSeek", icon: "search", color: "#4b5bb0" },
+  ollama: { displayName: "Ollama", icon: "cpu", color: "#7a5c8e", local: true },
   "openai-compatible": {
     displayName: "Custom endpoint",
-    logo: "{}",
+    icon: "braces",
     color: "#645d4e",
   },
-  minimax: { displayName: "Minimax", logo: "M", color: "#e05c2b" },
-  qwen: { displayName: "Qwen", logo: "Q", color: "#4f35b3" },
-  lmstudio: { displayName: "LM Studio", logo: "L", color: "#1988a2", local: true },
+  minimax: { displayName: "Minimax", icon: "bot", color: "#e05c2b" },
+  qwen: { displayName: "Qwen", icon: "bot", color: "#4f35b3" },
+  lmstudio: { displayName: "LM Studio", icon: "monitor", color: "#1988a2", local: true },
 };
 
 export const ROUTING_POLICIES: {
