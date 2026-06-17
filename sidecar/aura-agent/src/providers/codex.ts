@@ -274,7 +274,7 @@ export async function codexChat(request: ChatRequest, credentials: ProviderCrede
     }
     const text = parseSseText(raw);
     return {
-      text: text || raw.slice(0, 2000),
+      text: text || raw,
       usage: {},
     };
   }
@@ -282,7 +282,7 @@ export async function codexChat(request: ChatRequest, credentials: ProviderCrede
   const raw = await res.text();
   const text = parseSseText(raw);
   return {
-    text: text || raw.slice(0, 2000),
+    text: text || raw,
     usage: {},
   };
 }
