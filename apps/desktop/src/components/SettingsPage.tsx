@@ -739,6 +739,36 @@ export function SettingsPage({
                     </div>
                   </div>
                 </div>
+
+                <div className="section" style={{ marginTop: 24 }}>
+                  <span className="sec-label">{t("settings.notifications") || "Notifications"}</span>
+                  <div className="panel" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {(["taskComplete","taskError","permissionRequired","sidecarOffline","taskPaused"] as const).map((k) => {
+                      const labels: Record<string,string> = {
+                        taskComplete: t("settings.notifyTaskComplete") || "Task completed",
+                        taskError: t("settings.notifyTaskError") || "Task error",
+                        permissionRequired: t("settings.notifyPermission") || "Permission requested",
+                        sidecarOffline: t("settings.notifySidecar") || "Sidecar offline",
+                        taskPaused: t("settings.notifyTaskPaused") || "Task paused",
+                      };
+                      const checked = (() => {
+                        try { return JSON.parse(localStorage.getItem("aura-notification-settings") || "{}")[k] !== false; }
+                        catch { return true; }
+                      })();
+                      return (
+                        <label key={k} style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }}>
+                          <input type="checkbox" checked={checked} onChange={() => {
+                            const raw = localStorage.getItem("aura-notification-settings") || "{}";
+                            const s = JSON.parse(raw);
+                            s[k] = !checked;
+                            localStorage.setItem("aura-notification-settings", JSON.stringify(s));
+                          }} style={{ accentColor: "var(--accent)" }} />
+                          <span style={{ font:"var(--text-sm)", color:"var(--fg-1)" }}>{labels[k]}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </>
             )}
 

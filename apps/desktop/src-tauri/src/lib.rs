@@ -122,6 +122,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let db_conn = db::init_db(&app.handle())?;
             seed_if_empty(&db_conn)?;
@@ -196,6 +197,11 @@ pub fn run() {
             git::propose_git_commit,
             git::approve_git_commit,
             git::list_pending_commits,
+            git::git_log,
+            git::git_branches,
+            git::git_stash_list,
+            git::git_stash_push,
+            git::git_stash_pop,
             tasks::create_task,
             tasks::list_tasks,
             tasks::get_task,

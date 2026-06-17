@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { MarkdownText } from "../MarkdownText";
+import { TASK_TEMPLATES, type TaskTemplate } from "./TaskTemplates";
 
 export function StreamingMsg({
   who,
@@ -351,6 +352,25 @@ const SLASH_COMMANDS_AR: SlashCommand[] = [
   },
 ];
 
+const CATEGORY_ICONS: Record<string, string> = {
+  Review: "search",
+  Refactor: "refresh-cw",
+  Debug: "bug",
+  Documentation: "file-text",
+  Testing: "check-square",
+  Security: "shield",
+  Optimization: "zap",
+  Infrastructure: "git-commit",
+  Maintenance: "package",
+  Design: "layers",
+};
+
+const TEMPLATE_LABELS = {
+  title: "Templates",
+  placeholder: "Filter templates…",
+  noResults: "No templates match",
+};
+
 export function Composer({
   value,
   onChange,
@@ -402,6 +422,8 @@ export function Composer({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templateFilter, setTemplateFilter] = useState("");
 
   const showCommands = value.startsWith("/") && !value.includes(" ");
   const filterText = value.slice(1).toLowerCase();
@@ -510,6 +532,15 @@ export function Composer({
               ))}
             </select>
           )}
+          <button
+            type="button"
+            className="chip-btn"
+            onClick={() => setShowTemplates((s) => !s)}
+            title={TEMPLATE_LABELS.title}
+          >
+            <Icon name="file-text" size={14} />
+            {TEMPLATE_LABELS.title}
+          </button>
           <button type="button" className="chip-btn" onClick={onToggleMode}>
             <Icon name={mode === "ask" ? "shield-check" : "bot"} size={14} />
             {mode === "ask" ? labels.modeAsk : labels.modeAct}
@@ -532,6 +563,67 @@ export function Composer({
             {disabled ? labels.running : mode === "act" ? labels.startTask ?? labels.runTask : labels.send}
           </button>
         </div>
+        {showTemplates && (
+          <div className="template-popover">
+            <div className="tp-head">
+              <input
+                className="tp-search"
+                placeholder={TEMPLATE_LABELS.placeholder}
+                value={templateFilter}
+                onChange={(e) => setTemplateFilter(e.target.value)}
+                autoFocus
+              />
+              <button type="button" className="iconbtn" onClick={() => setShowTemplates(false)}>
+                <Icon name="ban" size={14} />
+              </button>
+            </div>
+            <div className="tp-body">
+              {(() => {
+                const cats = new Set(TASK_TEMPLATES.map((t) => t.category));
+                const filtered = TASK_TEMPLATES.filter(
+                  (t) =>
+                    !templateFilter ||
+                    t.name.toLowerCase().includes(templateFilter.toLowerCase()) ||
+                    t.description.toLowerCase().includes(templateFilter.toLowerCase()),
+                );
+                if (filtered.length === 0) {
+                  return <p className="muted" style={{ padding: 12, fontSize: 13 }}>{TEMPLATE_LABELS.noResults}</p>;
+                }
+                const grouped: Record<string, TaskTemplate[]> = {};
+                for (const t of filtered) {
+                  (grouped[t.category] ??= []).push(t);
+                }
+                return Object.entries(grouped).map(([cat, templates]) => (
+                  <div key={cat} className="tp-group">
+                    <span className="tp-cat">
+                      <Icon name={CATEGORY_ICONS[cat] || "file"} size={12} />
+                      {cat}
+                    </span>
+                    <div className="tp-grid">
+                      {templates.map((t) => (
+                        <button
+                          key={t.name}
+                          type="button"
+                          className="tp-item"
+                          onClick={() => {
+                            onChange(t.prompt);
+                            setShowTemplates(false);
+                            setTemplateFilter("");
+                            setTimeout(() => textareaRef.current?.focus(), 10);
+                          }}
+                        >
+                          <Icon name={t.icon} size={16} />
+                          <span className="tpi-name">{t.name}</span>
+                          <span className="tpi-desc">{t.description}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -418,6 +418,203 @@ pub fn list_pending_commits(
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitLogEntry {
+    pub hash: String,
+    pub author: String,
+    pub date: String,
+    pub message: String,
+    pub refs: String,
+    pub graph: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitBranchInfo {
+    pub name: String,
+    pub current: bool,
+    pub remote: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitStashEntry {
+    pub index: u32,
+    pub message: String,
+}
+
+#[tauri::command]
+pub fn git_log(
+    db: State<'_, DbState>,
+    project_id: String,
+    max_count: Option<u32>,
+) -> Result<Vec<GitLogEntry>, String> {
+    let root = project_folder(&db, &project_id)?;
+    if !is_git_repo(&root) {
+        return Err("Not a Git repository.".into());
+    }
+    let count = max_count.unwrap_or(30).to_string();
+    let raw = git_cmd(
+        &root,
+        &[
+            "log",
+            "--all",
+            "--oneline",
+            "--graph",
+            "--decorate",
+            "--date=short",
+            &format!("--max-count={}", count),
+            "--format=::HASH::%H::AUTHOR::%an::DATE::%ad::REFS::%D::GRAPH::%s",
+        ],
+    )?;
+    let mut entries = Vec::new();
+    for line in raw.lines() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        let graph_end = line.find(|c| c != '|' && c != '*' && c != '/' && c != '\\' && c != ' ' && c != '-' && c != '.');
+        let graph_part = match graph_end {
+            Some(i) => &line[..i],
+            None => line,
+        };
+        let rest = match graph_end {
+            Some(i) => line[i..].trim(),
+            None => "",
+        };
+        let hash = rest.split("::AUTHOR::").next().unwrap_or("").replace("::HASH::", "").trim().to_string();
+        if hash.is_empty() {
+            continue;
+        }
+        let author = rest.split("::AUTHOR::").nth(1)
+            .and_then(|s| s.split("::DATE::").next())
+            .unwrap_or("")
+            .to_string();
+        let date = rest.split("::DATE::").nth(1)
+            .and_then(|s| s.split("::REFS::").next())
+            .unwrap_or("")
+            .to_string();
+        let refs = rest.split("::REFS::").nth(1)
+            .and_then(|s| s.split("::GRAPH::").next())
+            .unwrap_or("")
+            .to_string();
+        let message = rest.split("::GRAPH::").nth(1).unwrap_or("").to_string();
+        entries.push(GitLogEntry {
+            hash: hash.chars().take(12).collect(),
+            author,
+            date,
+            message,
+            refs,
+            graph: graph_part.to_string(),
+        });
+    }
+    Ok(entries)
+}
+
+#[tauri::command]
+pub fn git_branches(
+    db: State<'_, DbState>,
+    project_id: String,
+) -> Result<Vec<GitBranchInfo>, String> {
+    let root = project_folder(&db, &project_id)?;
+    if !is_git_repo(&root) {
+        return Err("Not a Git repository.".into());
+    }
+    let raw = git_cmd(&root, &["branch", "--all", "--format=%(refname:short):::%(HEAD)"])?;
+    let mut branches = Vec::new();
+    for line in raw.lines() {
+        let parts: Vec<&str> = line.split(":::").collect();
+        if parts.is_empty() || parts[0].is_empty() {
+            continue;
+        }
+        let name = parts[0].to_string();
+        let current = parts.get(1).map(|h| *h == "*").unwrap_or(false);
+        let remote = if name.starts_with("remotes/") {
+            Some(name.clone())
+        } else {
+            None
+        };
+        branches.push(GitBranchInfo {
+            name,
+            current,
+            remote,
+        });
+    }
+    Ok(branches)
+}
+
+#[tauri::command]
+pub fn git_stash_list(
+    db: State<'_, DbState>,
+    project_id: String,
+) -> Result<Vec<GitStashEntry>, String> {
+    let root = project_folder(&db, &project_id)?;
+    if !is_git_repo(&root) {
+        return Err("Not a Git repository.".into());
+    }
+    let raw = git_cmd(&root, &["stash", "list"]).unwrap_or_default();
+    let mut entries = Vec::new();
+    for line in raw.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let colon = trimmed.find(':');
+        let (idx_str, msg) = match colon {
+            Some(i) => (&trimmed[..i], trimmed[i + 1..].trim()),
+            None => (trimmed, ""),
+        };
+        let index: u32 = idx_str
+            .trim_start_matches("stash@{")
+            .trim_end_matches('}')
+            .parse()
+            .unwrap_or(0);
+        entries.push(GitStashEntry {
+            index,
+            message: msg.to_string(),
+        });
+    }
+    Ok(entries)
+}
+
+#[tauri::command]
+pub fn git_stash_push(
+    db: State<'_, DbState>,
+    project_id: String,
+    message: Option<String>,
+) -> Result<String, String> {
+    let root = project_folder(&db, &project_id)?;
+    if !is_git_repo(&root) {
+        return Err("Not a Git repository.".into());
+    }
+    let mut args = vec!["stash", "push"];
+    if let Some(ref msg) = message {
+        args.push("-m");
+        args.push(msg);
+    }
+    git_cmd(&root, &args)?;
+    Ok("Stashed.".into())
+}
+
+#[tauri::command]
+pub fn git_stash_pop(
+    db: State<'_, DbState>,
+    project_id: String,
+    index: Option<u32>,
+) -> Result<String, String> {
+    let root = project_folder(&db, &project_id)?;
+    if !is_git_repo(&root) {
+        return Err("Not a Git repository.".into());
+    }
+    if let Some(idx) = index {
+        git_cmd(&root, &["stash", "pop", &format!("stash@{{{}}}", idx)])?;
+    } else {
+        git_cmd(&root, &["stash", "pop"])?;
+    }
+    Ok("Stash popped.".into())
+}
+
 pub fn tool_git_status(db: &DbState, project_id: &str) -> Result<GitStatusResult, String> {
     git_status_inner(db, project_id)
 }

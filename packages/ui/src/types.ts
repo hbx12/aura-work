@@ -9,6 +9,7 @@ export type AppView =
   | "computer"
   | "memory"
   | "audit"
+  | "usage"
   | "terminal"
   | "settings";
 
