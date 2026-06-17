@@ -68,6 +68,7 @@ export type MessageKey =
   | "memory.reject"
   | "memory.delete"
   | "nav.audit"
+  | "nav.usage"
   | "nav.settings"
   | "settings.title"
   | "settings.subtitle"
@@ -468,7 +469,17 @@ export type MessageKey =
   | "settings.notifyTaskError"
   | "settings.notifyPermission"
   | "settings.notifySidecar"
-  | "settings.notifyTaskPaused";
+  | "settings.notifyTaskPaused"
+  | "usage.title"
+  | "usage.subtitle"
+  | "usage.monthSpend"
+  | "usage.inputTokens"
+  | "usage.outputTokens"
+  | "usage.totalCalls"
+  | "usage.dailySpend"
+  | "usage.noData"
+  | "usage.byProvider"
+  | "usage.recent";
 
 export type MessageCatalog = Record<MessageKey, string>;
 
@@ -494,6 +505,7 @@ const en: MessageCatalog = {
   "memory.reject": "Reject",
   "memory.delete": "Delete",
   "nav.audit": "Audit log",
+  "nav.usage": "Usage",
   "nav.settings": "Settings",
   "settings.title": "Settings & vault",
   "settings.subtitle":
@@ -912,6 +924,16 @@ const en: MessageCatalog = {
   "settings.notifyPermission": "Permission requested",
   "settings.notifySidecar": "Sidecar offline",
   "settings.notifyTaskPaused": "Task paused",
+  "usage.title": "Usage Dashboard",
+  "usage.subtitle": "API usage and spending across providers.",
+  "usage.monthSpend": "This month",
+  "usage.inputTokens": "Input tokens",
+  "usage.outputTokens": "Output tokens",
+  "usage.totalCalls": "API calls",
+  "usage.dailySpend": "Daily spending (last 30 days)",
+  "usage.noData": "No usage data yet.",
+  "usage.byProvider": "By provider",
+  "usage.recent": "Recent usage",
 };
 
 /** Per-locale overrides — Arabic/Persian use strict isolation (no English fallback). */
@@ -939,6 +961,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "memory.reject": "رفض",
     "memory.delete": "حذف",
     "nav.audit": "سجل التدقيق",
+    "nav.usage": "الاستخدام",
     "nav.settings": "الإعدادات",
     "settings.title": "الإعدادات والخزنة",
     "settings.subtitle": "خزنة محلية مشفّرة، اللغة، التحديثات الموقّعة، والتحقق من حزمة التشغيل.",
@@ -1346,6 +1369,16 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.notifyPermission": "طلب إذن",
     "settings.notifySidecar": "انقطاع الخادم المساعد",
     "settings.notifyTaskPaused": "إيقاف المهمة مؤقتاً",
+    "usage.title": "لوحة الاستخدام",
+    "usage.subtitle": "استخدام واجهات API والإنفاق عبر المزودين.",
+    "usage.monthSpend": "هذا الشهر",
+    "usage.inputTokens": "رموز الإدخال",
+    "usage.outputTokens": "رموز الإخراج",
+    "usage.totalCalls": "استدعاءات API",
+    "usage.dailySpend": "الإنفاق اليومي (آخر 30 يوماً)",
+    "usage.noData": "لا توجد بيانات استخدام بعد.",
+    "usage.byProvider": "حسب المزود",
+    "usage.recent": "الاستخدام الأخير",
   },
   es: {
     "nav.tasks": "Tareas",
