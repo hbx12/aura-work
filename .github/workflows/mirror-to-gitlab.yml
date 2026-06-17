@@ -1,0 +1,47 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-to-gitlab
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    if: github.repository == 'hbx12/aura-work'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror GitHub ref to GitLab
+        env:
+          GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+          GITLAB_REPOSITORY: gitlab.com/hbybbdr558/aura-work.git
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${GITLAB_MIRROR_TOKEN}" ]; then
+            echo "GITLAB_MIRROR_TOKEN is required."
+            exit 1
+          fi
+
+          git config user.name "aura-work mirror"
+          git config user.email "mirror@aura-work.local"
+          git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git push -o ci.skip gitlab "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          else
+            git push -o ci.skip gitlab "HEAD:refs/heads/${GITHUB_REF_NAME}"
+          fi
