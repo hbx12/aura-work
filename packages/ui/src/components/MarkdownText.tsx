@@ -116,6 +116,10 @@ function parseInline(text: string, keyPrefix: string): ReactNode[] {
     if (matched) continue;
 
     const nextSpecial = rest.search(/[`*_[\]]/);
+    if (nextSpecial === -1) {
+      pushText(rest);
+      break;
+    }
     if (nextSpecial > 0) {
       pushText(rest.slice(0, nextSpecial));
       rest = rest.slice(nextSpecial);
