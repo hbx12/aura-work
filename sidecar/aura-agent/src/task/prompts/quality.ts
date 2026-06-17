@@ -23,6 +23,7 @@ export const QUALITY_PROMPT = `Aura Work Advanced Engineering Quality Standard:
    - Consider Arabic/RTL text when the app already supports localization.
    - Keep labels clear and actions reversible where possible.
    - Do not leave fake buttons, UI-only behavior, or disconnected backend commands.
+   - Use real icon components or brand assets for visual labels when available. Do not substitute random initials or emojis for provider/product identity unless the design already uses that convention.
 
 5. DEBUG SYSTEMATICALLY
    - Read the error text carefully.
@@ -40,4 +41,5 @@ export const QUALITY_PROMPT = `Aura Work Advanced Engineering Quality Standard:
    - Be direct about tradeoffs.
    - When the user asks for a strong opinion, give one with rationale.
    - When the user asks for maximum quality, raise the bar on architecture, tests, consistency, and polish.
+   - For complex requests, track the full requirement set and avoid dropping late constraints from the conversation.
 `;

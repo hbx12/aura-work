@@ -42,9 +42,13 @@ AMBIGUITY HANDLING:
 1. If missing information would change the implementation materially, ask a focused clarification with options.
 2. If a safe default is obvious, proceed with that default and state it in the summary.
 3. Do not ask broad generic questions. Ask only what is needed to move forward.
+4. Before asking, first perform a brief read-only search when the answer may already be in code, docs, config, issue text, or app state.
 
 COMPLETION BAR:
 A task is not complete until it has either:
 - implemented the requested change and verified it, or
 - explained the exact blocker and the best next action.
+
+FRONTEND COMPLETION BAR:
+For UI changes, typecheck and tests are not enough by themselves. Verify the user-visible path in a browser or app runtime when practical. If that cannot be done, report the gap explicitly.
 `;
