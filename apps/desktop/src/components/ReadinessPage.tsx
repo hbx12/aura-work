@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Icon } from "@aura-os/ui";
 
 export interface ReadinessResult {
   app: {
@@ -87,14 +88,16 @@ export function ReadinessPage({ projectId, isArabic }: ReadinessPageProps) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold" }}>
-            🛡️ {isArabic ? "جاهزية النظام وبيئة العمل" : "System & Project Readiness"}
+            <Icon name="shield-check" size={20} style={{ verticalAlign: "-4px", marginInlineEnd: 8 }} />
+            {isArabic ? "جاهزية النظام وبيئة العمل" : "System & Project Readiness"}
           </h2>
           <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "var(--text-muted)" }}>
             {isArabic ? "تحقق مما إذا كانت الأدوات والسياسات الأمنية جاهزة لعمل الوكيل." : "Verify if app components and security controls are ready for agent tasks."}
           </p>
         </div>
         <button className="btn sm primary" onClick={loadReadiness}>
-          🔄 {isArabic ? "تحديث" : "Refresh"}
+          <Icon name="rotate-cw" size={14} />
+          {isArabic ? "تحديث" : "Refresh"}
         </button>
       </div>
 
@@ -102,7 +105,8 @@ export function ReadinessPage({ projectId, isArabic }: ReadinessPageProps) {
         {/* App Health */}
         <div style={{ padding: "16px", background: "var(--bg-3)", border: "1px solid var(--border-2)", borderRadius: "10px" }}>
           <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: "bold", borderBottom: "1px solid var(--border-1)", paddingBottom: "6px" }}>
-            🔌 {isArabic ? "صحة التطبيق والخدمات" : "App Health & Services"}
+            <Icon name="plug" size={15} style={{ verticalAlign: "-3px", marginInlineEnd: 7 }} />
+            {isArabic ? "صحة التطبيق والخدمات" : "App Health & Services"}
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px" }}>
@@ -135,7 +139,8 @@ export function ReadinessPage({ projectId, isArabic }: ReadinessPageProps) {
         {/* Project Readiness */}
         <div style={{ padding: "16px", background: "var(--bg-3)", border: "1px solid var(--border-2)", borderRadius: "10px" }}>
           <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: "bold", borderBottom: "1px solid var(--border-1)", paddingBottom: "6px" }}>
-            📁 {isArabic ? "جاهزية المشروع" : "Project Readiness"}
+            <Icon name="folder" size={15} style={{ verticalAlign: "-3px", marginInlineEnd: 7 }} />
+            {isArabic ? "جاهزية المشروع" : "Project Readiness"}
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px" }}>
@@ -164,7 +169,8 @@ export function ReadinessPage({ projectId, isArabic }: ReadinessPageProps) {
         {/* Security Controls */}
         <div style={{ padding: "16px", background: "var(--bg-3)", border: "1px solid var(--border-2)", borderRadius: "10px" }}>
           <h3 style={{ margin: "0 0 12px 0", fontSize: "15px", fontWeight: "bold", borderBottom: "1px solid var(--border-1)", paddingBottom: "6px" }}>
-            🔒 {isArabic ? "السياسات الأمنية" : "Security & Policies"}
+            <Icon name="lock" size={15} style={{ verticalAlign: "-3px", marginInlineEnd: 7 }} />
+            {isArabic ? "السياسات الأمنية" : "Security & Policies"}
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "13px" }}>
