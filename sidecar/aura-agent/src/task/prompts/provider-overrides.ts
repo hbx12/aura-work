@@ -2,10 +2,10 @@ import type { ProviderId } from "@aura-os/shared";
 
 export const PROVIDER_OVERRIDES: Record<ProviderId, string> = {
   openai: `
-[Provider: OpenAI] Use structured outputs when available. Ensure tool calls use precise parameters.
+[Provider: OpenAI] Use structured outputs when available. Ensure tool calls use precise parameters and concise reasoning summaries.
 `,
   anthropic: `
-[Provider: Anthropic Claude] Leverage rich markdown structure and clear chain-of-thought inside tags when planning. Be highly precise.
+[Provider: Anthropic Claude] Use clear structure, explicit tool discipline, and concise reasoning summaries. Do not expose hidden chain-of-thought; summarize decisions instead.
 `,
   gemini: `
 [Provider: Google Gemini] Focus on explicit schema guidelines. Clearly separate role instructions from raw data block parameters.
@@ -14,7 +14,7 @@ export const PROVIDER_OVERRIDES: Record<ProviderId, string> = {
 [Provider: DeepSeek] CRITICAL: You must return ONLY raw JSON, with no explanation or prose outside the JSON structure. Double check JSON syntax to avoid parsing failures.
 `,
   ollama: `
-[Provider: Ollama Local] Rely on direct, explicit instructions. Do not assume high capacity for nested planning.
+[Provider: Ollama Local] Rely on direct, explicit instructions. Keep the JSON schema simple and avoid unnecessary nested prose.
 `,
   "openai-compatible": `
 [Provider: OpenAI-Compatible] Adhere strictly to the JSON schemas. Minimize trailing commentary.
