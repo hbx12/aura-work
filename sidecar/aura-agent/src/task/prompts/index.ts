@@ -2,6 +2,7 @@ import { BASE_PROMPT } from "./base.js";
 import { PLANNER_PROMPT } from "./planner.js";
 import { EXECUTOR_PROMPT } from "./executor.js";
 import { REVIEWER_PROMPT } from "./reviewer.js";
+import { QUALITY_PROMPT } from "./quality.js";
 import { TOOLS_PROMPT as toolsPrompt } from "./tools.js";
 import { CONTEXT_PROMPT as contextPrompt } from "./context.js";
 import { SAFETY_PROMPT } from "./safety.js";
@@ -25,6 +26,7 @@ export function getSystemPrompt(
     : "";
 
   return `${BASE_PROMPT}
+${QUALITY_PROMPT}
 ${toolsPrompt}
 ${EXECUTOR_PROMPT}
 ${REVIEWER_PROMPT}
@@ -42,6 +44,7 @@ ${planText}
 
 export function getPlannerSystemPrompt(): string {
   return `${PLANNER_PROMPT}
+${QUALITY_PROMPT}
 ${SAFETY_PROMPT}
 `;
 }
