@@ -1,5 +1,5 @@
 use crate::task_writes::{
-    brief_write_status, extract_markdown_writes, is_file_task_prompt, strip_code_fences,
+    is_file_task_prompt, strip_code_fences,
 };
 use crate::agent::{
     build_task_chat_bundle, enabled_providers, record_usage, sidecar_get_text, sidecar_post,
@@ -718,33 +718,8 @@ pub async fn advance_task_inner(
     let mut pending_edit_id: Option<String> = None;
     let mut wait_state: Option<TaskState> = None;
 
-    let mut tool_calls = iterate_resp.tool_calls.clone();
-    let mut assistant_content = iterate_resp.content.clone();
-
-    if tool_calls.is_none() {
-        let raw = assistant_content
-            .as_deref()
-            .or(iterate_resp.summary.as_deref())
-            .unwrap_or("");
-        if raw.contains("```") {
-            let writes = extract_markdown_writes(raw, &prompt);
-            if !writes.is_empty() {
-                let paths: Vec<String> = writes.iter().map(|(p, _)| p.clone()).collect();
-                assistant_content = Some(brief_write_status(&paths));
-                tool_calls = Some(
-                    writes
-                        .into_iter()
-                        .enumerate()
-                        .map(|(i, (path, content))| SidecarToolCall {
-                            id: (i + 1).to_string(),
-                            name: "write_file".into(),
-                            arguments: serde_json::json!({ "path": path, "content": content }),
-                        })
-                        .collect(),
-                );
-            }
-        }
-    }
+    let tool_calls = iterate_resp.tool_calls.clone();
+    let assistant_content = iterate_resp.content.clone();
 
     if let Some(ref role) = iterate_resp.role {
         if let Some(content) = assistant_content.as_ref() {

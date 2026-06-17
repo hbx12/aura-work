@@ -67,9 +67,15 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
 }
 
 mod vscode_bridge {
+    use crate::sidecar_auth::generate_sidecar_token;
     use serde::{Deserialize, Serialize};
+    use std::fs;
     use std::io::Read;
-    use tauri::Emitter;
+    use std::path::PathBuf;
+    use tauri::{Emitter, Manager};
+
+    const MAX_ACTIVE_EDITOR_BYTES: u64 = 512 * 1024;
+    const TOKEN_FILE_NAME: &str = "editor-bridge-token";
 
     #[derive(Serialize, Deserialize, Clone, Debug)]
     struct ActiveEditorPayload {
@@ -80,8 +86,82 @@ mod vscode_bridge {
         cursor_line: Option<i32>,
     }
 
+    fn token_path(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
+        let dir = app_handle
+            .path()
+            .app_data_dir()
+            .map_err(|e| format!("Could not resolve app data directory: {e}"))?;
+        fs::create_dir_all(&dir).map_err(|e| format!("Could not create app data directory: {e}"))?;
+        Ok(dir.join(TOKEN_FILE_NAME))
+    }
+
+    fn load_or_create_token(app_handle: &tauri::AppHandle) -> Result<String, String> {
+        let path = token_path(app_handle)?;
+        if let Ok(existing) = fs::read_to_string(&path) {
+            let token = existing.trim().to_string();
+            if token.len() >= 32 {
+                return Ok(token);
+            }
+        }
+
+        let token = generate_sidecar_token();
+        fs::write(&path, format!("{token}\n"))
+            .map_err(|e| format!("Could not write editor bridge token: {e}"))?;
+        Ok(token)
+    }
+
+    fn request_header<'a>(request: &'a tiny_http::Request, name: &str) -> Option<&'a str> {
+        request
+            .headers()
+            .iter()
+            .find(|header| header.field.to_string().eq_ignore_ascii_case(name))
+            .map(|header| header.value.as_str())
+    }
+
+    fn request_is_authorized(request: &tiny_http::Request, token: &str) -> bool {
+        let bearer = format!("Bearer {token}");
+        request_header(request, "Authorization")
+            .map(|value| value.trim() == bearer)
+            .unwrap_or(false)
+            || request_header(request, "X-Aura-Editor-Bridge-Token")
+                .map(|value| value.trim() == token)
+                .unwrap_or(false)
+    }
+
+    fn validate_payload(payload: &ActiveEditorPayload) -> Result<(), String> {
+        if payload.file_path.trim().is_empty() {
+            return Err("missing filePath".into());
+        }
+        if payload.file_path.contains('\0') {
+            return Err("invalid filePath".into());
+        }
+        if payload.content.len() as u64 > MAX_ACTIVE_EDITOR_BYTES {
+            return Err("content too large".into());
+        }
+        if payload.cursor_line.is_some_and(|line| line < 1) {
+            return Err("invalid cursorLine".into());
+        }
+        Ok(())
+    }
+
+    fn json_response(body: &'static str, status: u16) -> tiny_http::Response<std::io::Cursor<Vec<u8>>> {
+        tiny_http::Response::from_string(body)
+            .with_status_code(status)
+            .with_header(
+                tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..])
+                    .expect("static header"),
+            )
+    }
+
     pub fn start_vscode_bridge(app_handle: tauri::AppHandle) {
         std::thread::spawn(move || {
+            let token = match load_or_create_token(&app_handle) {
+                Ok(token) => token,
+                Err(e) => {
+                    eprintln!("[vscode-bridge] failed to initialize auth token: {e}");
+                    return;
+                }
+            };
             let addr = "127.0.0.1:47890";
             let server = match tiny_http::Server::http(addr) {
                 Ok(s) => s,
@@ -93,27 +173,40 @@ mod vscode_bridge {
             eprintln!("[vscode-bridge] listening on {addr}");
             for mut request in server.incoming_requests() {
                 if request.method() == &tiny_http::Method::Post && request.url() == "/active-editor" {
+                    if !request_is_authorized(&request, &token) {
+                        let _ = request.respond(json_response("{\"error\":\"unauthorized\"}", 401));
+                        continue;
+                    }
                     let mut content = String::new();
-                    let _ = request.as_reader().read_to_string(&mut content);
+                    let read_result = request
+                        .as_reader()
+                        .take(MAX_ACTIVE_EDITOR_BYTES + 1)
+                        .read_to_string(&mut content);
+                    if read_result.is_err() || content.len() as u64 > MAX_ACTIVE_EDITOR_BYTES {
+                        let _ = request.respond(json_response("{\"error\":\"request too large\"}", 413));
+                        continue;
+                    }
                     if let Ok(payload) = serde_json::from_str::<ActiveEditorPayload>(&content) {
+                        if let Err(reason) = validate_payload(&payload) {
+                            let _ = request.respond(json_response(
+                                match reason.as_str() {
+                                    "missing filePath" => "{\"error\":\"missing filePath\"}",
+                                    "invalid filePath" => "{\"error\":\"invalid filePath\"}",
+                                    "content too large" => "{\"error\":\"content too large\"}",
+                                    "invalid cursorLine" => "{\"error\":\"invalid cursorLine\"}",
+                                    _ => "{\"error\":\"invalid payload\"}",
+                                },
+                                400,
+                            ));
+                            continue;
+                        }
                         let _ = app_handle.emit("vs-code-editor-sync", payload);
-                        let response = tiny_http::Response::from_string("{\"ok\":true}");
-                        let _ = request.respond(
-                            response.with_header(
-                                tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap()
-                            )
-                        );
+                        let _ = request.respond(json_response("{\"ok\":true}", 200));
                     } else {
-                        let _ = request.respond(
-                            tiny_http::Response::from_string("{\"error\":\"invalid json\"}")
-                                .with_status_code(400)
-                        );
+                        let _ = request.respond(json_response("{\"error\":\"invalid json\"}", 400));
                     }
                 } else {
-                    let _ = request.respond(
-                        tiny_http::Response::from_string("{\"error\":\"not found\"}")
-                            .with_status_code(404)
-                    );
+                    let _ = request.respond(json_response("{\"error\":\"not found\"}", 404));
                 }
             }
         });

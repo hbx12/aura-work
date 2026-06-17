@@ -28,6 +28,37 @@ function envToStrings(env: Record<string, unknown>): Record<string, string> {
   return out;
 }
 
+const ALLOWED_INHERITED_ENV_KEYS = new Set([
+  "PATH",
+  "PATHEXT",
+  "SystemRoot",
+  "WINDIR",
+  "HOME",
+  "USER",
+  "USERNAME",
+  "USERPROFILE",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "SHELL",
+  "TMP",
+  "TEMP",
+  "TMPDIR",
+]);
+
+const SENSITIVE_ENV_PATTERN = /(KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL|AUTH|SESSION|COOKIE)/i;
+
+function inheritedMcpEnv(): Record<string, string> {
+  const out: Record<string, string> = { AURA_MCP: "1" };
+  for (const [key, value] of Object.entries(process.env)) {
+    if (typeof value !== "string") continue;
+    if (!ALLOWED_INHERITED_ENV_KEYS.has(key)) continue;
+    if (SENSITIVE_ENV_PATTERN.test(key)) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
 export async function reloadMcp(config: HelperConfig) {
   await disconnectAll();
   projectSettings = config.projectMcpSettings;
@@ -54,10 +85,7 @@ async function connectServer(server: McpServerConfig) {
   } else if (server.transport === "websocket" || server.transport === "ws") {
     transport = new WebSocketClientTransport(new URL(server.command));
   } else {
-    const baseEnv: Record<string, string> = {};
-    for (const [k, v] of Object.entries(process.env)) {
-      if (typeof v === "string") baseEnv[k] = v;
-    }
+    const baseEnv = inheritedMcpEnv();
     transport = new StdioClientTransport({
       command: server.command,
       args: server.args,

@@ -12,6 +12,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::State;
 
+const MAX_SKILL_EXCHANGE_BYTES: usize = 512 * 1024;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstalledPlugin {
@@ -216,7 +218,12 @@ pub fn build_helper_config(conn: &Connection) -> Result<HelperConfigPayload, Str
     for (project_id, folder_path) in &projects {
         let (project_servers, project_server_settings) = load_aura_config(Path::new(folder_path), project_id);
         
-        for s in project_servers {
+        for mut s in project_servers {
+            s.enabled = project_mcp_settings
+                .iter()
+                .find(|setting| setting.project_id == *project_id && setting.server_id == s.id)
+                .map(|setting| setting.enabled)
+                .unwrap_or(false);
             mcp_servers.push(s.clone());
             
             for (other_id, _) in &projects {
@@ -800,6 +807,7 @@ pub async fn save_local_skill(
         if !path.is_file() {
             return Err("Skill file does not exist".to_string());
         }
+        validate_config_skill_path(&db, path)?;
         
         let new_content = format!(
             "---\nname: {}\ndescription: {}\n---\n{}",
@@ -977,7 +985,7 @@ pub fn load_aura_config(
             if let Ok(config) = serde_json::from_str::<AuraConfigFile>(&clean) {
                 if let Some(mcp) = config.mcp {
                     for (name, entry) in mcp {
-                        let enabled = entry.enabled.unwrap_or(true);
+                        let enabled = entry.enabled.unwrap_or(prefix_id.is_empty());
                         let mut command = String::new();
                         let mut args = Vec::new();
                         let mut transport = "stdio".to_string();
@@ -1060,12 +1068,62 @@ pub fn load_aura_config(
 
 #[tauri::command]
 pub fn save_text_file(path: String, content: String) -> Result<(), String> {
+    validate_skill_exchange_file(&path, false)?;
+    if content.len() > MAX_SKILL_EXCHANGE_BYTES {
+        return Err("Skill export is too large.".into());
+    }
     fs::write(&path, content).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn read_text_file(path: String) -> Result<String, String> {
+    validate_skill_exchange_file(&path, true)?;
     fs::read_to_string(&path).map_err(|e| e.to_string())
+}
+
+fn validate_skill_exchange_file(path: &str, must_exist: bool) -> Result<(), String> {
+    let path = Path::new(path);
+    let ext = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    if ext != "aura-skill" && ext != "json" {
+        return Err("Only .aura-skill and .json skill files are supported.".into());
+    }
+    if must_exist {
+        let meta = fs::metadata(path).map_err(|e| e.to_string())?;
+        if !meta.is_file() {
+            return Err("Selected path is not a file.".into());
+        }
+        if meta.len() > MAX_SKILL_EXCHANGE_BYTES as u64 {
+            return Err("Skill file is too large.".into());
+        }
+    } else if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            return Err("Target folder does not exist.".into());
+        }
+    }
+    Ok(())
+}
+
+fn validate_config_skill_path(db: &DbState, path: &Path) -> Result<(), String> {
+    if path.file_name().and_then(|name| name.to_str()) != Some("SKILL.md") {
+        return Err("Config skill edits are limited to SKILL.md files.".into());
+    }
+    let canonical = path
+        .canonicalize()
+        .map_err(|e| format!("Skill file not accessible: {e}"))?;
+    let allowed = list_local_skills_internal(db)?
+        .into_iter()
+        .filter(|skill| skill.plugin_id == "config_skill")
+        .filter_map(|skill| skill.path)
+        .filter_map(|skill_path| PathBuf::from(skill_path).canonicalize().ok())
+        .any(|skill_path| skill_path == canonical);
+    if !allowed {
+        return Err("Skill file is outside trusted skill directories.".into());
+    }
+    Ok(())
 }
 
 #[cfg(test)]

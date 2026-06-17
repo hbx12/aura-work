@@ -14,13 +14,40 @@ import {
 import type { Device, DispatchRequest, EncryptedSyncEnvelope, SyncObjectType } from "./types.js";
 
 const PORT = Number(process.env.AURA_CLOUD_PORT ?? 47830);
+const MAX_JSON_BODY_BYTES = 64 * 1024;
+const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const AUTH_RATE_LIMIT_MAX_ATTEMPTS = 5;
 const store = new FileCloudStore();
 
+const authAttempts = new Map<string, { count: number; resetAt: number }>();
+
 async function parseJson<T>(req: IncomingMessage): Promise<T> {
+  const contentLength = Number(req.headers["content-length"]);
+  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BODY_BYTES) {
+    const err = new Error("Request body exceeds the 64 KB limit.");
+    (err as Error & { statusCode?: number }).statusCode = 413;
+    throw err;
+  }
   const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
+  let receivedBytes = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as ArrayBuffer);
+    receivedBytes += buffer.length;
+    if (receivedBytes > MAX_JSON_BODY_BYTES) {
+      const err = new Error("Request body exceeds the 64 KB limit.");
+      (err as Error & { statusCode?: number }).statusCode = 413;
+      throw err;
+    }
+    chunks.push(buffer);
+  }
   const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? (JSON.parse(raw) as T) : ({} as T);
+  try {
+    return raw ? (JSON.parse(raw) as T) : ({} as T);
+  } catch {
+    const err = new Error("Malformed JSON request body.");
+    (err as Error & { statusCode?: number }).statusCode = 400;
+    throw err;
+  }
 }
 
 function json(res: ServerResponse, status: number, body: unknown) {
@@ -32,6 +59,35 @@ function authToken(req: IncomingMessage): string | undefined {
   const h = req.headers.authorization;
   if (!h?.startsWith("Bearer ")) return undefined;
   return h.slice(7);
+}
+
+function rateLimitKey(req: IncomingMessage, scope: string, subject?: string): string {
+  const ip = req.socket.remoteAddress ?? "unknown";
+  return `${scope}:${ip}:${subject?.trim().toLowerCase() ?? "*"}`;
+}
+
+function assertAuthRateLimit(key: string): void {
+  const now = Date.now();
+  const entry = authAttempts.get(key);
+  if (entry && entry.resetAt > now && entry.count >= AUTH_RATE_LIMIT_MAX_ATTEMPTS) {
+    const err = new Error("Too many authentication attempts. Try again later.");
+    (err as Error & { statusCode?: number }).statusCode = 429;
+    throw err;
+  }
+}
+
+function recordAuthFailure(key: string): void {
+  const now = Date.now();
+  const entry = authAttempts.get(key);
+  if (!entry || entry.resetAt <= now) {
+    authAttempts.set(key, { count: 1, resetAt: now + AUTH_RATE_LIMIT_WINDOW_MS });
+    return;
+  }
+  entry.count += 1;
+}
+
+function clearAuthFailures(key: string): void {
+  authAttempts.delete(key);
 }
 
 async function requireAuth(req: IncomingMessage): Promise<{ accountId: string; token: string }> {
@@ -67,7 +123,10 @@ const server = createServer(async (req, res) => {
     // --- Auth (dev email/password; OAuth/Passkeys planned) ---
     if (method === "POST" && path === "/auth/register") {
       const body = await parseJson<{ email?: string; displayName?: string; password?: string }>(req);
+      const key = rateLimitKey(req, "register");
+      assertAuthRateLimit(key);
       if (!body.email || !body.password || body.password.length < 8) {
+        recordAuthFailure(key);
         return json(res, 400, { error: "email and password (min 8) required" });
       }
       const account = store.createAccount(
@@ -77,6 +136,7 @@ const server = createServer(async (req, res) => {
       );
       const session = store.createSession(account.id);
       await store.save();
+      clearAuthFailures(key);
       return json(res, 201, {
         accountId: account.id,
         email: account.email,
@@ -90,12 +150,16 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && path === "/auth/login") {
       const body = await parseJson<{ email?: string; password?: string }>(req);
+      const key = rateLimitKey(req, "login", body.email);
+      assertAuthRateLimit(key);
       const account = body.email ? store.findAccountByEmail(body.email) : undefined;
       if (!account || !body.password || !verifyPassword(body.password, account.passwordHash)) {
+        recordAuthFailure(key);
         return json(res, 401, { error: "Invalid credentials" });
       }
       const session = store.createSession(account.id);
       await store.save();
+      clearAuthFailures(key);
       return json(res, 200, {
         accountId: account.id,
         email: account.email,
@@ -326,6 +390,10 @@ const server = createServer(async (req, res) => {
       if (!body.sourceDeviceId || !body.targetDeviceId || !body.ciphertext || !body.nonce) {
         return json(res, 400, { error: "sourceDeviceId, targetDeviceId, ciphertext, nonce required" });
       }
+      const source = store.findDevice(body.sourceDeviceId);
+      if (!source || source.accountId !== auth.accountId) {
+        return json(res, 404, { error: "Source device not found" });
+      }
       const target = store.findDevice(body.targetDeviceId);
       if (!target || target.accountId !== auth.accountId) {
         return json(res, 404, { error: "Target device not found" });
@@ -413,7 +481,8 @@ const server = createServer(async (req, res) => {
     return json(res, 404, { error: "Not found" });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    const status = msg === "Unauthorized" || msg.startsWith("Invalid") ? 401 : 500;
+    const explicitStatus = (e as Error & { statusCode?: number })?.statusCode;
+    const status = explicitStatus ?? (msg === "Unauthorized" || msg.startsWith("Invalid") ? 401 : 500);
     return json(res, status, { error: msg });
   }
 });

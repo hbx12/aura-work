@@ -562,6 +562,9 @@ fn check_app_access(
     reason: &str,
     tool_payload: Option<serde_json::Value>,
 ) -> Result<(), String> {
+    if process_name.trim().is_empty() || title.trim().is_empty() {
+        return Err("Computer-use app actions require processName and title from computer_list_windows.".into());
+    }
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     if let Some(blocked) = is_app_blocked(&conn, process_name, title) {
         append_audit(

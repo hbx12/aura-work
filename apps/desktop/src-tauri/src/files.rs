@@ -114,21 +114,43 @@ pub fn resolve_project_path(root: &str, rel: &str) -> Result<PathBuf, String> {
     resolve_under_root(root, rel, false)
 }
 
+fn validate_relative_project_path(rel: &str) -> Result<(), String> {
+    let trimmed = rel.trim();
+    if trimmed.is_empty() {
+        return Err("Path is required.".into());
+    }
+    if trimmed.contains('\0') {
+        return Err("Path contains an invalid character.".into());
+    }
+    let path = Path::new(trimmed);
+    if path.is_absolute() {
+        return Err("Absolute paths are not allowed.".into());
+    }
+    for component in path.components() {
+        match component {
+            Component::Normal(_) | Component::CurDir => {}
+            Component::ParentDir => return Err("Path traversal is not allowed.".into()),
+            Component::RootDir | Component::Prefix(_) => {
+                return Err("Absolute paths are not allowed.".into())
+            }
+        }
+    }
+    Ok(())
+}
+
 fn resolve_under_root(root: &str, rel: &str, allow_missing: bool) -> Result<PathBuf, String> {
     let root = PathBuf::from(root);
     let rel = normalize_rel(rel);
-    if rel.contains("..") {
-        return Err("Path traversal is not allowed.".into());
-    }
-    let joined = root.join(&rel);
+    validate_relative_project_path(&rel)?;
     let canonical_root = root
         .canonicalize()
         .map_err(|e| format!("Project folder not accessible: {e}"))?;
+    let joined = canonical_root.join(&rel);
     if allow_missing {
         let mut check = joined.clone();
         while !check.exists() {
             if let Some(parent) = check.parent() {
-                if parent.starts_with(&root) || parent == root {
+                if parent.starts_with(&canonical_root) || parent == canonical_root {
                     check = parent.to_path_buf();
                 } else {
                     break;
@@ -137,13 +159,11 @@ fn resolve_under_root(root: &str, rel: &str, allow_missing: bool) -> Result<Path
                 break;
             }
         }
-        if check.exists() {
-            let canonical_parent = check
-                .canonicalize()
-                .map_err(|e| format!("Path error: {e}"))?;
-            if !canonical_parent.starts_with(&canonical_root) {
-                return Err("Path is outside the project folder.".into());
-            }
+        let canonical_parent = check
+            .canonicalize()
+            .map_err(|e| format!("Path error: {e}"))?;
+        if !canonical_parent.starts_with(&canonical_root) {
+            return Err("Path is outside the project folder.".into());
         }
         Ok(joined)
     } else {
@@ -982,6 +1002,34 @@ mod tests {
         let err = write_file_internal(root.to_str().unwrap(), "large.txt", &oversized).unwrap_err();
 
         assert!(err.contains("File too large to write"));
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn write_file_rejects_absolute_missing_paths() {
+        let root = temp_root("absolute-write");
+        let outside = std::env::temp_dir()
+            .join(format!("aura-work-outside-{}-missing.txt", std::process::id()));
+        let _ = fs::remove_file(&outside);
+
+        let err = write_file_internal(root.to_str().unwrap(), outside.to_str().unwrap(), "nope")
+            .unwrap_err();
+
+        assert!(
+            err.contains("Absolute paths are not allowed")
+                || err.contains("Path is outside the project folder")
+        );
+        assert!(!outside.exists());
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn write_file_rejects_parent_traversal() {
+        let root = temp_root("parent-write");
+
+        let err = write_file_internal(root.to_str().unwrap(), "../outside.txt", "nope").unwrap_err();
+
+        assert!(err.contains("Path traversal is not allowed"));
         let _ = fs::remove_dir_all(root);
     }
 }
