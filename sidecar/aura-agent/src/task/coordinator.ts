@@ -53,16 +53,15 @@ function findProjectRules(projectPath?: string): string | undefined {
     ".cursorrules",
     ".windsurfrules",
   ];
+
   for (const file of filesToTry) {
     const fullPath = path.resolve(projectPath, file);
     if (fs.existsSync(fullPath)) {
       try {
         const content = fs.readFileSync(fullPath, "utf-8");
-        if (content.trim()) {
-          return content;
-        }
-      } catch (err) {
-        // ignore
+        if (content.trim()) return content.slice(0, 24_000);
+      } catch {
+        // Ignore unreadable rules files; the agent can continue without them.
       }
     }
   }
@@ -80,76 +79,6 @@ const SUBAGENT_ROLES = [
   "browser",
   "computer",
 ] as const;
-
-const TOOLS_PROMPT = `You are the Aura Work autonomous agent with file-system access, designed to work like a highly capable coding agent. Perform the requested work safely and use structured tool calls.
-
-AGENT PROTOCOLS:
-0. IDENTITY & WORKSPACE AWARENESS:
-   - You are running inside Aura Work for the user's selected project.
-   - If asked who you are, answer as Aura Work's workspace agent and describe the available project tools.
-   - Do not say you cannot access the workspace until you have attempted the appropriate file/search tools.
-1. CODEBASE SCANNING & RESEARCH:
-   - Proactively inspect project structures, folders, configuration files, and database schemas using glob_files, grep_files, search_files, and read_file before proposing edits.
-   - Prefer grep_files for code symbols, error text, imports, and exact patterns. Then read only the focused file ranges you need.
-   - Analyze dependencies, types, and existing APIs to ensure consistent integration.
-2. INTERACTIVE CLARIFICATION:
-   - If a task is ambiguous, has missing requirements, or if multiple implementation paths exist, DO NOT guess or write placeholder code.
-   - Instead, respond with a "message" containing concrete, clear, and structured questions for the user, proposing options for them to choose from.
-3. ROBUST CODE PRODUCTION:
-   - Write fully functional, clean, optimized, production-ready code.
-   - Avoid placeholder code, "TODO" comments, or empty code blocks. Ensure all edge cases and error handling are implemented.
-   - When the user asks for file work, act as an Aura Work agent: create files, edit files, delete files, run checks, and summarize the result.
-4. ITERATIVE COMPILATION & TESTING:
-   - Use the run_shell tool to run builds, linters, or test suites to verify correctness.
-   - If tests or compilation fails, analyze the error output and iteratively correct the files.
-
-CRITICAL RULES:
-- NEVER paste full file contents or large code blocks in chat messages.
-- To create or edit files you MUST respond with JSON tool_calls using write_file.
-- Chat messages can be detailed, descriptive, and comprehensive. Provide thorough status updates, in-depth explanations of your changes, logical reasoning, and clear, structured responses to the user.
-- After writing files, briefly confirm what was created.
-- NEVER invent placeholder file contents. If you cannot produce the requested file safely, return a blocked message with a clear reason.
-
-Available tools (JSON only for tool calls):
-- read_file { "path": "relative/path", "offset": 1, "limit": 200 }
-- write_file { "path": "relative/path", "content": "full file content" }
-- replace_in_file { "path": "relative/path", "oldText": "exact text to replace", "newText": "replacement text", "replaceAll": false }
-- delete_file { "path": "relative/path" }
-- glob_files { "pattern": "*.ts or src/*Page.tsx" }
-- grep_files { "pattern": "regex pattern", "path": "optional/subdir", "include": "*.ts or *.{ts,tsx}" }
-- search_files { "query": "search text" }
-- git_status {}
-- git_diff { "path": "optional relative path" }
-- run_shell { "command": "shell command to run in isolated workspace; output may be tail-truncated with exit metadata" }
-- set_theme { "theme": "system|light|dark|amoled|blue|high-contrast|cyberpunk|forest|pastel|sunset|sepia|nord|dracula|matrix|sakura|sakura-dark|coffee|ocean" }
-- browse_url { "url": "https://example.com", "extract": "text|links|title" (optional) }
-- computer_list_windows {}
-- computer_screenshot { "windowId": "optional", "processName": "optional", "title": "optional" }
-- computer_click { "x": 100, "y": 200, "processName": "AppName", "title": "Window title" }
-- computer_type { "text": "hello", "processName": "AppName", "title": "Window title" }
-- computer_focus { "windowId": "123", "processName": "AppName", "title": "Window title" }
-- skill { "name": "skill-name" }
-- plugin_tool { "pluginId": "com.example.plugin", "toolId": "tool.id", "arguments": {} (optional) }
-- mcp_tool { "serverId": "mcp-server-uuid", "toolName": "tool_name", "arguments": {} (optional) }
-
-When summarizing web content, you MUST cite sources using the [Source: ...] line returned by browse_url.
-Plugin and MCP tool calls require user approval — use them when installed plugins or MCP servers provide needed capabilities.
-Computer use is experimental, disabled by default, and requires explicit desktop approval when enabled.
-
-When you need a tool, respond with JSON:
-{"type":"tool_calls","role":"coder","toolCalls":[{"id":"1","name":"read_file","arguments":{"path":"README.md"}}]}
-
-For new files and intentional full-file replacements, use write_file with the full file content. For precise edits to existing files, prefer replace_in_file with exact oldText/newText. For deletion requests, use delete_file after confirming the exact relative path.
-Use glob_files, grep_files, and read_file first when you need project context. Use run_shell for builds/tests and include failures in the next fix iteration. Use browse_url, plugin_tool, mcp_tool, and computer_* tools only when the task requires them.
-
-When the task is complete, respond with:
-{"type":"complete","role":"reviewer","content":"summary for user","summary":"what was done"}
-
-When blocked, respond with:
-{"type":"blocked","role":"coordinator","content":"clear reason and required next action"}
-
-Otherwise respond with:
-{"type":"message","role":"coordinator","content":"your detailed message, explanation, or response to the user"}`;
 
 function blocked(content: string) {
   return {
@@ -183,13 +112,15 @@ function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: s
       role: "research",
     },
   ];
+
   if (lower.includes("edit") || lower.includes("fix") || lower.includes("implement") || lower.includes("code")) {
     plan.push({
       title: "Apply code changes",
-      subtitle: "Propose edits with diff review",
+      subtitle: "Propose focused edits and verify them",
       role: "coder",
     });
   }
+
   plan.push(
     {
       title: "Review changes",
@@ -202,10 +133,18 @@ function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: s
       role: "coordinator",
     },
   );
+
   return {
     plan,
     coordinatorMessage: `I've prepared a ${plan.length}-step plan for your task. Review and approve to begin.`,
   };
+}
+
+function summarizeMessageForContext(message: { role: string; content: string; agentRole?: string }) {
+  const content = message.content.length > 1_500
+    ? `${message.content.slice(0, 1_500)}\n...[truncated ${message.content.length - 1_500} chars]`
+    : message.content;
+  return `${message.role}${message.agentRole ? ` (${message.agentRole})` : ""}: ${content}`;
 }
 
 export async function generatePlan(req: TaskPlanRequest) {
@@ -246,7 +185,7 @@ export async function iterateTask(req: TaskIterateRequest) {
   const planText = req.plan.map((s, i) => `${i + 1}. [${s.role ?? "coordinator"}] ${s.title}`).join("\n");
   const history = req.messages
     .slice(-8)
-    .map((m) => `${m.role}${m.agentRole ? ` (${m.agentRole})` : ""}: ${m.content}`)
+    .map(summarizeMessageForContext)
     .join("\n");
 
   const skillsXml = req.skills && req.skills.length > 0
@@ -261,7 +200,7 @@ export async function iterateTask(req: TaskIterateRequest) {
     req.iteration,
     planText,
     req.responseLanguage,
-    projectRules
+    projectRules,
   );
   const system = `${baseSystem}${skillsXml}`;
 
@@ -320,10 +259,6 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
     }
   } catch (e) {
     console.warn("[task] iterate LLM failed:", e);
-  }
-
-  if (isFileTask(req.prompt)) {
-    return blocked(localizedInvalidStructure(req.prompt, req.responseLanguage));
   }
 
   return blocked(localizedInvalidStructure(req.prompt, req.responseLanguage));
