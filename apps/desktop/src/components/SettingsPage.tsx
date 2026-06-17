@@ -46,6 +46,14 @@ const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; prev
   { id: "sapphire-luxury", labelKey: "settings.themeSapphireLuxury", preview: "sapphire-luxury" },
   { id: "amethyst-luxury", labelKey: "settings.themeAmethystLuxury", preview: "amethyst-luxury" },
   { id: "amber-luxury", labelKey: "settings.themeAmberLuxury", preview: "amber-luxury" },
+  { id: "obsidian-gold", labelKey: "settings.themeObsidianGold", preview: "obsidian-gold" },
+  { id: "pearl-noir", labelKey: "settings.themePearlNoir", preview: "pearl-noir" },
+  { id: "jade-silk", labelKey: "settings.themeJadeSilk", preview: "jade-silk" },
+  { id: "arctic-glass", labelKey: "settings.themeArcticGlass", preview: "arctic-glass" },
+  { id: "royal-indigo", labelKey: "settings.themeRoyalIndigo", preview: "royal-indigo" },
+  { id: "copper-olive", labelKey: "settings.themeCopperOlive", preview: "copper-olive" },
+  { id: "moonlit-rose", labelKey: "settings.themeMoonlitRose", preview: "moonlit-rose" },
+  { id: "carbon-teal", labelKey: "settings.themeCarbonTeal", preview: "carbon-teal" },
 ];
 
 const SANS_FONTS = [
@@ -113,6 +121,8 @@ interface SettingsPageProps {
   cloudStatus: CloudAccountStatus | null;
   cloudDevices: CloudDeviceInfo[];
   cloudSyncHelper: CloudSyncStatus | null;
+  cloudUsage?: any | null;
+  cloudReleaseInfo?: any | null;
   cloudLoading?: boolean;
   cloudError?: string | null;
   onCloudRegister: (
@@ -132,6 +142,8 @@ interface SettingsPageProps {
   onCloudInspectServer: () => Promise<unknown>;
   onCloudStartSyncHelper: () => Promise<unknown>;
   onCloudStopSyncHelper: () => Promise<unknown>;
+  onCloudStartDeviceLogin?: () => Promise<any>;
+  onCloudCompleteDeviceLogin?: () => Promise<any>;
   bridgeStatus: BridgeStatus | null;
   bridgeClients: BridgeClientRecord[];
   bridgeLoading?: boolean;
@@ -415,6 +427,8 @@ export function SettingsPage({
   cloudStatus,
   cloudDevices,
   cloudSyncHelper,
+  cloudUsage,
+  cloudReleaseInfo,
   cloudLoading,
   cloudError,
   onCloudRegister,
@@ -429,6 +443,8 @@ export function SettingsPage({
   onCloudInspectServer,
   onCloudStartSyncHelper,
   onCloudStopSyncHelper,
+  onCloudStartDeviceLogin,
+  onCloudCompleteDeviceLogin,
   bridgeStatus,
   bridgeClients,
   bridgeLoading,
@@ -1053,6 +1069,8 @@ export function SettingsPage({
                 status={cloudStatus}
                 devices={cloudDevices}
                 syncHelper={cloudSyncHelper}
+                usage={cloudUsage}
+                releaseInfo={cloudReleaseInfo}
                 loading={cloudLoading}
                 error={cloudError}
                 projectId={projectId}
@@ -1068,6 +1086,8 @@ export function SettingsPage({
                 onInspectServer={onCloudInspectServer}
                 onStartSyncHelper={onCloudStartSyncHelper}
                 onStopSyncHelper={onCloudStopSyncHelper}
+                onStartDeviceLogin={onCloudStartDeviceLogin}
+                onCompleteDeviceLogin={onCloudCompleteDeviceLogin}
                 t={t as (key: string, params?: Record<string, string>) => string}
                 embedded
               />

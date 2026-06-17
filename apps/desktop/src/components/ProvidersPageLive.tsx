@@ -48,6 +48,16 @@ export function ProvidersPageLive({
   }, [notice]);
 
   const statusLabel = (p: ProviderConfigPublic) => {
+    if (p.providerId === "aura-cloud") {
+      if (p.enabled) {
+        return document.documentElement.dir === "rtl"
+          ? "جاهز بعد تسجيل الدخول إلى Aura Cloud"
+          : "Ready after Aura Cloud sign-in";
+      }
+      return document.documentElement.dir === "rtl"
+        ? "نماذج مستضافة عبر Aura Cloud. لا تستخدم مفاتيح BYOK."
+        : "Hosted models through Aura Cloud. BYOK keys are not used.";
+    }
     if (p.hasSecret) {
       const parts =
         p.authMode === "codex-account"
@@ -177,13 +187,15 @@ export function ProvidersPageLive({
                       </div>
                       <div className="prov-actions">
                         <button type="button" className="chip-btn" onClick={() => onConfigure(p.providerId)}>
-                          <Icon name="key-round" size={14} />
-                          {t("providers.keyBtn")}
+                          <Icon name={p.providerId === "aura-cloud" ? "cloud" : "key-round"} size={14} />
+                          {p.providerId === "aura-cloud"
+                            ? (document.documentElement.dir === "rtl" ? "الحساب" : "Account")
+                            : t("providers.keyBtn")}
                         </button>
                         <button
                           type="button"
                           className="chip-btn"
-                          disabled={validating === p.providerId || !p.hasSecret}
+                          disabled={validating === p.providerId || (!p.hasSecret && p.providerId !== "aura-cloud")}
                           onClick={() => void handleValidate(p.providerId)}
                         >
                           <Icon name="cpu" size={14} />
@@ -192,7 +204,7 @@ export function ProvidersPageLive({
                         <button
                           type="button"
                           className="chip-btn"
-                          disabled={validating === p.providerId || (!p.hasSecret && !meta?.local)}
+                          disabled={validating === p.providerId || (!p.hasSecret && !meta?.local && p.providerId !== "aura-cloud")}
                           onClick={() => void handleFetchModels(p.providerId)}
                         >
                           <Icon name="list-filter" size={14} />

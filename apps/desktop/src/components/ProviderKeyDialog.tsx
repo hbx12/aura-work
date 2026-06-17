@@ -77,6 +77,36 @@ export function ProviderKeyDialog({
 
   const meta = PROVIDER_META[providerId as keyof typeof PROVIDER_META];
 
+  if (providerId === "aura-cloud") {
+    return (
+      <div className="modal-backdrop" onClick={onClose}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <h2>{displayName ?? meta?.displayName ?? "Aura Cloud Models"}</h2>
+          <p className="modal-desc">
+            {locale?.startsWith("ar")
+              ? "نماذج Aura Cloud تستخدم تسجيل دخول Aura Cloud ولا تحتاج مفتاح API من المستخدم. استخدم صفحة Aura Cloud في الإعدادات لربط الحساب والمزامنة."
+              : "Aura Cloud Models use Aura Cloud sign-in and do not require a user API key. Use the Aura Cloud settings page to connect your account and sync."}
+          </p>
+          <div className="modal-actions">
+            <button type="button" className="btn" onClick={onClose}>
+              {t("common.cancel")}
+            </button>
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                void openUrl("https://aura.work/activate");
+                onClose();
+              }}
+            >
+              {locale?.startsWith("ar") ? "فتح Aura Cloud" : "Open Aura Cloud"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleOauthConnect = async () => {
     setSaving(true);
     setError(null);

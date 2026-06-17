@@ -61,6 +61,42 @@ pub struct RemoteDispatchInput {
     pub prompt: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuraCloudDeviceLoginStart {
+    pub device_code: String,
+    pub user_code: String,
+    pub verification_uri: String,
+    pub expires_at: String,
+    pub interval_seconds: u64,
+    pub pending_backend: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuraCloudDeviceLoginComplete {
+    pub status: String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuraCloudUsageStatus {
+    pub usage_level: String,
+    pub hosted_models_enabled: bool,
+    pub reset_at: Option<String>,
+    pub note: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuraWorkReleaseInfo {
+    pub version: Option<String>,
+    pub download_url: String,
+    pub release_url: String,
+    pub source: String,
+}
+
 struct LocalCloudState {
     account_id: Option<String>,
     email: Option<String>,
@@ -74,6 +110,73 @@ struct LocalCloudState {
     sync_enabled: bool,
     last_sync_at: Option<String>,
     pull_cursor: Option<String>,
+}
+
+#[tauri::command]
+pub async fn start_aura_cloud_device_login() -> Result<AuraCloudDeviceLoginStart, String> {
+    let raw = uuid::Uuid::new_v4().simple().to_string().to_uppercase();
+    let user_code = format!("{}-{}", &raw[0..4], &raw[4..8]);
+    Ok(AuraCloudDeviceLoginStart {
+        device_code: raw,
+        user_code: user_code.clone(),
+        verification_uri: format!("https://aura.work/activate?code={user_code}"),
+        expires_at: (chrono::Utc::now() + chrono::Duration::minutes(10)).to_rfc3339(),
+        interval_seconds: 5,
+        pending_backend: true,
+    })
+}
+
+#[tauri::command]
+pub async fn complete_aura_cloud_device_login() -> Result<AuraCloudDeviceLoginComplete, String> {
+    Ok(AuraCloudDeviceLoginComplete {
+        status: "pending".into(),
+        message: "Aura Cloud device login endpoint is not available yet. No token was stored.".into(),
+    })
+}
+
+#[tauri::command]
+pub async fn get_aura_cloud_usage(
+    app: AppHandle,
+    db: State<'_, DbState>,
+) -> Result<AuraCloudUsageStatus, String> {
+    let status = build_account_status(&app, &db).await?;
+    Ok(AuraCloudUsageStatus {
+        usage_level: if status.signed_in { "normal" } else { "not-signed-in" }.into(),
+        hosted_models_enabled: status.signed_in,
+        reset_at: None,
+        note: if status.signed_in {
+            "Aura Cloud usage is shown as a level. BYOK and local models do not consume cloud usage.".into()
+        } else {
+            "Sign in to Aura Cloud to enable hosted model usage tracking.".into()
+        },
+    })
+}
+
+#[tauri::command]
+pub async fn get_aura_cloud_devices(
+    app: AppHandle,
+    db: State<'_, DbState>,
+) -> Result<Vec<CloudDeviceInfo>, String> {
+    cloud_list_devices(app, db).await
+}
+
+#[tauri::command]
+pub async fn revoke_aura_cloud_device(
+    app: AppHandle,
+    db: State<'_, DbState>,
+    device_id: String,
+) -> Result<(), String> {
+    cloud_revoke_device(app, db, device_id).await
+}
+
+#[tauri::command]
+pub async fn get_latest_aura_work_release() -> Result<AuraWorkReleaseInfo, String> {
+    Ok(AuraWorkReleaseInfo {
+        version: None,
+        download_url: "https://aura.work/download".into(),
+        release_url: "https://aura.work/api/releases/latest".into(),
+        source: "fallback".into(),
+    })
 }
 
 pub fn init_cloud_tables(conn: &Connection) -> Result<(), String> {

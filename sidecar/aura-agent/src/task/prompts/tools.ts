@@ -9,7 +9,7 @@ export const TOOLS_PROMPT = `Available tools (JSON only for tool calls):
 - git_status {}
 - git_diff { "path": "optional relative path" }
 - run_shell { "command": "shell command to run in isolated workspace; output may be tail-truncated with exit metadata" }
-- set_theme { "theme": "system|light|dark|amoled|blue|high-contrast|cyberpunk|forest|pastel|sunset|sepia|nord|dracula|matrix|sakura|sakura-dark|coffee|ocean" }
+- set_theme { "theme": "system|light|dark|amoled|blue|high-contrast|cyberpunk|forest|pastel|sunset|sepia|nord|dracula|matrix|sakura|sakura-dark|coffee|ocean|luxury|emerald-luxury|rose-luxury|velvet-luxury|bronze-luxury|platinum-luxury|crimson-luxury|sapphire-luxury|amethyst-luxury|amber-luxury|obsidian-gold|pearl-noir|jade-silk|arctic-glass|royal-indigo|copper-olive|moonlit-rose|carbon-teal" }
 - browse_url { "url": "https://example.com", "extract": "text|links|title" (optional) }
 - computer_list_windows {}
 - computer_screenshot { "windowId": "optional", "processName": "optional", "title": "optional" }
@@ -48,6 +48,9 @@ SHELL AND FILE SAFETY:
 4. File edits must be made through the file tools listed above; shell commands should be used for inspection, builds, tests, and project-native generators.
 5. Prefer glob_files, grep_files, search_files, and read_file over shell equivalents for routine codebase inspection.
 6. Use run_shell for project-native commands, tests, builds, generators, and shell-only diagnostics.
+7. For Markdown files, keep headings, lists, tables, links, and code fences valid. Do not flatten Markdown into plain paragraphs.
+8. When editing existing files, prefer replace_in_file with exact surrounding text. Use write_file only when creating a new file or intentionally replacing an entire small file.
+9. For app-control requests, use set_theme when changing themes and report missing tools for unsupported controls instead of pretending the setting changed.
 
 TASK MANAGEMENT RULES:
 1. For requests with three or more meaningful steps, maintain a concise checklist in your coordination messages.

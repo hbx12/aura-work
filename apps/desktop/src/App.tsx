@@ -90,7 +90,15 @@ const THEME_MODES: ThemeMode[] = [
   "crimson-luxury",
   "sapphire-luxury",
   "amethyst-luxury",
-  "amber-luxury"
+  "amber-luxury",
+  "obsidian-gold",
+  "pearl-noir",
+  "jade-silk",
+  "arctic-glass",
+  "royal-indigo",
+  "copper-olive",
+  "moonlit-rose",
+  "carbon-teal"
 ];
 const THEME_PREFERENCES: ThemePreference[] = ["system", ...THEME_MODES];
 
@@ -133,40 +141,38 @@ function formatTaskTime(iso: string) {
   }
 }
 
+const quoteFont = (font: string) => `'${font.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+
+const googleFontFamily = (font: string) => encodeURIComponent(font).replace(/%20/g, "+");
+
+const ensureGoogleFont = (id: string, font: string, weights: string) => {
+  if (font === "system" || font.startsWith("ui-") || font.includes(",")) return;
+  const linkId = `google-font-${id}-link`;
+  let link = document.getElementById(linkId) as HTMLLinkElement | null;
+  if (!link) {
+    link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }
+  link.href = `https://fonts.googleapis.com/css2?family=${googleFontFamily(font)}:wght@${weights}&display=swap`;
+};
+
 const applyFonts = (sans: string | null, mono: string | null) => {
   const root = document.documentElement;
-  if (sans) {
-    if (sans !== "system" && sans !== "IBM Plex Sans") {
-      const linkId = "google-font-sans-link";
-      let link = document.getElementById(linkId) as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.id = linkId;
-        link.rel = "stylesheet";
-        document.head.appendChild(link);
-      }
-      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(sans)}:wght@400;500;600;700&display=swap`;
-    }
-    root.style.setProperty("--font-sans", `'${sans}', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif`);
-    root.style.setProperty("--font-arabic", `'IBM Plex Sans Arabic', '${sans}', system-ui, sans-serif`);
+  if (sans && sans !== "system") {
+    ensureGoogleFont("sans", sans, "400;500;600;700");
+    const family = quoteFont(sans);
+    root.style.setProperty("--font-sans", `${family}, 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif`);
+    root.style.setProperty("--font-arabic", `${family}, 'IBM Plex Sans Arabic', system-ui, sans-serif`);
   } else {
     root.style.removeProperty("--font-sans");
     root.style.removeProperty("--font-arabic");
   }
   
-  if (mono) {
-    if (mono !== "system" && mono !== "IBM Plex Mono") {
-      const linkId = "google-font-mono-link";
-      let link = document.getElementById(linkId) as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.id = linkId;
-        link.rel = "stylesheet";
-        document.head.appendChild(link);
-      }
-      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(mono)}:wght@400;500;600&display=swap`;
-    }
-    root.style.setProperty("--font-mono", `'${mono}', ui-monospace, monospace`);
+  if (mono && mono !== "system") {
+    ensureGoogleFont("mono", mono, "400;500;600");
+    root.style.setProperty("--font-mono", `${quoteFont(mono)}, ui-monospace, monospace`);
   } else {
     root.style.removeProperty("--font-mono");
   }
@@ -1513,6 +1519,8 @@ You can open and customize it to instruct the agent on workspace rules.`;
           cloudStatus={cloudApi.status}
           cloudDevices={cloudApi.devices}
           cloudSyncHelper={cloudApi.syncHelper}
+          cloudUsage={cloudApi.usage}
+          cloudReleaseInfo={cloudApi.releaseInfo}
           cloudLoading={cloudApi.loading}
           cloudError={cloudApi.error}
           onCloudRegister={async (email, password, displayName, serverUrl) => {
@@ -1530,6 +1538,8 @@ You can open and customize it to instruct the agent on workspace rules.`;
           onCloudInspectServer={cloudApi.inspectServer}
           onCloudStartSyncHelper={cloudApi.startSyncHelper}
           onCloudStopSyncHelper={cloudApi.stopSyncHelper}
+          onCloudStartDeviceLogin={cloudApi.startDeviceLogin}
+          onCloudCompleteDeviceLogin={cloudApi.completeDeviceLogin}
           bridgeStatus={bridgeApi.status}
           bridgeClients={bridgeApi.clients}
           bridgeLoading={bridgeApi.loading}

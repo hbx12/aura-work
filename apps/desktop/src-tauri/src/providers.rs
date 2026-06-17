@@ -20,6 +20,7 @@ fn open_external_url(app: &AppHandle, url: &str) -> Result<(), String> {
 pub struct VaultHandle(pub Arc<Mutex<VaultState>>);
 
 const PROVIDERS: &[(&str, &str, bool)] = &[
+    ("aura-cloud", "Aura Cloud Models", false),
     ("anthropic", "Anthropic", false),
     ("openai", "OpenAI", false),
     ("gemini", "Google Gemini", false),

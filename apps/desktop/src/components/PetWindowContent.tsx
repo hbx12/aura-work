@@ -8,29 +8,29 @@ interface PetWindowContentProps {
 }
 
 const BUBBLES_EN = [
-  "Checking for clean code... 📋",
-  "I love Tauri! ⚡",
-  "Need a break? Stretch a bit! 🧘",
-  "Code compiles! Time for coffee ☕",
-  "No warnings, no bugs! 🎉",
-  "Keep going, you're doing great! 🚀",
-  "Let me handle the sidecars 🛠️",
-  "Writing tests is fun... sometimes! 🧪",
-  "Is the backend running? 🖥️",
-  "Let's build something beautiful! 🎨",
+  "Checking for clean code...",
+  "Standing by for the next task.",
+  "Need a break? Stretch a bit.",
+  "Code compiles. Time for a pause.",
+  "No warnings found.",
+  "Keeping the workspace ready.",
+  "Watching helper services.",
+  "Tests make releases calmer.",
+  "Is the backend running?",
+  "Let's build something polished.",
 ];
 
 const BUBBLES_AR = [
-  "أتحقق من نظافة الكود... 📋",
-  "أنا أحب Tauri! ⚡",
-  "هل تحتاج استراحة؟ قم بالتمدد قليلاً! 🧘",
-  "الكود يعمل بنجاح! وقت القهوة ☕",
-  "لا توجد أخطاء أو تحذيرات! 🎉",
-  "استمر، أنت تبلي بلاءً حسناً! 🚀",
-  "دعني أهتم بالـ sidecars 🛠️",
-  "كتابة الاختبارات ممتعة... أحياناً! 🧪",
-  "هل الخادم يعمل؟ 🖥️",
-  "دعنا نبني شيئاً جميلاً! 🎨",
+  "أتحقق من نظافة الكود...",
+  "جاهز للمهمة التالية.",
+  "هل تحتاج استراحة؟ تمدد قليلاً.",
+  "الكود يعمل بنجاح. وقت توقف قصير.",
+  "لا توجد تحذيرات.",
+  "أحافظ على جاهزية مساحة العمل.",
+  "أراقب خدمات المساعدة.",
+  "الاختبارات تجعل الإصدارات أهدأ.",
+  "هل الخادم يعمل؟",
+  "دعنا نبني شيئاً متقناً.",
 ];
 
 export function PetWindowContent({ initialType = "robot" }: PetWindowContentProps) {
@@ -40,6 +40,7 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
   const [bubbleText, setBubbleText] = useState<string | null>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [locale, setLocale] = useState<string>("en");
+  const isWindows = typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent);
 
   // Keep track of actual window position
   const positionRef = useRef({ x: 400, y: 400 });
@@ -76,13 +77,14 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
 
   // Force transparent backgrounds
   useEffect(() => {
-    document.documentElement.style.background = "transparent";
-    document.body.style.background = "transparent";
+    const bg = isWindows ? "#15110f" : "transparent";
+    document.documentElement.style.background = bg;
+    document.body.style.background = bg;
     const root = document.getElementById("root");
     if (root) {
-      root.style.background = "transparent";
+      root.style.background = bg;
     }
-  }, []);
+  }, [isWindows]);
 
   // Sync starting position
   const syncPosition = async () => {
@@ -130,7 +132,8 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
 
   // Smooth walking animation loop with recursive setTimeout to avoid queue buildup on Windows
   useEffect(() => {
-    const speed = 4.2; // logical pixels per tick (adjusted for 100ms interval)
+    const tickMs = isWindows ? 180 : 100;
+    const speed = isWindows ? 7.2 : 4.2;
     let timeoutId: NodeJS.Timeout | null = null;
     let active = true;
 
@@ -141,7 +144,7 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
       if (Date.now() - lastInteractionRef.current < 6000) {
         setIsWalking(false);
         shouldSyncPositionRef.current = true;
-        timeoutId = setTimeout(tick, 100);
+        timeoutId = setTimeout(tick, tickMs);
         return;
       }
 
@@ -214,18 +217,18 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
       }
       
       // Schedule next tick only after current work finishes
-      timeoutId = setTimeout(tick, 100);
+      timeoutId = setTimeout(tick, tickMs);
     };
 
     // Start loop
-    timeoutId = setTimeout(tick, 100);
+    timeoutId = setTimeout(tick, tickMs);
 
     return () => {
       active = false;
       if (timeoutId) clearTimeout(timeoutId);
       if (bubbleTimeoutRef.current) clearTimeout(bubbleTimeoutRef.current);
     };
-  }, [bubbleText, locale]);
+  }, [bubbleText, isWindows, locale]);
 
   // Handle cursor interaction (eye tracking)
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -289,7 +292,9 @@ export function PetWindowContent({ initialType = "robot" }: PetWindowContentProp
         justifyContent: "flex-end",
         alignItems: "center",
         overflow: "hidden",
-        background: "transparent",
+        background: isWindows ? "#15110f" : "transparent",
+        borderRadius: isWindows ? "18px" : undefined,
+        boxShadow: isWindows ? "0 10px 28px rgba(0,0,0,0.35)" : undefined,
         cursor: "grab",
         userSelect: "none",
         position: "relative",

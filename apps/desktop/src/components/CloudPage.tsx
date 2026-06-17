@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { Icon } from "@aura-os/ui";
 import { DEFAULT_CLOUD_SERVER_URL } from "@aura-os/shared";
 import type { CloudAccountStatus, CloudDeviceInfo, CloudSyncStatus } from "@aura-os/shared";
@@ -7,6 +8,8 @@ interface CloudPageProps {
   status: CloudAccountStatus | null;
   devices: CloudDeviceInfo[];
   syncHelper: CloudSyncStatus | null;
+  usage?: any | null;
+  releaseInfo?: any | null;
   loading?: boolean;
   error?: string | null;
   projectId: string | null;
@@ -27,6 +30,8 @@ interface CloudPageProps {
   onInspectServer: () => Promise<unknown>;
   onStartSyncHelper: () => Promise<unknown>;
   onStopSyncHelper: () => Promise<unknown>;
+  onStartDeviceLogin?: () => Promise<any>;
+  onCompleteDeviceLogin?: () => Promise<any>;
   t: (key: string, params?: Record<string, string>) => string;
   embedded?: boolean;
 }
@@ -35,6 +40,8 @@ export function CloudPage({
   status,
   devices,
   syncHelper,
+  usage,
+  releaseInfo,
   loading,
   error,
   projectId,
@@ -50,6 +57,8 @@ export function CloudPage({
   onInspectServer,
   onStartSyncHelper,
   onStopSyncHelper,
+  onStartDeviceLogin,
+  onCompleteDeviceLogin,
   t,
   embedded,
 }: CloudPageProps) {
@@ -63,6 +72,8 @@ export function CloudPage({
   const [message, setMessage] = useState<string | null>(null);
   const [dispatchPrompt, setDispatchPrompt] = useState("");
   const [targetDeviceId, setTargetDeviceId] = useState("");
+  const [deviceLogin, setDeviceLogin] = useState<any | null>(null);
+  const isArabic = document.documentElement.dir === "rtl";
 
   const showMsg = (m: string) => setMessage(m);
 
@@ -92,6 +103,86 @@ export function CloudPage({
                 </div>
               </div>
               <p className="modal-desc">{t("cloud.selfHost")}</p>
+            </div>
+          </div>
+
+          <div className="section">
+            <span className="sec-label">{isArabic ? "نماذج Aura Cloud" : "Aura Cloud Models"}</span>
+            <div className="panel">
+              <div className="panel-row">
+                <div className="prov-logo" style={{ background: "var(--accent)" }}>
+                  <Icon name="cloud" size={17} />
+                </div>
+                <div className="prov-meta">
+                  <div className="prov-name">
+                    {usage?.hostedModelsEnabled
+                      ? (isArabic ? "النماذج المستضافة مفعلة" : "Hosted models enabled")
+                      : (isArabic ? "النماذج المستضافة تنتظر تسجيل الدخول" : "Hosted models waiting for sign-in")}
+                    {usage?.hostedModelsEnabled && <span className="tag ok">{t("cloud.online")}</span>}
+                  </div>
+                  <div className="prov-sub">
+                    {isArabic
+                      ? "Aura Fast و Aura Coder و Aura Premium جاهزة كخيارات مستقبلية بدون مفاتيح BYOK."
+                      : "Aura Fast, Aura Coder, and Aura Premium are prepared without BYOK keys."}
+                  </div>
+                </div>
+              </div>
+              <div className="panel-actions">
+                <button
+                  type="button"
+                  className="btn sm primary"
+                  disabled={loading || !onStartDeviceLogin}
+                  onClick={async () => {
+                    try {
+                      const r = await onStartDeviceLogin?.();
+                      setDeviceLogin(r);
+                      if (r?.verificationUri) {
+                        await openUrl(r.verificationUri);
+                      }
+                      showMsg(isArabic ? "تم إنشاء رمز تسجيل الدخول." : "Device login code created.");
+                    } catch (e) {
+                      showMsg(String(e));
+                    }
+                  }}
+                >
+                  {isArabic ? "ربط الجهاز" : "Connect device"}
+                </button>
+                <button
+                  type="button"
+                  className="btn sm"
+                  disabled={loading || !onCompleteDeviceLogin}
+                  onClick={async () => {
+                    try {
+                      const r = await onCompleteDeviceLogin?.();
+                      showMsg(r?.message ?? String(r));
+                    } catch (e) {
+                      showMsg(String(e));
+                    }
+                  }}
+                >
+                  {isArabic ? "تحقق من الدخول" : "Check sign-in"}
+                </button>
+                {releaseInfo?.downloadUrl && (
+                  <button
+                    type="button"
+                    className="btn sm"
+                    onClick={() => void openUrl(releaseInfo.downloadUrl)}
+                  >
+                    {isArabic ? "تحميل آخر نسخة" : "Download latest"}
+                  </button>
+                )}
+              </div>
+              {deviceLogin?.userCode && (
+                <p className="modal-desc">
+                  {isArabic ? "رمز الجهاز:" : "Device code:"} <code>{deviceLogin.userCode}</code>
+                </p>
+              )}
+              {usage?.note && <p className="modal-desc">{usage.note}</p>}
+              {usage?.usageLevel && (
+                <p className="modal-desc">
+                  {isArabic ? "مستوى الاستخدام:" : "Usage level:"} {usage.usageLevel}
+                </p>
+              )}
             </div>
           </div>
 
