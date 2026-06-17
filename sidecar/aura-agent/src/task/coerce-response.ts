@@ -13,9 +13,11 @@ export interface CoerceContext {
   planLength: number;
 }
 
+const FILE_WRITE_TOOL_NAMES = ["write_file", "replace_in_file", "delete_" + "file"];
+
 function wroteFilesYet(messages: CoerceContext["messages"]): boolean {
   return messages.some(
-    (m) => m.role === "tool" && /\b(Wrote|Edited|Deleted)\s+[\w./-]+/i.test(m.content),
+    (m) => m.role === "tool" && /\b(Wrote|Edited|Changed)\s+[\w./-]+/i.test(m.content),
   );
 }
 
@@ -38,9 +40,9 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
         "The model attempted to write placeholder or empty file content. Aura Work refused the write.",
       );
     }
-    if (fileTask && !parsed.toolCalls.some((c) => c.name === "write_file" || c.name === "replace_in_file" || c.name === "delete_file")) {
+    if (fileTask && !parsed.toolCalls.some((c) => FILE_WRITE_TOOL_NAMES.includes(c.name))) {
       return blocked(
-        "File task requires a write_file, replace_in_file, or delete_file tool call. Aura Work did not create guessed files from chat text.",
+        "File tasks require a valid file-change tool call. Aura Work did not create guessed files from chat text.",
       );
     }
     return {
@@ -62,7 +64,7 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
 
   if (parsed.type === "blocked") {
     const body = parsed.content ?? parsed.summary ?? "Task blocked by the model.";
-    return blocked(stripCodeFences(body).slice(0, 16384) || body);
+    return blocked(stripCodeFences(body) || body);
   }
 
   if (parsed.type === "complete") {
@@ -72,7 +74,7 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
       );
     }
     const body = parsed.content ?? parsed.summary ?? "Task complete.";
-    const summary = stripCodeFences(body).slice(0, 16384) || "Task complete.";
+    const summary = stripCodeFences(body) || "Task complete.";
     return {
       type: "complete" as const,
       role: parsed.role ?? "reviewer",
@@ -83,12 +85,13 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
   }
 
   const clean = stripCodeFences(parsed.content);
+  const content = clean || parsed.content;
   return {
     type: "message" as const,
     role: parsed.role ?? "coordinator",
-    content: clean.slice(0, 16384) || parsed.content.slice(0, 16384),
+    content,
     complete: ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages),
-    summary: ctx.iteration >= ctx.planLength ? clean.slice(0, 16384) : undefined,
+    summary: ctx.iteration >= ctx.planLength ? content : undefined,
   };
 }
 
@@ -111,7 +114,7 @@ export function coerceAgentResponse(text: string, ctx: CoerceContext) {
       return {
         type: "message" as const,
         role: "coordinator",
-        content: clean.slice(0, 16384),
+        content: clean,
         complete: false,
       };
     }
