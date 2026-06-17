@@ -79,6 +79,15 @@ function baseUrl(credentials: ProviderCredentials, fallback: string): string {
   return (credentials.baseUrl ?? fallback).replace(/\/$/, "");
 }
 
+function numberValue(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  }
+  return undefined;
+}
+
 async function openAiListModels(
   credentials: ProviderCredentials,
   fallbackBase: string,
@@ -152,7 +161,13 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
       }
       const data = (await res.json()) as {
         choices?: { message?: { content?: string } }[];
-        usage?: { prompt_tokens?: number; completion_tokens?: number };
+        usage?: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          cost?: number | string;
+          total_cost?: number | string;
+          estimated_cost_usd?: number | string;
+        };
       };
       const text = data.choices?.[0]?.message?.content ?? "";
       return {
@@ -160,6 +175,10 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         usage: {
           inputTokens: data.usage?.prompt_tokens,
           outputTokens: data.usage?.completion_tokens,
+          estimatedCostUsd:
+            numberValue(data.usage?.estimated_cost_usd) ??
+            numberValue(data.usage?.total_cost) ??
+            numberValue(data.usage?.cost),
         },
       };
     },

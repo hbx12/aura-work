@@ -87,6 +87,7 @@ struct SidecarChatResponse {
 struct SidecarUsage {
     input_tokens: Option<u64>,
     output_tokens: Option<u64>,
+    estimated_cost_usd: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -564,7 +565,7 @@ pub async fn run_chat(
         })
         .collect();
 
-    let chat_messages: Vec<serde_json::Value> = if let Some(msgs) = &input.messages {
+    let mut chat_messages: Vec<serde_json::Value> = if let Some(msgs) = &input.messages {
         if msgs.is_empty() {
             return Err("Message is required.".into());
         }
@@ -582,6 +583,18 @@ pub async fn run_chat(
             "content": input.message.trim(),
         })]
     };
+    let has_system = chat_messages
+        .iter()
+        .any(|m| m.get("role").and_then(|v| v.as_str()) == Some("system"));
+    if !has_system {
+        chat_messages.insert(
+            0,
+            serde_json::json!({
+                "role": "system",
+                "content": "You are Aura Work's assistant inside the Aura Work desktop app. Reply in the same language as the user's latest message. If asked who you are, answer as Aura Work and explain that you can help with project work, providers, usage, and app guidance. Keep answers concise."
+            }),
+        );
+    }
 
     let (provider_id, model_id, routing_reason, fallback_from, requires_fallback) =
         if let (Some(p), Some(m)) = (&input.preferred_provider, &input.preferred_model) {
@@ -655,12 +668,14 @@ pub async fn run_chat(
 
     let (input_rate, output_rate) =
         pricing_for_model(&db, &provider_id, &model_id).unwrap_or((None, None));
-    let estimated = estimate_cost(
-        chat.usage.input_tokens.unwrap_or(0),
-        chat.usage.output_tokens.unwrap_or(0),
-        input_rate,
-        output_rate,
-    );
+    let estimated = chat.usage.estimated_cost_usd.or_else(|| {
+        estimate_cost(
+            chat.usage.input_tokens.unwrap_or(0),
+            chat.usage.output_tokens.unwrap_or(0),
+            input_rate,
+            output_rate,
+        )
+    });
     let cost_unknown = estimated.is_none()
         && (chat.usage.input_tokens.is_some() || chat.usage.output_tokens.is_some());
 

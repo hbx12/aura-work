@@ -1,10 +1,33 @@
 /** Detect file-related tasks — does not auto-create files from model output. */
 
-const CREATE_HINT =
-  /\b(create|make|write|add|build|scaffold|generate|implement|fix|edit|code|program|انش|إنش|سوي|اعمل|اكتب|برمج|عدّل|عدل|سوّ|سوی)\b/i;
+const EXPLICIT_PATH =
+  /[`"']?([\w./-]+\.(?:tsx?|jsx?|py|html|css|json|md|rs|go|java|cpp|c|h|vue|svelte|sql|yaml|yml|toml|sh|ps1))[`"']?/i;
+
+const FILE_ACTION =
+  /(?:^|[\s؟?،,.!;:])(?:create|make|write|add|build|scaffold|generate|implement|fix|edit|modify|delete|remove|انشئ|أنشئ|انشاء|إنشاء|اكتب|برمج|عدل|عدّل|احذف|حذف|اضف|أضف|اعمل|سوي|سوّ|سوی)(?=$|[\s؟?،,.!;:])/i;
+
+const FILE_OBJECT =
+  /(?:file|files|folder|folders|directory|directories|project|app|component|page|route|api|database|schema|code|bug|error|test|readme|ملف|ملفات|فايل|مجلد|مجلدات|مشروع|تطبيق|صفحة|مكون|واجهة|كود|برنامج|دالة|مشكلة|خطأ|ثغرة|اختبار)/i;
+
+const CHAT_ONLY =
+  /^(?:hello|hi|hey|who are you|what do you do|tell me about yourself|من\s+أنت|من\s+انت|وش\s+تسوي|ايش\s+تسوي|ماذا\s+تفعل|عرفني|تكلم(?:\s+معي)?)/i;
+
+function userTaskText(prompt: string): string {
+  const wrapped = prompt.match(/Workspace chat request:\s*([\s\S]*?)(?:\n\s*\n|$)/i);
+  if (wrapped?.[1]) return wrapped[1].trim();
+
+  const task = prompt.match(/^Task:\s*([\s\S]*?)(?:\n\s*\n|$)/i);
+  if (task?.[1]) return task[1].trim();
+
+  return prompt.trim();
+}
 
 export function isFileTask(prompt: string): boolean {
-  return CREATE_HINT.test(prompt) || /[`"']([\w./-]+\.\w+)[`"']/.test(prompt);
+  const text = userTaskText(prompt);
+  if (!text) return false;
+  if (EXPLICIT_PATH.test(text)) return true;
+  if (CHAT_ONLY.test(text) && !FILE_OBJECT.test(text)) return false;
+  return FILE_ACTION.test(text) && FILE_OBJECT.test(text);
 }
 
 export function inferPathFromPrompt(prompt: string): string | null {

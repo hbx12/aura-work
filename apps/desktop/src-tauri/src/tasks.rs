@@ -393,6 +393,8 @@ struct SidecarUsage {
     input_tokens: Option<u64>,
     #[serde(rename = "outputTokens")]
     output_tokens: Option<u64>,
+    #[serde(rename = "estimatedCostUsd")]
+    estimated_cost_usd: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -674,12 +676,14 @@ pub async fn advance_task_inner(
         let model_id = &chat.model_id;
         let (input_rate, output_rate) =
             crate::pricing::pricing_for_model(db, provider_id, model_id).unwrap_or((None, None));
-        let estimated = crate::pricing::estimate_cost(
-            usage.input_tokens.unwrap_or(0),
-            usage.output_tokens.unwrap_or(0),
-            input_rate,
-            output_rate,
-        );
+        let estimated = usage.estimated_cost_usd.or_else(|| {
+            crate::pricing::estimate_cost(
+                usage.input_tokens.unwrap_or(0),
+                usage.output_tokens.unwrap_or(0),
+                input_rate,
+                output_rate,
+            )
+        });
         let _ = crate::agent::record_usage(
             db,
             Some(&project_id),
@@ -1532,7 +1536,9 @@ pub async fn run_workspace_chat_agent(
     let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
     let mut total_input_tokens = 0u64;
     let mut total_output_tokens = 0u64;
+    let mut total_estimated_cost = 0.0f64;
     let mut saw_usage = false;
+    let mut saw_estimated_cost = false;
     let mut modified_files: Vec<String> = Vec::new();
     let mut last_content = String::new();
     let mut blocked_reason: Option<String> = None;
@@ -1570,6 +1576,10 @@ pub async fn run_workspace_chat_agent(
             saw_usage = true;
             total_input_tokens += usage.input_tokens.unwrap_or(0);
             total_output_tokens += usage.output_tokens.unwrap_or(0);
+            if let Some(cost) = usage.estimated_cost_usd {
+                saw_estimated_cost = true;
+                total_estimated_cost += cost;
+            }
         }
 
         if let Some(content) = iterate_resp.content.as_ref().or(iterate_resp.summary.as_ref()) {
@@ -1674,12 +1684,16 @@ pub async fn run_workspace_chat_agent(
     let (input_rate, output_rate) =
         crate::pricing::pricing_for_model(db, &chat.provider_id, &chat.model_id)
             .unwrap_or((None, None));
-    let estimated = crate::pricing::estimate_cost(
-        total_input_tokens,
-        total_output_tokens,
-        input_rate,
-        output_rate,
-    );
+    let estimated = if saw_estimated_cost {
+        Some(total_estimated_cost)
+    } else {
+        crate::pricing::estimate_cost(
+            total_input_tokens,
+            total_output_tokens,
+            input_rate,
+            output_rate,
+        )
+    };
     let usage_id = record_usage(
         db,
         Some(project_id),

@@ -212,15 +212,22 @@ export function formatCost(usage: TaskUsageRecord | null): {
 
   const total = inTok + outTok;
 
+  const formatUsd = (value: number) => {
+    if (value === 0) return "$0.00";
+    if (value > 0 && value < 0.0001) return "<$0.0001";
+    if (value < 0.01) return `$${value.toFixed(4)}`;
+    return `$${value.toFixed(2)}`;
+  };
+
   const usd =
 
     usage.estimatedCostUsd != null
 
-      ? `$${usage.estimatedCostUsd.toFixed(4)}`
+      ? formatUsd(usage.estimatedCostUsd)
 
       : total > 0
 
-        ? "cost unknown"
+        ? "pricing unavailable"
 
         : "$0.00";
 
