@@ -462,7 +462,13 @@ export type MessageKey =
   | "ctx.browserOfflineHint"
   | "ctx.pluginsOfflineHint"
   | "ctx.syncOfflineHint"
-  | "sidebar.account";
+  | "sidebar.account"
+  | "settings.notifications"
+  | "settings.notifyTaskComplete"
+  | "settings.notifyTaskError"
+  | "settings.notifyPermission"
+  | "settings.notifySidecar"
+  | "settings.notifyTaskPaused";
 
 export type MessageCatalog = Record<MessageKey, string>;
 
@@ -900,6 +906,12 @@ const en: MessageCatalog = {
   "ctx.pluginsOfflineHint": "Plugins helper offline — npm run plugins-helper",
   "ctx.syncOfflineHint": "Cloud sync offline — npm run cloud-sync",
   "sidebar.account": "Account",
+  "settings.notifications": "Notifications",
+  "settings.notifyTaskComplete": "Task completed",
+  "settings.notifyTaskError": "Task error",
+  "settings.notifyPermission": "Permission requested",
+  "settings.notifySidecar": "Sidecar offline",
+  "settings.notifyTaskPaused": "Task paused",
 };
 
 /** Per-locale overrides — Arabic/Persian use strict isolation (no English fallback). */
@@ -1328,6 +1340,12 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "ctx.pluginsOfflineHint": "مساعد الإضافات غير متصل — npm run plugins-helper",
     "ctx.syncOfflineHint": "مزامنة السحابة غير متصلة — npm run cloud-sync",
     "sidebar.account": "الحساب",
+    "settings.notifications": "الإشعارات",
+    "settings.notifyTaskComplete": "اكتمال المهمة",
+    "settings.notifyTaskError": "خطأ في المهمة",
+    "settings.notifyPermission": "طلب إذن",
+    "settings.notifySidecar": "انقطاع الخادم المساعد",
+    "settings.notifyTaskPaused": "إيقاف المهمة مؤقتاً",
   },
   es: {
     "nav.tasks": "Tareas",

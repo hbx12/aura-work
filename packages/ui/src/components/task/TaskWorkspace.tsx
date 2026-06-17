@@ -591,7 +591,6 @@ export function Composer({
             </div>
             <div className="tp-body">
               {(() => {
-                const cats = new Set(TASK_TEMPLATES.map((t) => t.category));
                 const filtered = TASK_TEMPLATES.filter(
                   (t) =>
                     !templateFilter ||

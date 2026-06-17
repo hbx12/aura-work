@@ -113,7 +113,6 @@ export function GitPage({
   t,
 }: GitPageProps) {
   const activeFile = selectedFile ?? status?.files[0]?.path ?? null;
-  const changeCount = status?.files.length ?? 0;
   const [stashMsg, setStashMsg] = useState("");
   const [activeSection, setActiveSection] = useState<"changes" | "log" | "branches" | "stash">("changes");
   const logRef = useRef<HTMLDivElement>(null);
