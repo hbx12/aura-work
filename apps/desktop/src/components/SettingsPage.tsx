@@ -4,6 +4,7 @@ import type { BrowserStatus, PluginsHelperStatus, VmStatus } from "@aura-os/shar
 import type { MessageCatalog } from "@aura-os/i18n";
 import type { VaultStatus } from "../hooks/useProviders";
 import type { AppLocaleSettings, LocaleInfo, PackagingInfo, UpdateCheckResult } from "../hooks/useI18n";
+import { useNotificationSettings } from "../hooks/useNotifications";
 import { CloudPage } from "./CloudPage";
 import { ExtensionsPage } from "./ExtensionsPage";
 import type { CloudAccountStatus, CloudDeviceInfo, CloudSyncStatus, BridgeClientRecord, BridgeStatus } from "@aura-os/shared";
@@ -441,6 +442,7 @@ export function SettingsPage({
   activeTab,
   onTabChange,
 }: SettingsPageProps) {
+  const { settings: notifSettings, update: notifUpdate } = useNotificationSettings();
   const [exportPassword, setExportPassword] = useState("");
   const [activeSans, setActiveSans] = useState(() => localStorage.getItem("selected-font-sans") || "IBM Plex Sans");
   const [activeMono, setActiveMono] = useState(() => localStorage.getItem("selected-font-mono") || "IBM Plex Mono");
@@ -761,18 +763,10 @@ export function SettingsPage({
                         sidecarOffline: t("settings.notifySidecar") || "Sidecar offline",
                         taskPaused: t("settings.notifyTaskPaused") || "Task paused",
                       };
-                      const checked = (() => {
-                        try { return JSON.parse(localStorage.getItem("aura-notification-settings") || "{}")[k] !== false; }
-                        catch { return true; }
-                      })();
+                      const checked = notifSettings[k];
                       return (
                         <label key={k} style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }}>
-                          <input type="checkbox" checked={checked} onChange={() => {
-                            const raw = localStorage.getItem("aura-notification-settings") || "{}";
-                            const s = JSON.parse(raw);
-                            s[k] = !checked;
-                            localStorage.setItem("aura-notification-settings", JSON.stringify(s));
-                          }} style={{ accentColor: "var(--accent)" }} />
+                          <input type="checkbox" checked={checked} onChange={() => notifUpdate({ [k]: !checked })} style={{ accentColor: "var(--accent)" }} />
                           <span style={{ font:"var(--text-sm)", color:"var(--fg-1)" }}>{labels[k]}</span>
                         </label>
                       );

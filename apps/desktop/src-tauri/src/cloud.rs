@@ -111,7 +111,6 @@ fn load_device_key(app: &AppHandle) -> Result<[u8; DEVICE_KEY_LEN], String> {
     if bytes.len() != DEVICE_KEY_LEN {
         return Err("Device key corrupt".into());
     }
-    let _ = crate::vault::enforce_fallback_key_permissions(&path);
     let mut key = [0u8; DEVICE_KEY_LEN];
     key.copy_from_slice(&bytes);
     Ok(key)

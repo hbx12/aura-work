@@ -1,6 +1,9 @@
+import { useState, useEffect, useCallback } from "react";
+import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
+
 const NOTIFY_SETTINGS_KEY = "aura-notification-settings";
 
-interface NotificationSettings {
+export interface NotificationSettings {
   taskComplete: boolean;
   taskError: boolean;
   permissionRequired: boolean;
@@ -26,37 +29,51 @@ function loadSettings(): NotificationSettings {
   return { ...DEFAULTS };
 }
 
-export function saveNotificationSettings(s: NotificationSettings) {
+function persistSettings(s: NotificationSettings) {
   localStorage.setItem(NOTIFY_SETTINGS_KEY, JSON.stringify(s));
 }
 
-let permission: NotificationPermission | null = null;
+export function useNotificationSettings() {
+  const [settings, setSettings] = useState<NotificationSettings>(loadSettings);
 
-async function ensurePermission(): Promise<boolean> {
-  if (typeof Notification === "undefined") return false;
-  if (permission === "granted") return true;
-  if (permission === "denied") return false;
-  const result = await Notification.requestPermission();
-  permission = result;
-  return result === "granted";
+  useEffect(() => {
+    persistSettings(settings);
+  }, [settings]);
+
+  const update = useCallback((patch: Partial<NotificationSettings>) => {
+    setSettings((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  return { settings, setSettings, update };
 }
 
-export async function sendDesktopNotification(title: string, body: string, onClick?: () => void) {
-  const ok = await ensurePermission();
-  if (!ok) return;
+let granted: boolean | null = null;
+
+async function ensurePermission(): Promise<boolean> {
+  if (granted === true) return true;
+  if (granted === false) return false;
   try {
-    const n = new Notification(title, { body, icon: "/aura-logo.png" });
-    if (onClick) {
-      n.onclick = () => { n.close(); onClick(); };
+    let ok = await isPermissionGranted();
+    if (!ok) {
+      const perm = await requestPermission();
+      ok = perm === "granted";
     }
-    setTimeout(() => n.close(), 5000);
+    granted = ok;
+    return ok;
   } catch {
-    /* fallback: notification API may not be available */
+    granted = false;
+    return false;
   }
 }
 
-export function getNotificationSettings(): NotificationSettings {
-  return loadSettings();
+export async function sendDesktopNotification(title: string, body: string) {
+  const ok = await ensurePermission();
+  if (!ok) return;
+  try {
+    sendNotification({ title, body });
+  } catch {
+    /* fallback */
+  }
 }
 
 export function shouldNotify(kind: keyof NotificationSettings): boolean {

@@ -289,7 +289,7 @@ export function GitPage({
                         type="button"
                         className="iconbtn"
                         title="Pop stash"
-                        onClick={() => onStashPop?.(s.index)}
+                        onClick={() => { if (window.confirm(`Pop stash@{${s.index}} — this will restore the changes and remove the stash entry.`)) onStashPop?.(s.index); }}
                       >
                         <Icon name="chevron-up" size={12} />
                       </button>
