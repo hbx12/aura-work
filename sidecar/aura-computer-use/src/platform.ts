@@ -209,7 +209,11 @@ export async function focusWindow(windowId: string): Promise<ActionResult> {
   }
 
   if (backend === "linux-native") {
-    await runShell("bash", ["-lc", `wmctrl -ia '${windowId}' 2>/dev/null || wmctrl -a '${windowId}'`]);
+    try {
+      await runShell("wmctrl", ["-ia", windowId]);
+    } catch {
+      await runShell("wmctrl", ["-a", windowId]);
+    }
     return { ok: true, backend, message: `Focused window ${windowId}` };
   }
 
@@ -242,7 +246,7 @@ export async function clickAt(x: number, y: number, button: "left" | "right" = "
 
   if (backend === "linux-native") {
     const btn = button === "right" ? "3" : "1";
-    await runShell("bash", ["-lc", `xdotool mousemove ${xi} ${yi} click ${btn}`]);
+    await runShell("xdotool", ["mousemove", String(xi), String(yi), "click", btn]);
     return { ok: true, backend, message: `Clicked at (${xi}, ${yi})` };
   }
 
@@ -262,7 +266,7 @@ export async function typeText(text: string): Promise<ActionResult> {
   }
 
   if (backend === "linux-native") {
-    await runShell("bash", ["-lc", `xdotool type --delay 12 -- '${text.replace(/'/g, "'\\''")}'`]);
+    await runShell("xdotool", ["type", "--delay", "12", "--", text]);
     return { ok: true, backend, message: `Typed ${text.length} character(s)` };
   }
 

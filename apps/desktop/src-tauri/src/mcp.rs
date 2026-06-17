@@ -138,6 +138,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
     }
 
     // 2. Load project-specific config-based servers
+    let project_settings = load_project_mcp_settings(&conn)?;
     let mut stmt = conn.prepare("SELECT id, folder_path FROM projects").map_err(|e| e.to_string())?;
     let projects: Vec<(String, String)> = stmt
         .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
@@ -149,6 +150,11 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
         let (project_servers, _) = load_aura_config(std::path::Path::new(folder_path), project_id);
         for s in project_servers {
             if !list.iter().any(|existing| existing.id == s.id) {
+                let enabled = project_settings
+                    .iter()
+                    .find(|setting| setting.project_id == *project_id && setting.server_id == s.id)
+                    .map(|setting| setting.enabled)
+                    .unwrap_or(false);
                 list.push(McpServerRecord {
                     id: s.id,
                     name: s.name,
@@ -156,7 +162,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
                     command: s.command,
                     args: s.args,
                     env: s.env,
-                    enabled: s.enabled,
+                    enabled,
                     created_at: "".to_string(),
                 });
             }

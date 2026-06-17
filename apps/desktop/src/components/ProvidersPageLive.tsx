@@ -4,6 +4,10 @@ import { PROVIDER_META, type RoutingPolicy, ROUTING_POLICIES } from "@aura-os/sh
 import type { MessageCatalog } from "@aura-os/i18n";
 import type { ProviderConfigPublic, ProviderModelPublic } from "../hooks/useProviders";
 
+function providerIconName(icon?: string) {
+  return icon ?? "bot";
+}
+
 interface ProvidersPageProps {
   providers: ProviderConfigPublic[];
   routingPolicy: RoutingPolicy;
@@ -157,7 +161,7 @@ export function ProvidersPageLive({
                   <div key={p.providerId} className="provider-block">
                     <div className="panel-row">
                       <div className="prov-logo" style={{ background: meta?.color ?? "#645d4e" }}>
-                        {meta?.logo ?? "?"}
+                        <Icon name={providerIconName(meta?.icon)} size={17} />
                       </div>
                       <div className="prov-meta">
                         <div className="prov-name">
@@ -214,9 +218,14 @@ export function ProvidersPageLive({
                       <div className="model-list">
                         {(providerModels[p.providerId] ?? []).map((model) => (
                           <div key={model.id} className="model-row">
-                            <div className="model-meta">
-                              <div className="model-name">{model.displayName}</div>
-                              <div className="model-id">{model.id}</div>
+                            <div className="model-main">
+                              <div className="model-icon" style={{ color: meta?.color ?? "var(--accent)" }}>
+                                <Icon name={providerIconName(meta?.icon)} size={15} />
+                              </div>
+                              <div className="model-meta">
+                                <div className="model-name">{model.displayName}</div>
+                                <div className="model-id">{model.id}</div>
+                              </div>
                             </div>
                             <div
                               className={`toggle mini${model.enabled ? " on" : ""}`}

@@ -445,6 +445,34 @@ pub fn validate_client(db: &DbState, session_token: &str) -> Result<BridgeClient
     Ok(client)
 }
 
+fn require_client_project(client: &BridgeClientRecord, project_id: &str) -> Result<(), String> {
+    if let Some(bound_project_id) = client.project_id.as_deref() {
+        if bound_project_id != project_id {
+            return Err("Bridge client is not authorized for this project.".into());
+        }
+    }
+    Ok(())
+}
+
+fn task_project_id(conn: &Connection, task_id: &str) -> Result<String, String> {
+    conn.query_row(
+        "SELECT project_id FROM tasks WHERE id = ?1",
+        params![task_id],
+        |row| row.get(0),
+    )
+    .map_err(|_| "Task not found.".to_string())
+}
+
+fn require_client_task(
+    conn: &Connection,
+    client: &BridgeClientRecord,
+    task_id: &str,
+) -> Result<String, String> {
+    let project_id = task_project_id(conn, task_id)?;
+    require_client_project(client, &project_id)?;
+    Ok(project_id)
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PageReadRequestInput {
@@ -468,6 +496,7 @@ pub fn internal_page_read_request(
     input: &PageReadRequestInput,
 ) -> Result<PageReadRequestResult, String> {
     let client = validate_client(db, &input.session_token)?;
+    require_client_project(&client, &input.project_id)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let project_exists: i64 = conn
         .query_row(
@@ -565,15 +594,21 @@ pub fn internal_page_read_status(
     session_token: &str,
     permission_id: &str,
 ) -> Result<PageReadStatusResult, String> {
-    validate_client(db, session_token)?;
+    let client = validate_client(db, session_token)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let status: String = conn
+    let (status, client_id): (String, String) = conn
         .query_row(
-            "SELECT status FROM pending_permissions WHERE id = ?1 AND category = 'bridge' AND action = 'page-read'",
+            "SELECT p.status, r.client_id
+             FROM pending_permissions p
+             JOIN bridge_page_reads r ON r.permission_id = p.id
+             WHERE p.id = ?1 AND p.category = 'bridge' AND p.action = 'page-read'",
             params![permission_id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
         .map_err(|_| "Page read permission not found.".to_string())?;
+    if client_id != client.id {
+        return Err("Bridge client is not authorized for this page-read request.".into());
+    }
     let approved = status == "allowed-once" || status == "allowed-always";
     let denied = status == "denied";
     Ok(PageReadStatusResult {
@@ -699,6 +734,7 @@ pub async fn internal_create_task(
     input: &BridgeTaskCreateInput,
 ) -> Result<TaskRecord, String> {
     let client = validate_client(db, &input.session_token)?;
+    require_client_project(&client, &input.project_id)?;
     if input.prompt.trim().is_empty() {
         return Err("Task prompt is required.".into());
     }
@@ -766,8 +802,9 @@ pub async fn internal_create_task(
 }
 
 pub fn internal_get_task(db: &DbState, session_token: &str, task_id: &str) -> Result<TaskRecord, String> {
-    validate_client(db, session_token)?;
+    let client = validate_client(db, session_token)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+    require_client_task(&conn, &client, task_id)?;
     get_task_record(&conn, task_id)
 }
 
@@ -777,22 +814,42 @@ pub fn internal_get_task_logs(
     task_id: &str,
     limit: Option<u32>,
 ) -> Result<Vec<crate::audit::AuditEntry>, String> {
-    validate_client(db, session_token)?;
+    let client = validate_client(db, session_token)?;
+    {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        require_client_task(&conn, &client, task_id)?;
+    }
     crate::packaging::list_task_logs(db, task_id, limit.unwrap_or(200))
 }
 
 pub fn internal_open_task(db: &DbState, session_token: &str, task_id: &str) -> Result<(), String> {
-    validate_client(db, session_token)?;
+    let client = validate_client(db, session_token)?;
     {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
+        require_client_task(&conn, &client, task_id)?;
         get_task_record(&conn, task_id)?;
     }
     crate::packaging::set_pending_open_task(db, task_id)
 }
 
 pub fn internal_list_projects(db: &DbState, session_token: &str) -> Result<Vec<BridgeProjectItem>, String> {
-    validate_client(db, session_token)?;
+    let client = validate_client(db, session_token)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+    if let Some(project_id) = client.project_id {
+        return conn
+            .query_row(
+                "SELECT id, name FROM projects WHERE id = ?1",
+                params![project_id],
+                |row| {
+                    Ok(vec![BridgeProjectItem {
+                        id: row.get(0)?,
+                        name: row.get(1)?,
+                    }])
+                },
+            )
+            .map_err(|_| "Project not found.".to_string());
+    }
+
     let mut stmt = conn
         .prepare("SELECT id, name FROM projects ORDER BY name ASC")
         .map_err(|e| e.to_string())?;

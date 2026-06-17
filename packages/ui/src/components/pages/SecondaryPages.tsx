@@ -21,12 +21,12 @@ export function SimplePage({ icon, title, desc }: SimplePageProps) {
 }
 
 const PROVIDERS = [
-  { id: "anthropic", name: "Anthropic", logo: "A", color: "#c2683f", sub: "Claude 3.5 / 3.7 · 4 models", tag: "ok", on: true, sel: true },
-  { id: "openai", name: "OpenAI", logo: "O", color: "#1a7f64", sub: "GPT-4o / o-series · 6 models", tag: "ok", on: true },
-  { id: "gemini", name: "Google Gemini", logo: "G", color: "#3a6fc4", sub: "1.5 Pro / Flash · 3 models", tag: "ok", on: true },
-  { id: "deepseek", name: "DeepSeek", logo: "D", color: "#4b5bb0", sub: "V3 / R1 · 2 models", tag: "off", on: false },
-  { id: "ollama", name: "Ollama", logo: "Ω", color: "#7a5c8e", sub: "llama3 · on-device, no key", tag: "local", on: true },
-  { id: "custom", name: "Custom endpoint", logo: "{}", color: "#645d4e", sub: "OpenAI-compatible · base URL", tag: "off", on: false },
+  { id: "anthropic", name: "Anthropic", icon: "brain", color: "#c2683f", sub: "Claude 3.5 / 3.7 · 4 models", tag: "ok", on: true, sel: true },
+  { id: "openai", name: "OpenAI", icon: "sparkles", color: "#1a7f64", sub: "GPT-4o / o-series · 6 models", tag: "ok", on: true },
+  { id: "gemini", name: "Google Gemini", icon: "sparkles", color: "#3a6fc4", sub: "1.5 Pro / Flash · 3 models", tag: "ok", on: true },
+  { id: "deepseek", name: "DeepSeek", icon: "search", color: "#4b5bb0", sub: "V3 / R1 · 2 models", tag: "off", on: false },
+  { id: "ollama", name: "Ollama", icon: "cpu", color: "#7a5c8e", sub: "llama3 · on-device, no key", tag: "local", on: true },
+  { id: "custom", name: "Custom endpoint", icon: "braces", color: "#645d4e", sub: "OpenAI-compatible · base URL", tag: "off", on: false },
 ];
 
 const ROUTES = [
@@ -68,7 +68,7 @@ export function ProvidersPage() {
               {PROVIDERS.map((p) => (
                 <div key={p.id} className="panel-row">
                   <div className="prov-logo" style={{ background: p.color }}>
-                    {p.logo}
+                    <Icon name={p.icon} size={17} />
                   </div>
                   <div className="prov-meta">
                     <div className="prov-name">
