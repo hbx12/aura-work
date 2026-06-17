@@ -88,6 +88,30 @@ function numberValue(value: unknown): number | undefined {
   return undefined;
 }
 
+function openAiRequestBody(request: ChatRequest) {
+  const body: Record<string, unknown> = {
+    model: request.model,
+    messages: request.messages,
+    temperature: request.temperature ?? 0.7,
+  };
+
+  // Do not impose a local output cap. Only send a provider cap when the caller
+  // explicitly requests one; otherwise let the selected model/provider decide.
+  if (request.maxOutputTokens != null) {
+    body.max_tokens = request.maxOutputTokens;
+  }
+
+  return body;
+}
+
+function anthropicMaxOutputTokens(request: ChatRequest): number {
+  if (request.maxOutputTokens != null) return request.maxOutputTokens;
+  const model = request.model.toLowerCase();
+  if (model.includes("sonnet-4") || model.includes("opus-4")) return 16_384;
+  if (model.includes("haiku")) return 8_192;
+  return 16_384;
+}
+
 async function openAiListModels(
   credentials: ProviderCredentials,
   fallbackBase: string,
@@ -148,12 +172,7 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
           Authorization: `Bearer ${credentials.apiKey ?? ""}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model: request.model,
-          messages: request.messages,
-          max_tokens: request.maxOutputTokens ?? 4096,
-          temperature: request.temperature ?? 0.7,
-        }),
+        body: JSON.stringify(openAiRequestBody(request)),
       });
       if (!res.ok) {
         const err = await res.text();
@@ -248,7 +267,7 @@ const anthropicAdapter: ProviderAdapter = {
       },
       body: JSON.stringify({
         model: request.model,
-        max_tokens: request.maxOutputTokens ?? 4096,
+        max_tokens: anthropicMaxOutputTokens(request),
         messages: request.messages.filter((m: { role: string }) => m.role !== "system"),
         system: request.messages.find((m: { role: string }) => m.role === "system")?.content,
       }),
@@ -349,6 +368,9 @@ const geminiAdapter: ProviderAdapter = {
       body: JSON.stringify({
         contents,
         ...(systemInstruction ? { systemInstruction } : {}),
+        ...(request.maxOutputTokens != null
+          ? { generationConfig: { maxOutputTokens: request.maxOutputTokens } }
+          : {}),
       }),
     });
     if (!res.ok) throw new Error(`Gemini chat failed (${res.status})`);

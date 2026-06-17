@@ -137,7 +137,8 @@ export type TaskStateName =
   | "blocked"
   | "completed"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "rolled_back";
 
 export interface PlanStep {
   title: string;

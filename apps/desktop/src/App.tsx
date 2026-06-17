@@ -6,6 +6,7 @@ import {
   ContextPanel,
   Msg,
   StreamingMsg,
+  ClarificationCard,
   NavRail,
   NAV_ITEMS,
   PlanBlock,
@@ -48,6 +49,8 @@ import { useCloud } from "./hooks/useCloud";
 import { SchedulePageLive } from "./components/SchedulePageLive";
 import { useScheduledTasks } from "./hooks/useScheduledTasks";
 import { MemoryPage } from "./components/MemoryPage";
+import { OnboardingWizard } from "./components/OnboardingWizard";
+import { TaskTimeline } from "./components/TaskTimeline";
 import { ComputerUsePage } from "./components/ComputerUsePage";
 import { useBridge } from "./hooks/useBridge";
 import { useComputerUse } from "./hooks/useComputerUse";
@@ -346,14 +349,90 @@ export default function App() {
       providersApi.providers.map((p) => p.defaultModel ?? "").join(",").length,
   );
 
+  const currentModelContextWindow = useMemo(() => {
+    const { preferredModel } = parseModelSelection(selectedModel);
+    if (!preferredModel) return 128000;
+    const name = preferredModel.toLowerCase();
+    if (name.includes("gemini-1.5-pro")) return 2000000;
+    if (name.includes("gemini-1.5-flash")) return 1000000;
+    if (name.includes("gemini-2.0-flash")) return 1048576;
+    if (name.includes("gemini-2.0-pro")) return 2097152;
+    if (name.includes("gemini")) return 1000000;
+    if (name.includes("claude-3-5-sonnet") || name.includes("claude-3-5-haiku")) return 200000;
+    if (name.includes("claude-3-opus") || name.includes("claude-3")) return 200000;
+    if (name.includes("claude")) return 200000;
+    if (name.includes("gpt-4o") || name.includes("gpt-4-turbo")) return 128000;
+    if (name.includes("gpt-4")) return 128000;
+    if (name.includes("o1")) return 128000;
+    if (name.includes("o3")) return 200000;
+    if (name.includes("gpt-3.5-turbo")) return 16385;
+    if (name.includes("deepseek-coder") || name.includes("deepseek-chat") || name.includes("deepseek-r1")) return 128000;
+    if (name.includes("deepseek")) return 128000;
+    if (name.includes("qwen-2.5") || name.includes("qwen2.5")) return 128000;
+    if (name.includes("qwen")) return 32000;
+    if (name.includes("llama-3.1") || name.includes("llama3.1") || name.includes("llama-3-2") || name.includes("llama3.2")) return 128000;
+    if (name.includes("llama-3") || name.includes("llama3")) return 8192;
+    if (name.includes("llama-2") || name.includes("llama2")) return 4096;
+    if (name.includes("codestral")) return 32000;
+    if (name.includes("mistral-large")) return 128000;
+    if (name.includes("mistral")) return 32000;
+    if (name.includes("command-r")) return 128000;
+    return 128000;
+  }, [selectedModel]);
+
   // Re-bind hooks when project changes
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     setChatMessages([]);
     setChatError(null);
     const saved = localStorage.getItem("selected-model") || "auto";
     setSelectedModel(saved);
+
+    if (activeProjectId) {
+      invoke("get_project_profile", { projectId: activeProjectId })
+        .then((profile: any) => {
+          setShowOnboarding(profile.confidence !== "high");
+        })
+        .catch(() => {
+          setShowOnboarding(true);
+        });
+    } else {
+      setShowOnboarding(false);
+    }
   }, [activeProjectId]);
+
+  const [canRollback, setCanRollback] = useState(false);
+
+  useEffect(() => {
+    if (activeTaskId) {
+      invoke<boolean>("has_task_snapshot", { taskId: activeTaskId })
+        .then(setCanRollback)
+        .catch(() => setCanRollback(false));
+    } else {
+      setCanRollback(false);
+    }
+  }, [activeTaskId, tasks.activeTask?.state]);
+
+  const handleRollback = async () => {
+    if (!activeTaskId) return;
+    const isArabic = i18n.settings?.locale === "ar";
+    const msg = isArabic
+      ? "هل أنت متأكد من رغبتك في التراجع عن جميع التغييرات التي أجراها الوكيل في هذه المهمة؟ لا يمكن التراجع عن هذا الإجراء."
+      : "Are you sure you want to rollback all file modifications made by the agent in this task? This action cannot be undone.";
+
+    if (confirm(msg)) {
+      try {
+        const res = await invoke<string>("rollback_task", { taskId: activeTaskId });
+        alert(res);
+        setCanRollback(false);
+        await tasks.refreshTasks();
+      } catch (e) {
+        alert("Rollback failed: " + e);
+      }
+    }
+  };
 
   useEffect(() => {
     setPlanCollapsed(false);
@@ -617,8 +696,171 @@ export default function App() {
     return false;
   };
 
+  const handleCheckSlashCommands = async (text: string): Promise<boolean> => {
+    const msg = text.trim();
+    const isAr = i18n.locale?.startsWith("ar");
+    
+    if (msg.startsWith("/context") || msg.startsWith("/السياق")) {
+      const systemEst = 4000;
+      const currentMessages = tasks.activeTask ? tasks.activeTask.messages : chatMessages;
+      const historyEst = Math.ceil(currentMessages.reduce((acc: number, m: { content: string }) => acc + m.content.length, 0) / 4);
+      const inputEst = Math.ceil(composer.length / 4);
+      const totalEst = systemEst + historyEst + inputEst;
+      
+      const responseText = isAr
+        ? `📊 **توزيع استخدام السياق المقدر:**
+- ⚙️ **موجه النظام (System):** ~${systemEst.toLocaleString()} رمزاً (Tokens)
+- 📁 **ملفات مساحة العمل:** (يتم تضمينها ديناميكياً عند الحاجة)
+- 💬 **سجل المحادثة:** ~${historyEst.toLocaleString()} رمزاً
+- ✏️ **الرسالة الحالية:** ~${inputEst.toLocaleString()} رمزاً
+- 📈 **الإجمالي المقدر:** ~${totalEst.toLocaleString()} / ${currentModelContextWindow.toLocaleString()} رمزاً
+
+💡 **نصائح لتنظيف وتحسين السياق:**
+1. قم ببدء مهمة جديدة لتصفير سجل الدردشة غير الضروري.
+2. تجنب فتح ملفات ضخمة جداً في المحرر دفعة واحدة.
+3. استخدم ذاكرة المشروع والمهارات لتلخيص المعرفة الدائمة.`
+        : `📊 **Estimated Context Allocation:**
+- ⚙️ **System Prompt:** ~${systemEst.toLocaleString()} tokens
+- 📁 **Workspace Files:** (dynamically injected based on context)
+- 💬 **Chat History:** ~${historyEst.toLocaleString()} tokens
+- ✏️ **Current Message:** ~${inputEst.toLocaleString()} tokens
+- 📈 **Total Estimated:** ~${totalEst.toLocaleString()} / ${currentModelContextWindow.toLocaleString()} tokens
+
+💡 **Context Optimization Tips:**
+1. Start a fresh task/chat to clear out historical context.
+2. Avoid opening or reading very large files concurrently.
+3. Utilize project memory and skills to pin long-term knowledge.`;
+
+      setComposer("");
+      setChatMessages(prev => [
+        ...prev,
+        { role: "user", content: msg },
+        { role: "assistant", content: responseText }
+      ]);
+      return true;
+    }
+
+    if (msg.startsWith("/security-audit") || msg.startsWith("/تدقيق_امني")) {
+      if (!activeProjectId) return false;
+      setComposer("");
+      const startMsg = isAr ? "جاري تشغيل التدقيق الأمني للمشروع..." : "Running security audit scan...";
+      setChatMessages(prev => [...prev, { role: "user", content: msg }, { role: "assistant", content: startMsg }]);
+
+      invoke<any[]>("run_security_audit", { projectId: activeProjectId })
+        .then((findings) => {
+          if (findings.length === 0) {
+            const successMsg = isAr
+              ? "✅ **لم يتم العثور على مشاكل أمنية واضحة في هذا المشروع.**"
+              : "✅ **No obvious security vulnerabilities found in this project.**";
+            setChatMessages(prev => [...prev.slice(0, prev.length - 1), { role: "assistant", content: successMsg }]);
+          } else {
+            let markdown = isAr
+              ? `🔍 **نتائج التدقيق الأمني للمشروع (${findings.length} ملاحظات):**\n\n`
+              : `🔍 **Security Audit Findings (${findings.length} issues detected):**\n\n`;
+
+            findings.forEach((f) => {
+              const severityIcon = f.severity === "critical" ? "🔴 [حرج]" : f.severity === "high" ? "🟠 [عالي]" : "🟡 [متوسط]";
+              const severityIconEn = f.severity === "critical" ? "🔴 [Critical]" : f.severity === "high" ? "🟠 [High]" : "🟡 [Medium]";
+
+              if (isAr) {
+                markdown += `### ${f.severity === "critical" ? "🔴" : f.severity === "high" ? "🟠" : "🟡"} ${f.finding} (${f.filePath})\n`;
+                markdown += `- **الخطورة:** ${severityIcon}\n`;
+                markdown += `- **الوصف:** ${f.description}\n`;
+                markdown += `- **الحل المقترح:** ${f.recommendedFix}\n\n`;
+              } else {
+                markdown += `### ${f.severity === "critical" ? "🔴" : f.severity === "high" ? "🟠" : "🟡"} ${f.finding} (${f.filePath})\n`;
+                markdown += `- **Severity:** ${severityIconEn}\n`;
+                markdown += `- **Description:** ${f.description}\n`;
+                markdown += `- **Fix:** ${f.recommendedFix}\n\n`;
+              }
+            });
+            setChatMessages(prev => [...prev.slice(0, prev.length - 1), { role: "assistant", content: markdown }]);
+          }
+        })
+        .catch((e) => {
+          const failMsg = (isAr ? "فشل التدقيق الأمني: " : "Security audit failed: ") + e;
+          setChatMessages(prev => [...prev.slice(0, prev.length - 1), { role: "assistant", content: failMsg }]);
+        });
+      return true;
+    }
+
+    if (msg.startsWith("/init-aura") || msg.startsWith("/تهيئة_اورا")) {
+      if (!activeProjectId) return false;
+      setComposer("");
+      const statusMsg = isAr ? "جاري فحص مساحة العمل لإنشاء ملف AURA.md..." : "Scanning workspace to generate AURA.md...";
+      setChatMessages(prev => [...prev, { role: "user", content: msg }, { role: "assistant", content: statusMsg }]);
+      
+      let pkgName = activeProject?.name || "Aura Project";
+      let depsList = "";
+      try {
+        const pkgJsonStr = await invoke<string>("read_project_file", {
+          projectId: activeProjectId,
+          filePath: "package.json"
+        });
+        const pkg = JSON.parse(pkgJsonStr);
+        pkgName = pkg.name || pkgName;
+        const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+        depsList = Object.keys(deps).map(d => `- ${d}: ${deps[d]}`).join("\n");
+      } catch (e) {
+        // package.json might not exist or failed
+      }
+
+      const auraMdContent = `# Aura Project Rules - ${pkgName}
+
+This file contains coding conventions, build instructions, and guidelines for the Aura Work assistant in this workspace.
+
+## Project Stack
+${depsList ? depsList : "- TypeScript / Javascript (No dependencies detected)"}
+
+## Architecture Guidelines
+- Keep code modular and strictly typed.
+- Prefer helper modules over monolithic files.
+- Keep components small and reusable.
+
+## Build and Verification Commands
+- Compile project: \`npm run build\` or equivalent.
+- Run tests: \`npm test\` or equivalent.
+- Lint check: \`npm run lint\` or equivalent.
+
+## Security and Rules
+- Never commit API keys or secret credentials.
+- Write unit tests for new APIs and edge cases.
+- Always run local compile checks before completing tasks.
+`;
+
+      try {
+        await invoke("write_project_file", {
+          input: {
+            projectId: activeProjectId,
+            filePath: "AURA.md",
+            content: auraMdContent,
+            skipPermission: true
+          }
+        });
+        const successText = isAr
+          ? `✅ **تم إنشاء ملف القواعد بنجاح!**
+تم حفظ الملف في مسار المشروع باسم [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+يمكنك فتحه وتعديله لتخصيص سلوك الوكيل داخل هذا المشروع.`
+          : `✅ **AURA.md rules file created successfully!**
+The file has been saved to [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+You can open and customize it to instruct the agent on workspace rules.`;
+
+        setChatMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: successText }]);
+      } catch (err) {
+        const failText = isAr
+          ? `❌ فشل إنشاء ملف القواعد: ${String(err)}`
+          : `❌ Failed to create rules file: ${String(err)}`;
+        setChatMessages(prev => [...prev, { role: "assistant", content: failText }]);
+      }
+      return true;
+    }
+    
+    return false;
+  };
+
   const handleSendChat = async (fallbackApproved = false) => {
     if (handleCheckPetCommand(composer)) return;
+    if (await handleCheckSlashCommands(composer)) return;
     const msg = composer.trim();
     if (!msg || agent.running || tasks.running) return;
     if (activeTaskId) return;
@@ -737,6 +979,7 @@ export default function App() {
 
   const handleNewTask = async () => {
     if (handleCheckPetCommand(composer)) return;
+    if (await handleCheckSlashCommands(composer)) return;
     const msg = composer.trim();
     if (!msg || tasks.running) return;
 
@@ -800,6 +1043,8 @@ export default function App() {
     const task = tasks.activeTask;
     if (task.state !== "running" && task.state !== "paused") return;
 
+    if (await handleCheckSlashCommands(composer)) return;
+
     const msg = composer.trim();
     if (msg) {
       setComposer("");
@@ -838,6 +1083,13 @@ export default function App() {
             </div>
             <div className="ws-scroll">
               <div className="ws-canvas">
+                {showOnboarding && activeProjectId && (
+                  <OnboardingWizard
+                    projectId={activeProjectId}
+                    onClose={() => setShowOnboarding(false)}
+                    isArabic={i18n.settings?.locale === "ar"}
+                  />
+                )}
                 {chatMessages.map((m, i) => (
                   <Msg
                     key={i}
@@ -877,6 +1129,8 @@ export default function App() {
               labels={composerLabels}
               locale={i18n.locale}
               skills={pluginsApi.skills}
+              messages={chatMessages}
+              modelContextWindow={currentModelContextWindow}
               showRunTask
             />
           </>
@@ -901,6 +1155,8 @@ export default function App() {
                 labels={composerLabels}
                 locale={i18n.locale}
                 skills={pluginsApi.skills}
+                messages={chatMessages}
+                modelContextWindow={currentModelContextWindow}
                 showRunTask={mode === "ask"}
               />
             </div>
@@ -912,8 +1168,17 @@ export default function App() {
     return (
       <>
         <div className="ws-head">
-          <div className="row1">
+          <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <h1>{task?.title ?? t("chat.taskFallback")}</h1>
+            {canRollback && (
+              <button
+                onClick={handleRollback}
+                className="chip-btn"
+                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)", padding: "4px 8px", borderRadius: "6px" }}
+              >
+                ↩️ {i18n.settings?.locale === "ar" ? "تراجع واستعادة الملفات" : "Undo & Restore"}
+              </button>
+            )}
           </div>
           <div className="row2">
             <span className="ws-meta">{activeProject.folderPath}</span>
@@ -934,23 +1199,55 @@ export default function App() {
         </div>
         <div className="ws-scroll">
           <div className="ws-canvas">
+            {showOnboarding && activeProjectId && (
+              <OnboardingWizard
+                projectId={activeProjectId}
+                onClose={() => setShowOnboarding(false)}
+                isArabic={i18n.settings?.locale === "ar"}
+              />
+            )}
             {tasks.loading && !task && <Thinking label={t("common.loading")} labels={thinkingLabels} />}
-            {task?.messages.map((m, i) => (
-              <StreamingMsg
-                key={i}
-                who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
-                agent={m.role !== "user"}
-                role={m.agentRole ?? undefined}
-                streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
-                liveText={
-                  tasks.running && m.role === "assistant" && i === task.messages.length - 1
-                    ? tasks.streamText
-                    : null
+            {task?.messages.map((m, i) => {
+              const isClarification = m.content.trim().startsWith('{"type":"clarification"');
+              if (isClarification) {
+                try {
+                  const data = JSON.parse(m.content);
+                  const isLatest = i === task.messages.length - 1;
+                  return (
+                    <ClarificationCard
+                      key={i}
+                      data={data}
+                      isLatest={isLatest}
+                      isArabic={i18n.locale?.startsWith("ar")}
+                      onSubmit={async (response) => {
+                        setComposer("");
+                        await tasks.sendTaskMessage(task.id, response);
+                        await tasks.continueTask(task.id, mode === "act");
+                      }}
+                    />
+                  );
+                } catch (e) {
+                  // fallback
                 }
-              >
-                {m.content}
-              </StreamingMsg>
-            ))}
+              }
+
+              return (
+                <StreamingMsg
+                  key={i}
+                  who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
+                  agent={m.role !== "user"}
+                  role={m.agentRole ?? undefined}
+                  streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
+                  liveText={
+                    tasks.running && m.role === "assistant" && i === task.messages.length - 1
+                      ? tasks.streamText
+                      : null
+                  }
+                >
+                  {m.content}
+                </StreamingMsg>
+              );
+            })}
 
             {tasks.running && tasks.streamText && (!task?.messages.length || task.messages[task.messages.length - 1]?.role === "user") && (
               <StreamingMsg
@@ -1093,6 +1390,9 @@ export default function App() {
           }}
           locale={i18n.locale}
           skills={pluginsApi.skills}
+          messages={task?.messages || []}
+          workspaceFiles={task?.modifiedFiles.join(",") || ""}
+          modelContextWindow={currentModelContextWindow}
         />
       </>
     );
@@ -1437,21 +1737,26 @@ export default function App() {
             )}
             <div className="main">{renderMain()}</div>
             {view === "tasks" && showCtx && (
-              <ContextPanel
-                cost={cost}
-                routingPolicy={providersApi.routingPolicy}
-                sidecarRunning={agent.sidecar.running}
-                vmRunning={vm.status?.running}
-                vmBackend={vm.status?.backendLabel}
-                browserRunning={browser.status?.running}
-                browserBackend={browser.status?.backendLabel}
-                pluginsRunning={pluginsApi.status?.running}
-                pluginsToolCount={pluginsApi.status?.toolCount}
-                cloudSyncEnabled={cloudApi.status?.syncEnabled}
-                cloudSyncRunning={cloudApi.syncHelper?.running}
-                cloudSignedIn={cloudApi.status?.signedIn}
-                labels={contextPanelLabels}
-              />
+              <div className="right-panel-col" style={{ display: "flex", flexDirection: "column", gap: "12px", width: "300px", height: "100%", overflowY: "auto", borderLeft: "1px solid var(--border-1)", padding: "12px" }}>
+                <ContextPanel
+                  cost={cost}
+                  routingPolicy={providersApi.routingPolicy}
+                  sidecarRunning={agent.sidecar.running}
+                  vmRunning={vm.status?.running}
+                  vmBackend={vm.status?.backendLabel}
+                  browserRunning={browser.status?.running}
+                  browserBackend={browser.status?.backendLabel}
+                  pluginsRunning={pluginsApi.status?.running}
+                  pluginsToolCount={pluginsApi.status?.toolCount}
+                  cloudSyncEnabled={cloudApi.status?.syncEnabled}
+                  cloudSyncRunning={cloudApi.syncHelper?.running}
+                  cloudSignedIn={cloudApi.status?.signedIn}
+                  labels={contextPanelLabels}
+                />
+                {activeTaskId && activeProjectId && (
+                  <TaskTimeline projectId={activeProjectId} taskId={activeTaskId} isArabic={i18n.settings?.locale === "ar"} />
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -10,7 +10,12 @@ import type { CloudAccountStatus, CloudDeviceInfo, CloudSyncStatus, BridgeClient
 import { PetSprite } from "./PetSprites";
 import { invoke } from "@tauri-apps/api/core";
 
-type SettingsTab = "general" | "vault" | "vm" | "cloud" | "extension" | "pet";
+import { ReadinessPage } from "./ReadinessPage";
+import { DiagnosticsPage } from "./DiagnosticsPage";
+import { LocalModelWizard } from "./LocalModelWizard";
+import { ApprovalInbox } from "./ApprovalInbox";
+
+type SettingsTab = "general" | "vault" | "vm" | "cloud" | "extension" | "pet" | "readiness" | "diagnostics" | "local_model" | "approvals";
 
 const THEME_OPTIONS: { id: ThemePreference; labelKey: keyof MessageCatalog; preview?: ThemeMode }[] = [
   { id: "system", labelKey: "settings.themeSystem" },
@@ -69,6 +74,11 @@ const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?
   { id: "vm", icon: "hard-drive", labelKey: "settings.vm" },
   { id: "cloud", icon: "cloud", labelKey: "cloud.title" },
   { id: "extension", icon: "plug", labelKey: "settings.extension" },
+  { group: "System & safety" },
+  { id: "readiness", icon: "shield-check", labelKey: "settings.readiness" as any },
+  { id: "diagnostics", icon: "list", labelKey: "settings.diagnostics" as any },
+  { id: "local_model", icon: "bot", labelKey: "settings.localModel" as any },
+  { id: "approvals", icon: "inbox", labelKey: "settings.approvals" as any },
 ];
 
 interface SettingsPageProps {
@@ -1113,6 +1123,19 @@ export function SettingsPage({
                 onRevokeClient={onBridgeRevokeClient}
                 embedded
               />
+            )}
+
+            {tab === "readiness" && projectId && (
+              <ReadinessPage projectId={projectId} isArabic={localeSettings?.locale === "ar"} />
+            )}
+            {tab === "diagnostics" && (
+              <DiagnosticsPage isArabic={localeSettings?.locale === "ar"} />
+            )}
+            {tab === "local_model" && (
+              <LocalModelWizard isArabic={localeSettings?.locale === "ar"} onClose={() => setTab("general")} />
+            )}
+            {tab === "approvals" && projectId && (
+              <ApprovalInbox projectId={projectId} isArabic={localeSettings?.locale === "ar"} />
             )}
           </div>
         </div>

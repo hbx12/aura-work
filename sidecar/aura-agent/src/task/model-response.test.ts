@@ -37,6 +37,38 @@ describe("parseModelResponse", () => {
   it("rejects schema violations", () => {
     expect(parseModelResponse(JSON.stringify({ type: "tool_calls", toolCalls: [] })).ok).toBe(false);
   });
+
+  it("accepts valid clarification JSON", () => {
+    const result = parseModelResponse(
+      JSON.stringify({
+        type: "clarification",
+        content: "Need choices",
+        questions: [
+          {
+            id: "choice1",
+            question: "Which style?",
+            options: [
+              { label: "Classic", value: "classic", recommended: true },
+              { label: "Modern", value: "modern" }
+            ],
+            allowCustom: true
+          }
+        ]
+      })
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects invalid clarification schema", () => {
+    const result = parseModelResponse(
+      JSON.stringify({
+        type: "clarification",
+        content: "Need choices",
+        questions: [] // empty is invalid
+      })
+    );
+    expect(result.ok).toBe(false);
+  });
 });
 
 describe("coerceAgentResponse", () => {

@@ -26,13 +26,36 @@ pub fn init_db(app: &AppHandle) -> Result<Connection, String> {
             name TEXT NOT NULL,
             folder_path TEXT NOT NULL UNIQUE,
             instructions TEXT,
-            permission_mode TEXT NOT NULL DEFAULT 'act-without-asking',
+            permission_mode TEXT NOT NULL DEFAULT 'ask-first',
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         );
         CREATE TABLE IF NOT EXISTS app_settings (
             key TEXT PRIMARY KEY NOT NULL,
             value TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS task_snapshots (
+            id TEXT PRIMARY KEY NOT NULL,
+            task_id TEXT NOT NULL,
+            project_id TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            original_content TEXT,
+            is_new INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL,
+            UNIQUE(task_id, file_path)
+        );
+        CREATE TABLE IF NOT EXISTS project_profiles (
+            project_id TEXT PRIMARY KEY NOT NULL,
+            framework TEXT,
+            language TEXT,
+            package_manager TEXT,
+            commands_json TEXT,
+            status_json TEXT,
+            confidence TEXT,
+            git_status TEXT,
+            readme_exists INTEGER,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
         );
         ",
     )
@@ -70,7 +93,7 @@ pub fn seed_if_empty(conn: &Connection) -> Result<(), String> {
                     .map(|p| p.to_string_lossy().to_string())
                     .unwrap_or_else(|_| ".".into()),
                 "Welcome to Aura OS. Replace this with your own project folder.",
-                "act-without-asking",
+                "ask-first",
                 now,
                 now
             ],

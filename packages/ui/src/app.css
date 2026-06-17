@@ -4,8 +4,8 @@
    ============================================================================ */
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:var(--bg-base)}
-button{font-family:inherit}
+body{background:var(--bg-base);font-family:var(--font-sans)}
+input,textarea,button,select{font-family:inherit}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:99px;border:3px solid transparent;background-clip:content-box}
 ::-webkit-scrollbar-thumb:hover{background:var(--border-3);background-clip:content-box}
@@ -938,3 +938,27 @@ button{font-family:inherit}
 .up-bar{height:100%;border-radius:var(--r-sm);min-width:2px}
 .panel-row .prov-meta{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .panel-row .prov-costs{display:flex;align-items:center;gap:10px;font:var(--text-sm);flex-shrink:0}
+
+.ctx-usage-ring-wrap:hover .ctx-ring-dropdown {
+  display: flex !important;
+}
+
+.ctx-usage-ring-wrap.critical svg circle:last-child {
+  animation: stroke-blink 1.5s infinite alternate;
+}
+
+@keyframes stroke-blink {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.q-opt-btn:hover {
+  background: var(--bg-hover) !important;
+  color: var(--fg-1) !important;
+  border-color: var(--border-2) !important;
+}
+.q-opt-btn.selected:hover {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}

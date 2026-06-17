@@ -8,7 +8,7 @@ use crate::agent::{
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
 use crate::files::{
-    tool_delete_file, tool_glob_files, tool_grep_files, tool_read_file_window,
+    project_folder, tool_delete_file, tool_glob_files, tool_grep_files, tool_read_file_window,
     tool_replace_in_file, tool_search_files, tool_write_file,
 };
 use crate::git::{tool_git_diff, tool_git_status, GitStatusResult};
@@ -464,11 +464,13 @@ pub async fn start_task_inner(
         None,
     )
     .await?;
+    let project_path = project_folder(&db, &project_id).unwrap_or_default();
     let plan_resp: SidecarPlanResponse = sidecar_post(
         "/task/plan",
         &serde_json::json!({
             "prompt": prompt,
             "projectId": project_id,
+            "projectPath": project_path,
             "providerId": chat.provider_id,
             "modelId": chat.model_id,
             "credentials": chat.credentials,
@@ -656,6 +658,7 @@ pub async fn advance_task_inner(
     let files_summary = workspace_files_summary(db, &project_id, 5, 150);
 
     let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
+    let project_path = project_folder(db, &project_id).unwrap_or_default();
     let iterate_resp: SidecarIterateResponse = sidecar_post(
         "/task/iterate",
         &serde_json::json!({
@@ -665,6 +668,7 @@ pub async fn advance_task_inner(
             "messages": messages,
             "iteration": iteration,
             "projectId": project_id,
+            "projectPath": project_path,
             "taskId": task_id,
             "providerId": chat.provider_id,
             "modelId": chat.model_id,
@@ -1565,6 +1569,7 @@ pub async fn run_workspace_chat_agent(
              Do not claim you cannot access files before trying the available tools.",
             input.message.trim()
         );
+        let project_path = project_folder(db, project_id).unwrap_or_default();
         let iterate_resp: SidecarIterateResponse = sidecar_post(
             "/task/iterate",
             &serde_json::json!({
@@ -1574,6 +1579,7 @@ pub async fn run_workspace_chat_agent(
                 "messages": messages,
                 "iteration": iteration,
                 "projectId": project_id,
+                "projectPath": project_path,
                 "providerId": chat.provider_id,
                 "modelId": chat.model_id,
                 "credentials": chat.credentials,

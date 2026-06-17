@@ -16,7 +16,7 @@ export type AppView =
 export type ThemeMode = "light" | "dark" | "amoled" | "blue" | "high-contrast" | "cyberpunk" | "forest" | "pastel" | "sunset" | "sepia" | "nord" | "dracula" | "matrix" | "sakura" | "sakura-dark" | "coffee" | "ocean" | "luxury" | "emerald-luxury" | "rose-luxury" | "velvet-luxury" | "bronze-luxury" | "platinum-luxury" | "crimson-luxury" | "sapphire-luxury" | "amethyst-luxury" | "amber-luxury";
 export type ThemePreference = ThemeMode | "system";
 
-export type PermissionMode = "ask-first" | "act-without-asking";
+export type PermissionMode = "read-only" | "ask-first" | "act-without-asking";
 
 export interface Project {
   id: string;
@@ -31,7 +31,7 @@ export interface Project {
 export interface TaskItem {
   id: string;
   name: string;
-  state: "running" | "done" | "wait" | "block" | "paused" | "draft";
+  state: "running" | "done" | "wait" | "block" | "paused" | "draft" | "rolled_back";
   time: string;
   projectId: string;
 }
