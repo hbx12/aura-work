@@ -5,47 +5,116 @@ export type ProviderId =
   | "deepseek"
   | "ollama"
   | "openai-compatible"
-  | "qwen"
   | "minimax"
+  | "qwen"
   | "lmstudio";
 
-export interface ProviderMeta {
-  id: ProviderId;
-  label: string;
-  secretLabel: string;
-  defaultBaseUrl?: string;
-  supportsOAuth?: boolean;
+export {
+  DEFAULT_JSON_BODY_LIMIT_BYTES,
+  SIDECAR_AUTH_ENV,
+  isSidecarAuthorized,
+  loadSidecarToken,
+  readJsonBody,
+  rejectUnauthorized,
+  requireSidecarAuth,
+} from "./sidecar-auth.js";
+
+export type RoutingPolicy =
+  | "quality-first"
+  | "cost-first"
+  | "privacy-first"
+  | "local-only"
+  | "manual";
+
+export type ModelCapability =
+  | "text"
+  | "vision"
+  | "tool-calling"
+  | "json-schema"
+  | "reasoning"
+  | "embeddings"
+  | "audio"
+  | "video";
+
+export interface ModelPricing {
+  inputPerMillionTokens?: number;
+  outputPerMillionTokens?: number;
+  currency: "USD";
+  source: "auto" | "manual" | "unknown";
+  updatedAt?: string;
 }
 
-export const PROVIDER_META: ProviderMeta[] = [
-  { id: "openai", label: "OpenAI", secretLabel: "OpenAI API key" },
-  { id: "anthropic", label: "Anthropic", secretLabel: "Anthropic API key" },
-  { id: "gemini", label: "Google Gemini", secretLabel: "Gemini API key" },
-  { id: "deepseek", label: "DeepSeek", secretLabel: "DeepSeek API key" },
-  { id: "ollama", label: "Ollama", secretLabel: "Local Ollama", defaultBaseUrl: "http://127.0.0.1:11434" },
-  { id: "openai-compatible", label: "OpenAI Compatible", secretLabel: "API key / optional" },
-  { id: "qwen", label: "Qwen", secretLabel: "Qwen API key" },
-  { id: "minimax", label: "MiniMax", secretLabel: "MiniMax API key" },
-  { id: "lmstudio", label: "LM Studio", secretLabel: "Local LM Studio", defaultBaseUrl: "http://127.0.0.1:1234" },
-];
+export interface ModelInfo {
+  id: string;
+  providerId: ProviderId;
+  displayName: string;
+  contextWindow?: number;
+  maxOutputTokens?: number;
+  capabilities: ModelCapability[];
+  pricing?: ModelPricing;
+}
 
-export interface ProviderConfig {
-  id: ProviderId;
-  label: string;
+export interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+export interface ChatUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  estimatedCostUsd?: number;
+}
+
+export interface RoutingContext {
+  taskType:
+    | "coding"
+    | "research"
+    | "document"
+    | "data"
+    | "browser"
+    | "review"
+    | "security"
+    | "general";
+  sensitivity: "normal" | "sensitive" | "secret-risk";
+  needsVision?: boolean;
+  needsToolCalling?: boolean;
+  needsReasoning?: boolean;
+  userPreferredModel?: string;
+  allowedProviders: ProviderId[];
+}
+
+export interface RoutingDecision {
+  providerId: ProviderId;
+  modelId: string;
+  reason: string;
+  estimatedCostClass: "low" | "medium" | "high" | "unknown";
+  requiresApproval?: boolean;
+}
+
+export interface ProviderConfigPublic {
+  providerId: ProviderId;
+  displayName: string;
   enabled: boolean;
   hasSecret: boolean;
   baseUrl?: string | null;
   defaultModel?: string | null;
-  accountLabel?: string | null;
-  updatedAt?: string | null;
+  manualModel?: string | null;
+  validatedAt?: string | null;
+  validationStatus: "unknown" | "valid" | "invalid";
 }
 
-export interface ChatUsage {
+export interface TaskUsageRecord {
+  id: string;
+  projectId?: string | null;
+  providerId: ProviderId;
+  modelId: string;
   inputTokens?: number | null;
   outputTokens?: number | null;
-  cacheReadTokens?: number | null;
-  cacheWriteTokens?: number | null;
   estimatedCostUsd?: number | null;
+  routingPolicy: RoutingPolicy;
+  createdAt: string;
 }
 
 export interface VaultStatus {
@@ -130,6 +199,62 @@ export interface AuditEntry {
   risk?: string | null;
   decision?: string | null;
   result: string;
+  createdAt: string;
   metadata?: string | null;
+}
+
+export interface PermissionRequest {
+  id: string;
+  projectId: string;
+  taskId?: string | null;
+  category: string;
+  action: string;
+  target: string;
+  reason: string;
+  risk: string;
+  requestedBy: string;
+  allowAlwaysAvailable: boolean;
+  desktopOnly?: boolean;
+  status: string;
+  createdAt: string;
+}
+
+export const COMPUTER_USE_HELPER_URL = "http://127.0.0.1:47828";
+
+export type ScreenshotRetention = "none" | "task" | "always";
+
+export interface ComputerUseStatus {
+  state: string;
+  backend: string;
+  backendLabel: string;
+  experimental: boolean;
+  startedAt?: string | null;
+  lastError?: string | null;
+  remediation?: string | null;
+  running: boolean;
+}
+
+export interface DesktopWindow {
+  id: string;
+  processName: string;
+  title: string;
+}
+
+export interface ComputerUseBlocklistEntry {
+  id: string;
+  pattern: string;
+  category: string;
+  userEditable: boolean;
+  createdAt: string;
+}
+
+export interface ComputerUseScreenshotRecord {
+  id: string;
+  projectId: string;
+  taskId?: string | null;
+  appTarget?: string | null;
+  filePath: string;
+  width?: number | null;
+  height?: number | null;
   createdAt: string;
 }
