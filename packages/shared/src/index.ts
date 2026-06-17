@@ -586,19 +586,19 @@ export const PROVIDER_META: Record<
   ProviderId,
   { displayName: string; icon: string; color: string; local?: boolean }
 > = {
-  anthropic: { displayName: "Anthropic", icon: "brain", color: "#c2683f" },
-  openai: { displayName: "OpenAI", icon: "sparkles", color: "#1a7f64" },
-  gemini: { displayName: "Google Gemini", icon: "sparkles", color: "#3a6fc4" },
-  deepseek: { displayName: "DeepSeek", icon: "search", color: "#4b5bb0" },
-  ollama: { displayName: "Ollama", icon: "cpu", color: "#7a5c8e", local: true },
+  anthropic: { displayName: "Anthropic", icon: "brand-anthropic", color: "#c2683f" },
+  openai: { displayName: "OpenAI", icon: "brand-openai", color: "#1a7f64" },
+  gemini: { displayName: "Google Gemini", icon: "brand-gemini", color: "#3a6fc4" },
+  deepseek: { displayName: "DeepSeek", icon: "brand-deepseek", color: "#4b5bb0" },
+  ollama: { displayName: "Ollama", icon: "brand-ollama", color: "#7a5c8e", local: true },
   "openai-compatible": {
     displayName: "Custom endpoint",
-    icon: "braces",
+    icon: "brand-openai-compatible",
     color: "#645d4e",
   },
-  minimax: { displayName: "Minimax", icon: "bot", color: "#e05c2b" },
-  qwen: { displayName: "Qwen", icon: "bot", color: "#4f35b3" },
-  lmstudio: { displayName: "LM Studio", icon: "monitor", color: "#1988a2", local: true },
+  minimax: { displayName: "Minimax", icon: "brand-minimax", color: "#e05c2b" },
+  qwen: { displayName: "Qwen", icon: "brand-qwen", color: "#4f35b3" },
+  lmstudio: { displayName: "LM Studio", icon: "brand-lmstudio", color: "#1988a2", local: true },
 };
 
 export const ROUTING_POLICIES: {

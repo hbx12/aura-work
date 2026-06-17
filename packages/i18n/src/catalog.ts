@@ -90,6 +90,13 @@ export type MessageKey =
   | "settings.cliDesc"
   | "settings.pet"
   | "settings.petDesc"
+  | "settings.group.preferences"
+  | "settings.group.runtime"
+  | "settings.group.safety"
+  | "settings.readiness"
+  | "settings.diagnostics"
+  | "settings.localModel"
+  | "settings.approvals"
   | "common.save"
   | "common.apply"
   | "common.loading"
@@ -513,6 +520,13 @@ const en: MessageCatalog = {
     "Pair `aura` CLI via Extensions → pair code. CLI uses the local bridge and cannot bypass permissions.",
   "settings.pet": "Desktop Pet",
   "settings.petDesc": "Choose and customize your interactive companion.",
+  "settings.group.preferences": "Preferences",
+  "settings.group.runtime": "Runtime & connections",
+  "settings.group.safety": "System & safety",
+  "settings.readiness": "Readiness",
+  "settings.diagnostics": "Diagnostics",
+  "settings.localModel": "Local model",
+  "settings.approvals": "Approvals",
   "common.save": "Save",
   "common.apply": "Apply",
   "common.loading": "Loading…",
@@ -949,6 +963,13 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.cliDesc": "اربط أداة aura CLI عبر الإضافات. لا يمكن للـ CLI تجاوز الصلاحيات.",
     "settings.pet": "الحيوان الأليف لسطح المكتب",
     "settings.petDesc": "اختر رفيقك التفاعلي لسطح المكتب وقم بتخصيصه.",
+    "settings.group.preferences": "التفضيلات",
+    "settings.group.runtime": "بيئة التشغيل والاتصالات",
+    "settings.group.safety": "النظام والأمان",
+    "settings.readiness": "الجاهزية",
+    "settings.diagnostics": "التشخيصات",
+    "settings.localModel": "النموذج المحلي",
+    "settings.approvals": "الموافقات",
     "common.save": "حفظ",
     "common.apply": "تطبيق",
     "common.loading": "جارٍ التحميل…",

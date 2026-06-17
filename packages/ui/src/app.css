@@ -634,6 +634,7 @@ input,textarea,button,select{font-family:inherit}
 .sn-item:hover{background:var(--bg-hover);color:var(--fg-1)}
 .sn-item.active{background:var(--accent-subtle);color:var(--accent)}
 .sn-item svg{width:16px;height:16px;flex-shrink:0}
+.sn-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .settings-body{flex:1;min-width:0;overflow-y:auto;background:var(--bg-base)}
 .settings-inner{max-width:680px;padding:28px 36px 48px;display:flex;flex-direction:column;gap:28px}
 .settings-inner > .s-title{font:var(--text-h1);color:var(--fg-1)}

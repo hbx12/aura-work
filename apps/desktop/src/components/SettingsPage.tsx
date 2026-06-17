@@ -65,20 +65,20 @@ const MONO_FONTS = [
   { id: "Courier New", name: "Courier New", preview: "code" },
 ];
 
-const SETTINGS_NAV: { group?: string; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
-  { group: "Preferences" },
+const SETTINGS_NAV: { groupKey?: keyof MessageCatalog; id?: SettingsTab; icon?: string; labelKey?: keyof MessageCatalog }[] = [
+  { groupKey: "settings.group.preferences" },
   { id: "general", icon: "settings", labelKey: "settings.general" },
   { id: "pet", icon: "sparkles", labelKey: "settings.pet" },
   { id: "vault", icon: "key-round", labelKey: "settings.vault" },
-  { group: "Runtime & connections" },
+  { groupKey: "settings.group.runtime" },
   { id: "vm", icon: "hard-drive", labelKey: "settings.vm" },
   { id: "cloud", icon: "cloud", labelKey: "cloud.title" },
   { id: "extension", icon: "plug", labelKey: "settings.extension" },
-  { group: "System & safety" },
-  { id: "readiness", icon: "shield-check", labelKey: "settings.readiness" as any },
-  { id: "diagnostics", icon: "list", labelKey: "settings.diagnostics" as any },
-  { id: "local_model", icon: "bot", labelKey: "settings.localModel" as any },
-  { id: "approvals", icon: "inbox", labelKey: "settings.approvals" as any },
+  { groupKey: "settings.group.safety" },
+  { id: "readiness", icon: "shield-check", labelKey: "settings.readiness" },
+  { id: "diagnostics", icon: "list-checks", labelKey: "settings.diagnostics" },
+  { id: "local_model", icon: "bot", labelKey: "settings.localModel" },
+  { id: "approvals", icon: "shield", labelKey: "settings.approvals" },
 ];
 
 interface SettingsPageProps {
@@ -461,9 +461,9 @@ export function SettingsPage({
       <div className="settings-layout">
         <div className="settings-nav">
           {SETTINGS_NAV.map((item, i) =>
-            item.group ? (
+            item.groupKey ? (
               <div key={`g-${i}`} className="sn-group">
-                {item.group}
+                {t(item.groupKey)}
               </div>
             ) : (
               <div
@@ -475,7 +475,7 @@ export function SettingsPage({
                 tabIndex={0}
               >
                 {item.icon && <Icon name={item.icon} size={16} />}
-                {item.labelKey ? t(item.labelKey) : null}
+                {item.labelKey ? <span className="sn-label">{t(item.labelKey)}</span> : null}
               </div>
             ),
           )}
