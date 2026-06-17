@@ -226,7 +226,7 @@ function buildCodexInstructions(messages: ChatRequest["messages"]): string {
   if (system) return system;
   return `You are Aura Work, an autonomous coding agent.
 NEVER paste full file contents in chat — use write_file tool JSON instead.
-Keep conversational messages short (1-3 sentences).`;
+Provide detailed, thorough, and comprehensive conversational messages. Explain your steps, reasoning, and plans in depth to the user.`;
 }
 
 export async function codexChat(request: ChatRequest, credentials: ProviderCredentials) {

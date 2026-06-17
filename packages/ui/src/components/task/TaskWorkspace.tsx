@@ -375,6 +375,9 @@ export function Composer({
   },
   locale,
   skills = [],
+  messages = [],
+  workspaceFiles = "",
+  modelContextWindow = 128000,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -399,6 +402,9 @@ export function Composer({
   };
   locale?: string;
   skills?: { name: string; prompt: string; description: string }[];
+  messages?: { role: string; content: string }[];
+  workspaceFiles?: string;
+  modelContextWindow?: number;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -510,6 +516,12 @@ export function Composer({
               ))}
             </select>
           )}
+          <ContextUsageRing
+            value={value}
+            messages={messages}
+            workspaceFiles={workspaceFiles}
+            modelContextWindow={modelContextWindow}
+          />
           <button type="button" className="chip-btn" onClick={onToggleMode}>
             <Icon name={mode === "ask" ? "shield-check" : "bot"} size={14} />
             {mode === "ask" ? labels.modeAsk : labels.modeAct}
@@ -1067,3 +1079,410 @@ export function Thinking({
     </div>
   );
 }
+
+export function ClarificationCard({
+  data,
+  onSubmit,
+  isLatest = false,
+  isArabic = false,
+}: {
+  data: {
+    content: string;
+    questions: Array<{
+      id: string;
+      question: string;
+      reason?: string;
+      options: Array<{
+        label: string;
+        value: string;
+        recommended?: boolean;
+        note?: string;
+      }>;
+      allowCustom?: boolean;
+    }>;
+    recommendedAction?: {
+      label: string;
+      value: string;
+    };
+  };
+  onSubmit: (response: string) => void;
+  isLatest?: boolean;
+  isArabic?: boolean;
+}) {
+  const [selections, setSelections] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    for (const q of data.questions) {
+      const rec = q.options.find(o => o.recommended);
+      if (rec) {
+        initial[q.id] = rec.value;
+      } else if (q.options.length > 0) {
+        initial[q.id] = q.options[0].value;
+      }
+    }
+    return initial;
+  });
+  const [customAnswers, setCustomAnswers] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSelectOption = (qid: string, val: string) => {
+    if (submitted || !isLatest) return;
+    setSelections(prev => ({ ...prev, [qid]: val }));
+  };
+
+  const handleCustomChange = (qid: string, val: string) => {
+    if (submitted || !isLatest) return;
+    setCustomAnswers(prev => ({ ...prev, [qid]: val }));
+    setSelections(prev => ({ ...prev, [qid]: "__custom__" }));
+  };
+
+  const handleSubmit = () => {
+    if (submitted || !isLatest) return;
+    setSubmitted(true);
+    const parts: string[] = [];
+    for (const q of data.questions) {
+      const selectedVal = selections[q.id];
+      let displayVal = "";
+      if (selectedVal === "__custom__") {
+        displayVal = customAnswers[q.id] || "";
+      } else {
+        const opt = q.options.find(o => o.value === selectedVal);
+        displayVal = opt ? opt.label : selectedVal;
+      }
+      parts.push(`${q.question}: ${displayVal}`);
+    }
+    const followUp = isArabic
+      ? `استخدم هذه الاختيارات:\n${parts.map(p => `- ${p}`).join("\n")}`
+      : `Use these choices:\n${parts.map(p => `- ${p}`).join("\n")}`;
+    onSubmit(followUp);
+  };
+
+  const handleUseRecommended = () => {
+    if (submitted || !isLatest) return;
+    const recommendedSelections = { ...selections };
+    for (const q of data.questions) {
+      const rec = q.options.find(o => o.recommended);
+      if (rec) {
+        recommendedSelections[q.id] = rec.value;
+      }
+    }
+    setSelections(recommendedSelections);
+    const parts: string[] = [];
+    for (const q of data.questions) {
+      const selectedVal = recommendedSelections[q.id];
+      const opt = q.options.find(o => o.value === selectedVal);
+      const displayVal = opt ? opt.label : selectedVal;
+      parts.push(`${q.question}: ${displayVal}`);
+    }
+    const followUp = isArabic
+      ? `استخدم هذه الاختيارات:\n${parts.map(p => `- ${p}`).join("\n")}`
+      : `Use these choices:\n${parts.map(p => `- ${p}`).join("\n")}`;
+    setSubmitted(true);
+    onSubmit(followUp);
+  };
+
+  return (
+    <div className="msg fade clarification-card-wrapper" style={{ marginBottom: "16px" }}>
+      <div className="av agent" style={{ background: "var(--accent)" }}>
+        <Icon name="shield-check" size={16} />
+      </div>
+      <div className="mbody">
+        <div className="who">
+          {isArabic ? "طلب توضيح من Aura" : "Aura Clarification Request"}
+          <span className="role">· coordinator</span>
+        </div>
+        <div className="clarification-card" style={{
+          background: "var(--bg-2)",
+          border: "1px solid var(--border-1)",
+          borderRadius: "8px",
+          padding: "16px",
+          marginTop: "8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px"
+        }}>
+          <p className="clarification-reason" style={{ margin: 0, font: "var(--text-body)", color: "var(--fg-1)" }}>{data.content}</p>
+
+          <div className="clarification-questions" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {data.questions.map((q) => {
+              const selectedValue = selections[q.id];
+              const customVal = customAnswers[q.id] || "";
+              return (
+                <div key={q.id} className="clarification-question-item" style={{
+                  borderTop: "1px solid var(--border-2)",
+                  paddingTop: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px"
+                }}>
+                  <div className="q-title-wrap">
+                    <h4 className="q-title" style={{ margin: 0, font: "var(--text-body-sm)", fontWeight: 600, color: "var(--fg-2)" }}>{q.question}</h4>
+                    {q.reason && <p className="q-reason" style={{ margin: "2px 0 0", font: "var(--text-caption)", color: "var(--fg-3)" }}>{q.reason}</p>}
+                  </div>
+
+                  <div className="q-options-list" style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "4px" }}>
+                    {q.options.map((opt) => {
+                      const isSelected = selectedValue === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          className={`q-opt-btn${isSelected ? " selected" : ""}`}
+                          disabled={submitted || !isLatest}
+                          style={{
+                            background: isSelected ? "var(--accent)" : "var(--bg-3)",
+                            border: `1px solid ${isSelected ? "var(--accent)" : "var(--border-1)"}`,
+                            color: isSelected ? "#fff" : "var(--fg-2)",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            cursor: (submitted || !isLatest) ? "default" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            font: "var(--text-caption)",
+                            transition: "all 0.2s"
+                          }}
+                          onClick={() => handleSelectOption(q.id, opt.value)}
+                        >
+                          <span className="opt-label">{opt.label}</span>
+                          {opt.recommended && (
+                            <span className="opt-recommended-badge" style={{
+                              background: isSelected ? "rgba(255,255,255,0.2)" : "rgba(90,138,82,0.15)",
+                              color: isSelected ? "#fff" : "var(--agent)",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: "bold"
+                            }}>
+                              {isArabic ? "موصى به" : "Recommended"}
+                            </span>
+                          )}
+                          {opt.note && <span className="opt-note" style={{ opacity: 0.7, fontSize: "10px" }}>({opt.note})</span>}
+                        </button>
+                      );
+                    })}
+
+                    {q.allowCustom && (
+                      <div className={`q-custom-wrap${selectedValue === "__custom__" ? " selected" : ""}`} style={{ display: "flex" }}>
+                        <input
+                          type="text"
+                          className="q-custom-input"
+                          placeholder={isArabic ? "إجابة مخصصة..." : "Custom answer..."}
+                          value={customVal}
+                          disabled={submitted || !isLatest}
+                          style={{
+                            background: "var(--bg-3)",
+                            border: `1px solid ${selectedValue === "__custom__" ? "var(--accent)" : "var(--border-1)"}`,
+                            color: "var(--fg-1)",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            outline: "none",
+                            font: "var(--text-caption)",
+                            minWidth: "150px"
+                          }}
+                          onChange={(e) => handleCustomChange(q.id, e.target.value)}
+                          onFocus={() => handleSelectOption(q.id, "__custom__")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {isLatest && !submitted && (
+            <div className="clarification-actions" style={{ display: "flex", gap: "8px", marginTop: "8px", borderTop: "1px solid var(--border-2)", paddingTop: "12px" }}>
+              <button
+                type="button"
+                className="btn primary sm"
+                onClick={handleSubmit}
+              >
+                {isArabic ? "إرسال الاختيارات" : "Submit Choices"}
+              </button>
+              {data.questions.some(q => q.options.some(o => o.recommended)) && (
+                <button
+                  type="button"
+                  className="btn sm secondary"
+                  style={{
+                    background: "var(--bg-3)",
+                    border: "1px solid var(--border-1)",
+                    color: "var(--fg-2)"
+                  }}
+                  onClick={handleUseRecommended}
+                >
+                  {isArabic ? "استخدام الخيارات الموصى بها" : "Use Recommended"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {submitted && (
+            <div className="clarification-submitted-badge" style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "var(--agent)",
+              font: "var(--text-caption)",
+              marginTop: "8px",
+              borderTop: "1px solid var(--border-2)",
+              paddingTop: "12px"
+            }}>
+              <Icon name="check" size={14} />
+              <span>{isArabic ? "تم إرسال الاختيارات بنجاح" : "Choices submitted successfully"}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ContextUsageRing({
+  value = "",
+  messages = [],
+  workspaceFiles = "",
+  modelContextWindow = 128000,
+}: {
+  value: string;
+  messages: { role: string; content: string }[];
+  workspaceFiles?: string;
+  modelContextWindow?: number;
+}) {
+  const systemEst = 4000;
+  const historyEst = Math.ceil(messages.reduce((acc, m) => acc + m.content.length, 0) / 4);
+  const inputEst = Math.ceil(value.length / 4);
+  const filesEst = Math.ceil((workspaceFiles || "").length / 4);
+  const totalEst = systemEst + historyEst + inputEst + filesEst;
+  const percentage = Math.min(100, Math.max(0, (totalEst / modelContextWindow) * 100));
+
+  let statusClass = "low";
+  let color = "#5a8a52"; // Emerald green
+  if (percentage >= 90) {
+    statusClass = "critical";
+    color = "#b23b3b"; // Ruby red
+  } else if (percentage >= 80) {
+    statusClass = "high";
+    color = "#d97706"; // Amber orange
+  } else if (percentage >= 50) {
+    statusClass = "medium";
+    color = "#3b82f6"; // Sapphire blue
+  }
+
+  const radius = 9;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className={`ctx-usage-ring-wrap ${statusClass}`} style={{
+      position: "relative",
+      display: "inline-flex",
+      alignItems: "center",
+      cursor: "pointer"
+    }}>
+      <div className="ctx-ring-trigger" style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+        padding: "4px 8px",
+        borderRadius: "6px",
+        background: "var(--bg-3)",
+        border: "1px solid var(--border-1)",
+        height: "28px"
+      }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" style={{ display: "block" }}>
+          <circle
+            cx="12"
+            cy="12"
+            r={radius}
+            stroke="var(--border-2)"
+            strokeWidth="3"
+            fill="transparent"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r={radius}
+            stroke={color}
+            strokeWidth="3"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            transform="rotate(-90 12 12)"
+          />
+        </svg>
+        <span className="ctx-text" style={{ color, fontSize: "11px", fontWeight: "bold", fontVariantNumeric: "tabular-nums" }}>{percentage.toFixed(0)}%</span>
+      </div>
+
+      <div className="ctx-ring-dropdown" style={{
+        position: "absolute",
+        bottom: "calc(100% + 8px)",
+        right: 0,
+        width: "250px",
+        background: "var(--bg-2)",
+        border: "1px solid var(--border-1)",
+        borderRadius: "8px",
+        padding: "12px",
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)",
+        display: "none",
+        flexDirection: "column",
+        gap: "8px",
+        zIndex: 1000
+      }}>
+        <h5 className="dropdown-title" style={{ margin: 0, font: "var(--text-body-sm)", fontWeight: 600, color: "var(--fg-1)" }}>Context Allocation</h5>
+        <div className="breakdown-grid" style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "11px" }}>
+          <div className="breakdown-item" style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-2)" }}>
+            <span className="b-label">System Prompt:</span>
+            <span className="b-val" style={{ fontWeight: 600 }}>{systemEst.toLocaleString()} tok</span>
+          </div>
+          <div className="breakdown-item" style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-2)" }}>
+            <span className="b-label">Workspace:</span>
+            <span className="b-val" style={{ fontWeight: 600 }}>{filesEst.toLocaleString()} tok</span>
+          </div>
+          <div className="breakdown-item" style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-2)" }}>
+            <span className="b-label">Chat History:</span>
+            <span className="b-val" style={{ fontWeight: 600 }}>{historyEst.toLocaleString()} tok</span>
+          </div>
+          <div className="breakdown-item" style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-2)" }}>
+            <span className="b-label">Next Prompt:</span>
+            <span className="b-val" style={{ fontWeight: 600 }}>{inputEst.toLocaleString()} tok</span>
+          </div>
+          <div style={{ borderTop: "1px solid var(--border-2)", margin: "4px 0" }} />
+          <div className="breakdown-item total" style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-1)", fontWeight: "bold" }}>
+            <span className="b-label">Total:</span>
+            <span className="b-val">{totalEst.toLocaleString()} / {modelContextWindow.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {percentage >= 90 ? (
+          <div className="ctx-warning critical" style={{
+            background: "rgba(178, 59, 59, 0.1)",
+            border: "1px solid rgba(178, 59, 59, 0.3)",
+            color: "#e88080",
+            padding: "8px",
+            borderRadius: "6px",
+            fontSize: "10px",
+            marginTop: "4px"
+          }}>
+            <strong>⚠️ Critical Context Limit!</strong>
+            <p style={{ margin: "2px 0 0" }}>Consider typing /context to compact history or starting a fresh task.</p>
+          </div>
+        ) : percentage >= 80 ? (
+          <div className="ctx-warning warning" style={{
+            background: "rgba(217, 119, 6, 0.1)",
+            border: "1px solid rgba(217, 119, 6, 0.3)",
+            color: "#f59e0b",
+            padding: "8px",
+            borderRadius: "6px",
+            fontSize: "10px",
+            marginTop: "4px"
+          }}>
+            <strong>⚠️ High Context Warning</strong>
+            <p style={{ margin: "2px 0 0" }}>Starting a fresh task soon is recommended to keep models accurate.</p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+

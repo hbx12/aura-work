@@ -106,7 +106,7 @@ pub fn project_permission_mode(db: &DbState, project_id: &str) -> Result<String,
     .map_err(|_| "Project not found.".to_string())
 }
 
-fn normalize_rel(path: &str) -> String {
+pub fn normalize_rel(path: &str) -> String {
     path.replace('\\', "/").trim_start_matches("./").to_string()
 }
 
@@ -587,6 +587,11 @@ pub fn write_project_file_inner(
         });
     }
 
+    if let Some(ref tid) = input.task_id {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        crate::task_snapshots::capture_snapshot_for_file(&conn, &input.project_id, tid, &rel)?;
+    }
+
     write_file_internal(&root, &rel, &input.content)?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
@@ -650,6 +655,11 @@ pub fn approve_pending_edit(db: State<'_, DbState>, edit_id: String) -> Result<P
     }
 
     let root = project_folder(&db, &edit.project_id)?;
+
+    if let Some(ref tid) = edit.task_id {
+        crate::task_snapshots::capture_snapshot_for_file(&conn, &edit.project_id, tid, &edit.file_path)?;
+    }
+
     write_file_internal(&root, &edit.file_path, &edit.proposed_content)?;
 
     conn.execute(
@@ -881,6 +891,11 @@ pub fn tool_delete_file(
         false,
         None,
     )?;
+
+    if let Some(tid) = task_id {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        crate::task_snapshots::capture_snapshot_for_file(&conn, project_id, tid, &rel)?;
+    }
 
     delete_file_internal(&root, &rel)?;
 

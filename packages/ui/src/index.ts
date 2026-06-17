@@ -8,6 +8,6 @@ export {
   AuditPage,
   SchedulePage,
 } from "./components/pages/SecondaryPages";
-export { Msg, StreamingMsg, Composer, ContextPanel, TaskWelcome, PlanBlock, Steps, Approval, Summary, Thinking } from "./components/task/TaskWorkspace";
+export { Msg, StreamingMsg, Composer, ContextPanel, TaskWelcome, PlanBlock, Steps, Approval, Summary, Thinking, ClarificationCard, ContextUsageRing } from "./components/task/TaskWorkspace";
 export type { Project, TaskItem, AppView, ThemeMode, ThemePreference, PermissionMode } from "./types";
 export { STATE_COLOR } from "./icons/paths";

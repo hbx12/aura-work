@@ -51,9 +51,18 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
     };
   }
 
+  if (parsed.type === "clarification") {
+    return {
+      type: "message" as const,
+      role: parsed.role ?? "coordinator",
+      content: JSON.stringify(parsed),
+      complete: false,
+    };
+  }
+
   if (parsed.type === "blocked") {
     const body = parsed.content ?? parsed.summary ?? "Task blocked by the model.";
-    return blocked(stripCodeFences(body).slice(0, 800) || body);
+    return blocked(stripCodeFences(body).slice(0, 16384) || body);
   }
 
   if (parsed.type === "complete") {
@@ -63,7 +72,7 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
       );
     }
     const body = parsed.content ?? parsed.summary ?? "Task complete.";
-    const summary = stripCodeFences(body).slice(0, 800) || "Task complete.";
+    const summary = stripCodeFences(body).slice(0, 16384) || "Task complete.";
     return {
       type: "complete" as const,
       role: parsed.role ?? "reviewer",
@@ -77,9 +86,9 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
   return {
     type: "message" as const,
     role: parsed.role ?? "coordinator",
-    content: clean.slice(0, 600) || parsed.content.slice(0, 200),
+    content: clean.slice(0, 16384) || parsed.content.slice(0, 16384),
     complete: ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages),
-    summary: ctx.iteration >= ctx.planLength ? clean.slice(0, 800) : undefined,
+    summary: ctx.iteration >= ctx.planLength ? clean.slice(0, 16384) : undefined,
   };
 }
 
@@ -102,7 +111,7 @@ export function coerceAgentResponse(text: string, ctx: CoerceContext) {
       return {
         type: "message" as const,
         role: "coordinator",
-        content: clean.slice(0, 600),
+        content: clean.slice(0, 16384),
         complete: false,
       };
     }

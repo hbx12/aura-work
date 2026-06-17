@@ -1,13 +1,12 @@
-/**
- * Task coordinator — plan generation and agent loop iterations (Phase 3)
- */
-
+import fs from "fs";
+import path from "path";
 import type { ProviderCredentials } from "../types.js";
 import { getAdapter } from "../providers/index.js";
 import type { ProviderId } from "@aura-os/shared";
 import { isFileTask } from "./extract-writes.js";
 import { coerceAgentResponse } from "./coerce-response.js";
 import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
+import { getSystemPrompt, getPlannerSystemPrompt } from "./prompts/index.js";
 
 export interface PlanStep {
   title: string;
@@ -18,6 +17,7 @@ export interface PlanStep {
 export interface TaskPlanRequest {
   prompt: string;
   projectId: string;
+  projectPath?: string;
   providerId: string;
   modelId: string;
   credentials: ProviderCredentials;
@@ -30,6 +30,7 @@ export interface TaskIterateRequest {
   messages: { role: string; content: string; agentRole?: string }[];
   iteration: number;
   projectId: string;
+  projectPath?: string;
   taskId?: string;
   providerId: string;
   modelId: string;
@@ -39,6 +40,33 @@ export interface TaskIterateRequest {
   allowPlainText?: boolean;
   responseLanguage?: string;
   onChunk?: (text: string) => void;
+}
+
+function findProjectRules(projectPath?: string): string | undefined {
+  if (!projectPath) return undefined;
+  const filesToTry = [
+    "AURA.md",
+    ".aura/rules.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTINUE.md",
+    ".cursorrules",
+    ".windsurfrules",
+  ];
+  for (const file of filesToTry) {
+    const fullPath = path.resolve(projectPath, file);
+    if (fs.existsSync(fullPath)) {
+      try {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        if (content.trim()) {
+          return content;
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+  }
+  return undefined;
 }
 
 const SUBAGENT_ROLES = [
@@ -78,7 +106,7 @@ AGENT PROTOCOLS:
 CRITICAL RULES:
 - NEVER paste full file contents or large code blocks in chat messages.
 - To create or edit files you MUST respond with JSON tool_calls using write_file.
-- Chat messages must be short status updates (1-2 sentences): what you're doing next, or clarifying questions, not the code itself.
+- Chat messages can be detailed, descriptive, and comprehensive. Provide thorough status updates, in-depth explanations of your changes, logical reasoning, and clear, structured responses to the user.
 - After writing files, briefly confirm what was created.
 - NEVER invent placeholder file contents. If you cannot produce the requested file safely, return a blocked message with a clear reason.
 
@@ -121,7 +149,7 @@ When blocked, respond with:
 {"type":"blocked","role":"coordinator","content":"clear reason and required next action"}
 
 Otherwise respond with:
-{"type":"message","role":"coordinator","content":"your clarifying question or short status update — no code blocks"}`;
+{"type":"message","role":"coordinator","content":"your detailed message, explanation, or response to the user"}`;
 
 function blocked(content: string) {
   return {
@@ -182,9 +210,7 @@ function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: s
 
 export async function generatePlan(req: TaskPlanRequest) {
   const adapter = getAdapter(req.providerId as ProviderId);
-  const system = `You are the Aura Work Coordinator. Create a concise task plan as JSON:
-{"plan":[{"title":"step","subtitle":"detail","role":"coordinator|research|coder|reviewer|security|data|document|browser"}],"coordinatorMessage":"brief message to user"}
-Roles: ${SUBAGENT_ROLES.join(", ")}. Keep 3-6 steps.`;
+  const system = getPlannerSystemPrompt();
 
   try {
     const result = await adapter.chat(
@@ -220,24 +246,24 @@ export async function iterateTask(req: TaskIterateRequest) {
   const planText = req.plan.map((s, i) => `${i + 1}. [${s.role ?? "coordinator"}] ${s.title}`).join("\n");
   const history = req.messages
     .slice(-8)
-    .map((m) => `${m.role}${m.agentRole ? ` (${m.agentRole})` : ""}: ${m.content.slice(0, 500)}`)
+    .map((m) => `${m.role}${m.agentRole ? ` (${m.agentRole})` : ""}: ${m.content}`)
     .join("\n");
 
   const skillsXml = req.skills && req.skills.length > 0
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
-  const languageRule = req.responseLanguage
-    ? `\nResponse language: ${req.responseLanguage}. Reply in that language unless the user explicitly asks for another language.`
-    : "\nReply in the same language as the user's latest message.";
+  const projectRules = findProjectRules(req.projectPath);
 
-  const system = `You are Aura Work executing a task step-by-step.
-${TOOLS_PROMPT}${skillsXml}
-${languageRule}
-
-Current iteration: ${req.iteration + 1}
-Plan:
-${planText}`;
+  const baseSystem = getSystemPrompt(
+    req.providerId,
+    req.modelId,
+    req.iteration,
+    planText,
+    req.responseLanguage,
+    projectRules
+  );
+  const system = `${baseSystem}${skillsXml}`;
 
   const userContent = `Task: ${req.prompt}
 
