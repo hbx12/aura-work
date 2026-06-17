@@ -10,8 +10,6 @@
     { "providerId": "gemini", "modelId": "gemini-1.5-pro", "displayName": "Gemini 1.5 Pro", "inputPerMillion": 1.25, "outputPerMillion": 5.0 },
     { "providerId": "deepseek", "modelId": "deepseek-chat", "displayName": "DeepSeek V3", "inputPerMillion": 0.27, "outputPerMillion": 1.1 },
     { "providerId": "deepseek", "modelId": "deepseek-reasoner", "displayName": "DeepSeek R1", "inputPerMillion": 0.55, "outputPerMillion": 2.19 },
-    { "providerId": "deepseek", "modelId": "deepseek/deepseek-v4-flash", "displayName": "DeepSeek V4 Flash", "inputPerMillion": 0.09, "outputPerMillion": 0.18 },
-    { "providerId": "minimax", "modelId": "minimax/minimax-m3", "displayName": "MiniMax M3", "inputPerMillion": 0.3, "outputPerMillion": 1.2 },
     { "providerId": "ollama", "modelId": "llama3.2", "displayName": "Llama 3.2", "inputPerMillion": 0.0, "outputPerMillion": 0.0 },
     { "providerId": "ollama", "modelId": "llama3.1", "displayName": "Llama 3.1", "inputPerMillion": 0.0, "outputPerMillion": 0.0 }
   ]

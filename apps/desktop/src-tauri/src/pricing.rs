@@ -8,6 +8,7 @@ const CURATED_PRICING_URL: &str =
 const OPENROUTER_MODELS_URL: &str = "https://openrouter.ai/api/v1/models";
 
 const BUNDLED_PRICING: &str = include_str!("../resources/pricing-v1.json");
+const REPO_PRICING_OVERRIDES: &str = include_str!("../resources/pricing-overrides.json");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -200,6 +201,9 @@ pub async fn refresh_remote_pricing(db: &DbState) -> Result<serde_json::Value, S
         }
     }
 
+    updated += load_pricing_json(REPO_PRICING_OVERRIDES, "repo-overrides", &conn)?;
+    sources.push("repo-overrides");
+
     if let Some(text) = openrouter {
         if let Ok(models) = parse_openrouter_models(&text) {
             updated += upsert_models(&conn, &models, "openrouter")?;
@@ -220,6 +224,7 @@ pub fn seed_pricing_if_empty(conn: &rusqlite::Connection) -> Result<(), String> 
         .map_err(|e| e.to_string())?;
     if count == 0 {
         load_pricing_json(BUNDLED_PRICING, "bundled", conn)?;
+        load_pricing_json(REPO_PRICING_OVERRIDES, "repo-overrides", conn)?;
     }
     Ok(())
 }
@@ -454,5 +459,54 @@ pub fn estimate_cost(
             Some((input_tokens as f64 * i + output_tokens as f64 * o) / 1_000_000.0)
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+
+    fn test_db() -> DbState {
+        let conn = rusqlite::Connection::open_in_memory().unwrap();
+        conn.execute_batch(
+            "
+            CREATE TABLE pricing_cache (
+                provider_id TEXT NOT NULL,
+                model_id TEXT NOT NULL,
+                display_name TEXT,
+                input_per_million REAL,
+                output_per_million REAL,
+                currency TEXT NOT NULL DEFAULT 'USD',
+                source TEXT NOT NULL DEFAULT 'auto',
+                updated_at TEXT NOT NULL,
+                PRIMARY KEY (provider_id, model_id)
+            );
+            ",
+        )
+        .unwrap();
+        DbState(Arc::new(Mutex::new(conn)))
+    }
+
+    #[test]
+    fn repo_overrides_seed_prices_when_cache_is_empty() {
+        let db = test_db();
+        {
+            let conn = db.0.lock().unwrap();
+            seed_pricing_if_empty(&conn).unwrap();
+        }
+        let pricing = pricing_for_model(&db, "deepseek", "deepseek/deepseek-v4-flash").unwrap();
+        assert_eq!(pricing, (Some(0.09), Some(0.18)));
+    }
+
+    #[test]
+    fn pricing_lookup_matches_short_model_names() {
+        let db = test_db();
+        {
+            let conn = db.0.lock().unwrap();
+            load_pricing_json(REPO_PRICING_OVERRIDES, "repo-overrides", &conn).unwrap();
+        }
+        let pricing = pricing_for_model(&db, "qwen", "qwen3.7-plus").unwrap();
+        assert_eq!(pricing, (Some(0.32), Some(1.28)));
     }
 }

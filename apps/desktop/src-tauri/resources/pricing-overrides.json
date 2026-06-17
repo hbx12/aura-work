@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "updatedAt": "2026-06-17",
+  "models": [
+    { "providerId": "deepseek", "modelId": "deepseek/deepseek-v4-flash", "displayName": "DeepSeek V4 Flash", "inputPerMillion": 0.09, "outputPerMillion": 0.18 },
+    { "providerId": "deepseek", "modelId": "deepseek/deepseek-v4-pro", "displayName": "DeepSeek V4 Pro", "inputPerMillion": 0.435, "outputPerMillion": 0.87 },
+    { "providerId": "minimax", "modelId": "minimax/minimax-m3", "displayName": "MiniMax M3", "inputPerMillion": 0.3, "outputPerMillion": 1.2 },
+    { "providerId": "qwen", "modelId": "qwen/qwen3.7-plus", "displayName": "Qwen3.7 Plus", "inputPerMillion": 0.32, "outputPerMillion": 1.28 },
+    { "providerId": "qwen", "modelId": "qwen/qwen3.7-max", "displayName": "Qwen3.7 Max", "inputPerMillion": 1.25, "outputPerMillion": 3.75 },
+    { "providerId": "openai-compatible", "modelId": "z-ai/glm-5.2", "displayName": "Z.ai GLM 5.2", "inputPerMillion": 1.4, "outputPerMillion": 4.4 },
+    { "providerId": "openai-compatible", "modelId": "moonshotai/kimi-k2.7-code", "displayName": "Kimi K2.7 Code", "inputPerMillion": 0.74, "outputPerMillion": 3.5 },
+    { "providerId": "openai-compatible", "modelId": "stepfun/step-3.7-flash", "displayName": "Step 3.7 Flash", "inputPerMillion": 0.2, "outputPerMillion": 1.15 },
+    { "providerId": "openai-compatible", "modelId": "nvidia/nemotron-3-ultra-550b-a55b", "displayName": "NVIDIA Nemotron 3 Ultra", "inputPerMillion": 0.5, "outputPerMillion": 2.2 },
+    { "providerId": "openai-compatible", "modelId": "openai/gpt-5.4", "displayName": "GPT-5.4", "inputPerMillion": 2.5, "outputPerMillion": 15.0 },
+    { "providerId": "openai-compatible", "modelId": "openai/gpt-5.4-mini", "displayName": "GPT-5.4 Mini", "inputPerMillion": 0.75, "outputPerMillion": 4.5 },
+    { "providerId": "openai-compatible", "modelId": "openai/gpt-5.4-pro", "displayName": "GPT-5.4 Pro", "inputPerMillion": 30.0, "outputPerMillion": 180.0 },
+    { "providerId": "openai-compatible", "modelId": "anthropic/claude-opus-4.8", "displayName": "Claude Opus 4.8", "inputPerMillion": 5.0, "outputPerMillion": 25.0 },
+    { "providerId": "openai-compatible", "modelId": "anthropic/claude-5-fable", "displayName": "Claude Fable 5", "inputPerMillion": 10.0, "outputPerMillion": 50.0 }
+  ]
+}
