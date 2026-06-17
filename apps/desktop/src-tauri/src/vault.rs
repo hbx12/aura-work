@@ -44,6 +44,7 @@ pub struct VaultState {
     storage_mode: VaultStorageMode,
     key: [u8; DEVICE_KEY_LEN],
     payload: VaultPayload,
+    migrated_to_keychain: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,6 +65,7 @@ impl VaultStorageMode {
 struct LoadedDeviceKey {
     key: [u8; DEVICE_KEY_LEN],
     storage_mode: VaultStorageMode,
+    migrated_to_keychain: bool,
 }
 
 impl VaultState {
@@ -100,6 +102,7 @@ impl VaultState {
             storage_mode: device_key.storage_mode,
             key: device_key.key,
             payload,
+            migrated_to_keychain: device_key.migrated_to_keychain,
         })
     }
 
@@ -112,6 +115,7 @@ impl VaultState {
             "keyStorage": self.storage_mode.as_str(),
             "fallbackFile": self.storage_mode == VaultStorageMode::FallbackFile,
             "legacyDeviceKeyFilePresent": self.device_key_path.exists(),
+            "migratedToKeychain": self.migrated_to_keychain,
         })
     }
 
@@ -323,13 +327,31 @@ fn read_fallback_device_key(path: &Path) -> Result<[u8; DEVICE_KEY_LEN], String>
 }
 
 #[cfg(unix)]
-fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
+pub(crate) fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
     use std::os::unix::fs::PermissionsExt;
     fs::set_permissions(path, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())
 }
 
-#[cfg(not(unix))]
-fn enforce_fallback_key_permissions(_path: &Path) -> Result<(), String> {
+#[cfg(windows)]
+pub(crate) fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
+    let username = std::env::var("USERNAME").map_err(|_| "USERNAME env not set".to_string())?;
+    let status = std::process::Command::new("icacls")
+        .arg(path.as_os_str())
+        .arg("/inheritance:r")
+        .arg("/grant")
+        .arg(format!("{username}:F"))
+        .arg("/grant")
+        .arg("SYSTEM:F")
+        .status()
+        .map_err(|e| format!("Failed to run icacls: {e}"))?;
+    if !status.success() {
+        return Err("icacls failed to restrict fallback key permissions".into());
+    }
+    Ok(())
+}
+
+#[cfg(not(any(unix, windows)))]
+pub(crate) fn enforce_fallback_key_permissions(_path: &Path) -> Result<(), String> {
     Ok(())
 }
 
@@ -370,6 +392,7 @@ fn load_or_create_fallback_device_key(path: &Path) -> Result<LoadedDeviceKey, St
         return Ok(LoadedDeviceKey {
             key: read_fallback_device_key(path)?,
             storage_mode: VaultStorageMode::FallbackFile,
+            migrated_to_keychain: false,
         });
     }
 
@@ -379,6 +402,7 @@ fn load_or_create_fallback_device_key(path: &Path) -> Result<LoadedDeviceKey, St
     Ok(LoadedDeviceKey {
         key,
         storage_mode: VaultStorageMode::FallbackFile,
+        migrated_to_keychain: false,
     })
 }
 
@@ -414,27 +438,46 @@ fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
         return Ok(LoadedDeviceKey {
             key,
             storage_mode: VaultStorageMode::OsKeychain,
+            migrated_to_keychain: false,
         });
     }
 
     if path.exists() {
         let key = read_fallback_device_key(path)?;
         let encoded = B64.encode(key);
-        let _ = entry.set_password(&encoded);
-        return Ok(LoadedDeviceKey {
-            key,
-            storage_mode: VaultStorageMode::FallbackFile,
-        });
+        match entry.set_password(&encoded) {
+            Ok(_) => {
+                if let Err(e) = fs::remove_file(path) {
+                    eprintln!("[vault] WARN: could not remove legacy device key after migration: {e}");
+                }
+                return Ok(LoadedDeviceKey {
+                    key,
+                    storage_mode: VaultStorageMode::OsKeychain,
+                    migrated_to_keychain: true,
+                });
+            }
+            Err(error) => {
+                eprintln!("[vault] WARN: OS secure storage write failed ({error}). Key remains in fallback file.");
+                return Ok(LoadedDeviceKey {
+                    key,
+                    storage_mode: VaultStorageMode::FallbackFile,
+                    migrated_to_keychain: false,
+                });
+            }
+        }
     }
 
     let mut key = [0u8; DEVICE_KEY_LEN];
     rand::thread_rng().fill_bytes(&mut key);
-    let _ = write_fallback_device_key(path, &key);
-    let _ = entry.set_password(&B64.encode(key));
+    write_fallback_device_key(path, &key)?;
+    if let Err(error) = entry.set_password(&B64.encode(key)) {
+        eprintln!("[vault] WARN: OS secure storage write failed ({error}). Key remains in fallback file.");
+    }
 
     Ok(LoadedDeviceKey {
         key,
         storage_mode: VaultStorageMode::FallbackFile,
+        migrated_to_keychain: false,
     })
 }
 
@@ -530,6 +573,7 @@ mod tests {
                 version: VAULT_VERSION,
                 secrets: HashMap::new(),
             },
+            migrated_to_keychain: false,
         };
 
         let status = state.status();
@@ -538,6 +582,58 @@ mod tests {
         assert_eq!(status["fallbackFile"], true);
         assert_eq!(status["deviceBound"], true);
         assert_eq!(status["legacyDeviceKeyFilePresent"], false);
+        assert_eq!(status["migratedToKeychain"], false);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn status_reports_os_keychain_storage_mode() {
+        let dir = temp_vault_dir("oskeychain");
+        let state = VaultState {
+            path: dir.join("vault.enc"),
+            device_key_path: dir.join("device.key"),
+            storage_mode: VaultStorageMode::OsKeychain,
+            key: [0u8; DEVICE_KEY_LEN],
+            payload: VaultPayload {
+                version: VAULT_VERSION,
+                secrets: HashMap::new(),
+            },
+            migrated_to_keychain: true,
+        };
+
+        let status = state.status();
+
+        assert_eq!(status["keyStorage"], "os-keychain");
+        assert_eq!(status["fallbackFile"], false);
+        assert_eq!(status["deviceBound"], true);
+        assert_eq!(status["migratedToKeychain"], true);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn status_reports_legacy_device_key_file() {
+        let dir = temp_vault_dir("legacyfile");
+        let path = dir.join("device.key");
+        let key = [0xabu8; DEVICE_KEY_LEN];
+        write_fallback_device_key(&path, &key).expect("write legacy key");
+
+        let state = VaultState {
+            path: dir.join("vault.enc"),
+            device_key_path: path.clone(),
+            storage_mode: VaultStorageMode::OsKeychain,
+            key,
+            payload: VaultPayload {
+                version: VAULT_VERSION,
+                secrets: HashMap::new(),
+            },
+            migrated_to_keychain: false,
+        };
+
+        let status = state.status();
+
+        assert_eq!(status["keyStorage"], "os-keychain");
+        assert_eq!(status["fallbackFile"], false);
+        assert_eq!(status["legacyDeviceKeyFilePresent"], true);
         let _ = fs::remove_dir_all(dir);
     }
 

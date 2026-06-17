@@ -758,6 +758,13 @@ export function SettingsPage({
                     <div className="vs">
                       v{vaultStatus?.version ?? 1} · {vaultStatus?.secretCount ?? 0} secrets
                     </div>
+                    <div className="vs" style={{ fontSize: "12px", marginTop: 4 }}>
+                      {vaultStatus?.keyStorage === "os-keychain"
+                        ? "OS keychain"
+                        : "File fallback"}
+                      {vaultStatus?.legacyDeviceKeyFilePresent && " · legacy device.key present"}
+                      {vaultStatus?.migratedToKeychain && " · migrated to keychain"}
+                    </div>
                   </div>
                 </div>
                 <div className="section">

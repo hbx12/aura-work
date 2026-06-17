@@ -122,6 +122,10 @@ export interface VaultStatus {
   version: number;
   secretCount: number;
   deviceBound: boolean;
+  keyStorage: "os-keychain" | "fallback-file";
+  fallbackFile: boolean;
+  legacyDeviceKeyFilePresent: boolean;
+  migratedToKeychain: boolean;
 }
 
 export type TaskStateName =
