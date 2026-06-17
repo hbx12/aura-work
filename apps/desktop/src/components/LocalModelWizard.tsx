@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@aura-os/ui";
 
 interface LocalModelWizardProps {
   isArabic?: boolean;
@@ -59,7 +60,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
-          🤖 {isArabic ? "مساعد إعداد النماذج المحلية" : "Local Model Setup Helper"}
+          <Icon name="bot" size={18} style={{ verticalAlign: "-3px", marginInlineEnd: 8 }} />
+          {isArabic ? "مساعد إعداد النماذج المحلية" : "Local Model Setup Helper"}
         </h3>
         <button onClick={onClose} style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: "20px" }}>&times;</button>
       </div>
@@ -84,7 +86,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
 
         {ollamaStatus === "connected" && (
           <div style={{ padding: "8px 12px", background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "6px", fontSize: "12px", color: "#34d399" }}>
-            ✅ {isArabic ? `متصل! تم العثور على (${ollamaModels.length}) نموذج:` : `Connected! Found (${ollamaModels.length}) models:`}
+            <Icon name="check" size={14} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />
+            {isArabic ? `متصل! تم العثور على (${ollamaModels.length}) نموذج:` : `Connected! Found (${ollamaModels.length}) models:`}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
               {ollamaModels.map((m) => (
                 <span key={m} style={{ padding: "2px 6px", background: "var(--bg-4)", borderRadius: "4px", fontSize: "11px", color: "var(--text-2)" }}>{m}</span>
@@ -95,7 +98,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
 
         {ollamaStatus === "failed" && (
           <div style={{ padding: "8px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "6px", fontSize: "12px", color: "#f87171" }}>
-            ❌ {isArabic ? "فشل الاتصال بـ Ollama. تأكد من تشغيل تطبيق Ollama على جهازك." : "Failed to connect to Ollama. Make sure the Ollama app is running."}
+            <Icon name="alert-triangle" size={14} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />
+            {isArabic ? "فشل الاتصال بـ Ollama. تأكد من تشغيل تطبيق Ollama على جهازك." : "Failed to connect to Ollama. Make sure the Ollama app is running."}
           </div>
         )}
       </div>
@@ -114,7 +118,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
 
         {lmStudioStatus === "connected" && (
           <div style={{ padding: "8px 12px", background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "6px", fontSize: "12px", color: "#34d399" }}>
-            ✅ {isArabic ? "متصل بـ LM Studio!" : "Connected to LM Studio!"}
+            <Icon name="check" size={14} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />
+            {isArabic ? "متصل بـ LM Studio!" : "Connected to LM Studio!"}
             {lmStudioModels.length > 0 && (
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
                 {lmStudioModels.map((m) => (
@@ -127,7 +132,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
 
         {lmStudioStatus === "failed" && (
           <div style={{ padding: "8px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "6px", fontSize: "12px", color: "#f87171" }}>
-            ❌ {isArabic ? "فشل الاتصال بـ LM Studio. تأكد من تفعيل Local Server داخل LM Studio." : "Failed to connect to LM Studio. Make sure Local Server is running in LM Studio."}
+            <Icon name="alert-triangle" size={14} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />
+            {isArabic ? "فشل الاتصال بـ LM Studio. تأكد من تفعيل Local Server داخل LM Studio." : "Failed to connect to LM Studio. Make sure Local Server is running in LM Studio."}
           </div>
         )}
       </div>
@@ -135,7 +141,8 @@ export function LocalModelWizard({ isArabic, onClose }: LocalModelWizardProps) {
       {/* Suggested Models */}
       <div style={{ background: "rgba(0,0,0,0.15)", padding: "14px", borderRadius: "8px" }}>
         <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "var(--text-1)" }}>
-          💡 {isArabic ? "النماذج المحلية المقترحة للتطوير:" : "Recommended Local Models for Coding:"}
+          <Icon name="sparkles" size={14} style={{ verticalAlign: "-3px", marginInlineEnd: 6 }} />
+          {isArabic ? "النماذج المحلية المقترحة للتطوير:" : "Recommended Local Models for Coding:"}
         </h4>
         <ul style={{ margin: 0, paddingLeft: "18px", fontSize: "12px", color: "var(--text-muted)", display: "flex", flexDirection: "column", gap: "6px" }}>
           <li>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Icon } from "@aura-os/ui";
 
 export interface PendingPermission {
   id: string;
@@ -112,7 +113,8 @@ export function ApprovalInbox({ projectId, isArabic, onActionCompleted }: Approv
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
-          📬 {isArabic ? "صندوق الموافقات البشرية" : "Human Approval Inbox"}
+          <Icon name="shield-check" size={15} />
+          {isArabic ? "صندوق الموافقات البشرية" : "Human Approval Inbox"}
           {totalCount > 0 && (
             <span style={{ padding: "1px 6px", fontSize: "10px", fontWeight: "bold", background: "#ef4444", color: "#fff", borderRadius: "10px" }}>
               {totalCount}
@@ -134,7 +136,8 @@ export function ApprovalInbox({ projectId, isArabic, onActionCompleted }: Approv
               <div key={p.id} style={{ padding: "10px", background: "var(--bg-3)", border: "1px solid var(--border-2)", borderRadius: "8px", fontSize: "12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                   <span style={{ fontWeight: "bold", color: "#fbbf24", textTransform: "uppercase", fontSize: "10px" }}>
-                    ⚠️ {p.category} / {p.action}
+                    <Icon name="alert-triangle" size={12} style={{ verticalAlign: "-3px", marginInlineEnd: 5 }} />
+                    {p.category} / {p.action}
                   </span>
                   <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>{p.risk} risk</span>
                 </div>
@@ -160,7 +163,8 @@ export function ApprovalInbox({ projectId, isArabic, onActionCompleted }: Approv
               <div key={ed.id} style={{ padding: "10px", background: "var(--bg-3)", border: "1px solid var(--border-2)", borderRadius: "8px", fontSize: "12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                   <span style={{ fontWeight: "bold", color: "#60a5fa", textTransform: "uppercase", fontSize: "10px" }}>
-                    📝 file / proposed write
+                    <Icon name="file-diff" size={12} style={{ verticalAlign: "-3px", marginInlineEnd: 5 }} />
+                    file / proposed write
                   </span>
                   <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>medium risk</span>
                 </div>

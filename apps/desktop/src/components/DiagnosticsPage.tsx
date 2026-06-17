@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Icon } from "@aura-os/ui";
 
 export interface DiagnosticBundle {
   appVersion: string;
@@ -79,7 +80,8 @@ export function DiagnosticsPage({ isArabic }: DiagnosticsPageProps) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "bold" }}>
-            📋 {isArabic ? "سجلات التشخيص والتحليل" : "Logs & Diagnostics"}
+            <Icon name="list-checks" size={20} style={{ verticalAlign: "-4px", marginInlineEnd: 8 }} />
+            {isArabic ? "سجلات التشخيص والتحليل" : "Logs & Diagnostics"}
           </h2>
           <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "var(--text-muted)" }}>
             {isArabic ? "عرض سجلات الأخطاء الحية وتحميل حزمة التشخيص الآمنة." : "View active error logs and export a redacted diagnostic bundle."}
@@ -87,10 +89,12 @@ export function DiagnosticsPage({ isArabic }: DiagnosticsPageProps) {
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
           <button className="btn sm secondary" onClick={loadDiagnostics}>
-            🔄 {isArabic ? "تحديث" : "Refresh"}
+            <Icon name="rotate-cw" size={14} />
+            {isArabic ? "تحديث" : "Refresh"}
           </button>
           <button className="btn sm primary" onClick={handleCopyBundle}>
-            {copied ? (isArabic ? "✓ تم النسخ!" : "✓ Copied!") : (isArabic ? "نسخ حزمة التشخيص" : "Copy Diagnostic Bundle")}
+            {copied && <Icon name="check" size={14} />}
+            {copied ? (isArabic ? "تم النسخ" : "Copied") : (isArabic ? "نسخ حزمة التشخيص" : "Copy Diagnostic Bundle")}
           </button>
         </div>
       </div>
@@ -161,8 +165,9 @@ export function DiagnosticsPage({ isArabic }: DiagnosticsPageProps) {
           ))
         )}
       </div>
-      <span style={{ fontSize: "11px", color: "var(--text-muted)", textAlign: "center" }}>
-        ⚠️ {isArabic ? "ملاحظة: يتم حجب وحذف جميع المفاتيح السرية والرموز تلقائياً من الملف للحفاظ على الخصوصية." : "Note: All API keys, passwords, and tokens are automatically redacted to protect your privacy."}
+      <span style={{ fontSize: "11px", color: "var(--text-muted)", textAlign: "center", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+        <Icon name="alert-triangle" size={13} />
+        {isArabic ? "ملاحظة: يتم حجب وحذف جميع المفاتيح السرية والرموز تلقائياً من الملف للحفاظ على الخصوصية." : "Note: All API keys, passwords, and tokens are automatically redacted to protect your privacy."}
       </span>
     </div>
   );

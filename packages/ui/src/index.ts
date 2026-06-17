@@ -1,4 +1,5 @@
 export { Icon } from "./components/Icon";
+export { ProviderBrandIcon } from "./components/ProviderBrandIcon";
 export { MarkdownText } from "./components/MarkdownText";
 export { TitleBar, NavRail, NAV_ITEMS } from "./components/chrome/TitleBar";
 export { Sidebar } from "./components/chrome/Sidebar";

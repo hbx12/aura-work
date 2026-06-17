@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@aura-os/ui";
+import { Icon, ProviderBrandIcon } from "@aura-os/ui";
 import { PROVIDER_META, type RoutingPolicy, ROUTING_POLICIES } from "@aura-os/shared";
 import type { MessageCatalog } from "@aura-os/i18n";
 import type { ProviderConfigPublic, ProviderModelPublic } from "../hooks/useProviders";
@@ -161,7 +161,7 @@ export function ProvidersPageLive({
                   <div key={p.providerId} className="provider-block">
                     <div className="panel-row">
                       <div className="prov-logo" style={{ background: meta?.color ?? "#645d4e" }}>
-                        <Icon name={providerIconName(meta?.icon)} size={17} />
+                        <ProviderBrandIcon name={providerIconName(meta?.icon)} size={18} />
                       </div>
                       <div className="prov-meta">
                         <div className="prov-name">
@@ -220,7 +220,7 @@ export function ProvidersPageLive({
                           <div key={model.id} className="model-row">
                             <div className="model-main">
                               <div className="model-icon" style={{ color: meta?.color ?? "var(--accent)" }}>
-                                <Icon name={providerIconName(meta?.icon)} size={15} />
+                                <ProviderBrandIcon name={providerIconName(meta?.icon)} size={16} />
                               </div>
                               <div className="model-meta">
                                 <div className="model-name">{model.displayName}</div>
