@@ -393,6 +393,10 @@ struct SidecarUsage {
     input_tokens: Option<u64>,
     #[serde(rename = "outputTokens")]
     output_tokens: Option<u64>,
+    #[serde(rename = "cacheReadTokens")]
+    cache_read_tokens: Option<u64>,
+    #[serde(rename = "cacheWriteTokens")]
+    cache_write_tokens: Option<u64>,
     #[serde(rename = "estimatedCostUsd")]
     estimated_cost_usd: Option<f64>,
 }
@@ -674,14 +678,19 @@ pub async fn advance_task_inner(
     if let Some(ref usage) = iterate_resp.usage {
         let provider_id = &chat.provider_id;
         let model_id = &chat.model_id;
-        let (input_rate, output_rate) =
-            crate::pricing::pricing_for_model(db, provider_id, model_id).unwrap_or((None, None));
+        let (input_rate, output_rate, cache_read_rate, cache_write_rate) =
+            crate::pricing::pricing_for_model(db, provider_id, model_id)
+                .unwrap_or((None, None, None, None));
         let estimated = usage.estimated_cost_usd.or_else(|| {
-            crate::pricing::estimate_cost(
+            crate::pricing::estimate_cost_with_cache(
                 usage.input_tokens.unwrap_or(0),
                 usage.output_tokens.unwrap_or(0),
+                usage.cache_read_tokens.unwrap_or(0),
+                usage.cache_write_tokens.unwrap_or(0),
                 input_rate,
                 output_rate,
+                cache_read_rate,
+                cache_write_rate,
             )
         });
         let _ = crate::agent::record_usage(
@@ -691,6 +700,8 @@ pub async fn advance_task_inner(
             model_id,
             usage.input_tokens,
             usage.output_tokens,
+            usage.cache_read_tokens,
+            usage.cache_write_tokens,
             estimated,
             "coding",
         );
@@ -1536,6 +1547,8 @@ pub async fn run_workspace_chat_agent(
     let skills_list = crate::plugins::list_local_skills_internal(db).unwrap_or_default();
     let mut total_input_tokens = 0u64;
     let mut total_output_tokens = 0u64;
+    let mut total_cache_read_tokens = 0u64;
+    let mut total_cache_write_tokens = 0u64;
     let mut total_estimated_cost = 0.0f64;
     let mut saw_usage = false;
     let mut saw_estimated_cost = false;
@@ -1576,6 +1589,8 @@ pub async fn run_workspace_chat_agent(
             saw_usage = true;
             total_input_tokens += usage.input_tokens.unwrap_or(0);
             total_output_tokens += usage.output_tokens.unwrap_or(0);
+            total_cache_read_tokens += usage.cache_read_tokens.unwrap_or(0);
+            total_cache_write_tokens += usage.cache_write_tokens.unwrap_or(0);
             if let Some(cost) = usage.estimated_cost_usd {
                 saw_estimated_cost = true;
                 total_estimated_cost += cost;
@@ -1681,17 +1696,21 @@ pub async fn run_workspace_chat_agent(
         }
     });
 
-    let (input_rate, output_rate) =
+    let (input_rate, output_rate, cache_read_rate, cache_write_rate) =
         crate::pricing::pricing_for_model(db, &chat.provider_id, &chat.model_id)
-            .unwrap_or((None, None));
+            .unwrap_or((None, None, None, None));
     let estimated = if saw_estimated_cost {
         Some(total_estimated_cost)
     } else {
-        crate::pricing::estimate_cost(
+        crate::pricing::estimate_cost_with_cache(
             total_input_tokens,
             total_output_tokens,
+            total_cache_read_tokens,
+            total_cache_write_tokens,
             input_rate,
             output_rate,
+            cache_read_rate,
+            cache_write_rate,
         )
     };
     let usage_id = record_usage(
@@ -1701,6 +1720,8 @@ pub async fn run_workspace_chat_agent(
         &chat.model_id,
         if saw_usage { Some(total_input_tokens) } else { None },
         if saw_usage { Some(total_output_tokens) } else { None },
+        if saw_usage { Some(total_cache_read_tokens) } else { None },
+        if saw_usage { Some(total_cache_write_tokens) } else { None },
         estimated,
         &chat.routing_policy,
     )?;

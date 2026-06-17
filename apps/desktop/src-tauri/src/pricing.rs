@@ -18,6 +18,8 @@ pub struct PricingModel {
     pub display_name: Option<String>,
     pub input_per_million: Option<f64>,
     pub output_per_million: Option<f64>,
+    pub cache_read_per_million: Option<f64>,
+    pub cache_write_per_million: Option<f64>,
     pub currency: String,
     pub source: String,
     pub updated_at: String,
@@ -36,6 +38,8 @@ struct PricingFileModel {
     display_name: Option<String>,
     input_per_million: Option<f64>,
     output_per_million: Option<f64>,
+    cache_read_per_million: Option<f64>,
+    cache_write_per_million: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -54,6 +58,8 @@ struct OpenRouterModel {
 struct OpenRouterPricing {
     prompt: Option<PriceValue>,
     completion: Option<PriceValue>,
+    input_cache_read: Option<PriceValue>,
+    input_cache_write: Option<PriceValue>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,12 +89,15 @@ fn upsert_models(
     for m in models {
         conn.execute(
             "INSERT INTO pricing_cache
-             (provider_id, model_id, display_name, input_per_million, output_per_million, currency, source, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, 'USD', ?6, ?7)
+             (provider_id, model_id, display_name, input_per_million, output_per_million,
+              cache_read_per_million, cache_write_per_million, currency, source, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'USD', ?8, ?9)
              ON CONFLICT(provider_id, model_id) DO UPDATE SET
                display_name = excluded.display_name,
                input_per_million = excluded.input_per_million,
                output_per_million = excluded.output_per_million,
+               cache_read_per_million = excluded.cache_read_per_million,
+               cache_write_per_million = excluded.cache_write_per_million,
                source = excluded.source,
                updated_at = excluded.updated_at",
             params![
@@ -97,6 +106,8 @@ fn upsert_models(
                 m.display_name,
                 m.input_per_million,
                 m.output_per_million,
+                m.cache_read_per_million,
+                m.cache_write_per_million,
                 source,
                 now
             ],
@@ -148,6 +159,8 @@ fn parse_openrouter_models(json: &str) -> Result<Vec<PricingFileModel>, String> 
         let pricing = model.pricing.unwrap_or_default();
         let input_per_million = price_per_million(pricing.prompt.as_ref());
         let output_per_million = price_per_million(pricing.completion.as_ref());
+        let cache_read_per_million = price_per_million(pricing.input_cache_read.as_ref());
+        let cache_write_per_million = price_per_million(pricing.input_cache_write.as_ref());
 
         if input_per_million.is_none() && output_per_million.is_none() {
             continue;
@@ -159,6 +172,8 @@ fn parse_openrouter_models(json: &str) -> Result<Vec<PricingFileModel>, String> 
             display_name: model.name.clone(),
             input_per_million,
             output_per_million,
+            cache_read_per_million,
+            cache_write_per_million,
         };
         models.push(base.clone());
 
@@ -248,7 +263,7 @@ fn read_pricing(conn: &rusqlite::Connection) -> Result<Vec<PricingModel>, String
     let mut stmt = conn
         .prepare(
             "SELECT provider_id, model_id, display_name, input_per_million, output_per_million,
-                    currency, source, updated_at
+                    cache_read_per_million, cache_write_per_million, currency, source, updated_at
              FROM pricing_cache ORDER BY provider_id, model_id",
         )
         .map_err(|e| e.to_string())?;
@@ -260,25 +275,29 @@ fn read_pricing(conn: &rusqlite::Connection) -> Result<Vec<PricingModel>, String
                 display_name: row.get(2)?,
                 input_per_million: row.get(3)?,
                 output_per_million: row.get(4)?,
-                currency: row.get(5)?,
-                source: row.get(6)?,
-                updated_at: row.get(7)?,
+                cache_read_per_million: row.get(5)?,
+                cache_write_per_million: row.get(6)?,
+                currency: row.get(7)?,
+                source: row.get(8)?,
+                updated_at: row.get(9)?,
             })
         })
         .map_err(|e| e.to_string())?;
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
+pub type ModelRates = (Option<f64>, Option<f64>, Option<f64>, Option<f64>);
+
 fn pricing_query(
     conn: &rusqlite::Connection,
     provider_id: &str,
     model_id: &str,
-) -> Result<Option<(Option<f64>, Option<f64>)>, String> {
+) -> Result<Option<ModelRates>, String> {
     conn.query_row(
-        "SELECT input_per_million, output_per_million FROM pricing_cache
+        "SELECT input_per_million, output_per_million, cache_read_per_million, cache_write_per_million FROM pricing_cache
          WHERE provider_id = ?1 AND model_id = ?2",
         params![provider_id, model_id],
-        |row| Ok((row.get(0)?, row.get(1)?)),
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )
     .optional()
     .map_err(|e| e.to_string())
@@ -288,12 +307,12 @@ fn pricing_query_ci(
     conn: &rusqlite::Connection,
     provider_id: &str,
     model_id: &str,
-) -> Result<Option<(Option<f64>, Option<f64>)>, String> {
+) -> Result<Option<ModelRates>, String> {
     conn.query_row(
-        "SELECT input_per_million, output_per_million FROM pricing_cache
+        "SELECT input_per_million, output_per_million, cache_read_per_million, cache_write_per_million FROM pricing_cache
          WHERE provider_id = ?1 AND LOWER(model_id) = LOWER(?2)",
         params![provider_id, model_id],
-        |row| Ok((row.get(0)?, row.get(1)?)),
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )
     .optional()
     .map_err(|e| e.to_string())
@@ -303,9 +322,9 @@ fn pricing_query_like(
     conn: &rusqlite::Connection,
     provider_id: &str,
     model_pattern: &str,
-) -> Result<Option<(Option<f64>, Option<f64>)>, String> {
+) -> Result<Option<ModelRates>, String> {
     conn.query_row(
-        "SELECT input_per_million, output_per_million FROM pricing_cache
+        "SELECT input_per_million, output_per_million, cache_read_per_million, cache_write_per_million FROM pricing_cache
          WHERE provider_id = ?1
            AND LOWER(model_id) LIKE LOWER(?2)
            AND input_per_million IS NOT NULL
@@ -314,7 +333,7 @@ fn pricing_query_like(
                   updated_at DESC
          LIMIT 1",
         params![provider_id, model_pattern],
-        |row| Ok((row.get(0)?, row.get(1)?)),
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )
     .optional()
     .map_err(|e| e.to_string())
@@ -323,9 +342,9 @@ fn pricing_query_like(
 fn pricing_query_provider_fallback(
     conn: &rusqlite::Connection,
     provider_id: &str,
-) -> Result<Option<(Option<f64>, Option<f64>)>, String> {
+) -> Result<Option<ModelRates>, String> {
     conn.query_row(
-        "SELECT input_per_million, output_per_million FROM pricing_cache
+        "SELECT input_per_million, output_per_million, cache_read_per_million, cache_write_per_million FROM pricing_cache
          WHERE provider_id = ?1
            AND input_per_million IS NOT NULL
            AND output_per_million IS NOT NULL
@@ -333,7 +352,7 @@ fn pricing_query_provider_fallback(
                   updated_at DESC
          LIMIT 1",
         params![provider_id],
-        |row| Ok((row.get(0)?, row.get(1)?)),
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )
     .optional()
     .map_err(|e| e.to_string())
@@ -401,7 +420,7 @@ pub fn pricing_for_model(
     db: &DbState,
     provider_id: &str,
     model_id: &str,
-) -> Result<(Option<f64>, Option<f64>), String> {
+) -> Result<ModelRates, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let providers = inferred_provider_ids(provider_id, model_id);
@@ -430,12 +449,12 @@ pub fn pricing_for_model(
     }
 
     conn.query_row(
-        "SELECT input_per_million, output_per_million FROM pricing_cache
+        "SELECT input_per_million, output_per_million, cache_read_per_million, cache_write_per_million FROM pricing_cache
          WHERE LOWER(model_id) = LOWER(?1)
          ORDER BY CASE source WHEN 'openrouter' THEN 0 WHEN 'curated' THEN 1 ELSE 2 END
          LIMIT 1",
         params![model_id],
-        |row| Ok((row.get(0)?, row.get(1)?)),
+        |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
     )
     .optional()
     .map_err(|e| e.to_string())?
@@ -454,12 +473,53 @@ pub fn estimate_cost(
     input_rate: Option<f64>,
     output_rate: Option<f64>,
 ) -> Option<f64> {
-    match (input_rate, output_rate) {
-        (Some(i), Some(o)) => {
-            Some((input_tokens as f64 * i + output_tokens as f64 * o) / 1_000_000.0)
-        }
-        _ => None,
+    estimate_cost_with_cache(
+        input_tokens,
+        output_tokens,
+        0,
+        0,
+        input_rate,
+        output_rate,
+        None,
+        None,
+    )
+}
+
+pub fn estimate_cost_with_cache(
+    input_tokens: u64,
+    output_tokens: u64,
+    cache_read_tokens: u64,
+    cache_write_tokens: u64,
+    input_rate: Option<f64>,
+    output_rate: Option<f64>,
+    cache_read_rate: Option<f64>,
+    cache_write_rate: Option<f64>,
+) -> Option<f64> {
+    let mut total = 0.0;
+    let mut priced = false;
+
+    if input_tokens > 0 {
+        let rate = input_rate?;
+        total += input_tokens as f64 * rate;
+        priced = true;
     }
+    if output_tokens > 0 {
+        let rate = output_rate?;
+        total += output_tokens as f64 * rate;
+        priced = true;
+    }
+    if cache_read_tokens > 0 {
+        let rate = cache_read_rate.or(input_rate)?;
+        total += cache_read_tokens as f64 * rate;
+        priced = true;
+    }
+    if cache_write_tokens > 0 {
+        let rate = cache_write_rate.or(input_rate)?;
+        total += cache_write_tokens as f64 * rate;
+        priced = true;
+    }
+
+    priced.then_some(total / 1_000_000.0)
 }
 
 #[cfg(test)]
@@ -477,6 +537,8 @@ mod tests {
                 display_name TEXT,
                 input_per_million REAL,
                 output_per_million REAL,
+                cache_read_per_million REAL,
+                cache_write_per_million REAL,
                 currency TEXT NOT NULL DEFAULT 'USD',
                 source TEXT NOT NULL DEFAULT 'auto',
                 updated_at TEXT NOT NULL,
@@ -496,7 +558,7 @@ mod tests {
             seed_pricing_if_empty(&conn).unwrap();
         }
         let pricing = pricing_for_model(&db, "deepseek", "deepseek/deepseek-v4-flash").unwrap();
-        assert_eq!(pricing, (Some(0.09), Some(0.18)));
+        assert_eq!(pricing, (Some(0.09), Some(0.18), Some(0.02), None));
     }
 
     #[test]
@@ -507,6 +569,6 @@ mod tests {
             load_pricing_json(REPO_PRICING_OVERRIDES, "repo-overrides", &conn).unwrap();
         }
         let pricing = pricing_for_model(&db, "qwen", "qwen3.7-plus").unwrap();
-        assert_eq!(pricing, (Some(0.32), Some(1.28)));
+        assert_eq!(pricing, (Some(0.32), Some(1.28), Some(0.064), Some(0.4)));
     }
 }

@@ -19,8 +19,12 @@ Each price is USD per one million tokens:
   "modelId": "provider/model-id",
   "displayName": "Model Name",
   "inputPerMillion": 0.5,
-  "outputPerMillion": 2.0
+  "outputPerMillion": 2.0,
+  "cacheReadPerMillion": 0.05,
+  "cacheWritePerMillion": 0.625
 }
 ```
+
+`cacheReadPerMillion` and `cacheWritePerMillion` are optional. When a provider reports cached token usage, Aura Work uses these rates in the cost estimate. If a cache rate is missing, Aura Work falls back to the normal input token rate for that cache bucket.
 
 Use the same `modelId` shown by the provider API. For generic OpenAI-compatible endpoints, keep `providerId` as `openai-compatible`. For built-in providers, use `deepseek`, `minimax`, `qwen`, `gemini`, `openai`, `anthropic`, `ollama`, or `lmstudio`.

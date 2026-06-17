@@ -112,6 +112,8 @@ pub fn init_provider_tables(conn: &rusqlite::Connection) -> Result<(), String> {
             display_name TEXT,
             input_per_million REAL,
             output_per_million REAL,
+            cache_read_per_million REAL,
+            cache_write_per_million REAL,
             currency TEXT NOT NULL DEFAULT 'USD',
             source TEXT NOT NULL DEFAULT 'auto',
             updated_at TEXT NOT NULL,
@@ -124,6 +126,8 @@ pub fn init_provider_tables(conn: &rusqlite::Connection) -> Result<(), String> {
             model_id TEXT NOT NULL,
             input_tokens INTEGER,
             output_tokens INTEGER,
+            cache_read_tokens INTEGER,
+            cache_write_tokens INTEGER,
             estimated_cost_usd REAL,
             routing_policy TEXT NOT NULL,
             created_at TEXT NOT NULL
@@ -138,6 +142,16 @@ pub fn init_provider_tables(conn: &rusqlite::Connection) -> Result<(), String> {
         ",
     )
     .map_err(|e| e.to_string())?;
+    let _ = conn.execute(
+        "ALTER TABLE pricing_cache ADD COLUMN cache_read_per_million REAL",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE pricing_cache ADD COLUMN cache_write_per_million REAL",
+        [],
+    );
+    let _ = conn.execute("ALTER TABLE task_usage ADD COLUMN cache_read_tokens INTEGER", []);
+    let _ = conn.execute("ALTER TABLE task_usage ADD COLUMN cache_write_tokens INTEGER", []);
     seed_providers(conn)
 }
 

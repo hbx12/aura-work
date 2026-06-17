@@ -20,6 +20,10 @@ export interface ChatResult {
 
   outputTokens?: number | null;
 
+  cacheReadTokens?: number | null;
+
+  cacheWriteTokens?: number | null;
+
   estimatedCostUsd?: number | null;
 
   costUnknown: boolean;
@@ -47,6 +51,10 @@ export interface TaskUsageRecord {
   inputTokens?: number | null;
 
   outputTokens?: number | null;
+
+  cacheReadTokens?: number | null;
+
+  cacheWriteTokens?: number | null;
 
   estimatedCostUsd?: number | null;
 
@@ -210,7 +218,11 @@ export function formatCost(usage: TaskUsageRecord | null): {
 
   const outTok = usage.outputTokens ?? 0;
 
-  const total = inTok + outTok;
+  const cacheReadTok = usage.cacheReadTokens ?? 0;
+
+  const cacheWriteTok = usage.cacheWriteTokens ?? 0;
+
+  const total = inTok + outTok + cacheReadTok + cacheWriteTok;
 
   const formatUsd = (value: number) => {
     if (value === 0) return "$0.00";

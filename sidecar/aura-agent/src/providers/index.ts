@@ -164,6 +164,9 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         usage?: {
           prompt_tokens?: number;
           completion_tokens?: number;
+          prompt_tokens_details?: { cached_tokens?: number };
+          cache_read_input_tokens?: number;
+          cache_creation_input_tokens?: number;
           cost?: number | string;
           total_cost?: number | string;
           estimated_cost_usd?: number | string;
@@ -175,6 +178,10 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         usage: {
           inputTokens: data.usage?.prompt_tokens,
           outputTokens: data.usage?.completion_tokens,
+          cacheReadTokens:
+            data.usage?.prompt_tokens_details?.cached_tokens ??
+            data.usage?.cache_read_input_tokens,
+          cacheWriteTokens: data.usage?.cache_creation_input_tokens,
           estimatedCostUsd:
             numberValue(data.usage?.estimated_cost_usd) ??
             numberValue(data.usage?.total_cost) ??
@@ -249,7 +256,12 @@ const anthropicAdapter: ProviderAdapter = {
     if (!res.ok) throw new Error(`Anthropic chat failed (${res.status})`);
     const data = (await res.json()) as {
       content?: { text?: string }[];
-      usage?: { input_tokens?: number; output_tokens?: number };
+      usage?: {
+        input_tokens?: number;
+        output_tokens?: number;
+        cache_read_input_tokens?: number;
+        cache_creation_input_tokens?: number;
+      };
     };
     const text = data.content?.map((c) => c.text ?? "").join("") ?? "";
     return {
@@ -257,6 +269,8 @@ const anthropicAdapter: ProviderAdapter = {
       usage: {
         inputTokens: data.usage?.input_tokens,
         outputTokens: data.usage?.output_tokens,
+        cacheReadTokens: data.usage?.cache_read_input_tokens,
+        cacheWriteTokens: data.usage?.cache_creation_input_tokens,
       },
     };
   },
@@ -340,7 +354,11 @@ const geminiAdapter: ProviderAdapter = {
     if (!res.ok) throw new Error(`Gemini chat failed (${res.status})`);
     const data = (await res.json()) as {
       candidates?: { content?: { parts?: { text?: string }[] } }[];
-      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        cachedContentTokenCount?: number;
+      };
     };
     const text =
       data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
@@ -349,6 +367,7 @@ const geminiAdapter: ProviderAdapter = {
       usage: {
         inputTokens: data.usageMetadata?.promptTokenCount,
         outputTokens: data.usageMetadata?.candidatesTokenCount,
+        cacheReadTokens: data.usageMetadata?.cachedContentTokenCount,
       },
     };
   },
