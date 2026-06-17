@@ -88,7 +88,7 @@ pub fn create_project(
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
         "INSERT INTO projects (id, name, folder_path, instructions, permission_mode, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, 'act-without-asking', ?5, ?6)",
+         VALUES (?1, ?2, ?3, ?4, 'ask-first', ?5, ?6)",
         params![
             id,
             input.name.trim(),
@@ -110,7 +110,7 @@ pub fn create_project(
         name: input.name.trim().to_string(),
         folder_path: input.folder_path.trim().to_string(),
         instructions: input.instructions,
-        permission_mode: "act-without-asking".into(),
+        permission_mode: "ask-first".into(),
         created_at: now.clone(),
         updated_at: now,
     })
@@ -140,7 +140,7 @@ pub fn set_project_permission_mode(
     state: tauri::State<'_, DbState>,
     input: SetProjectPermissionInput,
 ) -> Result<Project, String> {
-    let allowed = ["ask-first", "act-without-asking"];
+    let allowed = ["read-only", "ask-first", "act-without-asking"];
     if !allowed.contains(&input.permission_mode.as_str()) {
         return Err("Invalid permission mode.".into());
     }

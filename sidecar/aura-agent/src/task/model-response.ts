@@ -37,12 +37,41 @@ const MessageResponseSchema = z.object({
   summary: z.string().optional(),
 });
 
+const ClarificationQuestionOptionSchema = z.object({
+  label: z.string().min(1),
+  value: z.string().min(1),
+  recommended: z.boolean().optional(),
+  note: z.string().optional(),
+});
+
+const ClarificationQuestionSchema = z.object({
+  id: z.string().min(1),
+  question: z.string().min(1),
+  reason: z.string().optional(),
+  options: z.array(ClarificationQuestionOptionSchema).min(1),
+  allowCustom: z.boolean().optional(),
+});
+
+const ClarificationResponseSchema = z.object({
+  type: z.literal("clarification"),
+  role: z.string().optional(),
+  content: z.string(),
+  questions: z.array(ClarificationQuestionSchema).min(1),
+  recommendedAction: z.object({
+    label: z.string(),
+    value: z.string(),
+  }).optional(),
+  complete: z.literal(false).optional(),
+});
+
 export const ModelResponseSchema = z.discriminatedUnion("type", [
   ToolCallsResponseSchema,
   CompleteResponseSchema,
   BlockedResponseSchema,
   MessageResponseSchema,
+  ClarificationResponseSchema,
 ]);
+
 
 export type ParsedModelResponse = z.infer<typeof ModelResponseSchema>;
 

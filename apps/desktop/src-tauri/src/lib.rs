@@ -31,6 +31,10 @@ mod tasks;
 mod vault;
 mod vm;
 mod web;
+mod task_snapshots;
+mod onboarding;
+mod diagnostics;
+mod edit_resolutions;
 
 use db::{init_db, seed_if_empty, DbState};
 use providers::VaultHandle;
@@ -123,7 +127,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
-            let db_conn = db::init_db(&app.handle())?;
+            let db_conn = init_db(&app.handle())?;
             seed_if_empty(&db_conn)?;
             let db = DbState(Arc::new(Mutex::new(db_conn)));
             app.manage(db.clone());
@@ -189,6 +193,7 @@ pub fn run() {
             files::search_project_files,
             files::write_project_file,
             files::approve_pending_edit,
+            edit_resolutions::dismiss_pending_edit,
             files::list_pending_edits,
             git::git_status,
             git::git_init,
@@ -297,6 +302,16 @@ pub fn run() {
             toggle_pet_window,
             shell::resolve_terminal_cwd,
             shell::run_terminal_command,
+            task_snapshots::rollback_task,
+            task_snapshots::get_rollback_preview,
+            task_snapshots::has_task_snapshot,
+            onboarding::detect_project_profile,
+            onboarding::get_project_profile,
+            onboarding::save_project_profile,
+            onboarding::test_project_command,
+            diagnostics::run_readiness_checks,
+            diagnostics::get_diagnostic_bundle,
+            diagnostics::run_security_audit,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

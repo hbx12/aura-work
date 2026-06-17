@@ -270,7 +270,36 @@ pub fn check_task_permission(
         )
         .map_err(|_| "Project not found.".to_string())?;
 
-    if always_requires {
+    if mode == "read-only" {
+        if category == "file" && (action == "read" || action == "search") {
+            // allowed
+        } else {
+            return Err(format!("Operation '{}' on '{}' is not allowed in Plan/Read-Only mode.", action, category));
+        }
+    }
+
+    let mut force_approval = always_requires;
+
+    if mode == "act-without-asking" {
+        if category == "file" && action == "delete" {
+            force_approval = true;
+        } else if category == "file" && action == "write" && (target.contains(".env") || target.starts_with(".env")) {
+            force_approval = true;
+        } else if category == "shell" {
+            let cmd_lower = target.to_lowercase();
+            let risky_terms = [
+                "install", "install ", " add ", "remove", "delete", "destroy", " rm ", "rm -",
+                "migrate", "db:migrate", "db push", "prisma db", "upgrade", "uninstall"
+            ];
+            if risky_terms.iter().any(|&term| cmd_lower.contains(term)) || cmd_lower.starts_with("rm ") {
+                force_approval = true;
+            }
+        } else if category == "mcp" || category == "computer-use" {
+            force_approval = true;
+        }
+    }
+
+    if force_approval {
         return check_or_request(
             &conn,
             project_id,
