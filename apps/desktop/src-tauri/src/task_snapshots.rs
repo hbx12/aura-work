@@ -1,11 +1,15 @@
-use crate::db::DbState;
 use crate::audit::{append_audit, AppendAuditInput};
-use crate::files::{project_folder, resolve_project_path, normalize_rel};
+use crate::db::DbState;
+use crate::files::{normalize_rel, resolve_project_path};
+use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
 use tauri::State;
+
+const MAX_SNAPSHOT_BYTES: u64 = 8 * 1024 * 1024;
+const SNAPSHOT_B64_PREFIX: &str = "__AURA_SNAPSHOT_V1_BASE64__:";
+const LEGACY_SKIPPED_MARKER: &str = "[Binary or too large file skipped]";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,6 +17,26 @@ pub struct RollbackFilePreview {
     pub file_path: String,
     pub is_new: bool,
     pub exists: bool,
+}
+
+fn encode_snapshot_bytes(bytes: &[u8]) -> String {
+    format!("{SNAPSHOT_B64_PREFIX}{}", B64.encode(bytes))
+}
+
+fn decode_snapshot_content(content: &str, rel_path: &str) -> Result<Vec<u8>, String> {
+    if content == LEGACY_SKIPPED_MARKER {
+        return Err(format!(
+            "Cannot safely roll back {rel_path}: its original content was not captured."
+        ));
+    }
+
+    if let Some(encoded) = content.strip_prefix(SNAPSHOT_B64_PREFIX) {
+        return B64
+            .decode(encoded)
+            .map_err(|e| format!("Failed to decode rollback snapshot for {rel_path}: {e}"));
+    }
+
+    Ok(content.as_bytes().to_vec())
 }
 
 pub fn capture_snapshot_for_file(
@@ -52,37 +76,28 @@ pub fn capture_snapshot_for_file(
         Ok(path) => {
             if path.exists() && path.is_file() {
                 let metadata = fs::metadata(&path).map_err(|e| e.to_string())?;
-                if metadata.len() > 2_000_000 {
-                    // skip large file contents, store placeholder
-                    conn.execute(
-                        "INSERT INTO task_snapshots (id, task_id, project_id, file_path, original_content, is_new, created_at)
-                         VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6)",
-                        params![
-                            uuid::Uuid::new_v4().to_string(),
-                            task_id,
-                            project_id,
-                            rel_path,
-                            "[Binary or too large file skipped]",
-                            now
-                        ],
-                    )
-                    .map_err(|e| e.to_string())?;
-                } else {
-                    let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
-                    conn.execute(
-                        "INSERT INTO task_snapshots (id, task_id, project_id, file_path, original_content, is_new, created_at)
-                         VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6)",
-                        params![
-                            uuid::Uuid::new_v4().to_string(),
-                            task_id,
-                            project_id,
-                            rel_path,
-                            content,
-                            now
-                        ],
-                    )
-                    .map_err(|e| e.to_string())?;
+                if metadata.len() > MAX_SNAPSHOT_BYTES {
+                    return Err(format!(
+                        "Cannot safely snapshot {rel_path}: file is larger than {} MB.",
+                        MAX_SNAPSHOT_BYTES / 1024 / 1024
+                    ));
                 }
+
+                let content = fs::read(&path).map_err(|e| e.to_string())?;
+                let encoded_content = encode_snapshot_bytes(&content);
+                conn.execute(
+                    "INSERT INTO task_snapshots (id, task_id, project_id, file_path, original_content, is_new, created_at)
+                     VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6)",
+                    params![
+                        uuid::Uuid::new_v4().to_string(),
+                        task_id,
+                        project_id,
+                        rel_path,
+                        encoded_content,
+                        now
+                    ],
+                )
+                .map_err(|e| e.to_string())?;
             } else {
                 // Not a file, or doesn't exist yet -> newly created file
                 conn.execute(
@@ -190,13 +205,12 @@ pub async fn rollback_task(db: State<'_, DbState>, task_id: String) -> Result<St
 
     let mut stmt = conn
         .prepare(
-            "SELECT id, project_id, file_path, original_content, is_new FROM task_snapshots
+            "SELECT project_id, file_path, original_content, is_new FROM task_snapshots
              WHERE task_id = ?1",
         )
         .map_err(|e| e.to_string())?;
 
     struct SnapshotEntry {
-        id: String,
         project_id: String,
         file_path: String,
         original_content: Option<String>,
@@ -206,11 +220,10 @@ pub async fn rollback_task(db: State<'_, DbState>, task_id: String) -> Result<St
     let rows = stmt
         .query_map(params![task_id], |row| {
             Ok(SnapshotEntry {
-                id: row.get(0)?,
-                project_id: row.get(1)?,
-                file_path: row.get(2)?,
-                original_content: row.get(3)?,
-                is_new: row.get::<_, i64>(4)? != 0,
+                project_id: row.get(0)?,
+                file_path: row.get(1)?,
+                original_content: row.get(2)?,
+                is_new: row.get::<_, i64>(3)? != 0,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -244,13 +257,11 @@ pub async fn rollback_task(db: State<'_, DbState>, task_id: String) -> Result<St
                 })?;
             }
         } else if let Some(content) = &entry.original_content {
-            if content == "[Binary or too large file skipped]" {
-                continue; // Skip restoring large or binary files
-            }
+            let bytes = decode_snapshot_content(content, &rel_path)?;
             if let Some(parent) = path.parent() {
                 fs::create_dir_all(parent).map_err(|e| e.to_string())?;
             }
-            fs::write(&path, content).map_err(|e| {
+            fs::write(&path, bytes).map_err(|e| {
                 format!("Failed to restore file content {}: {}", rel_path, e)
             })?;
         }

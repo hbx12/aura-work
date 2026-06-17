@@ -1,5 +1,6 @@
 use crate::db::DbState;
 use crate::files::project_folder;
+use regex::Regex;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 use tauri::State;
@@ -202,7 +203,7 @@ pub async fn get_diagnostic_bundle(
     let redacted_logs = logs.into_iter().map(|l| redact_secrets(&l)).collect();
 
     Ok(DiagnosticBundle {
-        app_version: "0.5.0-beta".to_string(),
+        app_version: env!("CARGO_PKG_VERSION").to_string(),
         os_platform: std::env::consts::OS.to_string(),
         os_arch: std::env::consts::ARCH.to_string(),
         sidecar_status,
@@ -215,24 +216,32 @@ pub async fn get_diagnostic_bundle(
 
 fn redact_secrets(input: &str) -> String {
     let mut out = input.to_string();
-    if let Some(idx) = out.to_lowercase().find("bearer ") {
-        if idx + 7 < out.len() {
-            out.replace_range(idx + 7.., "[REDACTED]");
+
+    let replacements = [
+        (
+            r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]{8,}",
+            "$1 [REDACTED]",
+        ),
+        (
+            r#"(?i)\b(api[_-]?key|secret|token|password|authorization|refresh[_-]?token)([\s:=]+)([^,;\s'"`]{8,})"#,
+            "$1$2[REDACTED]",
+        ),
+        (
+            r"(?i)\b(sk-(?:proj-)?[A-Za-z0-9_-]{16,}|sk-ant-[A-Za-z0-9_-]{16,}|AIza[0-9A-Za-z_-]{20,}|ghp_[0-9A-Za-z_]{20,}|github_pat_[0-9A-Za-z_]{20,}|xox[baprs]-[0-9A-Za-z-]{10,}|AKIA[0-9A-Z]{16})",
+            "[REDACTED_KEY]",
+        ),
+        (
+            r"://[^/\s:@]+:[^/\s@]+@",
+            "://[REDACTED]@",
+        ),
+    ];
+
+    for (pattern, replacement) in replacements {
+        if let Ok(re) = Regex::new(pattern) {
+            out = re.replace_all(&out, replacement).into_owned();
         }
     }
-    let sk_patterns = ["sk-proj-", "sk-ant-", "AIzaSy"];
-    for pat in &sk_patterns {
-        let mut search_pos = 0;
-        while let Some(idx) = out[search_pos..].find(pat) {
-            let actual_idx = search_pos + idx;
-            let end_idx = (actual_idx + 25).min(out.len());
-            out.replace_range(actual_idx..end_idx, "[REDACTED_KEY]");
-            search_pos = actual_idx + 14;
-            if search_pos >= out.len() {
-                break;
-            }
-        }
-    }
+
     out
 }
 

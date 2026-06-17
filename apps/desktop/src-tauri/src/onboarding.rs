@@ -4,7 +4,9 @@ use rusqlite::params;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::thread;
+use std::time::{Duration, Instant};
 use tauri::State;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -302,25 +304,61 @@ pub async fn test_project_command(
     #[cfg(not(target_os = "windows"))]
     let (shell, arg) = ("sh", "-c");
 
-    let output = Command::new(shell)
+    let child = Command::new(shell)
         .arg(arg)
         .arg(&command_str)
         .current_dir(&root_path)
-        .output();
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn();
 
-    match output {
-        Ok(out) => {
-            let stdout = String::from_utf8_lossy(&out.stdout).to_string();
-            let stderr = String::from_utf8_lossy(&out.stderr).to_string();
-            let success = out.status.success();
-            let exit_code = out.status.code();
+    match child {
+        Ok(mut child) => {
+            let started = Instant::now();
+            loop {
+                match child.try_wait() {
+                    Ok(Some(_)) => {
+                        let out = child.wait_with_output().map_err(|e| e.to_string())?;
+                        let stdout = String::from_utf8_lossy(&out.stdout).to_string();
+                        let stderr = String::from_utf8_lossy(&out.stderr).to_string();
+                        let success = out.status.success();
+                        let exit_code = out.status.code();
 
-            Ok(CommandTestResult {
-                stdout,
-                stderr,
-                success,
-                exit_code,
-            })
+                        return Ok(CommandTestResult {
+                            stdout,
+                            stderr,
+                            success,
+                            exit_code,
+                        });
+                    }
+                    Ok(None) if started.elapsed() >= Duration::from_secs(30) => {
+                        let _ = child.kill();
+                        let out = child.wait_with_output().map_err(|e| e.to_string())?;
+                        let stdout = String::from_utf8_lossy(&out.stdout).to_string();
+                        let mut stderr = String::from_utf8_lossy(&out.stderr).to_string();
+                        if !stderr.is_empty() {
+                            stderr.push('\n');
+                        }
+                        stderr.push_str("Command timed out after 30 seconds.");
+
+                        return Ok(CommandTestResult {
+                            stdout,
+                            stderr,
+                            success: false,
+                            exit_code: out.status.code(),
+                        });
+                    }
+                    Ok(None) => thread::sleep(Duration::from_millis(100)),
+                    Err(e) => {
+                        return Ok(CommandTestResult {
+                            stdout: "".to_string(),
+                            stderr: e.to_string(),
+                            success: false,
+                            exit_code: None,
+                        });
+                    }
+                }
+            }
         }
         Err(e) => Ok(CommandTestResult {
             stdout: "".to_string(),

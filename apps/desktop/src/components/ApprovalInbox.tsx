@@ -87,26 +87,13 @@ export function ApprovalInbox({ projectId, isArabic, onActionCompleted }: Approv
           /* no active task loop */
         }
       } else {
-        // Delete pending edit from DB (reject)
-        // Wait, does the backend support delete or update status? Let's check:
-        // Since we don't have a direct reject_pending_edit, we can update status via db or let user reject it.
-        // Let's call a command or implement a quick deletion via direct DB run or just ignore it.
-        // Actually, we can update status to 'rejected' in SQLite or let the user dismiss it.
-        // Let's implement a rejection update:
-        await invoke("resolve_permission", {
-          input: { permissionId: editId, decision: "deny" } // fallback or handle
-        });
+        await invoke("dismiss_pending_edit", { editId });
+        if (activeDiff === editId) setActiveDiff(null);
       }
       loadInbox();
       onActionCompleted?.();
     } catch (e) {
-      // If no reject_pending_edit exists, we just approve it or let users bypass
-      if (approve) {
-        alert("Error approving edit: " + e);
-      } else {
-        // Mock rejection for UI state bypass
-        setEdits((prev) => prev.filter((ed) => ed.id !== editId));
-      }
+      alert((approve ? "Error approving edit: " : "Error dismissing edit: ") + e);
     }
   };
 
