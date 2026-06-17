@@ -1,4 +1,5 @@
 export type ProviderId =
+  | "aura-cloud"
   | "openai"
   | "anthropic"
   | "gemini"
@@ -586,6 +587,7 @@ export const PROVIDER_META: Record<
   ProviderId,
   { displayName: string; icon: string; color: string; local?: boolean }
 > = {
+  "aura-cloud": { displayName: "Aura Cloud Models", icon: "brand-aura-cloud", color: "#c48b5c" },
   anthropic: { displayName: "Anthropic", icon: "brand-anthropic", color: "#c2683f" },
   openai: { displayName: "OpenAI", icon: "brand-openai", color: "#1a7f64" },
   gemini: { displayName: "Google Gemini", icon: "brand-gemini", color: "#3a6fc4" },

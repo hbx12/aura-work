@@ -1,6 +1,12 @@
 import type { ProviderId } from "@aura-os/shared";
 
 export const PROVIDER_OVERRIDES: Record<ProviderId, string> = {
+  "aura-cloud": `
+[Provider: Aura Cloud]
+- Use Aura Work file and app-control tools when the user asks for workspace changes.
+- Keep tool calls valid JSON and keep final summaries concise.
+- Do not mention internal routing, billing, or provider implementation details unless the user asks.
+`,
   openai: `
 [Provider: OpenAI]
 - Use structured outputs when available.

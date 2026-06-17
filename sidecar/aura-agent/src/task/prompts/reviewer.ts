@@ -6,6 +6,7 @@ REVIEW GATES:
    - Use git_status or git_diff when relevant to verify what actually changed.
    - Confirm that the changed files match the user's request.
    - If the task asked for file work but no valid file change occurred, do not report completion.
+   - Confirm that no unrelated user changes were overwritten or silently reverted.
 2. BUILD GATE:
    - Prefer the narrowest relevant verification command first.
    - If project commands are known, use them.

@@ -49,16 +49,33 @@ fn toggle_pet_window(app: tauri::AppHandle, pet_type: String) {
     if let Some(window) = app.get_webview_window("pet-window") {
         let _ = window.close();
     } else {
-        let url_str = format!("index.html?view=pet&type={}", pet_type);
+        let safe_pet_type: String = pet_type
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_')
+            .take(32)
+            .collect();
+        let url_str = format!(
+            "index.html?view=pet&type={}",
+            if safe_pet_type.is_empty() { "robot" } else { &safe_pet_type }
+        );
         let url = tauri::WebviewUrl::App(std::path::PathBuf::from(url_str));
-        let builder = tauri::WebviewWindowBuilder::new(&app, "pet-window", url)
+        let mut builder = tauri::WebviewWindowBuilder::new(&app, "pet-window", url)
             .title("Pet")
             .inner_size(150.0, 150.0)
-            .transparent(true)
             .decorations(false)
             .always_on_top(true)
             .resizable(false)
             .skip_taskbar(true);
+
+        #[cfg(target_os = "windows")]
+        {
+            builder = builder.transparent(false);
+        }
+        #[cfg(not(target_os = "windows"))]
+        {
+            builder = builder.transparent(true);
+        }
+
         let builder = builder.shadow(false);
         if let Err(e) = builder.build() {
             eprintln!("Failed to spawn pet window: {:?}", e);
@@ -350,6 +367,12 @@ pub fn run() {
             cloud::start_cloud_sync,
             cloud::stop_cloud_sync,
             cloud::get_cloud_sync_helper_status,
+            cloud::start_aura_cloud_device_login,
+            cloud::complete_aura_cloud_device_login,
+            cloud::get_aura_cloud_usage,
+            cloud::get_aura_cloud_devices,
+            cloud::revoke_aura_cloud_device,
+            cloud::get_latest_aura_work_release,
             scheduled::list_scheduled_tasks,
             scheduled::get_scheduled_task,
             scheduled::create_scheduled_task,

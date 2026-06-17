@@ -18,6 +18,14 @@ export function ProviderBrandIcon({ name, size = 18, className }: ProviderBrandI
   };
 
   switch (name) {
+    case "brand-aura-cloud":
+      return (
+        <svg {...common} fill="currentColor">
+          <path d="M12 2.7 20.1 7.4v9.2L12 21.3l-8.1-4.7V7.4L12 2.7Zm0 3.1L6.55 8.95v6.1L12 18.2l5.45-3.15v-6.1L12 5.8Z" />
+          <path d="M12 8.05 15.4 10v4L12 15.95 8.6 14v-4L12 8.05Z" opacity="0.72" />
+          <path d="M6.2 8.8 12 12.1l5.8-3.3v2.35L12 14.45l-5.8-3.3V8.8Z" opacity="0.42" />
+        </svg>
+      );
     case "brand-openai":
       return (
         <svg {...common} stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">

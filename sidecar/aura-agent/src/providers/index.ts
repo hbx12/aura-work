@@ -3,6 +3,26 @@ import type { ProviderAdapter, ProviderCredentials, ChatRequest } from "../types
 import { codexChat, codexListModels, codexValidateCredentials, isCodexAccount } from "./codex.js";
 
 const DEFAULT_MODELS: Record<ProviderId, ModelInfo[]> = {
+  "aura-cloud": [
+    {
+      id: "aura-fast",
+      providerId: "aura-cloud",
+      displayName: "Aura Fast",
+      capabilities: ["text", "tool-calling", "json-schema"],
+    },
+    {
+      id: "aura-coder",
+      providerId: "aura-cloud",
+      displayName: "Aura Coder",
+      capabilities: ["text", "tool-calling", "json-schema", "reasoning"],
+    },
+    {
+      id: "aura-premium",
+      providerId: "aura-cloud",
+      displayName: "Aura Premium",
+      capabilities: ["text", "vision", "tool-calling", "json-schema", "reasoning"],
+    },
+  ],
   openai: [
     {
       id: "gpt-4o",
@@ -73,6 +93,28 @@ const DEFAULT_MODELS: Record<ProviderId, ModelInfo[]> = {
     },
   ],
   lmstudio: [],
+};
+
+const auraCloudAdapter: ProviderAdapter = {
+  id: "aura-cloud",
+  async listModels() {
+    return DEFAULT_MODELS["aura-cloud"];
+  },
+  async validateCredentials(credentials: ProviderCredentials) {
+    if (!credentials.apiKey) {
+      return {
+        valid: false,
+        message: "Sign in to Aura Cloud before using hosted models.",
+      };
+    }
+    return openAiAdapter("aura-cloud", "https://api.aura.work/v1").validateCredentials(credentials);
+  },
+  async chat(request: ChatRequest, credentials: ProviderCredentials) {
+    if (!credentials.apiKey) {
+      throw new Error("Aura Cloud sign-in is required before using hosted models.");
+    }
+    return openAiAdapter("aura-cloud", "https://api.aura.work/v1").chat(request, credentials);
+  },
 };
 
 function baseUrl(credentials: ProviderCredentials, fallback: string): string {
@@ -454,6 +496,7 @@ const ollamaAdapter: ProviderAdapter = {
 };
 
 const adapters: Record<ProviderId, ProviderAdapter> = {
+  "aura-cloud": auraCloudAdapter,
   openai: openAiAdapter("openai", "https://api.openai.com/v1"),
   anthropic: anthropicAdapter,
   gemini: geminiAdapter,

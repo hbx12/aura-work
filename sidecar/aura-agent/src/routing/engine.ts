@@ -3,6 +3,7 @@ import type { PricingRow, ProviderConfigRow, RouteRequestBody, RouteResponseBody
 import { DEFAULT_MODELS } from "../providers/index.js";
 
 const QUALITY_ORDER: Record<ProviderId, string[]> = {
+  "aura-cloud": ["aura-coder", "aura-premium", "aura-fast"],
   anthropic: ["claude-sonnet-4-20250514", "claude-3-5-haiku-20241022"],
   openai: ["gpt-4o", "gpt-4o-mini"],
   gemini: ["gemini-2.0-flash", "gemini-1.5-pro"],
@@ -50,13 +51,13 @@ function providerPriority(policy: RoutingPolicy): ProviderId[] {
     case "local-only":
       return ["ollama", "lmstudio"];
     case "privacy-first":
-      return ["ollama", "lmstudio", "openai-compatible", "deepseek", "gemini", "openai", "anthropic", "qwen", "minimax"];
+      return ["ollama", "lmstudio", "openai-compatible", "deepseek", "gemini", "openai", "anthropic", "qwen", "minimax", "aura-cloud"];
     case "cost-first":
-      return ["deepseek", "gemini", "openai", "anthropic", "qwen", "minimax", "ollama", "lmstudio", "openai-compatible"];
+      return ["deepseek", "gemini", "openai", "anthropic", "qwen", "minimax", "aura-cloud", "ollama", "lmstudio", "openai-compatible"];
     case "manual":
     case "quality-first":
     default:
-      return ["anthropic", "openai", "gemini", "deepseek", "qwen", "minimax", "ollama", "lmstudio", "openai-compatible"];
+      return ["aura-cloud", "anthropic", "openai", "gemini", "deepseek", "qwen", "minimax", "ollama", "lmstudio", "openai-compatible"];
   }
 }
 

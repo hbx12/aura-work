@@ -11,6 +11,8 @@ export function useCloud() {
   const [status, setStatus] = useState<CloudAccountStatus | null>(null);
   const [devices, setDevices] = useState<CloudDeviceInfo[]>([]);
   const [syncHelper, setSyncHelper] = useState<CloudSyncStatus | null>(null);
+  const [usage, setUsage] = useState<any | null>(null);
+  const [releaseInfo, setReleaseInfo] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +26,16 @@ export function useCloud() {
         setDevices(d);
       } else {
         setDevices([]);
+      }
+      try {
+        setUsage(await invoke("get_aura_cloud_usage"));
+      } catch {
+        setUsage(null);
+      }
+      try {
+        setReleaseInfo(await invoke("get_latest_aura_work_release"));
+      } catch {
+        setReleaseInfo(null);
       }
       setError(null);
     } catch (e) {
@@ -191,10 +203,20 @@ export function useCloud() {
     }
   }, []);
 
+  const startDeviceLogin = useCallback(async () => {
+    return invoke<any>("start_aura_cloud_device_login");
+  }, []);
+
+  const completeDeviceLogin = useCallback(async () => {
+    return invoke<any>("complete_aura_cloud_device_login");
+  }, []);
+
   return {
     status,
     devices,
     syncHelper,
+    usage,
+    releaseInfo,
     loading,
     error,
     refresh,
@@ -210,5 +232,7 @@ export function useCloud() {
     inspectServer,
     startSyncHelper,
     stopSyncHelper,
+    startDeviceLogin,
+    completeDeviceLogin,
   };
 }

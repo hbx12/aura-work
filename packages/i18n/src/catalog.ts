@@ -173,6 +173,14 @@ export type MessageKey =
   | "settings.themeSapphireLuxury"
   | "settings.themeAmethystLuxury"
   | "settings.themeAmberLuxury"
+  | "settings.themeObsidianGold"
+  | "settings.themePearlNoir"
+  | "settings.themeJadeSilk"
+  | "settings.themeArcticGlass"
+  | "settings.themeRoyalIndigo"
+  | "settings.themeCopperOlive"
+  | "settings.themeMoonlitRose"
+  | "settings.themeCarbonTeal"
   | "settings.general"
   | "settings.fontsTitle"
   | "settings.uiFont"
@@ -604,6 +612,14 @@ const en: MessageCatalog = {
   "settings.themeSapphireLuxury": "Royal Sapphire",
   "settings.themeAmethystLuxury": "Imperial Amethyst",
   "settings.themeAmberLuxury": "Golden Amber",
+  "settings.themeObsidianGold": "Obsidian Gold",
+  "settings.themePearlNoir": "Pearl Noir",
+  "settings.themeJadeSilk": "Jade Silk",
+  "settings.themeArcticGlass": "Arctic Glass",
+  "settings.themeRoyalIndigo": "Royal Indigo",
+  "settings.themeCopperOlive": "Copper Olive",
+  "settings.themeMoonlitRose": "Moonlit Rose",
+  "settings.themeCarbonTeal": "Carbon Teal",
   "settings.general": "General",
   "settings.fontsTitle": "Fonts & Typography",
   "settings.uiFont": "UI Font Family (Sans)",
@@ -1052,6 +1068,14 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "settings.themeSapphireLuxury": "الياقوت الملكي",
     "settings.themeAmethystLuxury": "الجمشت الإمبراطوري",
     "settings.themeAmberLuxury": "الكهرمان الذهبي",
+    "settings.themeObsidianGold": "الأوبسيديان الذهبي",
+    "settings.themePearlNoir": "اللؤلؤ الأسود",
+    "settings.themeJadeSilk": "حرير اليشم",
+    "settings.themeArcticGlass": "زجاج القطب",
+    "settings.themeRoyalIndigo": "النيلي الملكي",
+    "settings.themeCopperOlive": "النحاس والزيتون",
+    "settings.themeMoonlitRose": "وردة ضوء القمر",
+    "settings.themeCarbonTeal": "الكربون الفيروزي",
     "settings.general": "عام",
     "settings.fontsTitle": "الخطوط وتنسيق النصوص",
     "settings.uiFont": "خط واجهة المستخدم (Sans)",

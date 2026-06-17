@@ -223,6 +223,16 @@ fn build_credentials(
 ) -> Result<serde_json::Value, String> {
     let vault = vault.0.lock().map_err(|e| e.to_string())?;
     if !vault.has_secret(provider_id) {
+        if provider_id == "aura-cloud" {
+            let (_, base_url, _, _) = provider_row(db, provider_id)?;
+            return Ok(serde_json::json!({
+                "apiKey": null,
+                "baseUrl": base_url,
+                "authMode": "aura-cloud",
+                "accountId": null,
+                "refreshToken": null,
+            }));
+        }
         return Err(format!("No credentials for {provider_id}"));
     }
     let secret = vault.get_secret(provider_id).unwrap_or_default();
