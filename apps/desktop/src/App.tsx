@@ -408,10 +408,6 @@ export default function App() {
   useEffect(() => {
     void agent.checkSidecar();
     void agent.loadLatestUsage(activeProjectId);
-    const usageTimer = window.setInterval(() => {
-      void agent.loadLatestUsage(activeProjectId);
-    }, 60_000);
-    return () => window.clearInterval(usageTimer);
   }, [activeProjectId, agent.checkSidecar, agent.loadLatestUsage]);
 
   useEffect(() => {
@@ -652,6 +648,9 @@ export default function App() {
         result.text || t("chat.emptyResponse"),
         `${result.providerId}/${result.modelId}`
       );
+      if (activeProjectId) {
+        void agent.loadLatestUsage(activeProjectId);
+      }
     } catch (e) {
       const err = String(e);
       setChatError(err);
@@ -686,6 +685,9 @@ export default function App() {
         result.text || t("chat.emptyResponse"),
         `${result.providerId}/${result.modelId}`
       );
+      if (activeProjectId) {
+        void agent.loadLatestUsage(activeProjectId);
+      }
     } catch (e) {
       setChatError(String(e));
     }

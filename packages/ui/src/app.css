@@ -99,7 +99,7 @@ button{font-family:inherit}
 .ws-meta{display:flex;align-items:center;gap:6px;font:var(--text-caption);color:var(--fg-3)}
 .ws-meta svg{width:13px;height:13px}
 .ws-scroll{flex:1;overflow-y:auto;padding:24px;scroll-behavior:smooth}
-.ws-canvas{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.ws-canvas{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 
 /* Message / agent block */
 .msg{display:flex;gap:13px}
@@ -182,7 +182,7 @@ button{font-family:inherit}
 
 /* ---- Composer ------------------------------------------------------------- */
 .composer-wrap{flex-shrink:0;padding:14px 24px 18px;background:var(--bg-base)}
-.composer{position:relative;display:flex;flex-direction:column;max-width:740px;margin:0 auto;background:var(--bg-2);border:1px solid var(--border-2);
+.composer{position:relative;display:flex;flex-direction:column;max-width:1080px;margin:0 auto;background:var(--bg-2);border:1px solid var(--border-2);
   border-radius:var(--r-lg);box-shadow:var(--shadow-1);transition:border-color var(--dur-fast),box-shadow var(--dur-fast)}
 .composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring)}
 
@@ -333,7 +333,7 @@ button{font-family:inherit}
    CLEANER LAYOUT — calmer spacing overrides earlier rules
    ============================================================================ */
 .ws-scroll{padding:36px 24px 28px}
-.ws-canvas{max-width:680px;gap:24px}
+.ws-canvas{max-width:1080px;gap:24px}
 .ws-head{padding:18px 28px 16px}
 .ws-head .row2{gap:16px;margin-top:8px}
 .os-body .main{background:var(--bg-base)}
