@@ -34,6 +34,7 @@ mod web;
 mod task_snapshots;
 mod onboarding;
 mod diagnostics;
+mod edit_resolutions;
 
 use db::{init_db, seed_if_empty, DbState};
 use providers::VaultHandle;
@@ -126,7 +127,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
-            let db_conn = db::init_db(&app.handle())?;
+            let db_conn = init_db(&app.handle())?;
             seed_if_empty(&db_conn)?;
             let db = DbState(Arc::new(Mutex::new(db_conn)));
             app.manage(db.clone());
@@ -192,6 +193,7 @@ pub fn run() {
             files::search_project_files,
             files::write_project_file,
             files::approve_pending_edit,
+            edit_resolutions::dismiss_pending_edit,
             files::list_pending_edits,
             git::git_status,
             git::git_init,
