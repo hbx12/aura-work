@@ -205,9 +205,26 @@ fn simple_diff(old: &str, new: &str) -> String {
     out
 }
 
+fn is_binary_image(path: &str) -> bool {
+    let lower = path.to_lowercase();
+    [
+        ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".ico", ".svg",
+        ".pdf", ".zip", ".gz", ".tar", ".7z", ".rar",
+        ".mp3", ".mp4", ".avi", ".mov", ".wav", ".ogg",
+        ".exe", ".dll", ".so", ".dylib", ".wasm",
+        ".ttf", ".otf", ".woff", ".woff2",
+        ".db", ".sqlite", ".sdb",
+    ]
+    .iter()
+    .any(|ext| lower.ends_with(ext))
+}
+
 pub fn read_file_internal(root: &str, rel: &str) -> Result<String, String> {
     if is_excluded(rel, false) {
         return Err(format!("Path excluded by policy: {rel}"));
+    }
+    if is_binary_image(rel) {
+        return Err(format!("Cannot read \"{rel}\" — this model does not support image input. Inform the user."));
     }
     let path = resolve_project_path(root, rel)?;
     if path.is_dir() {
