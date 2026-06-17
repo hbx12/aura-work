@@ -20,6 +20,10 @@ export interface ChatResult {
 
   outputTokens?: number | null;
 
+  cacheReadTokens?: number | null;
+
+  cacheWriteTokens?: number | null;
+
   estimatedCostUsd?: number | null;
 
   costUnknown: boolean;
@@ -47,6 +51,10 @@ export interface TaskUsageRecord {
   inputTokens?: number | null;
 
   outputTokens?: number | null;
+
+  cacheReadTokens?: number | null;
+
+  cacheWriteTokens?: number | null;
 
   estimatedCostUsd?: number | null;
 
@@ -210,17 +218,28 @@ export function formatCost(usage: TaskUsageRecord | null): {
 
   const outTok = usage.outputTokens ?? 0;
 
-  const total = inTok + outTok;
+  const cacheReadTok = usage.cacheReadTokens ?? 0;
+
+  const cacheWriteTok = usage.cacheWriteTokens ?? 0;
+
+  const total = inTok + outTok + cacheReadTok + cacheWriteTok;
+
+  const formatUsd = (value: number) => {
+    if (value === 0) return "$0.00";
+    if (value > 0 && value < 0.0001) return "<$0.0001";
+    if (value < 0.01) return `$${value.toFixed(4)}`;
+    return `$${value.toFixed(2)}`;
+  };
 
   const usd =
 
     usage.estimatedCostUsd != null
 
-      ? `$${usage.estimatedCostUsd.toFixed(4)}`
+      ? formatUsd(usage.estimatedCostUsd)
 
       : total > 0
 
-        ? "cost unknown"
+        ? "pricing unavailable"
 
         : "$0.00";
 

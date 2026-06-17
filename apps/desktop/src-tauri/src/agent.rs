@@ -1,6 +1,6 @@
 use crate::db::DbState;
 use crate::sidecar_auth::authorized_reqwest;
-use crate::pricing::{estimate_cost, pricing_for_model};
+use crate::pricing::{estimate_cost_with_cache, pricing_for_model};
 use crate::providers::{VaultHandle, mark_provider_validation, provider_row};
 use crate::vault::ProviderSecret;
 use rusqlite::params;
@@ -54,6 +54,8 @@ pub struct TaskUsageRecord {
     pub model_id: String,
     pub input_tokens: Option<i64>,
     pub output_tokens: Option<i64>,
+    pub cache_read_tokens: Option<i64>,
+    pub cache_write_tokens: Option<i64>,
     pub estimated_cost_usd: Option<f64>,
     pub routing_policy: String,
     pub created_at: String,
@@ -87,6 +89,9 @@ struct SidecarChatResponse {
 struct SidecarUsage {
     input_tokens: Option<u64>,
     output_tokens: Option<u64>,
+    cache_read_tokens: Option<u64>,
+    cache_write_tokens: Option<u64>,
+    estimated_cost_usd: Option<f64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -238,6 +243,8 @@ pub fn record_usage(
     model_id: &str,
     input_tokens: Option<u64>,
     output_tokens: Option<u64>,
+    cache_read_tokens: Option<u64>,
+    cache_write_tokens: Option<u64>,
     estimated_cost_usd: Option<f64>,
     routing_policy: &str,
 ) -> Result<String, String> {
@@ -246,8 +253,9 @@ pub fn record_usage(
     let now = chrono::Utc::now().to_rfc3339();
     conn.execute(
         "INSERT INTO task_usage
-         (id, project_id, provider_id, model_id, input_tokens, output_tokens, estimated_cost_usd, routing_policy, created_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+         (id, project_id, provider_id, model_id, input_tokens, output_tokens,
+          cache_read_tokens, cache_write_tokens, estimated_cost_usd, routing_policy, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
         params![
             id,
             project_id,
@@ -255,6 +263,8 @@ pub fn record_usage(
             model_id,
             input_tokens.map(|v| v as i64),
             output_tokens.map(|v| v as i64),
+            cache_read_tokens.map(|v| v as i64),
+            cache_write_tokens.map(|v| v as i64),
             estimated_cost_usd,
             routing_policy,
             now
@@ -564,7 +574,7 @@ pub async fn run_chat(
         })
         .collect();
 
-    let chat_messages: Vec<serde_json::Value> = if let Some(msgs) = &input.messages {
+    let mut chat_messages: Vec<serde_json::Value> = if let Some(msgs) = &input.messages {
         if msgs.is_empty() {
             return Err("Message is required.".into());
         }
@@ -582,6 +592,18 @@ pub async fn run_chat(
             "content": input.message.trim(),
         })]
     };
+    let has_system = chat_messages
+        .iter()
+        .any(|m| m.get("role").and_then(|v| v.as_str()) == Some("system"));
+    if !has_system {
+        chat_messages.insert(
+            0,
+            serde_json::json!({
+                "role": "system",
+                "content": "You are Aura Work's assistant inside the Aura Work desktop app. Reply in the same language as the user's latest message. If asked who you are, answer as Aura Work and explain that you can help with project work, providers, usage, and app guidance. Keep answers concise."
+            }),
+        );
+    }
 
     let (provider_id, model_id, routing_reason, fallback_from, requires_fallback) =
         if let (Some(p), Some(m)) = (&input.preferred_provider, &input.preferred_model) {
@@ -653,14 +675,20 @@ pub async fn run_chat(
     )
     .await?;
 
-    let (input_rate, output_rate) =
-        pricing_for_model(&db, &provider_id, &model_id).unwrap_or((None, None));
-    let estimated = estimate_cost(
-        chat.usage.input_tokens.unwrap_or(0),
-        chat.usage.output_tokens.unwrap_or(0),
-        input_rate,
-        output_rate,
-    );
+    let (input_rate, output_rate, cache_read_rate, cache_write_rate) =
+        pricing_for_model(&db, &provider_id, &model_id).unwrap_or((None, None, None, None));
+    let estimated = chat.usage.estimated_cost_usd.or_else(|| {
+        estimate_cost_with_cache(
+            chat.usage.input_tokens.unwrap_or(0),
+            chat.usage.output_tokens.unwrap_or(0),
+            chat.usage.cache_read_tokens.unwrap_or(0),
+            chat.usage.cache_write_tokens.unwrap_or(0),
+            input_rate,
+            output_rate,
+            cache_read_rate,
+            cache_write_rate,
+        )
+    });
     let cost_unknown = estimated.is_none()
         && (chat.usage.input_tokens.is_some() || chat.usage.output_tokens.is_some());
 
@@ -671,6 +699,8 @@ pub async fn run_chat(
         &model_id,
         chat.usage.input_tokens,
         chat.usage.output_tokens,
+        chat.usage.cache_read_tokens,
+        chat.usage.cache_write_tokens,
         estimated,
         &routing_policy,
     )?;
@@ -821,11 +851,11 @@ pub fn get_latest_usage(db: State<'_, DbState>, project_id: Option<String>) -> R
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let sql = if project_id.is_some() {
         "SELECT id, project_id, provider_id, model_id, input_tokens, output_tokens,
-                estimated_cost_usd, routing_policy, created_at
+                cache_read_tokens, cache_write_tokens, estimated_cost_usd, routing_policy, created_at
          FROM task_usage WHERE project_id = ?1 ORDER BY created_at DESC LIMIT 1"
     } else {
         "SELECT id, project_id, provider_id, model_id, input_tokens, output_tokens,
-                estimated_cost_usd, routing_policy, created_at
+                cache_read_tokens, cache_write_tokens, estimated_cost_usd, routing_policy, created_at
          FROM task_usage ORDER BY created_at DESC LIMIT 1"
     };
     let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
@@ -843,14 +873,14 @@ pub fn list_task_usage(db: State<'_, DbState>, project_id: Option<String>) -> Re
     let mut stmt = if project_id.is_some() {
         conn.prepare(
             "SELECT id, project_id, provider_id, model_id, input_tokens, output_tokens,
-                    estimated_cost_usd, routing_policy, created_at
+                    cache_read_tokens, cache_write_tokens, estimated_cost_usd, routing_policy, created_at
              FROM task_usage WHERE project_id = ?1 ORDER BY created_at DESC LIMIT 50",
         )
         .map_err(|e| e.to_string())?
     } else {
         conn.prepare(
             "SELECT id, project_id, provider_id, model_id, input_tokens, output_tokens,
-                    estimated_cost_usd, routing_policy, created_at
+                    cache_read_tokens, cache_write_tokens, estimated_cost_usd, routing_policy, created_at
              FROM task_usage ORDER BY created_at DESC LIMIT 50",
         )
         .map_err(|e| e.to_string())?
@@ -872,9 +902,11 @@ fn map_usage_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<TaskUsageRecord> {
         model_id: row.get(3)?,
         input_tokens: row.get(4)?,
         output_tokens: row.get(5)?,
-        estimated_cost_usd: row.get(6)?,
-        routing_policy: row.get(7)?,
-        created_at: row.get(8)?,
+        cache_read_tokens: row.get(6)?,
+        cache_write_tokens: row.get(7)?,
+        estimated_cost_usd: row.get(8)?,
+        routing_policy: row.get(9)?,
+        created_at: row.get(10)?,
     })
 }
 

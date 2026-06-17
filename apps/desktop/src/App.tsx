@@ -408,7 +408,11 @@ export default function App() {
   useEffect(() => {
     void agent.checkSidecar();
     void agent.loadLatestUsage(activeProjectId);
-  }, [activeProjectId]);
+    const usageTimer = window.setInterval(() => {
+      void agent.loadLatestUsage(activeProjectId);
+    }, 60_000);
+    return () => window.clearInterval(usageTimer);
+  }, [activeProjectId, agent.checkSidecar, agent.loadLatestUsage]);
 
   useEffect(() => {
     if (activeProjectId) {

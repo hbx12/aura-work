@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { coerceAgentResponse } from "./coerce-response.js";
-import { extractFileWritesFromResponse } from "./extract-writes.js";
+import { extractFileWritesFromResponse, isFileTask } from "./extract-writes.js";
 import {
   BLOCKED_INVALID_STRUCTURE,
   parseModelResponse,
@@ -94,5 +94,22 @@ describe("extractFileWritesFromResponse", () => {
   it("keeps explicit header paths only", () => {
     const writes = extractFileWritesFromResponse("```src/app.ts\nexport {}\n```", "create app");
     expect(writes).toEqual([{ path: "src/app.ts", content: "export {}" }]);
+  });
+});
+
+describe("isFileTask", () => {
+  it("does not treat Arabic identity questions as file tasks", () => {
+    expect(isFileTask("وش تسوي؟")).toBe(false);
+    expect(
+      isFileTask(
+        "Workspace chat request: من انت و وش تسوي؟\n\nYou are running inside Aura Work.",
+      ),
+    ).toBe(false);
+  });
+
+  it("detects explicit Arabic and English file work", () => {
+    expect(isFileTask("سوي ملف README.md مرتب")).toBe(true);
+    expect(isFileTask("fix the login bug in the app")).toBe(true);
+    expect(isFileTask("create a new index.ts file")).toBe(true);
   });
 });
