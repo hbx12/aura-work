@@ -151,7 +151,7 @@ function openAiAdapter(id: ProviderId, defaultBase: string): ProviderAdapter {
         body: JSON.stringify({
           model: request.model,
           messages: request.messages,
-          max_tokens: request.maxOutputTokens ?? 1024,
+          max_tokens: request.maxOutputTokens ?? 4096,
           temperature: request.temperature ?? 0.7,
         }),
       });
@@ -248,7 +248,7 @@ const anthropicAdapter: ProviderAdapter = {
       },
       body: JSON.stringify({
         model: request.model,
-        max_tokens: request.maxOutputTokens ?? 1024,
+        max_tokens: request.maxOutputTokens ?? 4096,
         messages: request.messages.filter((m: { role: string }) => m.role !== "system"),
         system: request.messages.find((m: { role: string }) => m.role === "system")?.content,
       }),
