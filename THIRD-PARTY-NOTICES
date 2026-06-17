@@ -28,6 +28,7 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   - @tauri-apps/cli-win32-ia32-msvc@2.11.2 (Apache-2.0 OR MIT)
   - @tauri-apps/cli-win32-x64-msvc@2.11.2 (Apache-2.0 OR MIT)
   - @tauri-apps/plugin-dialog@2.7.1 (MIT OR Apache-2.0)
+  - @tauri-apps/plugin-notification@2.3.3 (MIT OR Apache-2.0)
   - @tauri-apps/plugin-opener@2.5.4 (MIT OR Apache-2.0)
   - @tauri-apps/plugin-updater@2.10.1 (MIT OR Apache-2.0)
 
@@ -360,6 +361,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @tauri-apps/plugin-dialog@2.7.1
   License: MIT OR Apache-2.0
   Source: node_modules/@tauri-apps/plugin-dialog
+
+@tauri-apps/plugin-notification@2.3.3
+  License: MIT OR Apache-2.0
+  Source: node_modules/@tauri-apps/plugin-notification
 
 @tauri-apps/plugin-opener@2.5.4
   License: MIT OR Apache-2.0
