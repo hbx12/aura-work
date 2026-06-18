@@ -12,6 +12,7 @@ export const NAV_ITEMS: { id: AppView; icon: string; label: string }[] = [
   { id: "computer", icon: "monitor", label: "Computer use" },
   { id: "memory", icon: "brain", label: "Memory" },
   { id: "audit", icon: "scroll-text", label: "Audit log" },
+  { id: "usage", icon: "database", label: "Usage" },
 ];
 
 interface TitleBarProps {

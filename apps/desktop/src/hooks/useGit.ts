@@ -2,15 +2,38 @@ import { useCallback, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { GitStatusResult, PendingCommit } from "@aura-os/shared";
 
+interface GitLogEntry {
+  hash: string;
+  author: string;
+  date: string;
+  message: string;
+  refs: string;
+  graph: string;
+}
+
+interface GitBranchInfo {
+  name: string;
+  current: boolean;
+  remote?: string | null;
+}
+
+interface GitStashEntry {
+  index: number;
+  message: string;
+}
+
 export function useGit(projectId: string | null) {
   const [status, setStatus] = useState<GitStatusResult | null>(null);
   const [diff, setDiff] = useState("");
+  const [logEntries, setLogEntries] = useState<GitLogEntry[]>([]);
+  const [branches, setBranches] = useState<GitBranchInfo[]>([]);
+  const [stashEntries, setStashEntries] = useState<GitStashEntry[]>([]);
   const [pendingCommits, setPendingCommits] = useState<PendingCommit[]>([]);
   const [commitMessage, setCommitMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [diffView, setDiffView] = useState<"unified" | "side-by-side">("unified");
 
   const refresh = useCallback(async () => {
     if (!projectId) return;
@@ -24,8 +47,26 @@ export function useGit(projectId: string | null) {
         const d = await invoke<{ diff: string }>("git_diff", { projectId, filePath: path });
         setDiff(d.diff);
         if (!selectedFile && st.files[0]?.path) setSelectedFile(st.files[0].path);
+
+        try {
+          const log = await invoke<GitLogEntry[]>("git_log", { projectId, maxCount: 30 });
+          setLogEntries(log);
+        } catch { /* log may fail on empty repo */ }
+
+        try {
+          const br = await invoke<GitBranchInfo[]>("git_branches", { projectId });
+          setBranches(br);
+        } catch { /* */ }
+
+        try {
+          const sh = await invoke<GitStashEntry[]>("git_stash_list", { projectId });
+          setStashEntries(sh);
+        } catch { /* */ }
       } else {
         setDiff("");
+        setLogEntries([]);
+        setBranches([]);
+        setStashEntries([]);
         setSelectedFile(null);
       }
       const pending = await invoke<PendingCommit[]>("list_pending_commits", { projectId });
@@ -65,6 +106,9 @@ export function useGit(projectId: string | null) {
       const st = await invoke<GitStatusResult>("git_status", { projectId });
       setStatus(st);
       setDiff("");
+      setLogEntries([]);
+      setBranches([]);
+      setStashEntries([]);
       const pending = await invoke<PendingCommit[]>("list_pending_commits", { projectId });
       setPendingCommits(pending);
     } catch (e) {
@@ -105,13 +149,44 @@ export function useGit(projectId: string | null) {
     [refresh],
   );
 
+  const stashPush = useCallback(async (message?: string) => {
+    if (!projectId) return;
+    setLoading(true);
+    try {
+      await invoke("git_stash_push", { projectId, message: message ?? null });
+      await refresh();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, refresh]);
+
+  const stashPop = useCallback(async (index?: number) => {
+    if (!projectId) return;
+    setLoading(true);
+    try {
+      await invoke("git_stash_pop", { projectId, index: index ?? null });
+      await refresh();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, refresh]);
+
   return {
     status,
     diff,
+    logEntries,
+    branches,
+    stashEntries,
     pendingCommits,
     commitMessage,
     setCommitMessage,
     selectedFile,
+    diffView,
+    setDiffView,
     loading,
     error,
     refresh,
@@ -119,5 +194,7 @@ export function useGit(projectId: string | null) {
     initRepo,
     proposeCommit,
     approveCommit,
+    stashPush,
+    stashPop,
   };
 }

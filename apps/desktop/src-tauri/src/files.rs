@@ -6,6 +6,7 @@ use rusqlite::params;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::io::Read;
 use std::path::{Component, Path, PathBuf};
 use tauri::State;
 
@@ -225,6 +226,16 @@ fn simple_diff(old: &str, new: &str) -> String {
     out
 }
 
+fn appears_binary(path: &Path) -> bool {
+    let mut file = match fs::File::open(path) {
+        Ok(f) => f,
+        Err(_) => return false,
+    };
+    let mut buf = [0u8; 8192];
+    let n = file.read(&mut buf).unwrap_or(0);
+    buf[..n].contains(&0x00)
+}
+
 pub fn read_file_internal(root: &str, rel: &str) -> Result<String, String> {
     if is_excluded(rel, false) {
         return Err(format!("Path excluded by policy: {rel}"));
@@ -236,6 +247,12 @@ pub fn read_file_internal(root: &str, rel: &str) -> Result<String, String> {
     let meta = fs::metadata(&path).map_err(|e| e.to_string())?;
     if meta.len() > MAX_TEXT_FILE_BYTES as u64 {
         return Err("File too large to read (>2MB).".into());
+    }
+    if appears_binary(&path) {
+        return Err(format!(
+            "Cannot read \"{}\" — this model does not support image input. Inform the user.",
+            rel
+        ));
     }
     fs::read_to_string(&path).map_err(|e| e.to_string())
 }

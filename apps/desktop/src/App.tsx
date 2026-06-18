@@ -32,6 +32,7 @@ import { FilesPage } from "./components/FilesPage";
 import { GitPage } from "./components/GitPage";
 import { TerminalPage } from "./components/TerminalPage";
 import { AuditPageLive } from "./components/AuditPageLive";
+import { UsagePage } from "./components/UsagePage";
 import { useProjects } from "./hooks/useProjects";
 import { formatCost, useAgent } from "./hooks/useAgent";
 import { useProviders } from "./hooks/useProviders";
@@ -55,6 +56,7 @@ import { useBridge } from "./hooks/useBridge";
 import { useComputerUse } from "./hooks/useComputerUse";
 import { useMemory } from "./hooks/useMemory";
 import { useI18n, usePackaging, usePendingOpenTask } from "./hooks/useI18n";
+import { sendDesktopNotification, shouldNotify } from "./hooks/useNotifications";
 import type { MessageCatalog } from "@aura-os/i18n";
 import { useChatModels, parseModelSelection } from "./hooks/useChatModels";
 import { PetWindowContent } from "./components/PetWindowContent";
@@ -495,6 +497,15 @@ export default function App() {
     void agent.loadLatestUsage(activeProjectId);
   }, [activeProjectId, agent.checkSidecar, agent.loadLatestUsage]);
 
+  const prevSidecarRunning = useRef<boolean | null>(null);
+  useEffect(() => {
+    const running = agent.sidecar.running;
+    if (prevSidecarRunning.current === true && running === false && shouldNotify("sidecarOffline")) {
+      void sendDesktopNotification("Sidecar offline", "The agent sidecar has stopped running.");
+    }
+    prevSidecarRunning.current = running;
+  }, [agent.sidecar.running]);
+
   useEffect(() => {
     if (activeProjectId) {
       void agent.loadLatestUsage(activeProjectId);
@@ -509,12 +520,31 @@ export default function App() {
     if (activeTaskId) void tasks.loadTask(activeTaskId);
   }, [activeTaskId]);
 
+  const prevTaskState = useRef<string | null>(null);
+  useEffect(() => {
+    const task = tasks.activeTask;
+    if (!task) { prevTaskState.current = null; return; }
+    const prev = prevTaskState.current;
+    prevTaskState.current = task.state;
+    if (prev === task.state) return;
+    if (task.state === "completed" && shouldNotify("taskComplete")) {
+      void sendDesktopNotification("Task completed", task.title || "Your task has finished.");
+    } else if (task.state === "failed" && shouldNotify("taskError")) {
+      void sendDesktopNotification("Task failed", task.title || "Your task encountered an error.");
+    } else if (task.state === "blocked" && shouldNotify("taskError")) {
+      void sendDesktopNotification("Task blocked", task.title || "Your task is blocked.");
+    } else if (task.state === "waiting-for-approval" && shouldNotify("permissionRequired")) {
+      void sendDesktopNotification("Permission needed", `${task.title} requires your approval.`);
+    }
+  }, [tasks.activeTask?.state, tasks.activeTask?.title]);
+
   useEffect(() => {
     if (view === "files" && activeProjectId) void files.refreshFiles();
     if (view === "git" && activeProjectId) void git.refresh();
     if (view === "audit") void audit.refresh();
     if (view === "schedule") void scheduledApi.refresh();
     if (view === "computer") void computerUseApi.refresh();
+    if (view === "usage" && activeProjectId) {} // UsagePage refreshes itself
     if (view === "memory" && activeProjectId) void memoryApi.refresh();
     if (view === "settings") {
       void cloudApi.refresh();
@@ -1472,6 +1502,13 @@ You can open and customize it to instruct the agent on workspace rules.`;
           t={t}
         />
       );
+    if (view === "usage")
+      return (
+        <UsagePage
+          projectId={activeProjectId}
+          t={t}
+        />
+      );
     if (view === "memory")
       return (
         <MemoryPage
@@ -1590,17 +1627,24 @@ You can open and customize it to instruct the agent on workspace rules.`;
         <GitPage
           status={git.status}
           diff={git.diff}
+          logEntries={git.logEntries}
+          branches={git.branches}
+          stashEntries={git.stashEntries}
           pendingCommits={git.pendingCommits}
           commitMessage={git.commitMessage}
           loading={git.loading}
           error={git.error}
           folderPath={activeProject?.folderPath}
           selectedFile={git.selectedFile}
+          diffView={git.diffView}
+          onDiffViewChange={git.setDiffView}
           onCommitMessageChange={git.setCommitMessage}
           onProposeCommit={() => void git.proposeCommit()}
           onApproveCommit={(id) => void git.approveCommit(id)}
           onSelectFile={(path) => void git.selectFile(path)}
           onInitRepo={() => void git.initRepo()}
+          onStashPush={(msg) => void git.stashPush(msg)}
+          onStashPop={(idx) => void git.stashPop(idx)}
           t={t}
         />
       );
