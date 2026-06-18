@@ -92,6 +92,9 @@ fn validate_git_rel_path(path: &str) -> Result<String, String> {
     if rel.trim().is_empty() {
         return Err("Git file path is required.".into());
     }
+    if looks_like_windows_absolute_path(&rel) {
+        return Err("Absolute Git paths are not allowed.".into());
+    }
     let path = Path::new(&rel);
     if path.is_absolute() {
         return Err("Absolute Git paths are not allowed.".into());
@@ -106,6 +109,14 @@ fn validate_git_rel_path(path: &str) -> Result<String, String> {
         }
     }
     Ok(rel)
+}
+
+fn looks_like_windows_absolute_path(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 3
+        && bytes[1] == b':'
+        && bytes[0].is_ascii_alphabetic()
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
 }
 
 pub fn is_git_repo(root: &str) -> bool {
@@ -496,5 +507,6 @@ mod tests {
         assert!(validate_git_rel_path("../secret.txt").is_err());
         assert!(validate_git_rel_path("/tmp/secret.txt").is_err());
         assert!(validate_git_rel_path("C:/Users/example/secret.txt").is_err());
+        assert!(validate_git_rel_path("C:\\Users\\example\\secret.txt").is_err());
     }
 }

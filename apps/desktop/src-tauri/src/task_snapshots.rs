@@ -45,6 +45,9 @@ fn validate_snapshot_rel_path(rel_path: &str) -> Result<String, String> {
     if rel_path.trim().is_empty() {
         return Err("Snapshot path is required.".into());
     }
+    if looks_like_windows_absolute_path(&rel_path) {
+        return Err("Snapshot path must be relative.".into());
+    }
     let path = Path::new(&rel_path);
     if path.is_absolute() {
         return Err("Snapshot path must be relative.".into());
@@ -59,6 +62,14 @@ fn validate_snapshot_rel_path(rel_path: &str) -> Result<String, String> {
         }
     }
     Ok(rel_path)
+}
+
+fn looks_like_windows_absolute_path(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 3
+        && bytes[1] == b':'
+        && bytes[0].is_ascii_alphabetic()
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
 }
 
 fn resolve_snapshot_path(root: &str, rel_path: &str) -> Result<PathBuf, String> {
@@ -380,6 +391,8 @@ mod tests {
 
         assert!(resolve_snapshot_path(root.to_str().unwrap(), "../secret.txt").is_err());
         assert!(resolve_snapshot_path(root.to_str().unwrap(), "/tmp/secret.txt").is_err());
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "C:/Users/example/secret.txt").is_err());
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "C:\\Users\\example\\secret.txt").is_err());
 
         let _ = fs::remove_dir_all(root);
     }
