@@ -73,6 +73,24 @@ struct HelperErrorBody {
     error: String,
 }
 
+pub fn normalize_cloud_server_url(server_url: &str) -> Result<String, String> {
+    let mut url = reqwest::Url::parse(server_url.trim())
+        .map_err(|_| "Cloud server URL is invalid.".to_string())?;
+    match url.scheme() {
+        "http" | "https" => {}
+        _ => return Err("Cloud server URL must use http or https.".into()),
+    }
+    if url.host_str().is_none() {
+        return Err("Cloud server URL must include a host.".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("Cloud server URL cannot include username or password.".into());
+    }
+    url.set_query(None);
+    url.set_fragment(None);
+    Ok(url.as_str().trim_end_matches('/').to_string())
+}
+
 async fn helper_get<T: for<'de> Deserialize<'de>>(path: &str) -> Result<T, String> {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(30))
@@ -194,7 +212,8 @@ pub async fn cloud_direct_post<T: for<'de> Deserialize<'de>>(
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(|e| e.to_string())?;
-    let url = format!("{}{}", server_url.trim_end_matches('/'), path);
+    let server_url = normalize_cloud_server_url(server_url)?;
+    let url = format!("{}{}", server_url, path);
     let mut req = client.post(&url).json(body);
     if let Some(t) = token.filter(|s| !s.is_empty()) {
         req = req.header("Authorization", format!("Bearer {t}"));
@@ -219,7 +238,8 @@ pub async fn cloud_direct_get<T: for<'de> Deserialize<'de>>(
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(|e| e.to_string())?;
-    let url = format!("{}{}", server_url.trim_end_matches('/'), path);
+    let server_url = normalize_cloud_server_url(server_url)?;
+    let url = format!("{}{}", server_url, path);
     let mut req = client.get(&url);
     if let Some(t) = token.filter(|s| !s.is_empty()) {
         req = req.header("Authorization", format!("Bearer {t}"));
@@ -240,7 +260,32 @@ pub async fn check_cloud_server_health(server_url: &str) -> Result<bool, String>
         .timeout(std::time::Duration::from_secs(5))
         .build()
         .map_err(|e| e.to_string())?;
-    let url = format!("{}/health", server_url.trim_end_matches('/'));
+    let server_url = normalize_cloud_server_url(server_url)?;
+    let url = format!("{}/health", server_url);
     let resp = client.get(&url).send().await.map_err(|e| e.to_string())?;
     Ok(resp.status().is_success())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalizes_cloud_server_urls() {
+        assert_eq!(
+            normalize_cloud_server_url("http://127.0.0.1:47830/").unwrap(),
+            "http://127.0.0.1:47830"
+        );
+        assert_eq!(
+            normalize_cloud_server_url("https://cloud.example.com/api?x=1#frag").unwrap(),
+            "https://cloud.example.com/api"
+        );
+    }
+
+    #[test]
+    fn rejects_unsafe_cloud_server_urls() {
+        assert!(normalize_cloud_server_url("file:///tmp/aura").is_err());
+        assert!(normalize_cloud_server_url("https://user:pass@example.com").is_err());
+        assert!(normalize_cloud_server_url("not a url").is_err());
+    }
 }

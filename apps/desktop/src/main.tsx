@@ -11,14 +11,18 @@ if (!rootEl) {
 function showBootError(message: string) {
   const el = document.getElementById("root");
   if (!el) return;
-  el.innerHTML = `<div style="padding:2rem;font-family:system-ui,sans-serif;max-width:40rem;line-height:1.5;color:#3d3832;background:#faf9f5;min-height:100vh">
-    <h1 style="margin-top:0">Aura Work failed to start</h1>
-    <p>${message}</p>
-    <pre style="background:#efece2;padding:1rem;border-radius:8px;overflow:auto">npm install
-npm run build:sidecars
-npm run sidecar
-npm run dev</pre>
-  </div>`;
+  const shell = document.createElement("div");
+  shell.style.cssText = "padding:2rem;font-family:system-ui,sans-serif;max-width:40rem;line-height:1.5;color:#3d3832;background:#faf9f5;min-height:100vh";
+  const title = document.createElement("h1");
+  title.textContent = "Aura Work failed to start";
+  title.style.marginTop = "0";
+  const body = document.createElement("p");
+  body.textContent = message;
+  const commands = document.createElement("pre");
+  commands.textContent = "npm install\nnpm run build:sidecars\nnpm run sidecar\nnpm run dev";
+  commands.style.cssText = "background:#efece2;padding:1rem;border-radius:8px;overflow:auto";
+  shell.append(title, body, commands);
+  el.replaceChildren(shell);
 }
 
 try {

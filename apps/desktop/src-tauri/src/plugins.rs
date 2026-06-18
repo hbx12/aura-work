@@ -1088,8 +1088,12 @@ fn validate_skill_exchange_file(path: &str, must_exist: bool) -> Result<(), Stri
         .and_then(|value| value.to_str())
         .unwrap_or("")
         .to_ascii_lowercase();
-    if ext != "aura-skill" && ext != "json" {
-        return Err("Only .aura-skill and .json skill files are supported.".into());
+    if must_exist {
+        if ext != "aura-skill" && ext != "json" {
+            return Err("Only .aura-skill and .json skill files are supported.".into());
+        }
+    } else if ext != "aura-skill" {
+        return Err("Skill exports must use the .aura-skill extension.".into());
     }
     if must_exist {
         let meta = fs::metadata(path).map_err(|e| e.to_string())?;
@@ -1214,6 +1218,25 @@ This is the prompt content.
         assert_eq!(skill_info.name, "test-skill");
         assert_eq!(skill_info.description, "A dummy test skill");
         assert_eq!(skill_info.prompt, "This is the prompt content.");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn skill_export_requires_aura_skill_extension() {
+        let temp_dir = std::env::temp_dir().join(format!(
+            "aura-skill-extension-test-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&temp_dir);
+        fs::create_dir_all(&temp_dir).unwrap();
+        let json_path = temp_dir.join("backup.json");
+        let skill_path = temp_dir.join("backup.aura-skill");
+        fs::write(&json_path, "{}").unwrap();
+
+        assert!(validate_skill_exchange_file(skill_path.to_str().unwrap(), false).is_ok());
+        assert!(validate_skill_exchange_file(json_path.to_str().unwrap(), false).is_err());
+        assert!(validate_skill_exchange_file(json_path.to_str().unwrap(), true).is_ok());
 
         let _ = fs::remove_dir_all(temp_dir);
     }

@@ -1,9 +1,10 @@
 use crate::audit::{append_audit, AppendAuditInput};
 use crate::db::DbState;
-use crate::files::project_folder;
+use crate::files::{normalize_rel, project_folder};
 use crate::permissions::check_or_request;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
+use std::path::{Component, Path};
 use std::process::Command;
 use tauri::State;
 
@@ -84,6 +85,27 @@ fn git_cmd(cwd: &str, args: &[&str]) -> Result<String, String> {
         return Err(err.trim().to_string());
     }
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+fn validate_git_rel_path(path: &str) -> Result<String, String> {
+    let rel = normalize_rel(path);
+    if rel.trim().is_empty() {
+        return Err("Git file path is required.".into());
+    }
+    let path = Path::new(&rel);
+    if path.is_absolute() {
+        return Err("Absolute Git paths are not allowed.".into());
+    }
+    for component in path.components() {
+        match component {
+            Component::Normal(_) | Component::CurDir => {}
+            Component::ParentDir => return Err("Git path traversal is not allowed.".into()),
+            Component::RootDir | Component::Prefix(_) => {
+                return Err("Absolute Git paths are not allowed.".into())
+            }
+        }
+    }
+    Ok(rel)
 }
 
 pub fn is_git_repo(root: &str) -> bool {
@@ -176,14 +198,15 @@ pub fn git_diff_inner(
         return Err("Not a Git repository.".into());
     }
     let diff = if let Some(ref fp) = file_path {
-        let is_untracked = if let Ok(status) = git_cmd(&root, &["status", "--porcelain", fp]) {
+        let fp = validate_git_rel_path(fp)?;
+        let is_untracked = if let Ok(status) = git_cmd(&root, &["status", "--porcelain", &fp]) {
             status.starts_with("??")
         } else {
             false
         };
 
         if is_untracked {
-            let full_path = std::path::Path::new(&root).join(fp);
+            let full_path = std::path::Path::new(&root).join(&fp);
             if let Ok(content) = std::fs::read_to_string(&full_path) {
                 let mut fake_diff = format!("--- /dev/null\n+++ b/{}\n@@ -0,0 +1,{} @@\n", fp, content.lines().count());
                 for line in content.lines() {
@@ -191,13 +214,13 @@ pub fn git_diff_inner(
                 }
                 fake_diff
             } else {
-                git_cmd(&root, &["diff", "--relative", "--", fp])?
+                git_cmd(&root, &["diff", "--relative", "--", &fp])?
             }
         } else {
-            git_cmd(&root, &["diff", "--relative", "--", fp])?
+            git_cmd(&root, &["diff", "--relative", "--", &fp])?
         }
     } else {
-        git_cmd(&root, &["diff", "--relative"])?
+        full_worktree_diff(&root)?
     };
     Ok(GitDiffResult {
         path: file_path.map(String::from),
@@ -225,9 +248,7 @@ pub fn propose_git_commit(
     if input.message.trim().is_empty() {
         return Err("Commit message is required.".into());
     }
-    // Stage all changes (both modified and untracked) so they show up in diff
-    let _ = git_cmd(&root, &["add", "-A"]);
-    let diff = git_cmd(&root, &["diff", "--staged"])?;
+    let diff = full_worktree_diff(&root)?;
     if diff.is_empty() {
         return Err("No changes to commit.".into());
     }
@@ -425,4 +446,55 @@ pub fn tool_git_status(db: &DbState, project_id: &str) -> Result<GitStatusResult
 pub fn tool_git_diff(db: &DbState, project_id: &str, file_path: Option<&str>) -> Result<String, String> {
     let result = git_diff_inner(db, project_id, file_path)?;
     Ok(result.diff)
+}
+
+fn full_worktree_diff(root: &str) -> Result<String, String> {
+    let mut diff = String::new();
+    let unstaged = git_cmd(root, &["diff", "--relative"])?;
+    if !unstaged.is_empty() {
+        diff.push_str(&unstaged);
+        if !diff.ends_with('\n') {
+            diff.push('\n');
+        }
+    }
+
+    let staged = git_cmd(root, &["diff", "--staged", "--relative"])?;
+    if !staged.is_empty() {
+        diff.push_str(&staged);
+        if !diff.ends_with('\n') {
+            diff.push('\n');
+        }
+    }
+
+    let untracked = git_cmd(root, &["ls-files", "--others", "--exclude-standard"])?;
+    for raw_path in untracked.lines() {
+        let rel = validate_git_rel_path(raw_path)?;
+        let full_path = std::path::Path::new(root).join(&rel);
+        let Ok(content) = std::fs::read_to_string(&full_path) else {
+            continue;
+        };
+        diff.push_str(&format!(
+            "--- /dev/null\n+++ b/{}\n@@ -0,0 +1,{} @@\n",
+            rel,
+            content.lines().count()
+        ));
+        for line in content.lines() {
+            diff.push_str(&format!("+{}\n", line));
+        }
+    }
+
+    Ok(diff.trim_end().to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn git_paths_reject_absolute_and_parent_traversal() {
+        assert!(validate_git_rel_path("src/main.rs").is_ok());
+        assert!(validate_git_rel_path("../secret.txt").is_err());
+        assert!(validate_git_rel_path("/tmp/secret.txt").is_err());
+        assert!(validate_git_rel_path("C:/Users/example/secret.txt").is_err());
+    }
 }

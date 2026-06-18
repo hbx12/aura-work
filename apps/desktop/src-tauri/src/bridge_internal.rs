@@ -18,6 +18,7 @@ pub struct BridgeRuntime {
 }
 
 const INTERNAL_PORT: u16 = 47827;
+const MAX_BRIDGE_BODY_BYTES: u64 = 1_000_000;
 
 pub fn start_server(runtime: Arc<BridgeRuntime>) {
     std::thread::spawn(move || {
@@ -155,8 +156,12 @@ fn handle_request(runtime: &Arc<BridgeRuntime>, mut request: Request) -> Result<
 fn read_body(reader: &mut dyn Read) -> Result<String, String> {
     let mut body = String::new();
     reader
+        .take(MAX_BRIDGE_BODY_BYTES + 1)
         .read_to_string(&mut body)
         .map_err(|e| e.to_string())?;
+    if body.len() as u64 > MAX_BRIDGE_BODY_BYTES {
+        return Err("Bridge request body is too large.".into());
+    }
     Ok(body)
 }
 

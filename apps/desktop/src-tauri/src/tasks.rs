@@ -1552,6 +1552,7 @@ pub async fn run_workspace_chat_agent(
     let mut modified_files: Vec<String> = Vec::new();
     let mut last_content = String::new();
     let mut blocked_reason: Option<String> = None;
+    let reply_in_arabic = response_language_for_prompt(input.message.trim()) == "Arabic";
 
     for iteration in 0..MAX_CHAT_AGENT_ITERATIONS {
         let prompt = format!(
@@ -1647,9 +1648,11 @@ pub async fn run_workspace_chat_agent(
                     step.status = "block".into();
                     step.tool_ok = Some(false);
                     step.output = Some("Waiting for permission".into());
-                    blocked_reason = Some(
-                        "I need your approval before running that workspace action. Use the pending approval dialog to allow or deny it, then send a follow-up message if you want me to continue.".into(),
-                    );
+                    blocked_reason = Some(if reply_in_arabic {
+                        "أحتاج موافقتك قبل تشغيل هذه العملية داخل مساحة العمل. استخدم بطاقة الموافقة التي ظهرت للسماح أو الرفض، ثم أرسل رسالة متابعة إذا أردت أن أكمل.".into()
+                    } else {
+                        "I need your approval before running that workspace action. Use the pending approval card to allow or deny it, then send a follow-up message if you want me to continue.".into()
+                    });
                     steps.push(step);
                     break;
                 }
@@ -1657,9 +1660,11 @@ pub async fn run_workspace_chat_agent(
                     step.status = "block".into();
                     step.tool_ok = Some(false);
                     step.output = Some("Waiting for edit approval".into());
-                    blocked_reason = Some(
-                        "I prepared a file edit that needs your approval. Open Files, review Pending edits, and approve it to apply the change. Send another message only if you want more changes.".into(),
-                    );
+                    blocked_reason = Some(if reply_in_arabic {
+                        "حضرت تعديل ملف يحتاج موافقتك. افتح الملفات، راجع التعديلات المعلقة، ثم وافق عليها لتطبيق التغيير.".into()
+                    } else {
+                        "I prepared a file edit that needs your approval. Open Files, review Pending edits, and approve it to apply the change. Send another message only if you want more changes.".into()
+                    });
                     steps.push(step);
                     break;
                 }

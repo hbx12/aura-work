@@ -7,17 +7,20 @@ use crate::cloud_crypto::{
 use crate::cloud_helper::{
     ack_dispatch, check_cloud_server_health, cloud_direct_get, cloud_direct_post,
     get_cloud_sync_status, list_pending_dispatch, pull_sync_envelopes, push_sync_envelopes,
-    start_cloud_sync_helper, stop_cloud_sync_helper, CloudDeviceInfo, CloudSyncConfigPayload,
-    CloudSyncStatus, DEFAULT_CLOUD_SERVER_URL, DispatchPendingItem, EncryptedSyncEnvelope,
+    start_cloud_sync_helper, stop_cloud_sync_helper, normalize_cloud_server_url, CloudDeviceInfo,
+    CloudSyncConfigPayload, CloudSyncStatus, DEFAULT_CLOUD_SERVER_URL, DispatchPendingItem,
+    EncryptedSyncEnvelope,
 };
 use crate::db::DbState;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, Manager, State};
 
 const DEVICE_KEY_LEN: usize = 32;
+static PENDING_AURA_CLOUD_DEVICE_CODE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -97,6 +100,33 @@ pub struct AuraWorkReleaseInfo {
     pub source: String,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WebsiteDeviceLoginStart {
+    device_code: String,
+    user_code: String,
+    verification_uri: String,
+    expires_at: String,
+    interval_seconds: u64,
+    pending_backend: bool,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WebsiteDeviceLoginComplete {
+    status: String,
+    message: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WebsiteReleaseInfo {
+    version: Option<String>,
+    download_url: String,
+    release_url: String,
+    source: String,
+}
+
 struct LocalCloudState {
     account_id: Option<String>,
     email: Option<String>,
@@ -114,12 +144,40 @@ struct LocalCloudState {
 
 #[tauri::command]
 pub async fn start_aura_cloud_device_login() -> Result<AuraCloudDeviceLoginStart, String> {
+    let web_url = aura_cloud_web_url();
+    let client = reqwest::Client::new();
+    let start_url = format!("{}/api/auth/device/start", web_url.trim_end_matches('/'));
+    if let Ok(resp) = client
+        .post(&start_url)
+        .json(&serde_json::json!({
+            "deviceName": whoami_fallback(),
+            "client": "desktop",
+        }))
+        .send()
+        .await
+    {
+        if resp.status().is_success() {
+            if let Ok(start) = resp.json::<WebsiteDeviceLoginStart>().await {
+                remember_pending_device_code(Some(start.device_code.clone()))?;
+                return Ok(AuraCloudDeviceLoginStart {
+                    device_code: start.device_code,
+                    user_code: start.user_code,
+                    verification_uri: start.verification_uri,
+                    expires_at: start.expires_at,
+                    interval_seconds: start.interval_seconds,
+                    pending_backend: start.pending_backend,
+                });
+            }
+        }
+    }
+
     let raw = uuid::Uuid::new_v4().simple().to_string().to_uppercase();
     let user_code = format!("{}-{}", &raw[0..4], &raw[4..8]);
+    remember_pending_device_code(Some(raw.clone()))?;
     Ok(AuraCloudDeviceLoginStart {
         device_code: raw,
         user_code: user_code.clone(),
-        verification_uri: format!("https://aura.work/activate?code={user_code}"),
+        verification_uri: format!("{}/activate?code={user_code}", web_url.trim_end_matches('/')),
         expires_at: (chrono::Utc::now() + chrono::Duration::minutes(10)).to_rfc3339(),
         interval_seconds: 5,
         pending_backend: true,
@@ -128,9 +186,32 @@ pub async fn start_aura_cloud_device_login() -> Result<AuraCloudDeviceLoginStart
 
 #[tauri::command]
 pub async fn complete_aura_cloud_device_login() -> Result<AuraCloudDeviceLoginComplete, String> {
+    let device_code = pending_device_code()?;
+    if let Some(device_code) = device_code {
+        let web_url = aura_cloud_web_url();
+        let client = reqwest::Client::new();
+        let complete_url = format!("{}/api/auth/device/complete", web_url.trim_end_matches('/'));
+        if let Ok(resp) = client
+            .post(&complete_url)
+            .json(&serde_json::json!({ "deviceCode": device_code }))
+            .send()
+            .await
+        {
+            if let Ok(result) = resp.json::<WebsiteDeviceLoginComplete>().await {
+                if result.status != "pending" {
+                    remember_pending_device_code(None)?;
+                }
+                return Ok(AuraCloudDeviceLoginComplete {
+                    status: result.status,
+                    message: result.message,
+                });
+            }
+        }
+    }
+
     Ok(AuraCloudDeviceLoginComplete {
         status: "pending".into(),
-        message: "Aura Cloud device login endpoint is not available yet. No token was stored.".into(),
+        message: "Aura Cloud website is not reachable yet. No token was stored.".into(),
     })
 }
 
@@ -171,12 +252,50 @@ pub async fn revoke_aura_cloud_device(
 
 #[tauri::command]
 pub async fn get_latest_aura_work_release() -> Result<AuraWorkReleaseInfo, String> {
+    let web_url = aura_cloud_web_url();
+    let client = reqwest::Client::new();
+    let release_url = format!("{}/api/releases/latest", web_url.trim_end_matches('/'));
+    if let Ok(resp) = client.get(&release_url).send().await {
+        if resp.status().is_success() {
+            if let Ok(info) = resp.json::<WebsiteReleaseInfo>().await {
+                return Ok(AuraWorkReleaseInfo {
+                    version: info.version,
+                    download_url: info.download_url,
+                    release_url: info.release_url,
+                    source: info.source,
+                });
+            }
+        }
+    }
+
     Ok(AuraWorkReleaseInfo {
         version: None,
-        download_url: "https://aura.work/download".into(),
-        release_url: "https://aura.work/api/releases/latest".into(),
+        download_url: format!("{}/en/download", web_url.trim_end_matches('/')),
+        release_url,
         source: "fallback".into(),
     })
+}
+
+fn aura_cloud_web_url() -> String {
+    std::env::var("AURA_CLOUD_WEB_URL")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .or_else(|| std::env::var("NEXT_PUBLIC_APP_URL").ok())
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| "http://localhost:3000".into())
+}
+
+fn remember_pending_device_code(device_code: Option<String>) -> Result<(), String> {
+    let cell = PENDING_AURA_CLOUD_DEVICE_CODE.get_or_init(|| Mutex::new(None));
+    let mut guard = cell.lock().map_err(|e| e.to_string())?;
+    *guard = device_code;
+    Ok(())
+}
+
+fn pending_device_code() -> Result<Option<String>, String> {
+    let cell = PENDING_AURA_CLOUD_DEVICE_CODE.get_or_init(|| Mutex::new(None));
+    let guard = cell.lock().map_err(|e| e.to_string())?;
+    Ok(guard.clone())
 }
 
 pub fn init_cloud_tables(conn: &Connection) -> Result<(), String> {
@@ -860,6 +979,7 @@ pub async fn cloud_register(
         .server_url
         .filter(|s| !s.trim().is_empty())
         .unwrap_or_else(|| DEFAULT_CLOUD_SERVER_URL.to_string());
+    let server_url = normalize_cloud_server_url(&server_url)?;
 
     #[derive(Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -933,6 +1053,7 @@ pub async fn cloud_login(
         .server_url
         .filter(|s| !s.trim().is_empty())
         .unwrap_or_else(|| DEFAULT_CLOUD_SERVER_URL.to_string());
+    let server_url = normalize_cloud_server_url(&server_url)?;
 
     #[derive(Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -1135,7 +1256,8 @@ pub async fn cloud_revoke_device(
         Ok::<_, String>((state, token))
     }?;
     let client = reqwest::Client::new();
-    let url = format!("{}/devices/{}", state.server_url.trim_end_matches('/'), device_id);
+    let server_url = normalize_cloud_server_url(&state.server_url)?;
+    let url = format!("{}/devices/{}", server_url, device_id);
     client
         .delete(&url)
         .header("Authorization", format!("Bearer {token}"))
@@ -1171,12 +1293,10 @@ pub async fn cloud_remote_dispatch(
 
     let token = access_token(&app, &state)?;
     let client = reqwest::Client::new();
+    let server_url = normalize_cloud_server_url(&state.server_url)?;
 
     let resp = client
-        .post(format!(
-            "{}/dispatch/request",
-            state.server_url.trim_end_matches('/')
-        ))
+        .post(format!("{}/dispatch/request", server_url))
         .header("Authorization", format!("Bearer {token}"))
         .json(&serde_json::json!({
             "sourceDeviceId": source_device_id,

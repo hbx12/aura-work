@@ -6,7 +6,7 @@
     "bundled": true,
     "minVersion": "20.0.0",
     "resourcePath": "node",
-    "executable": "node/bin/node",
+    "executable": "node/node.exe",
     "note": "Installed builds use this bundled Node runtime; development builds may use workspace Node."
   },
   "vmImage": {
