@@ -7,7 +7,14 @@
 
 Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
 
-> Want to build an extension? Start with the **[Aura Marketplace Registry guide](./registry/README.md)** for Skills, MCP connectors, plugins, supported languages, and the GitHub approval flow.
+## Build Marketplace extensions
+
+Want to build an extension for Aura Work? Start here:
+
+- **[Aura Marketplace Registry guide](./registry/README.md)** — the main public place for Skills, MCP connectors, Aura Plugins, supported languages, required files, and the GitHub approval flow.
+- **[Marketplace submission guide](./docs/marketplace-submission.md)** — full submission format, validation rules, and maintainer review checklist.
+
+Community extensions are submitted through GitHub pull requests and are published only after maintainer approval.
 
 ## Demo
 
