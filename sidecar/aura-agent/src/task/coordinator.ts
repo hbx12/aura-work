@@ -8,6 +8,7 @@ import { isFileTask } from "./extract-writes.js";
 import { coerceAgentResponse } from "./coerce-response.js";
 import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
 import { getSystemPrompt, getPlannerSystemPrompt } from "./prompts/index.js";
+import { loadAgents, type AgentConfig } from "./agent-loader.js";
 
 export interface PlanStep {
   title: string;
@@ -41,6 +42,7 @@ export interface TaskIterateRequest {
   allowPlainText?: boolean;
   responseLanguage?: string;
   onChunk?: (text: string) => void;
+  activeAgent?: string;
 }
 
 // Helper function to resolve glob patterns (e.g. packages/*/AGENTS.md)
@@ -375,8 +377,94 @@ export async function generatePlan(req: TaskPlanRequest) {
   return fallbackPlan(req.prompt);
 }
 
+// Helper function to check if a tool is permitted
+function isToolPermitted(toolName: string, args: any, agent: AgentConfig): { permitted: boolean; reason?: string } {
+  if (agent.tools) {
+    for (const [pattern, enabled] of Object.entries(agent.tools)) {
+      if (!enabled) {
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+        if (regex.test(toolName)) {
+          return { permitted: false, reason: `Tool '${toolName}' is disabled by agent tools policy.` };
+        }
+      }
+    }
+  }
+
+  if (agent.permission) {
+    if (["write_file", "replace_in_file", "delete_file"].includes(toolName)) {
+      if (agent.permission.edit === "deny") {
+        return { permitted: false, reason: `File modifications are denied by agent permissions.` };
+      }
+    }
+    
+    if (toolName === "browse_url") {
+      if (agent.permission.webfetch === "deny") {
+        return { permitted: false, reason: `Web browsing is denied by agent permissions.` };
+      }
+    }
+
+    if (toolName === "run_shell" && agent.permission.bash) {
+      const cmd = (args.command || "").trim();
+      if (typeof agent.permission.bash === "string") {
+        if (agent.permission.bash === "deny") {
+          return { permitted: false, reason: `Shell command execution is denied by agent permissions.` };
+        }
+      } else if (typeof agent.permission.bash === "object") {
+        let decision: string | null = null;
+        for (const [pattern, value] of Object.entries(agent.permission.bash)) {
+          const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+          if (regex.test(cmd)) {
+            decision = value as string;
+          }
+        }
+        if (decision === "deny") {
+          return { permitted: false, reason: `Shell command '${cmd}' is denied by agent permissions.` };
+        }
+      }
+    }
+
+    if (toolName === "task" || toolName === "plugin_tool" || toolName === "mcp_tool") {
+      const subagentName = args.role || args.name || args.toolId || "";
+      if (agent.permission.task) {
+        let decision: string | null = null;
+        for (const [pattern, value] of Object.entries(agent.permission.task)) {
+          const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+          if (regex.test(subagentName)) {
+            decision = value as string;
+          }
+        }
+        if (decision === "deny") {
+          return { permitted: false, reason: `Summoning subagent/task '${subagentName}' is denied by agent permissions.` };
+        }
+      }
+    }
+  }
+
+  return { permitted: true };
+}
+
 export async function iterateTask(req: TaskIterateRequest) {
-  const adapter = getAdapter(req.providerId as ProviderId);
+  const agents = loadAgents(req.projectPath);
+  const activeAgentId = req.activeAgent || "build";
+  const agentConfig = agents.find(a => a.name === activeAgentId) || agents.find(a => a.name === "build") || {
+    name: "build",
+    description: "Development agent",
+    mode: "primary" as const
+  };
+
+  const modelId = agentConfig.model || req.modelId;
+  const providerId = agentConfig.model ? agentConfig.model.split("/")[0] : req.providerId;
+  const adapter = getAdapter(providerId as ProviderId);
+
+  // Extract model/provider options
+  const customParams: Record<string, any> = {};
+  for (const [key, value] of Object.entries(agentConfig)) {
+    if (["name", "description", "mode", "model", "prompt", "temperature", "steps", "maxSteps", "disable", "tools", "permission", "hidden", "color", "top_p"].includes(key)) {
+      continue;
+    }
+    customParams[key] = value;
+  }
+
   const planText = req.plan.map((s, i) => `${i + 1}. [${s.role ?? "coordinator"}] ${s.title}`).join("\n");
   const history = req.messages
     .slice(-8)
@@ -390,14 +478,24 @@ export async function iterateTask(req: TaskIterateRequest) {
   const projectRules = await findProjectRules(req.projectPath);
 
   const baseSystem = getSystemPrompt(
-    req.providerId,
-    req.modelId,
+    providerId,
+    modelId,
     req.iteration,
     planText,
     req.responseLanguage,
     projectRules,
+    agentConfig,
   );
-  const system = `${baseSystem}${skillsXml}`;
+  let system = `${baseSystem}${skillsXml}`;
+
+  if (agentConfig.prompt) {
+    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${agentConfig.name}":\n${agentConfig.prompt}`;
+  }
+
+  const stepsLimit = agentConfig.steps ?? agentConfig.maxSteps;
+  if (stepsLimit && req.iteration >= stepsLimit) {
+    system += `\n\n[WARNING: STEPS LIMIT REACHED. You have reached the maximum execution steps of ${stepsLimit}. You must NOT call any more tools. Summarize your work and list remaining recommendations, then output 'complete' or 'blocked'.]`;
+  }
 
   const userContent = `Task: ${req.prompt}
 
@@ -413,12 +511,15 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
   try {
     const result = await adapter.chat(
       {
-        model: req.modelId,
+        model: modelId,
         messages: [
           { role: "system", content: system },
           { role: "user", content: userContent },
         ],
         onChunk: req.onChunk,
+        temperature: agentConfig.temperature,
+        topP: agentConfig.top_p,
+        ...customParams,
       },
       req.credentials,
     );
@@ -439,6 +540,24 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
           usage: result.usage,
         };
       }
+
+      // Enforce tool permissions gating in sidecar
+      if (coerced.type === "tool_calls") {
+        for (const call of coerced.toolCalls) {
+          const check = isToolPermitted(call.name, call.arguments, agentConfig);
+          if (!check.permitted) {
+            return {
+              type: "blocked" as const,
+              role: "coordinator",
+              content: check.reason || "Tool execution blocked by agent policy.",
+              summary: check.reason || "Tool execution blocked by agent policy.",
+              complete: false,
+              usage: result.usage,
+            };
+          }
+        }
+      }
+
       return { ...coerced, usage: result.usage };
     }
 

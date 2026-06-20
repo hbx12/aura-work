@@ -138,6 +138,13 @@ const server = createServer(async (req, res) => {
       return json(res, 200, plan);
     }
 
+    if (method === "POST" && url === "/agents/list") {
+      const body = await readJsonBody<{ projectPath?: string }>(req);
+      const { loadAgents } = await import("./task/agent-loader.js");
+      const agents = loadAgents(body.projectPath);
+      return json(res, 200, { agents });
+    }
+
     if (method === "GET" && url.startsWith("/task/stream")) {
       const q = new URL(url, "http://local");
       const taskId = q.searchParams.get("taskId") ?? "";

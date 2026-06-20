@@ -1581,6 +1581,7 @@ pub async fn run_workspace_chat_agent(
                 "skills": skills_list,
                 "allowPlainText": true,
                 "responseLanguage": response_language_for_prompt(input.message.trim()),
+                "activeAgent": input.active_agent.as_deref().unwrap_or("build"),
             }),
         )
         .await?;

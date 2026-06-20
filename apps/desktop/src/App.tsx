@@ -241,6 +241,10 @@ export default function App() {
   const [view, setView] = useState<AppView>("tasks");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const activeProject = useMemo(
+    () => projects.find((p) => p.id === activeProjectId) ?? null,
+    [projects, activeProjectId],
+  );
   const [settingsTab, setSettingsTab] = useState<string>("general");
   const [showCtx, setShowCtx] = useState(true);
   const [search, setSearch] = useState("");
@@ -256,6 +260,8 @@ export default function App() {
     return localStorage.getItem("selected-model") || "auto";
   });
   const [chatError, setChatError] = useState<string | null>(null);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [activeAgent, setActiveAgent] = useState("build");
   const [fallbackApproval, setFallbackApproval] = useState<{
     from?: string | null;
     to: string;
@@ -263,6 +269,7 @@ export default function App() {
     reason: string;
     pendingMessage: string;
     pendingHistory: { role: string; content: string }[];
+    activeAgent?: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -491,6 +498,22 @@ export default function App() {
   }, [projects, activeProjectId]);
 
   useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const res = await invoke<{ agents: any[] }>("get_agents_list", {
+          projectPath: activeProject?.folderPath || null,
+        });
+        if (res && Array.isArray(res.agents)) {
+          setAgents(res.agents);
+        }
+      } catch (err) {
+        console.error("Failed to load agents:", err);
+      }
+    };
+    void fetchAgents();
+  }, [activeProject?.folderPath]);
+
+  useEffect(() => {
     void agent.checkSidecar();
     void agent.loadLatestUsage(activeProjectId);
   }, [activeProjectId, agent.checkSidecar, agent.loadLatestUsage]);
@@ -521,11 +544,6 @@ export default function App() {
       void bridgeApi.refresh();
     }
   }, [view, activeProjectId]);
-
-  const activeProject = useMemo(
-    () => projects.find((p) => p.id === activeProjectId) ?? null,
-    [projects, activeProjectId],
-  );
 
   useEffect(() => {
     if (!activeProject) return;
@@ -882,6 +900,17 @@ You can open and customize it to instruct the agent on workspace rules.`;
       finalMsg = `${msg}\n\n[Context from active file in VS Code: ${activeEditor.filePath}${activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}]\n\`\`\`\n${activeEditor.content}\n\`\`\``;
     }
 
+    let chatAgent = activeAgent;
+    const mentionMatch = msg.match(/^@([a-zA-Z0-9_-]+)/);
+    if (mentionMatch) {
+      const agentId = mentionMatch[1].toLowerCase();
+      const found = agents.find(a => a.name === agentId);
+      if (found) {
+        chatAgent = agentId;
+        finalMsg = msg.slice(mentionMatch[0].length).trim();
+      }
+    }
+
     const { preferredProvider, preferredModel } = parseModelSelection(selectedModel);
     try {
       const result = await agent.runChat({
@@ -894,6 +923,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
         preferredProvider,
         preferredModel,
         fallbackApproved,
+        activeAgent: chatAgent,
       });
       if (result.requiresFallbackApproval) {
         setFallbackApproval({
@@ -903,6 +933,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
           reason: result.routingReason,
           pendingMessage: msg,
           pendingHistory: history.map((m) => ({ role: m.role, content: m.content })),
+          activeAgent: chatAgent,
         });
         return;
       }
@@ -945,6 +976,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
         preferredProvider,
         preferredModel,
         fallbackApproved: true,
+        activeAgent: fallbackApproval?.activeAgent,
       });
       startTypingSimulation(
         result.text || t("chat.emptyResponse"),
@@ -1132,6 +1164,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
               messages={chatMessages}
               modelContextWindow={currentModelContextWindow}
               showRunTask
+              activeAgent={activeAgent}
+              onAgentChange={setActiveAgent}
+              agents={agents}
             />
           </>
         );
@@ -1158,6 +1193,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
                 messages={chatMessages}
                 modelContextWindow={currentModelContextWindow}
                 showRunTask={mode === "ask"}
+                activeAgent={activeAgent}
+                onAgentChange={setActiveAgent}
+                agents={agents}
               />
             </div>
           </div>
@@ -1394,6 +1432,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
           messages={task?.messages || []}
           workspaceFiles={task?.modifiedFiles.join(",") || ""}
           modelContextWindow={currentModelContextWindow}
+          activeAgent={activeAgent}
+          onAgentChange={setActiveAgent}
+          agents={agents}
         />
       </>
     );

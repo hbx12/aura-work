@@ -26,6 +26,7 @@ pub struct RunChatInput {
     pub preferred_model: Option<String>,
     pub messages: Option<Vec<ChatMessageInput>>,
     pub fallback_approved: Option<bool>,
+    pub active_agent: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -537,6 +538,15 @@ pub async fn list_chat_models(
         }
     }
     Ok(out)
+}
+
+#[tauri::command]
+pub async fn get_agents_list(project_path: Option<String>) -> Result<serde_json::Value, String> {
+    let body = serde_json::json!({
+        "projectPath": project_path
+    });
+    let res: serde_json::Value = sidecar_post("/agents/list", &body).await?;
+    Ok(res)
 }
 
 #[tauri::command]

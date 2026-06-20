@@ -27,6 +27,7 @@ export interface ChatRequest {
   maxOutputTokens?: number;
   temperature?: number;
   onChunk?: (text: string) => void;
+  [key: string]: any;
 }
 
 export type ChatEvent =

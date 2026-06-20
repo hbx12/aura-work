@@ -291,6 +291,7 @@ pub fn run() {
             agent::list_provider_models,
             agent::set_provider_model_enabled,
             agent::list_chat_models,
+            agent::get_agents_list,
             agent::run_chat,
             agent::get_latest_usage,
             agent::list_task_usage,

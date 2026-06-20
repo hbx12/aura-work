@@ -378,6 +378,9 @@ export function Composer({
   messages = [],
   workspaceFiles = "",
   modelContextWindow = 128000,
+  activeAgent = "build",
+  onAgentChange,
+  agents = [],
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -405,6 +408,9 @@ export function Composer({
   messages?: { role: string; content: string }[];
   workspaceFiles?: string;
   modelContextWindow?: number;
+  activeAgent?: string;
+  onAgentChange?: (agent: string) => void;
+  agents?: any[];
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -491,7 +497,15 @@ export function Composer({
                 onChange(value + " ");
               }
             } else {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              if (e.key === "Tab" && !value.trim() && onAgentChange && agents.length > 0) {
+                e.preventDefault();
+                const primaryAgents = agents.filter(a => a.mode === "primary" || a.mode === "all");
+                if (primaryAgents.length > 0) {
+                  const curIdx = primaryAgents.findIndex(a => a.name === activeAgent);
+                  const nextIdx = (curIdx + 1) % primaryAgents.length;
+                  onAgentChange(primaryAgents[nextIdx].name);
+                }
+              } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 onSend();
               }
@@ -514,6 +528,35 @@ export function Composer({
                   {m.label}
                 </option>
               ))}
+            </select>
+          )}
+          {onAgentChange && agents.length > 0 && (
+            <select
+              className="composer-agent-select"
+              value={activeAgent}
+              onChange={(e) => onAgentChange(e.target.value)}
+              disabled={disabled}
+              title={isAr ? "الوكيل النشط" : "Active Agent"}
+              style={{
+                marginLeft: isAr ? "0" : "6px",
+                marginRight: isAr ? "6px" : "0",
+                background: "var(--sl-color-bg-inline-code, rgba(255,255,255,0.05))",
+                border: "1px solid var(--sl-color-border, rgba(255,255,255,0.15))",
+                color: "var(--sl-color-white, #fff)",
+                borderRadius: "4px",
+                padding: "2px 6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              {agents
+                .filter(a => a.mode === "primary" || a.mode === "all")
+                .map((a) => (
+                  <option key={a.name} value={a.name}>
+                    {a.name.toUpperCase()}
+                  </option>
+                ))}
             </select>
           )}
           <ContextUsageRing
