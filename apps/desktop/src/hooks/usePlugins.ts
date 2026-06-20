@@ -6,6 +6,8 @@ import type {
   McpServerRecord,
   PluginsHelperStatus,
 } from "@aura-os/shared";
+import { universalWorkspaceEntries } from "../marketplace/universalWorkspaceEntries";
+import { mergeMarketplaceEntries } from "../marketplace/localizeMarketplace";
 
 export interface SkillInfo {
   pluginId: string;
@@ -16,7 +18,7 @@ export interface SkillInfo {
 }
 
 function withMarketplaceFallback(entries: MarketplaceEntry[] | null | undefined) {
-  return entries ?? [];
+  return mergeMarketplaceEntries(entries ?? [], universalWorkspaceEntries);
 }
 
 async function loadMarketplaceEntries() {
@@ -24,7 +26,7 @@ async function loadMarketplaceEntries() {
     return withMarketplaceFallback(await invoke<MarketplaceEntry[]>("list_marketplace_entries"));
   } catch (error) {
     console.warn("[marketplace] Could not load marketplace registry", error);
-    return [];
+    return withMarketplaceFallback([]);
   }
 }
 
@@ -32,7 +34,7 @@ export function usePlugins(projectId: string | null) {
   const [status, setStatus] = useState<PluginsHelperStatus | null>(null);
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
   const [mcpServers, setMcpServers] = useState<McpServerRecord[]>([]);
-  const [marketplace, setMarketplace] = useState<MarketplaceEntry[]>([]);
+  const [marketplace, setMarketplace] = useState<MarketplaceEntry[]>(universalWorkspaceEntries);
   const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -187,8 +189,9 @@ export function usePlugins(projectId: string | null) {
       return entries;
     } catch (error) {
       console.warn("[marketplace] Sync failed", error);
-      setMarketplace([]);
-      return [];
+      const entries = withMarketplaceFallback([]);
+      setMarketplace(entries);
+      return entries;
     } finally {
       setLoading(false);
     }
