@@ -338,6 +338,16 @@ export type MessageKey =
   | "chat.modeAsk"
   | "chat.modeAct"
   | "chat.thinking"
+  | "agent.build.name"
+  | "agent.build.desc"
+  | "agent.plan.name"
+  | "agent.plan.desc"
+  | "agent.general.name"
+  | "agent.general.desc"
+  | "agent.explore.name"
+  | "agent.explore.desc"
+  | "agent.scout.name"
+  | "agent.scout.desc"
   | "chat.error"
   | "files.title"
   | "files.subtitle"
@@ -786,6 +796,16 @@ const en: MessageCatalog = {
   "chat.modeAsk": "Ask-first",
   "chat.modeAct": "Act without asking",
   "chat.thinking": "Thinking…",
+  "agent.build.name": "Build / Development",
+  "agent.build.desc": "Full development work with all tools enabled",
+  "agent.plan.name": "Plan / Analysis",
+  "agent.plan.desc": "Analysis and planning without making changes",
+  "agent.general.name": "General Agent",
+  "agent.general.desc": "Research complex questions and run multi-step tasks",
+  "agent.explore.name": "Explorer",
+  "agent.explore.desc": "Explore codebase and read files only",
+  "agent.scout.name": "Scout",
+  "agent.scout.desc": "Search external documentation and dependencies",
   "chat.error": "Something went wrong.",
   "files.title": "File explorer",
   "files.subtitle":
@@ -1229,6 +1249,16 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.modeAsk": "اسأل أولاً",
     "chat.modeAct": "نفّذ بدون سؤال",
     "chat.thinking": "يفكّر…",
+    "agent.build.name": "تطوير / بناء الكود",
+    "agent.build.desc": "أعمال تطوير كاملة مع تفعيل جميع الأدوات",
+    "agent.plan.name": "تخطيط / تحليل",
+    "agent.plan.desc": "تحليل وتخطيط بدون إجراء تغييرات",
+    "agent.general.name": "الوكيل العام",
+    "agent.general.desc": "البحث في أسئلة معقدة وتنفيذ مهام متعددة الخطوات",
+    "agent.explore.name": "المستكشف",
+    "agent.explore.desc": "استكشاف قواعد الشفرة وقراءة الملفات فقط",
+    "agent.scout.name": "المستطلع",
+    "agent.scout.desc": "البحث في الوثائق الخارجية والتبعيات",
     "chat.error": "حدث خطأ.",
     "files.title": "مستكشف الملفات",
     "files.subtitle":

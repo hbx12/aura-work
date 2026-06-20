@@ -420,6 +420,23 @@ export function Composer({
   
   const isAr = locale?.startsWith("ar");
   const commandsList = isAr ? SLASH_COMMANDS_AR : SLASH_COMMANDS_EN;
+
+  const AGENT_NAMES: Record<string, { en: string; ar: string }> = {
+    build: { en: "Build / Develop", ar: "تطوير / بناء الكود" },
+    plan: { en: "Plan / Analyze", ar: "تخطيط / تحليل" },
+    general: { en: "General", ar: "الوكيل العام" },
+    explore: { en: "Explore", ar: "المستكشف" },
+    scout: { en: "Scout", ar: "المستطلع" },
+  };
+
+  const getAgentDisplayName = (name: string) => {
+    const normalized = name.toLowerCase();
+    const found = AGENT_NAMES[normalized];
+    if (found) {
+      return isAr ? found.ar : found.en;
+    }
+    return name.toUpperCase();
+  };
   
   const customSkills = skills.map((s) => ({
     name: `/${s.name.replace(/\s+/g, "_")}`,
@@ -499,7 +516,7 @@ export function Composer({
             } else {
               if (e.key === "Tab" && !value.trim() && onAgentChange && agents.length > 0) {
                 e.preventDefault();
-                const primaryAgents = agents.filter(a => a.mode === "primary" || a.mode === "all");
+                const primaryAgents = agents.filter(a => (a.mode === "primary" || a.mode === "all") && !a.hidden);
                 if (primaryAgents.length > 0) {
                   const curIdx = primaryAgents.findIndex(a => a.name === activeAgent);
                   const nextIdx = (curIdx + 1) % primaryAgents.length;
@@ -537,24 +554,12 @@ export function Composer({
               onChange={(e) => onAgentChange(e.target.value)}
               disabled={disabled}
               title={isAr ? "الوكيل النشط" : "Active Agent"}
-              style={{
-                marginLeft: isAr ? "0" : "6px",
-                marginRight: isAr ? "6px" : "0",
-                background: "var(--sl-color-bg-inline-code, rgba(255,255,255,0.05))",
-                border: "1px solid var(--sl-color-border, rgba(255,255,255,0.15))",
-                color: "var(--sl-color-white, #fff)",
-                borderRadius: "4px",
-                padding: "2px 6px",
-                fontSize: "12px",
-                cursor: "pointer",
-                outline: "none",
-              }}
             >
               {agents
-                .filter(a => a.mode === "primary" || a.mode === "all")
+                .filter(a => (a.mode === "primary" || a.mode === "all") && !a.hidden)
                 .map((a) => (
                   <option key={a.name} value={a.name}>
-                    {a.name.toUpperCase()}
+                    {getAgentDisplayName(a.name)}
                   </option>
                 ))}
             </select>
