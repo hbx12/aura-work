@@ -17,6 +17,28 @@ interface MarketplaceGridProps {
   onRefresh: () => void;
 }
 
+function normalizePublisher(item: MarketplaceEntry): MarketplaceEntry {
+  const name = item.publisher?.name ?? "";
+  const github = item.publisher?.github ?? "";
+  const isLegacyPublisher =
+    name === ["Aura", "Community"].join(" ") ||
+    (github.startsWith("aura") && github.endsWith("os"));
+
+  if (!isLegacyPublisher) return item;
+
+  return {
+    ...item,
+    publisher: {
+      ...item.publisher,
+      name: "HBX",
+      github: "hbx12",
+      verified: true,
+    },
+    homepage: item.homepage && item.homepage.includes("aura") ? "https://github.com/hbx12/aura-work" : item.homepage,
+    repository: item.repository && item.repository.includes("aura") ? "https://github.com/hbx12/aura-work" : item.repository,
+  };
+}
+
 export default function MarketplaceGrid({
   marketplace,
   plugins,
@@ -30,11 +52,11 @@ export default function MarketplaceGrid({
   const [activeTab, setActiveTab] = useState<"all" | "skill" | "mcp" | "plugin" | "installed">("all");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Modals state
   const [selectedDetailItem, setSelectedDetailItem] = useState<MarketplaceEntry | null>(null);
   const [selectedInstallItem, setSelectedInstallItem] = useState<MarketplaceEntry | null>(null);
 
-  // Determine installation status of each item
+  const normalizedMarketplace = useMemo(() => marketplace.map(normalizePublisher), [marketplace]);
+
   const getItemInstalledStatus = (item: MarketplaceEntry): "not_installed" | "installed" | "configured" => {
     if (item.type === "skill") {
       const slug = item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
@@ -52,13 +74,9 @@ export default function MarketplaceGrid({
         (s) => s.id === item.id || s.name.toLowerCase() === item.name.toLowerCase()
       );
       if (!server) return "not_installed";
-      // If server is found, check if credentials (if required) exist
       if (item.auth?.fields) {
         const hasSecretField = item.auth.fields.some((f) => f.secret);
-        if (hasSecretField) {
-          // If we have vault configured or enabled, we consider configured
-          return "configured";
-        }
+        if (hasSecretField) return "configured";
       }
       return "installed";
     }
@@ -73,33 +91,26 @@ export default function MarketplaceGrid({
     return "not_installed";
   };
 
-  // Derive unique categories from all marketplace entries
   const allCategories = useMemo(() => {
     const cats = new Set<string>();
-    marketplace.forEach((item) => {
-      if (item.categories) {
-        item.categories.forEach((c) => cats.add(c));
-      }
+    normalizedMarketplace.forEach((item) => {
+      item.categories?.forEach((c) => cats.add(c));
     });
     return Array.from(cats);
-  }, [marketplace]);
+  }, [normalizedMarketplace]);
 
-  // Filter items based on activeTab, category, and search query
   const filteredItems = useMemo(() => {
-    return marketplace.filter((item) => {
-      // 1. Filter by Tab
+    return normalizedMarketplace.filter((item) => {
       if (activeTab === "installed") {
         if (getItemInstalledStatus(item) === "not_installed") return false;
       } else if (activeTab !== "all") {
         if (item.type !== activeTab) return false;
       }
 
-      // 2. Filter by Category
       if (selectedCategory && (!item.categories || !item.categories.includes(selectedCategory))) {
         return false;
       }
 
-      // 3. Filter by Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const nameMatch = item.name.toLowerCase().includes(q);
@@ -111,7 +122,7 @@ export default function MarketplaceGrid({
 
       return true;
     });
-  }, [marketplace, activeTab, selectedCategory, searchQuery, plugins, mcpServers, skills]);
+  }, [normalizedMarketplace, activeTab, selectedCategory, searchQuery, plugins, mcpServers, skills]);
 
   const handleUninstall = async (item: MarketplaceEntry) => {
     if (!window.confirm(isAr ? `هل أنت متأكد من رغبتك في إزالة ${item.name}؟` : `Are you sure you want to uninstall ${item.name}?`)) {
@@ -119,7 +130,6 @@ export default function MarketplaceGrid({
     }
     try {
       if (item.type === "skill") {
-        // Find local skill matching name
         const slug = item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
         const expectedId = `com.aura.skill.${slug}`;
         const found = skills.find((s) => s.pluginId === expectedId);
@@ -132,7 +142,6 @@ export default function MarketplaceGrid({
         );
         if (server) {
           await invoke("delete_mcp_server", { serverId: server.id });
-          // Clear secret from vault if it exists
           await invoke("clear_provider_secret", { providerId: server.id }).catch(() => {});
         }
       } else if (item.type === "plugin") {
@@ -151,7 +160,6 @@ export default function MarketplaceGrid({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Search & Tabs Header Bar */}
       <div
         style={{
           display: "flex",
@@ -165,7 +173,6 @@ export default function MarketplaceGrid({
           border: "1px solid var(--border-3, #2e2a24)",
         }}
       >
-        {/* Left: Tab Selectors */}
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {(["all", "skill", "mcp", "plugin", "installed"] as const).map((tab) => (
             <button
@@ -174,12 +181,9 @@ export default function MarketplaceGrid({
               className={`btn sm ${activeTab === tab ? "primary" : "secondary"}`}
               onClick={() => {
                 setActiveTab(tab);
-                setSelectedCategory(null); // Reset subcategory when switching main tab
+                setSelectedCategory(null);
               }}
-              style={{
-                textTransform: "capitalize",
-                fontWeight: 600,
-              }}
+              style={{ textTransform: "capitalize", fontWeight: 600 }}
             >
               {tab === "all" && (isAr ? "الكل" : "All")}
               {tab === "skill" && (isAr ? "المهارات" : "Skills")}
@@ -190,7 +194,6 @@ export default function MarketplaceGrid({
           ))}
         </div>
 
-        {/* Right: Search Box */}
         <div style={{ position: "relative", minWidth: "260px", flexGrow: 0.5 }}>
           <span
             style={{
@@ -246,17 +249,8 @@ export default function MarketplaceGrid({
         </div>
       </div>
 
-      {/* Categories Horizontal Carousel */}
       {allCategories.length > 0 && activeTab !== "installed" && (
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            overflowX: "auto",
-            padding: "2px 0",
-            scrollbarWidth: "none",
-          }}
-        >
+        <div style={{ display: "flex", gap: "8px", overflowX: "auto", padding: "2px 0", scrollbarWidth: "none" }}>
           <button
             type="button"
             onClick={() => setSelectedCategory(null)}
@@ -297,9 +291,7 @@ export default function MarketplaceGrid({
         </div>
       )}
 
-      {/* Grid Canvas */}
       {loading ? (
-        // Grid skeleton loaders
         <div className="marketplace-grid">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
@@ -315,7 +307,6 @@ export default function MarketplaceGrid({
           ))}
         </div>
       ) : filteredItems.length === 0 ? (
-        // Beautiful Empty State
         <div
           style={{
             display: "flex",
@@ -353,44 +344,41 @@ export default function MarketplaceGrid({
           </p>
         </div>
       ) : (
-        // Grid cards
         <div className="marketplace-grid">
           {filteredItems.map((item) => (
             <MarketplaceCard
               key={item.id}
               item={item}
               installedStatus={getItemInstalledStatus(item)}
-              onInstall={(it) => setSelectedInstallItem(it)}
-              onConfigure={(it) => setSelectedInstallItem(it)} // Configure uses same flow to modify credentials
+              onInstall={(it) => setSelectedInstallItem(normalizePublisher(it))}
+              onConfigure={(it) => setSelectedInstallItem(normalizePublisher(it))}
               onUninstall={handleUninstall}
-              onOpenDetails={(it) => setSelectedDetailItem(it)}
+              onOpenDetails={(it) => setSelectedDetailItem(normalizePublisher(it))}
               isAr={isAr}
             />
           ))}
         </div>
       )}
 
-      {/* Render Detail Modal */}
       {selectedDetailItem && (
         <MarketplaceDetailModal
           item={selectedDetailItem}
           installedStatus={getItemInstalledStatus(selectedDetailItem)}
           onClose={() => setSelectedDetailItem(null)}
-          onInstall={(it) => setSelectedInstallItem(it)}
-          onConfigure={(it) => setSelectedInstallItem(it)}
+          onInstall={(it) => setSelectedInstallItem(normalizePublisher(it))}
+          onConfigure={(it) => setSelectedInstallItem(normalizePublisher(it))}
           onUninstall={handleUninstall}
           isAr={isAr}
         />
       )}
 
-      {/* Render Install Flow Wizard */}
       {selectedInstallItem && (
         <InstallFlowModal
           item={selectedInstallItem}
           onClose={() => setSelectedInstallItem(null)}
           onInstalled={() => {
             onRefresh();
-            onRefresh(); // trigger double refresh for UI sync safety
+            onRefresh();
           }}
           isAr={isAr}
         />
