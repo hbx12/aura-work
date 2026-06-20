@@ -1,0 +1,32 @@
+name: Validate Marketplace Submissions
+
+on:
+  push:
+    branches:
+      - main
+      - feature/aura-marketplace
+    paths:
+      - 'registry/**'
+      - 'scripts/validate-marketplace-manifests.js'
+  pull_request:
+    branches:
+      - main
+      - feature/aura-marketplace
+    paths:
+      - 'registry/**'
+      - 'scripts/validate-marketplace-manifests.js'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Marketplace Validation Script
+        run: node scripts/validate-marketplace-manifests.js

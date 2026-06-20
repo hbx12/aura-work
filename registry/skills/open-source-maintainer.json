@@ -1,0 +1,40 @@
+{
+  "id": "skill.open-source-maintainer",
+  "type": "skill",
+  "name": "OS Maintainer",
+  "version": "1.0.0",
+  "summary": "Assists in triaging issues and preparing releases.",
+  "description": "Automates release notes generation, triages issues, generates pull request templates, and ensures compliance with contributing guidelines.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Collaboration",
+    "Automation"
+  ],
+  "tags": [
+    "open-source",
+    "maintainer",
+    "github",
+    "issues"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are an Open Source Project Maintainer. Help package libraries, draft changelogs, manage release labels, check licensing issues, and format contributions templates."
+  },
+  "permissions": [],
+  "setup": [
+    "No setup required."
+  ],
+  "tools": [],
+  "homepage": "https://aura-os.org",
+  "license": "MIT"
+}

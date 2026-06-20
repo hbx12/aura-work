@@ -43,3 +43,9 @@ Explain whether this change affects permissions, local services, credentials, pa
 - [ ] I updated documentation when needed.
 - [ ] UI changes follow the existing Aura Work design patterns, or this PR does not change UI.
 - [ ] CI is green.
+
+### Marketplace Submissions (If applicable)
+- [ ] Manifest file is placed under `registry/skills/`, `registry/mcp/`, or `registry/plugins/`.
+- [ ] Manifest matches `registry/schema/marketplace-item.schema.json` and runs local validation.
+- [ ] Added matching SVG icon and cover art assets under `registry/assets/<item_id>/`.
+- [ ] Checked for security implications (sandboxed path validation, credential storage in Vault).

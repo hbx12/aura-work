@@ -468,16 +468,60 @@ export interface McpServerRecord {
   createdAt: string;
 }
 
+export interface MarketplacePublisher {
+  name: string;
+  github?: string | null;
+  verified?: boolean;
+}
+
+export interface MarketplaceAuthField {
+  name: string;
+  label: string;
+  secret?: boolean;
+  required?: boolean;
+}
+
+export interface MarketplaceAuth {
+  type: "none" | "api-key" | "pat" | "oauth" | "oauth-or-pat" | "env" | "connection-string" | "local-file" | "local-only";
+  requiresLogin?: boolean;
+  fields?: MarketplaceAuthField[];
+}
+
+export interface MarketplaceInstall {
+  kind: "skill" | "mcp" | "plugin";
+  transport?: "stdio" | "sse" | string;
+  command?: string;
+  args?: string[];
+  script?: string;
+  prompt?: string;
+}
+
+export interface MarketplaceTool {
+  name: string;
+  description?: string;
+}
+
 export interface MarketplaceEntry {
   id: string;
+  type: "skill" | "mcp" | "plugin";
   name: string;
   version: string;
-  publisher?: string | null;
+  summary?: string | null;
   description?: string | null;
+  publisher?: MarketplacePublisher | null;
+  icon?: string | null;
+  cover?: string | null;
+  categories?: string[] | null;
+  tags?: string[] | null;
+  risk?: "low" | "medium" | "high" | null;
+  auth?: MarketplaceAuth | null;
+  install?: MarketplaceInstall | null;
+  permissions?: string[] | null;
+  setup?: string[] | null;
+  tools?: MarketplaceTool[] | null;
   homepage?: string | null;
   license?: string | null;
   repository?: string | null;
-  tags?: string[] | null;
   syncedAt?: string | null;
 }
 

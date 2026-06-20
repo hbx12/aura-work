@@ -6,7 +6,7 @@ import type { MarketplaceEntry } from "./types.js";
 
 const LOCAL_REGISTRY = join(
   dirname(fileURLToPath(import.meta.url)),
-  "../../../docs/registry.json",
+  "../../../registry/marketplace.json",
 );
 const MAX_REGISTRY_BYTES = 512 * 1024;
 const MAX_REDIRECTS = 5;

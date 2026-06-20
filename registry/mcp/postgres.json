@@ -1,0 +1,66 @@
+{
+  "id": "mcp.postgres",
+  "type": "mcp",
+  "name": "PostgreSQL MCP",
+  "version": "0.1.5",
+  "summary": "Enables read/write database queries on Postgres.",
+  "description": "Allows the agent to explore schemas, run queries, list tables, and analyze performance of a PostgreSQL database.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Database"
+  ],
+  "tags": [
+    "postgres",
+    "sql",
+    "mcp",
+    "database"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "connection-string",
+    "fields": [
+      {
+        "name": "DATABASE_URL",
+        "label": "PostgreSQL Connection URI (postgres://...)",
+        "secret": true,
+        "required": true
+      }
+    ]
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-postgres",
+      "[DATABASE_URL]"
+    ]
+  },
+  "permissions": [
+    "network",
+    "database_access"
+  ],
+  "setup": [
+    "Ensure you have a running Postgres database.",
+    "Input your connection string. Make sure the database user has limited/safe privileges if running in production."
+  ],
+  "tools": [
+    {
+      "name": "query",
+      "description": "Execute a read or write SQL query."
+    },
+    {
+      "name": "describe_table",
+      "description": "Retrieve schema information for a table."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+  "license": "MIT"
+}

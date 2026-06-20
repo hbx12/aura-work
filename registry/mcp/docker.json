@@ -1,0 +1,57 @@
+{
+  "id": "mcp.docker",
+  "type": "mcp",
+  "name": "Docker MCP",
+  "version": "0.1.0",
+  "summary": "Interact with local Docker containers.",
+  "description": "Allows the agent to manage Docker containers, list images, inspect networks, and start/stop environments.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "DevOps",
+    "Developer Tools"
+  ],
+  "tags": [
+    "docker",
+    "containers",
+    "devops",
+    "mcp"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "mcp-server-docker"
+    ]
+  },
+  "permissions": [
+    "execute_command",
+    "docker_api"
+  ],
+  "setup": [
+    "Ensure Docker Desktop is running locally on your computer.",
+    "The agent will connect to the local Docker socket (/var/run/docker.sock or named pipe)."
+  ],
+  "tools": [
+    {
+      "name": "docker_ps",
+      "description": "List running containers."
+    },
+    {
+      "name": "docker_logs",
+      "description": "Fetch container logs."
+    }
+  ],
+  "license": "Apache-2.0"
+}

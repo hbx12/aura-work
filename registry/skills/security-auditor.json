@@ -1,0 +1,52 @@
+{
+  "id": "skill.security-auditor",
+  "type": "skill",
+  "name": "Security Auditor",
+  "version": "1.0.0",
+  "summary": "Audits your codebase for security vulnerabilities.",
+  "description": "A specialized AI agent that audits code for security issues and common vulnerabilities, suggesting patches and security best practices.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "security/icon.svg",
+  "cover": "security/cover.svg",
+  "categories": [
+    "Security",
+    "Quality"
+  ],
+  "tags": [
+    "security",
+    "audit",
+    "sast",
+    "owasp"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are a Security Auditor. Inspect the files, search for OWASP Top 10 vulnerabilities, insecure dependency usage, hardcoded secrets, and buffer overflows. Propose safe, hardened refactoring options."
+  },
+  "permissions": [
+    "read_file"
+  ],
+  "setup": [
+    "No extra setup required. Fully sandboxed."
+  ],
+  "tools": [
+    {
+      "name": "scan_file",
+      "description": "Audit security of a specific file."
+    },
+    {
+      "name": "scan_directory",
+      "description": "Audit security of a whole directory."
+    }
+  ],
+  "homepage": "https://aura-os.org",
+  "license": "MIT",
+  "repository": "https://github.com/aura-os/aura-work"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "plugin.sample-local",
+  "type": "plugin",
+  "name": "Aura Dev Plugin",
+  "version": "1.0.0",
+  "summary": "An example plugin to kickstart local development.",
+  "description": "Demonstrates plugin integration in Aura Work, highlighting tool bindings, assets, and custom settings integration.",
+  "publisher": {
+    "name": "User",
+    "verified": false
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Developer Tools"
+  ],
+  "tags": [
+    "sample",
+    "plugin",
+    "development",
+    "local"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "plugin",
+    "command": "npm",
+    "args": [
+      "run",
+      "start"
+    ]
+  },
+  "permissions": [
+    "read_file"
+  ],
+  "setup": [
+    "Open your plugin folder and run npm install.",
+    "Select the folder path inside the app to load it locally."
+  ],
+  "tools": [
+    {
+      "name": "sample_tool",
+      "description": "A simple dummy tool returning greeting messages."
+    }
+  ],
+  "license": "MIT"
+}

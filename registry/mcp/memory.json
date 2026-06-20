@@ -1,0 +1,57 @@
+{
+  "id": "mcp.memory",
+  "type": "mcp",
+  "name": "Memory MCP",
+  "version": "0.1.0",
+  "summary": "Simple graph-based local memory.",
+  "description": "Enables semantic entity-relation graph storage to help the agent remember facts across conversations.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Database",
+    "Productivity"
+  ],
+  "tags": [
+    "memory",
+    "graph",
+    "knowledge",
+    "mcp"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-memory"
+    ]
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Stores memory database in a local JSON file under your app data directory."
+  ],
+  "tools": [
+    {
+      "name": "remember_fact",
+      "description": "Add a new fact to memory."
+    },
+    {
+      "name": "recall_facts",
+      "description": "Query memory for facts."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+  "license": "MIT"
+}

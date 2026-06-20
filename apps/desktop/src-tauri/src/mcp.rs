@@ -5,6 +5,7 @@ use crate::extensions_helper::{
 };
 use crate::permissions::check_task_permission;
 use crate::plugins::{push_config_to_helper, load_aura_config, APP_DATA_DIR};
+use crate::VaultHandle;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use tauri::State;
@@ -202,6 +203,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddMcpServerInput {
+    pub id: Option<String>,
     pub name: String,
     pub command: String,
     pub transport: Option<String>,
@@ -212,9 +214,10 @@ pub struct AddMcpServerInput {
 #[tauri::command]
 pub async fn add_mcp_server(
     db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
     input: AddMcpServerInput,
 ) -> Result<McpServerRecord, String> {
-    let id = Uuid::new_v4().to_string();
+    let id = input.id.unwrap_or_else(|| Uuid::new_v4().to_string());
     let now = chrono::Utc::now().to_rfc3339();
     let transport = input.transport.unwrap_or_else(|| "stdio".to_string());
     let args_json = serde_json::to_string(&input.args.unwrap_or_default()).map_err(|e| e.to_string())?;
@@ -244,7 +247,7 @@ pub async fn add_mcp_server(
             },
         )?;
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     load_mcp_servers(&conn)?
         .into_iter()
@@ -253,7 +256,11 @@ pub async fn add_mcp_server(
 }
 
 #[tauri::command]
-pub async fn delete_mcp_server(db: State<'_, DbState>, server_id: String) -> Result<(), String> {
+pub async fn delete_mcp_server(
+    db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
+    server_id: String,
+) -> Result<(), String> {
     if server_id.starts_with("aura_config_") {
         return Err("Configuration-based MCP servers are read-only. Remove them from aura.json/aura.jsonc instead.".to_string());
     }
@@ -267,13 +274,14 @@ pub async fn delete_mcp_server(db: State<'_, DbState>, server_id: String) -> Res
         )
         .map_err(|e| e.to_string())?;
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn set_mcp_server_enabled(
     db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
     server_id: String,
     enabled: bool,
 ) -> Result<McpServerRecord, String> {
@@ -288,7 +296,7 @@ pub async fn set_mcp_server_enabled(
         )
         .map_err(|e| e.to_string())?;
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     load_mcp_servers(&conn)?
         .into_iter()
@@ -307,6 +315,7 @@ pub struct ProjectMcpToggleInput {
 #[tauri::command]
 pub async fn set_project_mcp_enabled(
     db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
     input: ProjectMcpToggleInput,
 ) -> Result<(), String> {
     {
@@ -322,7 +331,7 @@ pub async fn set_project_mcp_enabled(
         )
         .map_err(|e| e.to_string())?;
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     Ok(())
 }
 
@@ -402,7 +411,7 @@ pub async fn tool_mcp_call(
         tool_payload,
     )?;
 
-    let _ = push_config_to_helper(db).await?;
+    let _ = push_config_to_helper(&db, None).await?;
     let result = call_mcp_tool_remote(project_id, server_id, tool_name, arguments).await?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;

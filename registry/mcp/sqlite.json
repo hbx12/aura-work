@@ -1,0 +1,61 @@
+{
+  "id": "mcp.sqlite",
+  "type": "mcp",
+  "name": "SQLite MCP",
+  "version": "0.1.5",
+  "summary": "Interact with local SQLite database files.",
+  "description": "Enables querying SQLite databases, inspecting tables, and importing schemas directly.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Database"
+  ],
+  "tags": [
+    "sqlite",
+    "sql",
+    "mcp",
+    "database"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "local-file",
+    "fields": [
+      {
+        "name": "SQLITE_PATH",
+        "label": "SQLite Database File Path (.db/.sqlite)",
+        "secret": false,
+        "required": true
+      }
+    ]
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-sqlite",
+      "[SQLITE_PATH]"
+    ]
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Provide the full path to a local SQLite database file."
+  ],
+  "tools": [
+    {
+      "name": "query",
+      "description": "Execute SQL queries on SQLite."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+  "license": "MIT"
+}
