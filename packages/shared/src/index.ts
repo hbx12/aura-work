@@ -10,45 +10,119 @@ export type ProviderId =
   | "qwen"
   | "lmstudio";
 
-export type RoutingPolicy = "quality-first" | "cost-first" | "privacy-first" | "local-only" | "manual";
+export {
+  DEFAULT_JSON_BODY_LIMIT_BYTES,
+  SIDECAR_AUTH_ENV,
+  isSidecarAuthorized,
+  loadSidecarToken,
+  readJsonBody,
+  rejectUnauthorized,
+  requireSidecarAuth,
+} from "./sidecar-auth.js";
+
+export type RoutingPolicy =
+  | "quality-first"
+  | "cost-first"
+  | "privacy-first"
+  | "local-only"
+  | "manual";
+
+export type ModelCapability =
+  | "text"
+  | "vision"
+  | "tool-calling"
+  | "json-schema"
+  | "reasoning"
+  | "embeddings"
+  | "audio"
+  | "video";
+
+export interface ModelPricing {
+  inputPerMillionTokens?: number;
+  outputPerMillionTokens?: number;
+  currency: "USD";
+  source: "auto" | "manual" | "unknown";
+  updatedAt?: string;
+}
 
 export interface ModelInfo {
   id: string;
   providerId: ProviderId;
   displayName: string;
-  contextWindow: number;
-  inputCostPer1M?: number | null;
-  outputCostPer1M?: number | null;
-  supportsTools?: boolean;
-  supportsVision?: boolean;
-  localOnly?: boolean;
+  contextWindow?: number;
+  maxOutputTokens?: number;
+  capabilities: ModelCapability[];
+  pricing?: ModelPricing;
 }
 
 export interface ChatMessage {
-  role: "system" | "user" | "assistant" | "tool";
+  role: "system" | "user" | "assistant";
   content: string;
+}
+
+export interface ChatUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  estimatedCostUsd?: number;
+}
+
+export interface RoutingContext {
+  taskType:
+    | "coding"
+    | "research"
+    | "document"
+    | "data"
+    | "browser"
+    | "review"
+    | "security"
+    | "general";
+  sensitivity: "normal" | "sensitive" | "secret-risk";
+  needsVision?: boolean;
+  needsToolCalling?: boolean;
+  needsReasoning?: boolean;
+  userPreferredModel?: string;
+  allowedProviders: ProviderId[];
 }
 
 export interface RoutingDecision {
   providerId: ProviderId;
   modelId: string;
   reason: string;
-  estimatedCostUsd?: number | null;
+  estimatedCostClass: "low" | "medium" | "high" | "unknown";
   requiresApproval?: boolean;
-  fallbackFrom?: ProviderId | null;
 }
 
 export interface ProviderConfigPublic {
   providerId: ProviderId;
-  enabled: boolean;
   displayName: string;
-  models: ModelInfo[];
+  enabled: boolean;
+  hasSecret: boolean;
   baseUrl?: string | null;
-  authMode?: string | null;
-  hasSecret?: boolean;
+  defaultModel?: string | null;
+  manualModel?: string | null;
   validatedAt?: string | null;
-  validationStatus?: "unknown" | "valid" | "invalid";
-  validationMessage?: string | null;
+  validationStatus: "unknown" | "valid" | "invalid";
+}
+
+export interface TaskUsageRecord {
+  id: string;
+  projectId?: string | null;
+  providerId: ProviderId;
+  modelId: string;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  estimatedCostUsd?: number | null;
+  routingPolicy: RoutingPolicy;
+  createdAt: string;
+}
+
+export interface VaultStatus {
+  unlocked: boolean;
+  version: number;
+  secretCount: number;
+  deviceBound: boolean;
 }
 
 export type TaskStateName =
@@ -60,7 +134,8 @@ export type TaskStateName =
   | "blocked"
   | "completed"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "rolled_back";
 
 export interface PlanStep {
   title: string;
@@ -185,15 +260,42 @@ export interface ComputerUseScreenshotRecord {
   createdAt: string;
 }
 
+export interface ProjectComputerSettings {
+  projectId: string;
+  screenshotRetention: ScreenshotRetention;
+}
+
+export interface PermissionProfileGrant {
+  category: string;
+  action: string;
+  targetPattern: string;
+}
+
+export type ScheduledCadenceKind =
+  | "manual"
+  | "hourly"
+  | "daily"
+  | "weekly"
+  | "weekdays"
+  | "custom";
+
+export interface ScheduledCadence {
+  kind: ScheduledCadenceKind | string;
+  hour?: number | null;
+  minute?: number | null;
+  dayOfWeek?: number | null;
+  cron?: string | null;
+}
+
 export interface ScheduledTaskRecord {
   id: string;
-  projectId: string;
   name: string;
+  description?: string | null;
   prompt: string;
-  cadenceKind: string;
-  cronExpr?: string | null;
-  everySeconds?: number | null;
-  timezone?: string | null;
+  projectId: string;
+  routingPolicy?: string | null;
+  cadence: ScheduledCadence;
+  permissionProfile: PermissionProfileGrant[];
   paused: boolean;
   lastRunAt?: string | null;
   nextRunAt?: string | null;
@@ -220,12 +322,6 @@ export interface ScheduledTaskRun {
   error?: string | null;
   startedAt: string;
   finishedAt?: string | null;
-}
-
-export interface PermissionProfileGrant {
-  category: string;
-  action: string;
-  targetPattern: string;
 }
 
 export const PERMISSION_PROFILE_PRESETS: {
@@ -472,4 +568,125 @@ export interface CloudAccountStatus {
   accountId?: string | null;
   email?: string | null;
   displayName?: string | null;
+  serverUrl: string;
+  deviceId?: string | null;
+  deviceName?: string | null;
+  syncEnabled: boolean;
+  hasRecoveryKey: boolean;
+  recoveryKeyFingerprint?: string | null;
+  lastSyncAt?: string | null;
+  cloudServerReachable: boolean;
+  syncHelper?: CloudSyncStatus | null;
 }
+
+export interface CloudDeviceInfo {
+  id: string;
+  name: string;
+  deviceType: string;
+  publicKey: string;
+  pairedAt: string;
+  lastSeenAt: string;
+  online: boolean;
+}
+
+export interface CloudRegisterResult {
+  status: CloudAccountStatus;
+  recoveryKey: string;
+}
+
+export const DEFAULT_CLOUD_SERVER_URL = "http://127.0.0.1:47830";
+export const BRIDGE_PUBLIC_URL = "http://127.0.0.1:47826";
+export const BRIDGE_INTERNAL_PORT = 47827;
+
+export type BridgeClientType =
+  | "chrome-extension"
+  | "office-word"
+  | "office-excel"
+  | "office-powerpoint";
+
+export interface BridgeHelperStatus {
+  state: string;
+  clientCount: number;
+  connectedClients: number;
+  startedAt?: string | null;
+  lastError?: string | null;
+  remediation?: string | null;
+  running: boolean;
+}
+
+export interface BridgeStatus {
+  internalRunning: boolean;
+  helper: BridgeHelperStatus;
+  pairedClientCount: number;
+  internalPort: number;
+  publicPort: number;
+}
+
+export interface BridgeClientRecord {
+  id: string;
+  name: string;
+  clientType: string;
+  projectId?: string | null;
+  pairedAt: string;
+  lastSeenAt?: string | null;
+  revoked: boolean;
+}
+
+export interface BridgePairingResult {
+  code: string;
+  expiresAt: string;
+}
+
+export const PROVIDER_META: Record<
+  ProviderId,
+  { displayName: string; icon: string; color: string; local?: boolean }
+> = {
+  "aura-cloud": { displayName: "Aura Cloud Models", icon: "brand-aura-cloud", color: "#c48b5c" },
+  anthropic: { displayName: "Anthropic", icon: "brand-anthropic", color: "#c2683f" },
+  openai: { displayName: "OpenAI", icon: "brand-openai", color: "#1a7f64" },
+  gemini: { displayName: "Google Gemini", icon: "brand-gemini", color: "#3a6fc4" },
+  deepseek: { displayName: "DeepSeek", icon: "brand-deepseek", color: "#4b5bb0" },
+  ollama: { displayName: "Ollama", icon: "brand-ollama", color: "#7a5c8e", local: true },
+  "openai-compatible": {
+    displayName: "Custom endpoint",
+    icon: "brand-openai-compatible",
+    color: "#645d4e",
+  },
+  minimax: { displayName: "Minimax", icon: "brand-minimax", color: "#e05c2b" },
+  qwen: { displayName: "Qwen", icon: "brand-qwen", color: "#4f35b3" },
+  lmstudio: { displayName: "LM Studio", icon: "brand-lmstudio", color: "#1988a2", local: true },
+};
+
+export const ROUTING_POLICIES: {
+  id: RoutingPolicy;
+  title: string;
+  subtitle: string;
+}[] = [
+  {
+    id: "quality-first",
+    title: "Quality-first",
+    subtitle: "Best model for the job. Default.",
+  },
+  {
+    id: "cost-first",
+    title: "Cost-first",
+    subtitle: "Cheapest model that can do the task.",
+  },
+  {
+    id: "privacy-first",
+    title: "Privacy-first",
+    subtitle: "Prefer local; redact secrets before cloud.",
+  },
+  {
+    id: "local-only",
+    title: "Local-only",
+    subtitle: "Ollama only. No cloud requests.",
+  },
+  {
+    id: "manual",
+    title: "Manual model",
+    subtitle: "Use the model you pick per provider.",
+  },
+];
+
+export * from "./sidecar-auth.js";

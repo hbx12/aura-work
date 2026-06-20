@@ -11,7 +11,9 @@ function svgDataUri(title: string, glyph: string, from: string, to: string) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-const skill = (entry: MarketplaceEntry): MarketplaceEntry => ({
+type UniversalSkillEntry = Omit<MarketplaceEntry, "type" | "version">;
+
+const skill = (entry: UniversalSkillEntry): MarketplaceEntry => ({
   type: "skill",
   version: "1.0.0",
   publisher,
