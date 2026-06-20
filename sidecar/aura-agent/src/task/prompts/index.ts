@@ -1,4 +1,5 @@
 import { BASE_PROMPT } from "./base.js";
+import { UNIVERSAL_WORKSPACE_PROMPT } from "./universal.js";
 import { PLANNER_PROMPT } from "./planner.js";
 import { EXECUTOR_PROMPT } from "./executor.js";
 import { REVIEWER_PROMPT } from "./reviewer.js";
@@ -23,7 +24,7 @@ export function getFilteredToolsPrompt(agentConfig?: any): string {
       if (toolName === "delete_file" && agentConfig.tools.edit === false) return false;
       if (toolName === "run_shell" && agentConfig.tools.bash === false) return false;
       if (agentConfig.tools[toolName] === false) return false;
-      
+
       for (const [pattern, enabled] of Object.entries(agentConfig.tools)) {
         if (!enabled) {
           const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
@@ -59,6 +60,7 @@ export function getSystemPrompt(
   const activeToolsPrompt = getFilteredToolsPrompt(agentConfig);
 
   return `${BASE_PROMPT}
+${UNIVERSAL_WORKSPACE_PROMPT}
 ${QUALITY_PROMPT}
 ${WORKFLOW_PROMPT}
 ${activeToolsPrompt}
@@ -78,6 +80,7 @@ ${planText}
 
 export function getPlannerSystemPrompt(): string {
   return `${PLANNER_PROMPT}
+${UNIVERSAL_WORKSPACE_PROMPT}
 ${QUALITY_PROMPT}
 ${WORKFLOW_PROMPT}
 ${SAFETY_PROMPT}
