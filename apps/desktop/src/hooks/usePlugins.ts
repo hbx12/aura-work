@@ -6,7 +6,6 @@ import type {
   McpServerRecord,
   PluginsHelperStatus,
 } from "@aura-os/shared";
-import bundledMarketplaceRegistry from "../../../../registry/marketplace.json";
 
 export interface SkillInfo {
   pluginId: string;
@@ -16,19 +15,16 @@ export interface SkillInfo {
   enabled: boolean;
 }
 
-const bundledMarketplaceEntries = (bundledMarketplaceRegistry.plugins ?? []) as MarketplaceEntry[];
-
-function withBundledMarketplaceFallback(entries: MarketplaceEntry[] | null | undefined) {
-  return entries && entries.length > 0 ? entries : bundledMarketplaceEntries;
+function withMarketplaceFallback(entries: MarketplaceEntry[] | null | undefined) {
+  return entries ?? [];
 }
 
 async function loadMarketplaceEntries() {
   try {
-    const entries = await invoke<MarketplaceEntry[]>("list_marketplace_entries");
-    return withBundledMarketplaceFallback(entries);
+    return withMarketplaceFallback(await invoke<MarketplaceEntry[]>("list_marketplace_entries"));
   } catch (error) {
-    console.warn("[marketplace] Falling back to bundled marketplace registry", error);
-    return bundledMarketplaceEntries;
+    console.warn("[marketplace] Could not load marketplace registry", error);
+    return [];
   }
 }
 
@@ -36,7 +32,7 @@ export function usePlugins(projectId: string | null) {
   const [status, setStatus] = useState<PluginsHelperStatus | null>(null);
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
   const [mcpServers, setMcpServers] = useState<McpServerRecord[]>([]);
-  const [marketplace, setMarketplace] = useState<MarketplaceEntry[]>(bundledMarketplaceEntries);
+  const [marketplace, setMarketplace] = useState<MarketplaceEntry[]>([]);
   const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,11 +54,8 @@ export function usePlugins(projectId: string | null) {
       setError(null);
     } catch (e) {
       setError(String(e));
-      if (marketplace.length === 0) {
-        setMarketplace(bundledMarketplaceEntries);
-      }
     }
-  }, [marketplace.length]);
+  }, []);
 
   const start = useCallback(async () => {
     setLoading(true);
@@ -187,16 +180,15 @@ export function usePlugins(projectId: string | null) {
   const syncMarketplace = useCallback(async () => {
     setLoading(true);
     try {
-      const entries = await invoke<MarketplaceEntry[]>("sync_marketplace", {
+      const entries = withMarketplaceFallback(await invoke<MarketplaceEntry[]>("sync_marketplace", {
         registryUrl: null,
-      });
-      const resolvedEntries = withBundledMarketplaceFallback(entries);
-      setMarketplace(resolvedEntries);
-      return resolvedEntries;
+      }));
+      setMarketplace(entries);
+      return entries;
     } catch (error) {
-      console.warn("[marketplace] Sync failed, using bundled registry", error);
-      setMarketplace(bundledMarketplaceEntries);
-      return bundledMarketplaceEntries;
+      console.warn("[marketplace] Sync failed", error);
+      setMarketplace([]);
+      return [];
     } finally {
       setLoading(false);
     }
