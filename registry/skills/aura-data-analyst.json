@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-data-analyst",
+  "type": "skill",
+  "name": "Aura Data Analyst",
+  "version": "1.0.0",
+  "summary": "Profile, clean, transform, chart, and explain datasets.",
+  "description": "A data workspace skill for CSV, JSON, logs, survey data, metrics, and business datasets. It profiles columns first, checks missing values and duplicates, uses charts when helpful, and exports cleaned files or reports.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-data-analyst/icon.svg",
+  "cover": "aura-data-analyst/cover.svg",
+  "categories": [
+    "Data",
+    "Analytics",
+    "Business"
+  ],
+  "tags": [
+    "data",
+    "csv",
+    "json",
+    "analytics",
+    "charts"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Data Analyst, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "data_profile",
+      "description": "Inspect schema, types, and missing values."
+    },
+    {
+      "name": "data_clean",
+      "description": "Normalize and deduplicate datasets."
+    },
+    {
+      "name": "data_export_report",
+      "description": "Create a cleaned data report or export."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura لتحليل البيانات",
+      "summary": "يفحص وينظف ويحوّل ويرسم ويشرح البيانات.",
+      "description": "مهارة للبيانات مثل CSV وJSON والسجلات والاستبيانات والمؤشرات. تفحص الأعمدة أولاً، وتتحقق من القيم الناقصة والتكرارات، وتستخدم الرسوم عند فائدتها، وتصدر ملفات أو تقارير منظمة.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "فحص البيانات",
+          "description": "فحص الأعمدة والأنواع والقيم الناقصة."
+        },
+        {
+          "name": "تنظيف",
+          "description": "ترتيب البيانات وإزالة التكرارات."
+        },
+        {
+          "name": "تقرير",
+          "description": "إنشاء تقرير أو تصدير منظم."
+        }
+      ],
+      "categories": [
+        "بيانات",
+        "تحليلات",
+        "أعمال"
+      ]
+    }
+  }
+}

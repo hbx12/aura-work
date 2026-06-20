@@ -57,6 +57,8 @@ Please comment on an issue before starting work so effort is not duplicated.
 - Multi-provider AI (OpenAI/ChatGPT Codex, Anthropic, Gemini, DeepSeek, Ollama) with routing
 - Encrypted local vault — keys stored with OS-backed secure storage when available
 - Task agent with file tools, Git, VM shell, browser, plugins/MCP
+- Universal Workspace routing for documents, spreadsheets, presentations, PDF, research, data, design, automation, database, and browser workflows
+- Official HBX Marketplace skills with localized Arabic/English metadata and real SVG assets
 - 20 languages with RTL (Arabic, Persian)
 - Integrated docs at [hbx12.github.io/aura-work](https://hbx12.github.io/aura-work) (when deployed)
 
@@ -94,6 +96,9 @@ Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` wh
 ## Documentation
 
 - [docs/README.md](./docs/README.md) — feature index
+- [docs/features/universal-workspace.md](./docs/features/universal-workspace.md) — Universal Workspace modes and artifact-first behavior
+- [docs/features/artifact-tools.md](./docs/features/artifact-tools.md) — artifact creation, verification, and current native export limits
+- [docs/features/marketplace-localization.md](./docs/features/marketplace-localization.md) — localized Marketplace entries and official HBX skills
 - [registry/README.md](./registry/README.md) — Marketplace extension guide
 - [docs/releases.md](./docs/releases.md) — approved GitHub Releases and optional signed updates
 - [docs/github-publish.md](./docs/github-publish.md) — what goes on GitHub

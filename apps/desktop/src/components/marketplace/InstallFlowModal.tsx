@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Icon } from "@aura-os/ui";
 import type { MarketplaceEntry } from "@aura-os/shared";
 import PermissionPreview from "./PermissionPreview";
+import { localizedMarketplace } from "../../marketplace/localizeMarketplace";
 
 interface InstallFlowModalProps {
   item: MarketplaceEntry;
@@ -17,6 +18,7 @@ export default function InstallFlowModal({
   onInstalled,
   isAr,
 }: InstallFlowModalProps) {
+  const displayItem = localizedMarketplace(item, isAr);
   // Input fields state
   const [formData, setFormData] = useState<Record<string, string>>({});
   // Special instructions text for skill installation
@@ -146,7 +148,7 @@ export default function InstallFlowModal({
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ margin: 0, color: "var(--fg-1)" }}>
-            {isAr ? `تثبيت ${item.name}` : `Install ${item.name}`}
+            {isAr ? `تثبيت ${displayItem.name}` : `Install ${displayItem.name}`}
           </h2>
           <button
             type="button"
@@ -223,7 +225,7 @@ export default function InstallFlowModal({
             <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--fg-2)", display: "block", marginBottom: 6 }}>
               {isAr ? "صلاحيات الوصول المطلوبة:" : "Requested Permissions:"}
             </span>
-            <PermissionPreview permissions={item.permissions} isAr={isAr} />
+            <PermissionPreview permissions={displayItem.permissions ?? item.permissions} isAr={isAr} />
           </div>
         )}
 
@@ -260,7 +262,7 @@ export default function InstallFlowModal({
         {item.type === "skill" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <label style={{ fontSize: "13px", color: "var(--fg-2)" }}>
-              {isAr ? "تعليمات المهارة للوكيل (System Prompt):" : "Skill System Prompt / Instructions:"}
+              {isAr ? "تعليمات المهارة للوكيل:" : "Skill Instructions:"}
             </label>
             <textarea
               required

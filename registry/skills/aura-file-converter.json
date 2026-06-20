@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-file-converter",
+  "type": "skill",
+  "name": "Aura File Converter",
+  "version": "1.0.0",
+  "summary": "Convert content between Markdown, CSV, HTML, text, and report formats.",
+  "description": "A file conversion workspace skill that infers target formats from natural language and preserves headings, lists, links, tables, and source data. It verifies converted files are readable before completion.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-file-converter/icon.svg",
+  "cover": "aura-file-converter/cover.svg",
+  "categories": [
+    "Files",
+    "Conversion",
+    "Productivity"
+  ],
+  "tags": [
+    "convert",
+    "markdown",
+    "csv",
+    "html",
+    "text"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura File Converter, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "format_infer",
+      "description": "Infer the safest output format."
+    },
+    {
+      "name": "convert_content",
+      "description": "Convert content while preserving structure."
+    },
+    {
+      "name": "verify_output",
+      "description": "Read back generated files."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura لتحويل الملفات",
+      "summary": "يحوّل المحتوى بين Markdown وCSV وHTML والنصوص والتقارير.",
+      "description": "مهارة لتحويل الملفات تفهم الصيغة المطلوبة من كلام المستخدم وتحافظ على العناوين والقوائم والروابط والجداول والبيانات. تتحقق من قابلية قراءة الملف الناتج قبل الإنهاء.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "تحديد الصيغة",
+          "description": "استنتاج الصيغة المناسبة بأمان."
+        },
+        {
+          "name": "تحويل",
+          "description": "تحويل المحتوى مع الحفاظ على البنية."
+        },
+        {
+          "name": "تحقق",
+          "description": "قراءة الملف الناتج للتأكد."
+        }
+      ],
+      "categories": [
+        "ملفات",
+        "تحويل",
+        "إنتاجية"
+      ]
+    }
+  }
+}

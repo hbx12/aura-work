@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-dashboard-builder",
+  "type": "skill",
+  "name": "Aura Dashboard Builder",
+  "version": "1.0.0",
+  "summary": "Create dashboard specs, HTML previews, metrics tables, and reporting layouts.",
+  "description": "A dashboard workspace skill for metrics layouts, HTML previews, reporting pages, and data visualization specs. It verifies hierarchy, readability, responsive behavior, and source assumptions.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-dashboard-builder/icon.svg",
+  "cover": "aura-dashboard-builder/cover.svg",
+  "categories": [
+    "Dashboards",
+    "Data",
+    "Design"
+  ],
+  "tags": [
+    "dashboard",
+    "metrics",
+    "html",
+    "charts",
+    "reporting"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Dashboard Builder, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "dashboard_plan",
+      "description": "Plan dashboard sections and metrics."
+    },
+    {
+      "name": "dashboard_create_html",
+      "description": "Create an HTML preview when useful."
+    },
+    {
+      "name": "dashboard_verify",
+      "description": "Check layout, labels, and assumptions."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للوحات المتابعة",
+      "summary": "ينشئ مواصفات لوحات متابعة ومعاينات HTML وجداول مؤشرات وتخطيطات تقارير.",
+      "description": "مهارة للوحات المتابعة وتخطيطات المؤشرات ومعاينات HTML وصفحات التقارير ومواصفات الرسوم. تتحقق من التسلسل البصري والقراءة والتجاوب وافتراضات المصادر.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "خطة لوحة",
+          "description": "تخطيط أقسام ومؤشرات لوحة المتابعة."
+        },
+        {
+          "name": "إنشاء HTML",
+          "description": "إنشاء معاينة HTML عند الحاجة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص التخطيط والتسميات والافتراضات."
+        }
+      ],
+      "categories": [
+        "لوحات متابعة",
+        "بيانات",
+        "تصميم"
+      ]
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "id": "skill.aura-research",
+  "type": "skill",
+  "name": "Aura Research",
+  "version": "1.0.0",
+  "summary": "Research, compare, verify sources, and create cited reports.",
+  "description": "A research workspace skill for current facts, comparisons, market research, academic topics, and source-backed deliverables. It prefers official and primary sources, cites claims near the text, and separates facts from assumptions.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-research/icon.svg",
+  "cover": "aura-research/cover.svg",
+  "categories": [
+    "Research",
+    "Web",
+    "Business"
+  ],
+  "tags": [
+    "research",
+    "sources",
+    "citations",
+    "comparison",
+    "report"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Research, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file",
+    "browse_url"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "research_plan",
+      "description": "Plan source strategy and scope."
+    },
+    {
+      "name": "source_quality_check",
+      "description": "Compare source reliability and dates."
+    },
+    {
+      "name": "research_create_report",
+      "description": "Create a cited Markdown report."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للبحث",
+      "summary": "يبحث ويقارن ويتحقق من المصادر وينشئ تقارير موثقة.",
+      "description": "مهارة للبحث والمقارنات والمعلومات الحديثة والأسواق والمواضيع الأكاديمية والتقارير الموثقة. تفضل المصادر الرسمية والأولية، وتضع الاستشهادات قرب الادعاءات، وتفصل الحقائق عن الافتراضات.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "خطة بحث",
+          "description": "تحديد نطاق البحث والمصادر."
+        },
+        {
+          "name": "فحص المصادر",
+          "description": "مقارنة موثوقية المصادر وتواريخها."
+        },
+        {
+          "name": "تقرير موثق",
+          "description": "إنشاء تقرير Markdown مع الاستشهادات."
+        }
+      ],
+      "categories": [
+        "بحث",
+        "ويب",
+        "أعمال"
+      ]
+    }
+  }
+}

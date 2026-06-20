@@ -15,6 +15,8 @@
 - بحث وتقارير.
 - تحليل بيانات وتحويل ملفات.
 - أتمتة ومهام متكررة.
+- قواعد بيانات واستعلامات آمنة وتقارير.
+- تصفح وتحكم مرئي عند توفر الأدوات والموافقة.
 
 ## حالات المهمة
 
@@ -48,6 +50,8 @@
 - `pdf` — تلخيص وتحويل واستخراج من PDF.
 - `image` / `design` — صور وتصاميم وواجهات.
 - `automation` — مهام متكررة وتدفقات عمل.
+- `database` — فحص مخططات SQL واستعلامات قراءة وتصدير تقارير.
+- `dispatch` — توزيع الأهداف المتعددة إلى جلسات/أدوار مركزة.
 - `browser` / `computer` — تصفح وتحكم مرئي عند توفر الأدوات.
 
 ## فهم صيغة الناتج
@@ -80,7 +84,7 @@
 
 ## مهارات Marketplace العامة
 
-تمت إضافة مهارات عامة تظهر في Marketplace حتى لو لم يتم تحميل registry من الخلفية:
+تمت إضافة مهارات رسمية في registry المحلي مع أصول SVG حقيقية وتعريب عربي/إنجليزي:
 
 - Aura Documents
 - Aura Spreadsheets
@@ -88,11 +92,24 @@
 - Aura PDF
 - Aura Research
 - Aura Image Studio
+- Aura Design Studio
 - Aura Data Analyst
 - Aura File Converter
 - Aura Automation
+- Aura Database Analyst
+- Aura Browser Assistant
+- Aura Business Kit
+- Aura Study Kit
+- Aura Forms
+- Aura Dashboard Builder
 
-كل مهارة تحتوي على وصف إنجليزي وعربي، ويعرض المتجر النص المناسب حسب لغة الواجهة.
+كل مهارة تحتوي على وصف إنجليزي وعربي، ويعرض المتجر النص المناسب حسب لغة الواجهة. التثبيت يستخدم المعرف الثابت من registry وليس الاسم المعروض، لذلك لا تنكسر عملية التثبيت عند استخدام الواجهة العربية.
+
+راجع:
+
+- [Universal Workspace](./universal-workspace.md)
+- [Artifact Tools](./artifact-tools.md)
+- [Marketplace Localization](./marketplace-localization.md)
 
 ## الاستثناءات الافتراضية
 

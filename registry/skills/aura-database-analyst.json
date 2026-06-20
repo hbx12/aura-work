@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-database-analyst",
+  "type": "skill",
+  "name": "Aura Database Analyst",
+  "version": "1.0.0",
+  "summary": "Inspect schemas, write safe queries, explain plans, and export database reports.",
+  "description": "A database workspace skill for SQLite, Postgres, schema inspection, read-first querying, explain plans, exports, and migration planning. It asks before database writes or destructive migrations and flags sensitive fields.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-database-analyst/icon.svg",
+  "cover": "aura-database-analyst/cover.svg",
+  "categories": [
+    "Database",
+    "Data",
+    "Business"
+  ],
+  "tags": [
+    "database",
+    "sqlite",
+    "postgres",
+    "sql",
+    "export"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Database Analyst, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "database_access"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "database_schema_inspect",
+      "description": "Inspect schema before querying."
+    },
+    {
+      "name": "database_query",
+      "description": "Prepare safe read-first SQL queries."
+    },
+    {
+      "name": "database_export_report",
+      "description": "Export results to CSV or report files."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura لقواعد البيانات",
+      "summary": "يفحص المخططات ويكتب استعلامات آمنة ويشرح الخطط ويصدر تقارير قواعد البيانات.",
+      "description": "مهارة لقواعد البيانات مثل SQLite وPostgres وفحص المخططات والاستعلامات الآمنة وشرح الخطط والتصدير وتخطيط الهجرات. تسأل قبل الكتابة أو التغييرات الخطرة وتكشف الحقول الحساسة.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "فحص المخطط",
+          "description": "فحص بنية قاعدة البيانات قبل الاستعلام."
+        },
+        {
+          "name": "استعلام",
+          "description": "تحضير SQL آمن يبدأ بالقراءة."
+        },
+        {
+          "name": "تقرير",
+          "description": "تصدير النتائج إلى CSV أو تقرير."
+        }
+      ],
+      "categories": [
+        "قواعد بيانات",
+        "بيانات",
+        "أعمال"
+      ]
+    }
+  }
+}

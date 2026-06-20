@@ -184,11 +184,11 @@ export default function MarketplaceDetailModal({
         <div style={{ padding: 16, borderTop: "1px solid var(--border-2)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
           {isInstalled ? (
             <>
-              {item.type === "mcp" && onConfigure && <button type="button" className="btn secondary" onClick={() => onConfigure(item)}>{isAr ? "إعداد" : "Configure"}</button>}
-              {onUninstall && <button type="button" className="btn secondary" style={{ color: "var(--danger)" }} onClick={() => onUninstall(item)}>{isAr ? "إلغاء التثبيت" : "Uninstall"}</button>}
+              {item.type === "mcp" && onConfigure && <button type="button" className="btn secondary" onClick={() => onConfigure(rawItem)}>{isAr ? "إعداد" : "Configure"}</button>}
+              {onUninstall && <button type="button" className="btn secondary" style={{ color: "var(--danger)" }} onClick={() => onUninstall(rawItem)}>{isAr ? "إلغاء التثبيت" : "Uninstall"}</button>}
             </>
           ) : (
-            <button type="button" className="btn primary" onClick={() => onInstall(item)}>
+            <button type="button" className="btn primary" onClick={() => onInstall(rawItem)}>
               <Icon name="plus" size={14} /> {isAr ? "تثبيت" : "Install"}
             </button>
           )}

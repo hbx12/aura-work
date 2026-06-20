@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-presentations",
+  "type": "skill",
+  "name": "Aura Presentations",
+  "version": "1.0.0",
+  "summary": "Plan and create presentation storylines, slide outlines, and deck-ready files.",
+  "description": "A presentation workspace skill for slide decks, pitch decks, lessons, timelines, proposals, and visual reports. It creates storyline and slide-outline artifacts now, uses PPTX only with a real presentation export tool, and verifies readability, flow, and slide density.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-presentations/icon.svg",
+  "cover": "aura-presentations/cover.svg",
+  "categories": [
+    "Presentations",
+    "Design",
+    "Business"
+  ],
+  "tags": [
+    "presentation",
+    "slides",
+    "deck",
+    "storyline",
+    "pptx"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Presentations, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "presentation_create_storyline",
+      "description": "Plan slide titles and narrative flow."
+    },
+    {
+      "name": "presentation_create_deck_outline",
+      "description": "Create deck-ready Markdown or HTML slide outlines."
+    },
+    {
+      "name": "presentation_verify",
+      "description": "Check readability, density, and flow."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للعروض",
+      "summary": "يخطط وينشئ قصص العروض ومخططات الشرائح وملفات جاهزة للتحويل.",
+      "description": "مهارة للعروض والشرائح والـ pitch decks والدروس والمقترحات والتقارير البصرية. تنشئ Storyline ومخططات شرائح كملفات حقيقية حالياً، ولا تستخدم PPTX إلا عند توفر أداة تصدير فعلية، وتتحقق من القراءة والتسلسل وكثافة الشرائح.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "قصة العرض",
+          "description": "تخطيط عناوين الشرائح وتسلسل الفكرة."
+        },
+        {
+          "name": "مخطط الشرائح",
+          "description": "إنشاء مخطط Markdown أو HTML جاهز للعرض."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص القراءة والكثافة وتسلسل الفكرة."
+        }
+      ],
+      "categories": [
+        "عروض",
+        "تصميم",
+        "أعمال"
+      ]
+    }
+  }
+}

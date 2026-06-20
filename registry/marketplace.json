@@ -1,6 +1,1479 @@
 {
   "plugins": [
     {
+      "id": "skill.aura-documents",
+      "type": "skill",
+      "name": "Aura Documents",
+      "version": "1.0.0",
+      "summary": "Create and edit document-style files, reports, letters, resumes, and policies.",
+      "description": "A document workspace skill for structured writing. It routes formal text, letters, reports, resumes, policies, and contract drafts into artifact-first document work. It uses available file tools to create Markdown or text deliverables now, keeps DOCX/PDF export as an explicit tool-backed path when available, and verifies generated content before completion.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-documents/icon.svg",
+      "cover": "aura-documents/cover.svg",
+      "categories": [
+        "Documents",
+        "Productivity",
+        "Business"
+      ],
+      "tags": [
+        "document",
+        "markdown",
+        "report",
+        "letter",
+        "resume"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Documents, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "document_create",
+          "description": "Create structured Markdown or text documents using file tools."
+        },
+        {
+          "name": "document_edit",
+          "description": "Apply targeted edits to existing document files."
+        },
+        {
+          "name": "document_verify",
+          "description": "Read back generated document content and check headings, tables, and references."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للمستندات",
+          "summary": "ينشئ ويعدل المستندات والتقارير والخطابات والسير الذاتية والسياسات.",
+          "description": "مهارة للمستندات والكتابة المنظمة. تفهم الخطابات والتقارير والسير الذاتية والسياسات والعقود كعمل على ملف حقيقي. تستخدم أدوات الملفات المتاحة لإنشاء Markdown أو نص حالياً، ولا تدعي تصدير DOCX/PDF إلا عند توفر أداة فعلية، وتتحقق من الناتج قبل الإنهاء.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء مستند",
+              "description": "إنشاء مستند Markdown أو نص منظم باستخدام أدوات الملفات."
+            },
+            {
+              "name": "تعديل مستند",
+              "description": "تطبيق تعديلات محددة على ملفات مستندات موجودة."
+            },
+            {
+              "name": "تحقق",
+              "description": "قراءة الناتج والتحقق من العناوين والجداول والمراجع."
+            }
+          ],
+          "categories": [
+            "مستندات",
+            "إنتاجية",
+            "أعمال"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-spreadsheets",
+      "type": "skill",
+      "name": "Aura Spreadsheets",
+      "version": "1.0.0",
+      "summary": "Build spreadsheet-style tables, budgets, CSV files, formulas, and analysis reports.",
+      "description": "A spreadsheet workspace skill for budgets, expenses, sales tables, formulas, CSV analysis, and dashboard-ready tabular outputs. It creates real CSV/Markdown table files with available tools now, uses XLSX export only when a real workbook tool is available, and verifies totals, ranges, and formulas when present.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-spreadsheets/icon.svg",
+      "cover": "aura-spreadsheets/cover.svg",
+      "categories": [
+        "Spreadsheets",
+        "Data",
+        "Productivity"
+      ],
+      "tags": [
+        "spreadsheet",
+        "csv",
+        "budget",
+        "formula",
+        "dashboard"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Spreadsheets, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "spreadsheet_create_table",
+          "description": "Create CSV or Markdown table artifacts."
+        },
+        {
+          "name": "spreadsheet_set_formula",
+          "description": "Represent formulas clearly when workbook tooling is available."
+        },
+        {
+          "name": "spreadsheet_verify",
+          "description": "Check totals, ranges, and obvious table errors."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للجداول",
+          "summary": "ينشئ جداول وميزانيات وملفات CSV ومعادلات وتقارير تحليلية.",
+          "description": "مهارة للجداول والميزانيات والمصاريف والمبيعات والمعادلات وتحليل CSV. تنشئ ملفات CSV أو جداول Markdown حقيقية بالأدوات المتاحة حالياً، ولا تستخدم XLSX إلا عند توفر أداة workbook فعلية، وتتحقق من الإجماليات والنطاقات والمعادلات.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء جدول",
+              "description": "إنشاء CSV أو جدول Markdown كملف حقيقي."
+            },
+            {
+              "name": "معادلات",
+              "description": "تمثيل المعادلات بوضوح عند توفر أدوات workbook."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص الإجماليات والنطاقات والأخطاء الواضحة."
+            }
+          ],
+          "categories": [
+            "جداول",
+            "بيانات",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-presentations",
+      "type": "skill",
+      "name": "Aura Presentations",
+      "version": "1.0.0",
+      "summary": "Plan and create presentation storylines, slide outlines, and deck-ready files.",
+      "description": "A presentation workspace skill for slide decks, pitch decks, lessons, timelines, proposals, and visual reports. It creates storyline and slide-outline artifacts now, uses PPTX only with a real presentation export tool, and verifies readability, flow, and slide density.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-presentations/icon.svg",
+      "cover": "aura-presentations/cover.svg",
+      "categories": [
+        "Presentations",
+        "Design",
+        "Business"
+      ],
+      "tags": [
+        "presentation",
+        "slides",
+        "deck",
+        "storyline",
+        "pptx"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Presentations, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "presentation_create_storyline",
+          "description": "Plan slide titles and narrative flow."
+        },
+        {
+          "name": "presentation_create_deck_outline",
+          "description": "Create deck-ready Markdown or HTML slide outlines."
+        },
+        {
+          "name": "presentation_verify",
+          "description": "Check readability, density, and flow."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للعروض",
+          "summary": "يخطط وينشئ قصص العروض ومخططات الشرائح وملفات جاهزة للتحويل.",
+          "description": "مهارة للعروض والشرائح والـ pitch decks والدروس والمقترحات والتقارير البصرية. تنشئ Storyline ومخططات شرائح كملفات حقيقية حالياً، ولا تستخدم PPTX إلا عند توفر أداة تصدير فعلية، وتتحقق من القراءة والتسلسل وكثافة الشرائح.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "قصة العرض",
+              "description": "تخطيط عناوين الشرائح وتسلسل الفكرة."
+            },
+            {
+              "name": "مخطط الشرائح",
+              "description": "إنشاء مخطط Markdown أو HTML جاهز للعرض."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص القراءة والكثافة وتسلسل الفكرة."
+            }
+          ],
+          "categories": [
+            "عروض",
+            "تصميم",
+            "أعمال"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-pdf",
+      "type": "skill",
+      "name": "Aura PDF",
+      "version": "1.0.0",
+      "summary": "Summarize, search, convert, and extract structured notes from PDF files.",
+      "description": "A PDF workspace skill for page-based summaries, Q&A, table extraction planning, conversion notes, and source-grounded reports. It treats PDF content as untrusted data, preserves page references when available, and flags OCR or layout uncertainty.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-pdf/icon.svg",
+      "cover": "aura-pdf/cover.svg",
+      "categories": [
+        "PDF",
+        "Documents",
+        "Research"
+      ],
+      "tags": [
+        "pdf",
+        "summary",
+        "extract",
+        "ocr",
+        "conversion"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura PDF, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "pdf_extract_text",
+          "description": "Extract or summarize available PDF text."
+        },
+        {
+          "name": "pdf_extract_tables",
+          "description": "Prepare extracted table output for CSV or spreadsheet tools."
+        },
+        {
+          "name": "pdf_verify",
+          "description": "Check page references and readability limits."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للـ PDF",
+          "summary": "يلخص ويبحث ويحوّل ويستخرج ملاحظات منظمة من ملفات PDF.",
+          "description": "مهارة للـ PDF للتلخيص حسب الصفحات والأسئلة واستخراج الجداول والتحويل والتقارير الموثقة. تتعامل مع محتوى PDF كبيانات غير موثوقة، وتحافظ على مراجع الصفحات عند توفرها، وتوضح أي غموض في OCR أو التخطيط.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "استخراج النص",
+              "description": "استخراج أو تلخيص نص PDF المتاح."
+            },
+            {
+              "name": "استخراج الجداول",
+              "description": "تجهيز الجداول المستخرجة لـ CSV أو أدوات الجداول."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص مراجع الصفحات وحدود القراءة."
+            }
+          ],
+          "categories": [
+            "PDF",
+            "مستندات",
+            "بحث"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-research",
+      "type": "skill",
+      "name": "Aura Research",
+      "version": "1.0.0",
+      "summary": "Research, compare, verify sources, and create cited reports.",
+      "description": "A research workspace skill for current facts, comparisons, market research, academic topics, and source-backed deliverables. It prefers official and primary sources, cites claims near the text, and separates facts from assumptions.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-research/icon.svg",
+      "cover": "aura-research/cover.svg",
+      "categories": [
+        "Research",
+        "Web",
+        "Business"
+      ],
+      "tags": [
+        "research",
+        "sources",
+        "citations",
+        "comparison",
+        "report"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Research, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file",
+        "browse_url"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "research_plan",
+          "description": "Plan source strategy and scope."
+        },
+        {
+          "name": "source_quality_check",
+          "description": "Compare source reliability and dates."
+        },
+        {
+          "name": "research_create_report",
+          "description": "Create a cited Markdown report."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للبحث",
+          "summary": "يبحث ويقارن ويتحقق من المصادر وينشئ تقارير موثقة.",
+          "description": "مهارة للبحث والمقارنات والمعلومات الحديثة والأسواق والمواضيع الأكاديمية والتقارير الموثقة. تفضل المصادر الرسمية والأولية، وتضع الاستشهادات قرب الادعاءات، وتفصل الحقائق عن الافتراضات.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "خطة بحث",
+              "description": "تحديد نطاق البحث والمصادر."
+            },
+            {
+              "name": "فحص المصادر",
+              "description": "مقارنة موثوقية المصادر وتواريخها."
+            },
+            {
+              "name": "تقرير موثق",
+              "description": "إنشاء تقرير Markdown مع الاستشهادات."
+            }
+          ],
+          "categories": [
+            "بحث",
+            "ويب",
+            "أعمال"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-image-studio",
+      "type": "skill",
+      "name": "Aura Image Studio",
+      "version": "1.0.0",
+      "summary": "Create image briefs, banners, icons, SVG concepts, and visual asset plans.",
+      "description": "A visual asset workspace skill for image briefs, banners, posters, icons, logo concepts, and SVG outputs. It respects exact dimensions, brand constraints, readability, contrast, and layout verification.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-image-studio/icon.svg",
+      "cover": "aura-image-studio/cover.svg",
+      "categories": [
+        "Images",
+        "Design",
+        "Marketing"
+      ],
+      "tags": [
+        "image",
+        "banner",
+        "icon",
+        "svg",
+        "poster"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Image Studio, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "image_create_brief",
+          "description": "Create precise generation or editing briefs."
+        },
+        {
+          "name": "image_export_svg",
+          "description": "Create simple SVG visual assets when appropriate."
+        },
+        {
+          "name": "image_verify",
+          "description": "Check dimensions, contrast, and text readability."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للصور",
+          "summary": "ينشئ أوصاف صور وبانرات وأيقونات ومفاهيم SVG وخطط أصول بصرية.",
+          "description": "مهارة للأصول البصرية مثل أوصاف الصور والبانرات والبوسترات والأيقونات ومفاهيم الشعارات وملفات SVG. تراعي المقاسات والهوية ووضوح النص والتباين وتتحقق من التخطيط.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "وصف صورة",
+              "description": "صياغة وصف دقيق للتوليد أو التعديل."
+            },
+            {
+              "name": "تصدير SVG",
+              "description": "إنشاء أصول SVG بسيطة عند الحاجة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص المقاس والتباين ووضوح النص."
+            }
+          ],
+          "categories": [
+            "صور",
+            "تصميم",
+            "تسويق"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-design-studio",
+      "type": "skill",
+      "name": "Aura Design Studio",
+      "version": "1.0.0",
+      "summary": "Create UI mockups, HTML previews, dashboards, landing pages, and design systems.",
+      "description": "A design workspace skill for UI screens, dashboards, landing pages, components, visual systems, and HTML/CSS previews. It verifies responsive layout, RTL behavior, spacing, contrast, and text overflow.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-design-studio/icon.svg",
+      "cover": "aura-design-studio/cover.svg",
+      "categories": [
+        "Design",
+        "Productivity",
+        "Marketing"
+      ],
+      "tags": [
+        "design",
+        "ui",
+        "html",
+        "dashboard",
+        "landing-page"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Design Studio, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "design_create_html",
+          "description": "Create HTML/CSS design previews."
+        },
+        {
+          "name": "design_update_html",
+          "description": "Refine existing design files."
+        },
+        {
+          "name": "design_verify",
+          "description": "Check responsive layout, RTL, and overflow."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للتصميم",
+          "summary": "ينشئ واجهات وHTML previews ولوحات ومواقع تعريفية وأنظمة تصميم.",
+          "description": "مهارة للتصميم والواجهات والداشبورد والصفحات التعريفية والمكونات وأنظمة التصميم وHTML/CSS previews. تتحقق من التجاوب وRTL والمسافات والتباين وتداخل النصوص.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء HTML",
+              "description": "إنشاء معاينات تصميم HTML/CSS."
+            },
+            {
+              "name": "تحديث التصميم",
+              "description": "تحسين ملفات تصميم موجودة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص التجاوب وRTL وتداخل النصوص."
+            }
+          ],
+          "categories": [
+            "تصميم",
+            "إنتاجية",
+            "تسويق"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-data-analyst",
+      "type": "skill",
+      "name": "Aura Data Analyst",
+      "version": "1.0.0",
+      "summary": "Profile, clean, transform, chart, and explain datasets.",
+      "description": "A data workspace skill for CSV, JSON, logs, survey data, metrics, and business datasets. It profiles columns first, checks missing values and duplicates, uses charts when helpful, and exports cleaned files or reports.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-data-analyst/icon.svg",
+      "cover": "aura-data-analyst/cover.svg",
+      "categories": [
+        "Data",
+        "Analytics",
+        "Business"
+      ],
+      "tags": [
+        "data",
+        "csv",
+        "json",
+        "analytics",
+        "charts"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Data Analyst, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "data_profile",
+          "description": "Inspect schema, types, and missing values."
+        },
+        {
+          "name": "data_clean",
+          "description": "Normalize and deduplicate datasets."
+        },
+        {
+          "name": "data_export_report",
+          "description": "Create a cleaned data report or export."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura لتحليل البيانات",
+          "summary": "يفحص وينظف ويحوّل ويرسم ويشرح البيانات.",
+          "description": "مهارة للبيانات مثل CSV وJSON والسجلات والاستبيانات والمؤشرات. تفحص الأعمدة أولاً، وتتحقق من القيم الناقصة والتكرارات، وتستخدم الرسوم عند فائدتها، وتصدر ملفات أو تقارير منظمة.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "فحص البيانات",
+              "description": "فحص الأعمدة والأنواع والقيم الناقصة."
+            },
+            {
+              "name": "تنظيف",
+              "description": "ترتيب البيانات وإزالة التكرارات."
+            },
+            {
+              "name": "تقرير",
+              "description": "إنشاء تقرير أو تصدير منظم."
+            }
+          ],
+          "categories": [
+            "بيانات",
+            "تحليلات",
+            "أعمال"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-file-converter",
+      "type": "skill",
+      "name": "Aura File Converter",
+      "version": "1.0.0",
+      "summary": "Convert content between Markdown, CSV, HTML, text, and report formats.",
+      "description": "A file conversion workspace skill that infers target formats from natural language and preserves headings, lists, links, tables, and source data. It verifies converted files are readable before completion.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-file-converter/icon.svg",
+      "cover": "aura-file-converter/cover.svg",
+      "categories": [
+        "Files",
+        "Conversion",
+        "Productivity"
+      ],
+      "tags": [
+        "convert",
+        "markdown",
+        "csv",
+        "html",
+        "text"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura File Converter, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "format_infer",
+          "description": "Infer the safest output format."
+        },
+        {
+          "name": "convert_content",
+          "description": "Convert content while preserving structure."
+        },
+        {
+          "name": "verify_output",
+          "description": "Read back generated files."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura لتحويل الملفات",
+          "summary": "يحوّل المحتوى بين Markdown وCSV وHTML والنصوص والتقارير.",
+          "description": "مهارة لتحويل الملفات تفهم الصيغة المطلوبة من كلام المستخدم وتحافظ على العناوين والقوائم والروابط والجداول والبيانات. تتحقق من قابلية قراءة الملف الناتج قبل الإنهاء.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "تحديد الصيغة",
+              "description": "استنتاج الصيغة المناسبة بأمان."
+            },
+            {
+              "name": "تحويل",
+              "description": "تحويل المحتوى مع الحفاظ على البنية."
+            },
+            {
+              "name": "تحقق",
+              "description": "قراءة الملف الناتج للتأكد."
+            }
+          ],
+          "categories": [
+            "ملفات",
+            "تحويل",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-automation",
+      "type": "skill",
+      "name": "Aura Automation",
+      "version": "1.0.0",
+      "summary": "Plan and run repeatable workflows, reminders, monitors, and connector actions.",
+      "description": "An automation workspace skill for scheduled tasks, monitors, browser workflows, file workflows, and connector actions. It identifies approval points and never performs externally visible actions without explicit approval.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-automation/icon.svg",
+      "cover": "aura-automation/cover.svg",
+      "categories": [
+        "Automation",
+        "Workflow",
+        "Productivity"
+      ],
+      "tags": [
+        "automation",
+        "schedule",
+        "monitor",
+        "workflow",
+        "connector"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Automation, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file",
+        "browse_url"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "automation_create_task",
+          "description": "Create a repeatable workflow plan."
+        },
+        {
+          "name": "automation_schedule",
+          "description": "Plan scheduled or recurring task behavior."
+        },
+        {
+          "name": "automation_verify",
+          "description": "Check that workflow outputs completed."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للأتمتة",
+          "summary": "يخطط وينفذ مهام متكررة وتذكيرات ومراقبة وتكاملات.",
+          "description": "مهارة للأتمتة والجداول والمراقبة والتصفح وسير عمل الملفات والتكاملات. تحدد نقاط الموافقة ولا تنفذ أي إجراء خارجي واضح بدون موافقة صريحة.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء مهمة",
+              "description": "إنشاء خطة سير عمل قابلة للتكرار."
+            },
+            {
+              "name": "جدولة",
+              "description": "تخطيط مهمة مجدولة أو متكررة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص اكتمال مخرجات سير العمل."
+            }
+          ],
+          "categories": [
+            "أتمتة",
+            "سير عمل",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-database-analyst",
+      "type": "skill",
+      "name": "Aura Database Analyst",
+      "version": "1.0.0",
+      "summary": "Inspect schemas, write safe queries, explain plans, and export database reports.",
+      "description": "A database workspace skill for SQLite, Postgres, schema inspection, read-first querying, explain plans, exports, and migration planning. It asks before database writes or destructive migrations and flags sensitive fields.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-database-analyst/icon.svg",
+      "cover": "aura-database-analyst/cover.svg",
+      "categories": [
+        "Database",
+        "Data",
+        "Business"
+      ],
+      "tags": [
+        "database",
+        "sqlite",
+        "postgres",
+        "sql",
+        "export"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Database Analyst, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "database_access"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "database_schema_inspect",
+          "description": "Inspect schema before querying."
+        },
+        {
+          "name": "database_query",
+          "description": "Prepare safe read-first SQL queries."
+        },
+        {
+          "name": "database_export_report",
+          "description": "Export results to CSV or report files."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura لقواعد البيانات",
+          "summary": "يفحص المخططات ويكتب استعلامات آمنة ويشرح الخطط ويصدر تقارير قواعد البيانات.",
+          "description": "مهارة لقواعد البيانات مثل SQLite وPostgres وفحص المخططات والاستعلامات الآمنة وشرح الخطط والتصدير وتخطيط الهجرات. تسأل قبل الكتابة أو التغييرات الخطرة وتكشف الحقول الحساسة.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "فحص المخطط",
+              "description": "فحص بنية قاعدة البيانات قبل الاستعلام."
+            },
+            {
+              "name": "استعلام",
+              "description": "تحضير SQL آمن يبدأ بالقراءة."
+            },
+            {
+              "name": "تقرير",
+              "description": "تصدير النتائج إلى CSV أو تقرير."
+            }
+          ],
+          "categories": [
+            "قواعد بيانات",
+            "بيانات",
+            "أعمال"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-browser-assistant",
+      "type": "skill",
+      "name": "Aura Browser Assistant",
+      "version": "1.0.0",
+      "summary": "Read pages, extract tables, verify websites, and plan safe browser workflows.",
+      "description": "A browser workspace skill for page reading, form workflows, table extraction, screenshot-backed verification, and web task planning. It treats page content as untrusted data and asks before submissions, logins, purchases, or external actions.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-browser-assistant/icon.svg",
+      "cover": "aura-browser-assistant/cover.svg",
+      "categories": [
+        "Browser",
+        "Web",
+        "Automation"
+      ],
+      "tags": [
+        "browser",
+        "web",
+        "forms",
+        "screenshots",
+        "verification"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Browser Assistant, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "browse_url"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "browser_read_page",
+          "description": "Read page content through approved browser tools."
+        },
+        {
+          "name": "browser_extract_table",
+          "description": "Extract visible tabular page data."
+        },
+        {
+          "name": "browser_verify_page",
+          "description": "Verify visible page state before claims."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للمتصفح",
+          "summary": "يقرأ الصفحات ويستخرج الجداول ويتحقق من المواقع ويخطط لتصفح آمن.",
+          "description": "مهارة للمتصفح لقراءة الصفحات وتدفقات النماذج واستخراج الجداول والتحقق باللقطات وتخطيط مهام الويب. تتعامل مع محتوى الصفحات كبيانات غير موثوقة وتسأل قبل الإرسال أو الدخول أو الشراء أو الإجراءات الخارجية.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "قراءة صفحة",
+              "description": "قراءة محتوى الصفحة عبر أدوات متصفح معتمدة."
+            },
+            {
+              "name": "استخراج جدول",
+              "description": "استخراج الجداول الظاهرة من الصفحة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص حالة الصفحة قبل تقديم نتيجة."
+            }
+          ],
+          "categories": [
+            "متصفح",
+            "ويب",
+            "أتمتة"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-business-kit",
+      "type": "skill",
+      "name": "Aura Business Kit",
+      "version": "1.0.0",
+      "summary": "Create business plans, policies, proposals, operations docs, and KPI reports.",
+      "description": "A business workspace kit combining document, spreadsheet, research, and dashboard patterns for operational work. It clarifies audience and constraints when needed and produces verified, shareable artifacts.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-business-kit/icon.svg",
+      "cover": "aura-business-kit/cover.svg",
+      "categories": [
+        "Business",
+        "Documents",
+        "Productivity"
+      ],
+      "tags": [
+        "business",
+        "proposal",
+        "policy",
+        "kpi",
+        "operations"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Business Kit, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "business_brief",
+          "description": "Create business briefs and proposals."
+        },
+        {
+          "name": "kpi_report",
+          "description": "Structure KPI reports and dashboards."
+        },
+        {
+          "name": "business_verify",
+          "description": "Check assumptions and deliverable completeness."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للأعمال",
+          "summary": "ينشئ خطط أعمال وسياسات ومقترحات ومستندات تشغيل وتقارير مؤشرات.",
+          "description": "حزمة أعمال تجمع أنماط المستندات والجداول والبحث واللوحات للعمل التشغيلي. تستوضح الجمهور والقيود عند الحاجة وتنتج ملفات قابلة للمشاركة والتحقق.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "ملخص أعمال",
+              "description": "إنشاء ملخصات ومقترحات أعمال."
+            },
+            {
+              "name": "تقرير مؤشرات",
+              "description": "تنظيم تقارير KPI ولوحات المتابعة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص الافتراضات واكتمال المخرجات."
+            }
+          ],
+          "categories": [
+            "أعمال",
+            "مستندات",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-study-kit",
+      "type": "skill",
+      "name": "Aura Study Kit",
+      "version": "1.0.0",
+      "summary": "Create study notes, lesson plans, quizzes, flashcards, and learning reports.",
+      "description": "A study workspace kit for notes, summaries, lesson plans, quizzes, flashcards, and learning schedules. It adapts tone and depth to the audience and creates files instead of long chat dumps for substantial material.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-study-kit/icon.svg",
+      "cover": "aura-study-kit/cover.svg",
+      "categories": [
+        "Study",
+        "Documents",
+        "Productivity"
+      ],
+      "tags": [
+        "study",
+        "notes",
+        "quiz",
+        "flashcards",
+        "lesson"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Study Kit, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "study_notes",
+          "description": "Create structured learning notes."
+        },
+        {
+          "name": "quiz_create",
+          "description": "Create quizzes or flashcards."
+        },
+        {
+          "name": "study_verify",
+          "description": "Check coverage and clarity."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للدراسة",
+          "summary": "ينشئ ملاحظات دراسية وخطط دروس واختبارات وبطاقات وتقارير تعلم.",
+          "description": "حزمة دراسة للملاحظات والملخصات وخطط الدروس والاختبارات والبطاقات والجداول التعليمية. تضبط الأسلوب والعمق حسب الجمهور وتنشئ ملفات بدل حشو الشات عند وجود محتوى كبير.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "ملاحظات",
+              "description": "إنشاء ملاحظات تعليمية منظمة."
+            },
+            {
+              "name": "اختبار",
+              "description": "إنشاء اختبارات أو بطاقات."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص الشمول والوضوح."
+            }
+          ],
+          "categories": [
+            "دراسة",
+            "مستندات",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-forms",
+      "type": "skill",
+      "name": "Aura Forms",
+      "version": "1.0.0",
+      "summary": "Create forms, surveys, intake sheets, checklists, and response templates.",
+      "description": "A forms workspace skill for surveys, intake forms, checklists, questionnaires, and response templates. It creates structured Markdown/CSV artifacts and asks before publishing or sending forms externally.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-forms/icon.svg",
+      "cover": "aura-forms/cover.svg",
+      "categories": [
+        "Forms",
+        "Business",
+        "Productivity"
+      ],
+      "tags": [
+        "forms",
+        "survey",
+        "checklist",
+        "questionnaire",
+        "template"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Forms, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "form_create",
+          "description": "Create structured form questions."
+        },
+        {
+          "name": "form_export",
+          "description": "Export forms to Markdown or CSV."
+        },
+        {
+          "name": "form_verify",
+          "description": "Check required fields and answer options."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للنماذج",
+          "summary": "ينشئ نماذج واستبيانات واستمارات وقوائم تحقق وقوالب ردود.",
+          "description": "مهارة للنماذج والاستبيانات والاستمارات وقوائم التحقق وقوالب الردود. تنشئ ملفات Markdown/CSV منظمة وتسأل قبل نشر أو إرسال أي نموذج خارجياً.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء نموذج",
+              "description": "إنشاء أسئلة نموذج منظمة."
+            },
+            {
+              "name": "تصدير",
+              "description": "تصدير النماذج إلى Markdown أو CSV."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص الحقول المطلوبة وخيارات الإجابة."
+            }
+          ],
+          "categories": [
+            "نماذج",
+            "أعمال",
+            "إنتاجية"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-dashboard-builder",
+      "type": "skill",
+      "name": "Aura Dashboard Builder",
+      "version": "1.0.0",
+      "summary": "Create dashboard specs, HTML previews, metrics tables, and reporting layouts.",
+      "description": "A dashboard workspace skill for metrics layouts, HTML previews, reporting pages, and data visualization specs. It verifies hierarchy, readability, responsive behavior, and source assumptions.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-dashboard-builder/icon.svg",
+      "cover": "aura-dashboard-builder/cover.svg",
+      "categories": [
+        "Dashboards",
+        "Data",
+        "Design"
+      ],
+      "tags": [
+        "dashboard",
+        "metrics",
+        "html",
+        "charts",
+        "reporting"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Dashboard Builder, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the artifact or workflow you want in normal language.",
+        "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+      ],
+      "tools": [
+        {
+          "name": "dashboard_plan",
+          "description": "Plan dashboard sections and metrics."
+        },
+        {
+          "name": "dashboard_create_html",
+          "description": "Create an HTML preview when useful."
+        },
+        {
+          "name": "dashboard_verify",
+          "description": "Check layout, labels, and assumptions."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Aura للوحات المتابعة",
+          "summary": "ينشئ مواصفات لوحات متابعة ومعاينات HTML وجداول مؤشرات وتخطيطات تقارير.",
+          "description": "مهارة للوحات المتابعة وتخطيطات المؤشرات ومعاينات HTML وصفحات التقارير ومواصفات الرسوم. تتحقق من التسلسل البصري والقراءة والتجاوب وافتراضات المصادر.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+            "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+          ],
+          "tools": [
+            {
+              "name": "خطة لوحة",
+              "description": "تخطيط أقسام ومؤشرات لوحة المتابعة."
+            },
+            {
+              "name": "إنشاء HTML",
+              "description": "إنشاء معاينة HTML عند الحاجة."
+            },
+            {
+              "name": "تحقق",
+              "description": "فحص التخطيط والتسميات والافتراضات."
+            }
+          ],
+          "categories": [
+            "لوحات متابعة",
+            "بيانات",
+            "تصميم"
+          ]
+        }
+      }
+    },
+    {
       "id": "skill.security-auditor",
       "type": "skill",
       "name": "Security Auditor",
@@ -8,8 +1481,8 @@
       "summary": "Audits your codebase for security vulnerabilities.",
       "description": "A specialized AI agent that audits code for security issues and common vulnerabilities, suggesting patches and security best practices.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "security/icon.svg",
@@ -48,9 +1521,9 @@
           "description": "Audit security of a whole directory."
         }
       ],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT",
-      "repository": "https://github.com/aura-os/aura-work"
+      "repository": "https://github.com/hbx12/aura-work"
     },
     {
       "id": "skill.prd-writer",
@@ -60,8 +1533,8 @@
       "summary": "Drafts comprehensive Product Requirement Documents.",
       "description": "Generates high-quality, structured Product Requirement Documents (PRDs) containing goals, user stories, success metrics, and technical considerations.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -89,7 +1562,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -100,8 +1573,8 @@
       "summary": "Locates bugs and logic flaws in your code.",
       "description": "Uses advanced semantic search and syntax analysis to find bugs, logic flaws, race conditions, memory leaks, and performance issues in your source code.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -131,7 +1604,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -142,8 +1615,8 @@
       "summary": "Provides detailed feedback on pull requests and commits.",
       "description": "Acts as a senior reviewer analyzing style, structure, complexity, test coverage, and performance. Emits standard code review checklists.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -173,7 +1646,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -184,8 +1657,8 @@
       "summary": "Generates beautiful markdown documentation.",
       "description": "Analyzes code symbols, comments, and structure to generate clear, comprehensive Markdown documentation, API guides, and READMEs.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -213,7 +1686,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -224,8 +1697,8 @@
       "summary": "Assists in triaging issues and preparing releases.",
       "description": "Automates release notes generation, triages issues, generates pull request templates, and ensures compliance with contributing guidelines.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -253,7 +1726,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -264,8 +1737,8 @@
       "summary": "Generates Model Context Protocol servers.",
       "description": "Speeds up MCP server development by generating TypeScript or Python templates, schema mappings, and custom integrations.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -293,7 +1766,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -304,8 +1777,8 @@
       "summary": "Writes optimized SQL queries and database schemas.",
       "description": "Helps design database schemas, drafts efficient SQL queries, analyzes query execution plans, and formats migrations.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -334,7 +1807,7 @@
         "No setup required."
       ],
       "tools": [],
-      "homepage": "https://aura-os.org",
+      "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT"
     },
     {
@@ -668,8 +2141,8 @@
       "summary": "Automate web tasks using Playwright.",
       "description": "Gives the agent capability to run web automation scripts, test frontends, and interact with single-page applications.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",
@@ -721,8 +2194,8 @@
       "summary": "Interact with local Docker containers.",
       "description": "Allows the agent to manage Docker containers, list images, inspect networks, and start/stop environments.",
       "publisher": {
-        "name": "Aura Community",
-        "github": "aura-os",
+        "name": "HBX",
+        "github": "hbx12",
         "verified": true
       },
       "icon": "default/icon.svg",

@@ -1,0 +1,91 @@
+{
+  "id": "skill.aura-browser-assistant",
+  "type": "skill",
+  "name": "Aura Browser Assistant",
+  "version": "1.0.0",
+  "summary": "Read pages, extract tables, verify websites, and plan safe browser workflows.",
+  "description": "A browser workspace skill for page reading, form workflows, table extraction, screenshot-backed verification, and web task planning. It treats page content as untrusted data and asks before submissions, logins, purchases, or external actions.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-browser-assistant/icon.svg",
+  "cover": "aura-browser-assistant/cover.svg",
+  "categories": [
+    "Browser",
+    "Web",
+    "Automation"
+  ],
+  "tags": [
+    "browser",
+    "web",
+    "forms",
+    "screenshots",
+    "verification"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Browser Assistant, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "browse_url"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "browser_read_page",
+      "description": "Read page content through approved browser tools."
+    },
+    {
+      "name": "browser_extract_table",
+      "description": "Extract visible tabular page data."
+    },
+    {
+      "name": "browser_verify_page",
+      "description": "Verify visible page state before claims."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للمتصفح",
+      "summary": "يقرأ الصفحات ويستخرج الجداول ويتحقق من المواقع ويخطط لتصفح آمن.",
+      "description": "مهارة للمتصفح لقراءة الصفحات وتدفقات النماذج واستخراج الجداول والتحقق باللقطات وتخطيط مهام الويب. تتعامل مع محتوى الصفحات كبيانات غير موثوقة وتسأل قبل الإرسال أو الدخول أو الشراء أو الإجراءات الخارجية.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "قراءة صفحة",
+          "description": "قراءة محتوى الصفحة عبر أدوات متصفح معتمدة."
+        },
+        {
+          "name": "استخراج جدول",
+          "description": "استخراج الجداول الظاهرة من الصفحة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص حالة الصفحة قبل تقديم نتيجة."
+        }
+      ],
+      "categories": [
+        "متصفح",
+        "ويب",
+        "أتمتة"
+      ]
+    }
+  }
+}

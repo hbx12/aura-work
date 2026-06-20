@@ -5,6 +5,7 @@ import MarketplaceCard from "./MarketplaceCard";
 import MarketplaceDetailModal from "./MarketplaceDetailModal";
 import InstallFlowModal from "./InstallFlowModal";
 import { invoke } from "@tauri-apps/api/core";
+import { localizedMarketplace } from "../../marketplace/localizeMarketplace";
 import "./marketplace.css";
 
 interface MarketplaceGridProps {
@@ -56,14 +57,21 @@ export default function MarketplaceGrid({
   const [selectedInstallItem, setSelectedInstallItem] = useState<MarketplaceEntry | null>(null);
 
   const normalizedMarketplace = useMemo(() => marketplace.map(normalizePublisher), [marketplace]);
+  const displayMarketplace = useMemo(
+    () => normalizedMarketplace.map((item) => localizedMarketplace(item, isAr)),
+    [normalizedMarketplace, isAr],
+  );
 
   const getItemInstalledStatus = (item: MarketplaceEntry): "not_installed" | "installed" | "configured" => {
     if (item.type === "skill") {
-      const slug = item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+      const slug = item.id.startsWith("skill.")
+        ? item.id.slice("skill.".length)
+        : item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
       const expectedId = `com.aura.skill.${slug}`;
       const isInst = skills.some(
         (s) =>
           s.pluginId === expectedId ||
+          s.pluginId === item.id ||
           s.name.toLowerCase() === item.name.toLowerCase()
       );
       return isInst ? "installed" : "not_installed";
@@ -93,14 +101,14 @@ export default function MarketplaceGrid({
 
   const allCategories = useMemo(() => {
     const cats = new Set<string>();
-    normalizedMarketplace.forEach((item) => {
+    displayMarketplace.forEach((item) => {
       item.categories?.forEach((c) => cats.add(c));
     });
     return Array.from(cats);
-  }, [normalizedMarketplace]);
+  }, [displayMarketplace]);
 
   const filteredItems = useMemo(() => {
-    return normalizedMarketplace.filter((item) => {
+    return displayMarketplace.filter((item) => {
       if (activeTab === "installed") {
         if (getItemInstalledStatus(item) === "not_installed") return false;
       } else if (activeTab !== "all") {
@@ -113,16 +121,31 @@ export default function MarketplaceGrid({
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
-        const nameMatch = item.name.toLowerCase().includes(q);
-        const descMatch = (item.description || "").toLowerCase().includes(q);
-        const summaryMatch = (item.summary || "").toLowerCase().includes(q);
-        const tagMatch = item.tags && item.tags.some((t) => t.toLowerCase().includes(q));
-        if (!nameMatch && !descMatch && !summaryMatch && !tagMatch) return false;
+        const localized = item.localized ? Object.values(item.localized) : [];
+        const searchText = [
+          item.name,
+          item.description,
+          item.summary,
+          ...(item.tags ?? []),
+          ...(item.categories ?? []),
+          ...localized.flatMap((loc) => [
+            loc?.name,
+            loc?.summary,
+            loc?.description,
+            ...(loc?.categories ?? []),
+            ...(loc?.setup ?? []),
+            ...(loc?.tools ?? []).flatMap((tool) => [tool.name, tool.description]),
+          ]),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!searchText.includes(q)) return false;
       }
 
       return true;
     });
-  }, [normalizedMarketplace, activeTab, selectedCategory, searchQuery, plugins, mcpServers, skills]);
+  }, [displayMarketplace, activeTab, selectedCategory, searchQuery, plugins, mcpServers, skills]);
 
   const handleUninstall = async (item: MarketplaceEntry) => {
     if (!window.confirm(isAr ? `هل أنت متأكد من رغبتك في إزالة ${item.name}؟` : `Are you sure you want to uninstall ${item.name}?`)) {
@@ -130,9 +153,11 @@ export default function MarketplaceGrid({
     }
     try {
       if (item.type === "skill") {
-        const slug = item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+        const slug = item.id.startsWith("skill.")
+          ? item.id.slice("skill.".length)
+          : item.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
         const expectedId = `com.aura.skill.${slug}`;
-        const found = skills.find((s) => s.pluginId === expectedId);
+        const found = skills.find((s) => s.pluginId === expectedId || s.pluginId === item.id);
         if (found) {
           await invoke("uninstall_plugin", { pluginId: found.pluginId });
         }

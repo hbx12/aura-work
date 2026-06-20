@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-spreadsheets",
+  "type": "skill",
+  "name": "Aura Spreadsheets",
+  "version": "1.0.0",
+  "summary": "Build spreadsheet-style tables, budgets, CSV files, formulas, and analysis reports.",
+  "description": "A spreadsheet workspace skill for budgets, expenses, sales tables, formulas, CSV analysis, and dashboard-ready tabular outputs. It creates real CSV/Markdown table files with available tools now, uses XLSX export only when a real workbook tool is available, and verifies totals, ranges, and formulas when present.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-spreadsheets/icon.svg",
+  "cover": "aura-spreadsheets/cover.svg",
+  "categories": [
+    "Spreadsheets",
+    "Data",
+    "Productivity"
+  ],
+  "tags": [
+    "spreadsheet",
+    "csv",
+    "budget",
+    "formula",
+    "dashboard"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Spreadsheets, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "spreadsheet_create_table",
+      "description": "Create CSV or Markdown table artifacts."
+    },
+    {
+      "name": "spreadsheet_set_formula",
+      "description": "Represent formulas clearly when workbook tooling is available."
+    },
+    {
+      "name": "spreadsheet_verify",
+      "description": "Check totals, ranges, and obvious table errors."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للجداول",
+      "summary": "ينشئ جداول وميزانيات وملفات CSV ومعادلات وتقارير تحليلية.",
+      "description": "مهارة للجداول والميزانيات والمصاريف والمبيعات والمعادلات وتحليل CSV. تنشئ ملفات CSV أو جداول Markdown حقيقية بالأدوات المتاحة حالياً، ولا تستخدم XLSX إلا عند توفر أداة workbook فعلية، وتتحقق من الإجماليات والنطاقات والمعادلات.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "إنشاء جدول",
+          "description": "إنشاء CSV أو جدول Markdown كملف حقيقي."
+        },
+        {
+          "name": "معادلات",
+          "description": "تمثيل المعادلات بوضوح عند توفر أدوات workbook."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص الإجماليات والنطاقات والأخطاء الواضحة."
+        }
+      ],
+      "categories": [
+        "جداول",
+        "بيانات",
+        "إنتاجية"
+      ]
+    }
+  }
+}

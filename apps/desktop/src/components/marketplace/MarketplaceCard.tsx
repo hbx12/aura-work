@@ -194,19 +194,19 @@ export default function MarketplaceCard({
         )}
 
         <div style={{ display: "flex", gap: 8, marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border-3)" }}>
-          <button type="button" className="btn secondary sm" style={{ flex: 1 }} onClick={() => onOpenDetails(displayItem)}>
+          <button type="button" className="btn secondary sm" style={{ flex: 1 }} onClick={() => onOpenDetails(item)}>
             {isAr ? "التفاصيل" : "Details"}
           </button>
 
           {isInstalled ? (
             <div style={{ display: "flex", gap: 6, flex: 1.5 }}>
               {displayItem.type === "mcp" && onConfigure && (
-                <button type="button" className="btn secondary sm" style={{ flex: 1, borderColor: "var(--accent)", color: "var(--accent)" }} onClick={() => onConfigure(displayItem)}>
+                <button type="button" className="btn secondary sm" style={{ flex: 1, borderColor: "var(--accent)", color: "var(--accent)" }} onClick={() => onConfigure(item)}>
                   <Icon name="cog" size={13} />
                 </button>
               )}
               {onUninstall && (
-                <button type="button" className="btn secondary sm" style={{ flex: 1, color: "var(--danger)", borderColor: "rgba(239,68,68,.2)" }} onClick={() => onUninstall(displayItem)} title={isAr ? "إلغاء التثبيت" : "Uninstall"}>
+                <button type="button" className="btn secondary sm" style={{ flex: 1, color: "var(--danger)", borderColor: "rgba(239,68,68,.2)" }} onClick={() => onUninstall(item)} title={isAr ? "إلغاء التثبيت" : "Uninstall"}>
                   <Icon name="trash" size={13} />
                 </button>
               )}
@@ -216,7 +216,7 @@ export default function MarketplaceCard({
               </span>
             </div>
           ) : (
-            <button type="button" className="btn primary sm" style={{ flex: 1.5 }} onClick={() => onInstall(displayItem)}>
+            <button type="button" className="btn primary sm" style={{ flex: 1.5 }} onClick={() => onInstall(item)}>
               <Icon name="plus" size={13} />
               {isAr ? "تثبيت" : "Install"}
             </button>

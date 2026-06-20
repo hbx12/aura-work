@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Aura Study Kit">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#164e63"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="34" fill="url(#g)"/>
+  <circle cx="132" cy="28" r="34" fill="white" opacity=".10"/>
+  <circle cx="24" cy="140" r="46" fill="black" opacity=".16"/>
+  <path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M34 48h42c12 0 20 8 20 20v66H54c-12 0-20-8-20-20z"/><path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M126 48H96v86h30c0-12-8-20-20-20H96"/>
+</svg>
