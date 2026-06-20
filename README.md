@@ -7,6 +7,8 @@
 
 Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.
 
+> Want to build an extension? Start with the **[Aura Marketplace Registry guide](./registry/README.md)** for Skills, MCP connectors, plugins, supported languages, and the GitHub approval flow.
+
 ## Demo
 
 <p align="center">
@@ -29,6 +31,7 @@ Aura Work is maintained by **Habib (`hbx12`)**. Suggestions are reviewed activel
 - [Beginner-friendly issues](https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 - [Tasks needing help](https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 - [Contribution guide](./CONTRIBUTING.md)
+- [Marketplace Registry guide](./registry/README.md)
 
 Please comment on an issue before starting work so effort is not duplicated.
 
@@ -84,6 +87,7 @@ Installers are produced under `apps/desktop/src-tauri/target/release/bundle/` wh
 ## Documentation
 
 - [docs/README.md](./docs/README.md) — feature index
+- [registry/README.md](./registry/README.md) — Marketplace extension guide
 - [docs/releases.md](./docs/releases.md) — approved GitHub Releases and optional signed updates
 - [docs/github-publish.md](./docs/github-publish.md) — what goes on GitHub
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — development and translations
