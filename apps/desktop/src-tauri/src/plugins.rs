@@ -725,6 +725,7 @@ pub struct CreateSkillInput {
     pub name: String,
     pub description: String,
     pub prompt: String,
+    pub id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -754,8 +755,37 @@ pub async fn create_local_skill(
     db: State<'_, DbState>,
     input: CreateSkillInput,
 ) -> Result<InstalledPlugin, String> {
-    let slug = input.name.to_lowercase().replace(|c: char| !c.is_alphanumeric(), "-");
-    let plugin_id = format!("com.aura.skill.{}", slug);
+    let plugin_id = if let Some(ref custom_id) = input.id {
+        custom_id.clone()
+    } else {
+        let raw_slug = input.name.to_lowercase()
+            .chars()
+            .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+            .collect::<String>();
+        
+        let mut clean_slug = String::new();
+        let mut last_was_dash = false;
+        for c in raw_slug.chars() {
+            if c == '-' {
+                if !last_was_dash {
+                    clean_slug.push(c);
+                    last_was_dash = true;
+                }
+            } else {
+                clean_slug.push(c);
+                last_was_dash = false;
+            }
+        }
+        let clean_slug = clean_slug.trim_matches('-');
+        
+        let slug_final = if clean_slug.is_empty() {
+            uuid::Uuid::new_v4().to_string()
+        } else {
+            clean_slug.to_string()
+        };
+        format!("com.aura.skill.{}", slug_final)
+    };
+
     validate_plugin_id(&plugin_id)?;
     let root = plugins_root()?;
     let dest = root.join(&plugin_id);

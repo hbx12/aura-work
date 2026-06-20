@@ -40,6 +40,7 @@ export default function InstallFlowModal({
         // Skill install flow: invoke create_local_skill
         await invoke("create_local_skill", {
           input: {
+            id: item.id,
             name: item.name,
             description: item.description || item.summary || "",
             prompt: skillPromptText.trim(),
