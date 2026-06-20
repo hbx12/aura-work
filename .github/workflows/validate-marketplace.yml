@@ -4,17 +4,16 @@ on:
   push:
     branches:
       - main
-      - feature/aura-marketplace
     paths:
       - 'registry/**'
       - 'scripts/validate-marketplace-manifests.js'
   pull_request:
     branches:
       - main
-      - feature/aura-marketplace
     paths:
       - 'registry/**'
       - 'scripts/validate-marketplace-manifests.js'
+      - '.github/workflows/validate-marketplace.yml'
 
 jobs:
   validate:

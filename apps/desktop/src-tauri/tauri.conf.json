@@ -44,7 +44,8 @@
       "../../../bundle/sidecars/aura-plugins-helper/dist": "sidecars/aura-plugins-helper/dist",
       "../../../bundle/sidecars/aura-cloud-sync/dist": "sidecars/aura-cloud-sync/dist",
       "../../../bundle/sidecars/aura-bridge/dist": "sidecars/aura-bridge/dist",
-      "../../../bundle/sidecars/aura-computer-use/dist": "sidecars/aura-computer-use/dist"
+      "../../../bundle/sidecars/aura-computer-use/dist": "sidecars/aura-computer-use/dist",
+      "../../../registry": "registry"
     },
     "icon": [
       "icons/32x32.png",

@@ -15,6 +15,19 @@ export interface SkillInfo {
   enabled: boolean;
 }
 
+function withMarketplaceFallback(entries: MarketplaceEntry[] | null | undefined) {
+  return entries ?? [];
+}
+
+async function loadMarketplaceEntries() {
+  try {
+    return withMarketplaceFallback(await invoke<MarketplaceEntry[]>("list_marketplace_entries"));
+  } catch (error) {
+    console.warn("[marketplace] Could not load marketplace registry", error);
+    return [];
+  }
+}
+
 export function usePlugins(projectId: string | null) {
   const [status, setStatus] = useState<PluginsHelperStatus | null>(null);
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
@@ -30,7 +43,7 @@ export function usePlugins(projectId: string | null) {
         invoke<PluginsHelperStatus>("get_plugins_status"),
         invoke<InstalledPlugin[]>("list_installed_plugins"),
         invoke<McpServerRecord[]>("list_mcp_servers"),
-        invoke<MarketplaceEntry[]>("list_marketplace_entries"),
+        loadMarketplaceEntries(),
         invoke<SkillInfo[]>("list_local_skills"),
       ]);
       setStatus(s);
@@ -167,11 +180,15 @@ export function usePlugins(projectId: string | null) {
   const syncMarketplace = useCallback(async () => {
     setLoading(true);
     try {
-      const entries = await invoke<MarketplaceEntry[]>("sync_marketplace", {
+      const entries = withMarketplaceFallback(await invoke<MarketplaceEntry[]>("sync_marketplace", {
         registryUrl: null,
-      });
+      }));
       setMarketplace(entries);
       return entries;
+    } catch (error) {
+      console.warn("[marketplace] Sync failed", error);
+      setMarketplace([]);
+      return [];
     } finally {
       setLoading(false);
     }
