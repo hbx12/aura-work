@@ -4,10 +4,28 @@ import { Icon } from "@aura-os/ui";
 interface PermissionApprovalDialogProps {
   permission: PermissionRequest | null;
   onDecide: (decision: string) => void;
+  labels?: {
+    highRisk: string;
+    needsApproval: string;
+    desktopOnly: string;
+    allowOnce: string;
+    allowAlways: string;
+    deny: string;
+  };
 }
 
-export function PermissionApprovalDialog({ permission, onDecide }: PermissionApprovalDialogProps) {
+const DEFAULT_LABELS = {
+  highRisk: "High risk",
+  needsApproval: "Needs approval",
+  desktopOnly: "Desktop approval required. Remote clients cannot approve this action.",
+  allowOnce: "Allow once",
+  allowAlways: "Allow always (this project)",
+  deny: "Deny",
+};
+
+export function PermissionApprovalDialog({ permission, onDecide, labels: labelOverrides }: PermissionApprovalDialogProps) {
   if (!permission) return null;
+  const labels = { ...DEFAULT_LABELS, ...labelOverrides };
   const icon =
     permission.category === "file"
       ? "file"
@@ -37,19 +55,19 @@ export function PermissionApprovalDialog({ permission, onDecide }: PermissionApp
           <div>
             <div className="ah">
               {permission.action} — {permission.target}
-              <span className="risk">{high ? "High risk" : "Needs approval"}</span>
+              <span className="risk">{high ? labels.highRisk : labels.needsApproval}</span>
             </div>
             <div className="adesc">{permission.reason}</div>
             {desktopOnly && (
               <div className="adesc" style={{ marginTop: 6 }}>
-                Desktop approval required — remote clients cannot approve this action.
+                {labels.desktopOnly}
               </div>
             )}
           </div>
         </div>
         <div className="acts">
           <button type="button" className="btn primary sm" onClick={() => onDecide("allow-once")}>
-            Allow once
+            {labels.allowOnce}
           </button>
           {permission.allowAlwaysAvailable && (
             <button
@@ -57,12 +75,12 @@ export function PermissionApprovalDialog({ permission, onDecide }: PermissionApp
               className="btn secondary sm"
               onClick={() => onDecide("allow-always-project")}
             >
-              Allow always (this project)
+              {labels.allowAlways}
             </button>
           )}
           <div className="cspacer" />
           <button type="button" className="btn danger sm" onClick={() => onDecide("deny")}>
-            Deny
+            {labels.deny}
           </button>
         </div>
       </div>

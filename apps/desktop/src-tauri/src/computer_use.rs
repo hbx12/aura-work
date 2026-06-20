@@ -496,21 +496,24 @@ pub fn list_computer_use_screenshots(
 
 #[tauri::command]
 pub fn delete_computer_use_screenshot(db: State<'_, DbState>, id: String) -> Result<(), String> {
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let path: Option<String> = conn
-        .query_row(
-            "SELECT file_path FROM computer_use_screenshots WHERE id = ?1",
+    let path: Option<String> = {
+        let conn = db.0.lock().map_err(|e| e.to_string())?;
+        let path: Option<String> = conn
+            .query_row(
+                "SELECT file_path FROM computer_use_screenshots WHERE id = ?1",
+                params![id],
+                |row| row.get(0),
+            )
+            .ok();
+        conn.execute(
+            "DELETE FROM computer_use_screenshots WHERE id = ?1",
             params![id],
-            |row| row.get(0),
         )
-        .ok();
-    conn.execute(
-        "DELETE FROM computer_use_screenshots WHERE id = ?1",
-        params![id],
-    )
-    .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?;
+        path
+    };
     if let Some(p) = path {
-        let _ = std::fs::remove_file(p);
+        remove_stored_screenshot_file(&db, &p)?;
     }
     Ok(())
 }
@@ -551,6 +554,23 @@ fn screenshots_dir(db: &DbState) -> Result<PathBuf, String> {
         .join("computer-use-screenshots");
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     Ok(dir)
+}
+
+fn remove_stored_screenshot_file(db: &DbState, file_path: &str) -> Result<(), String> {
+    let dir = screenshots_dir(db)?
+        .canonicalize()
+        .map_err(|e| format!("Screenshot directory is not accessible: {e}"))?;
+    let path = PathBuf::from(file_path);
+    if !path.exists() {
+        return Ok(());
+    }
+    let canonical = path
+        .canonicalize()
+        .map_err(|e| format!("Screenshot file is not accessible: {e}"))?;
+    if !canonical.starts_with(&dir) {
+        return Err("Refused to delete a screenshot outside the app screenshot directory.".into());
+    }
+    std::fs::remove_file(canonical).map_err(|e| e.to_string())
 }
 
 fn check_app_access(

@@ -67,6 +67,18 @@ export function useTasks(projectId: string | null) {
     }
   }, [projectId]);
 
+  const refreshPendingPermissions = useCallback(
+    async (scope?: { projectId?: string | null; taskId?: string | null }) => {
+      const perms = await invoke<PermissionRequest[]>("list_pending_permissions", {
+        projectId: scope?.projectId ?? projectId,
+        taskId: scope?.taskId ?? null,
+      });
+      setPendingPermissions(perms);
+      return perms;
+    },
+    [projectId],
+  );
+
   const loadTask = useCallback(async (taskId: string) => {
     setLoading(true);
     setError(null);
@@ -74,17 +86,13 @@ export function useTasks(projectId: string | null) {
     try {
       const task = await invoke<TaskRecord>("get_task", { taskId });
       setActiveTask(task);
-      const perms = await invoke<PermissionRequest[]>("list_pending_permissions", {
-        projectId: null,
-        taskId,
-      });
-      setPendingPermissions(perms);
+      await refreshPendingPermissions({ projectId: null, taskId });
     } catch (e) {
       setError(String(e));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [refreshPendingPermissions]);
 
   const runLoop = useCallback(
     async (taskId: string, maxSteps = MAX_TASK_STEPS, autoApproveEdits = false) => {
@@ -124,11 +132,7 @@ export function useTasks(projectId: string | null) {
             break;
           }
         }
-        const perms = await invoke<PermissionRequest[]>("list_pending_permissions", {
-          projectId: null,
-          taskId,
-        });
-        setPendingPermissions(perms);
+        await refreshPendingPermissions({ projectId: null, taskId });
         await refreshTasks();
         return task;
       } catch (e) {
@@ -138,7 +142,7 @@ export function useTasks(projectId: string | null) {
         setRunning(false);
       }
     },
-    [refreshTasks, advanceTask],
+    [refreshTasks, advanceTask, refreshPendingPermissions],
   );
 
   const createAndStart = useCallback(
@@ -239,11 +243,7 @@ export function useTasks(projectId: string | null) {
             permissionId,
             decision,
           });
-          const perms = await invoke<PermissionRequest[]>("list_pending_permissions", {
-            projectId,
-            taskId: null,
-          });
-          setPendingPermissions(perms);
+          await refreshPendingPermissions({ projectId, taskId: null });
           return null;
         }
         const task = await invoke<TaskRecord>("resume_after_permission", {
@@ -262,7 +262,7 @@ export function useTasks(projectId: string | null) {
         setRunning(false);
       }
     },
-    [pendingPermissions, projectId, runLoop],
+    [pendingPermissions, projectId, runLoop, refreshPendingPermissions],
   );
 
   const sendTaskMessage = useCallback(
@@ -296,6 +296,7 @@ export function useTasks(projectId: string | null) {
     setError,
     streamText,
     refreshTasks,
+    refreshPendingPermissions,
     loadTask,
     createAndStart,
     approvePlan,

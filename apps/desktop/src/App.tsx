@@ -647,6 +647,20 @@ export default function App() {
     [t],
   );
 
+  const approvalLabels = useMemo(
+    () => ({
+      highRisk: t("task.approval.highRisk"),
+      needsApproval: t("task.approval.needsApproval"),
+      desktopOnly: i18n.locale?.startsWith("ar")
+        ? "تتطلب هذه العملية موافقة من تطبيق سطح المكتب. لا يمكن اعتمادها من جهاز بعيد."
+        : "Desktop approval required. Remote clients cannot approve this action.",
+      allowOnce: t("task.approval.allowOnce"),
+      allowAlways: i18n.locale?.startsWith("ar") ? "السماح دائماً لهذا المشروع" : "Allow always (this project)",
+      deny: t("task.approval.deny"),
+    }),
+    [i18n.locale, t],
+  );
+
   const handleCheckPetCommand = (text: string): boolean => {
     const msg = text.trim().toLowerCase();
     if (msg.startsWith("/pet") || msg.startsWith("/أليف")) {
@@ -892,6 +906,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
         });
         return;
       }
+      if (activeProjectId) {
+        void tasks.refreshPendingPermissions({ projectId: activeProjectId, taskId: null });
+      }
       startTypingSimulation(
         result.text || t("chat.emptyResponse"),
         `${result.providerId}/${result.modelId}`
@@ -1087,6 +1104,13 @@ You can open and customize it to instruct the agent on workspace rules.`;
                     {chatStreamText}
                   </StreamingMsg>
                 )}
+                {tasks.pendingPermissions[0] && (
+                  <PermissionApprovalDialog
+                    permission={tasks.pendingPermissions[0]}
+                    labels={approvalLabels}
+                    onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
+                  />
+                )}
                 {chatError && <p className="modal-error">{chatError}</p>}
                 {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
               </div>
@@ -1274,6 +1298,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
             {tasks.pendingPermissions[0] && (
               <PermissionApprovalDialog
                 permission={tasks.pendingPermissions[0]}
+                labels={approvalLabels}
                 onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
               />
             )}

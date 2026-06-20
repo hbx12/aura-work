@@ -115,10 +115,37 @@ fn load_mcp_servers(conn: &Connection) -> Result<Vec<McpServerRecord>, String> {
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
+fn is_sensitive_env_key(key: &str) -> bool {
+    let upper = key.to_ascii_uppercase();
+    ["KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL", "AUTH"]
+        .iter()
+        .any(|needle| upper.contains(needle))
+}
+
+fn redact_env_for_display(
+    env: serde_json::Map<String, serde_json::Value>,
+) -> serde_json::Map<String, serde_json::Value> {
+    env.into_iter()
+        .map(|(key, value)| {
+            if is_sensitive_env_key(&key) {
+                (key, serde_json::Value::String("[REDACTED]".into()))
+            } else {
+                (key, value)
+            }
+        })
+        .collect()
+}
+
 #[tauri::command]
 pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let mut list = load_mcp_servers(&conn)?;
+    let mut list = load_mcp_servers(&conn)?
+        .into_iter()
+        .map(|mut server| {
+            server.env = redact_env_for_display(server.env);
+            server
+        })
+        .collect::<Vec<_>>();
 
     // 1. Load global config-based servers
     if let Some(app_data) = APP_DATA_DIR.get() {
@@ -130,7 +157,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
                 transport: s.transport,
                 command: s.command,
                 args: s.args,
-                env: s.env,
+                env: redact_env_for_display(s.env),
                 enabled: s.enabled,
                 created_at: "".to_string(),
             });
@@ -161,7 +188,7 @@ pub fn list_mcp_servers(db: State<'_, DbState>) -> Result<Vec<McpServerRecord>, 
                     transport: s.transport,
                     command: s.command,
                     args: s.args,
-                    env: s.env,
+                    env: redact_env_for_display(s.env),
                     enabled,
                     created_at: "".to_string(),
                 });
@@ -407,4 +434,27 @@ pub async fn tool_mcp_call(
         return Err(result.output);
     }
     Ok(result.output.chars().take(10000).collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn redacts_sensitive_env_for_display() {
+        let mut env = serde_json::Map::new();
+        env.insert("OPENAI_API_KEY".into(), serde_json::Value::String("sk-test".into()));
+        env.insert("NODE_ENV".into(), serde_json::Value::String("production".into()));
+
+        let redacted = redact_env_for_display(env);
+
+        assert_eq!(
+            redacted.get("OPENAI_API_KEY").and_then(|v| v.as_str()),
+            Some("[REDACTED]")
+        );
+        assert_eq!(
+            redacted.get("NODE_ENV").and_then(|v| v.as_str()),
+            Some("production")
+        );
+    }
 }

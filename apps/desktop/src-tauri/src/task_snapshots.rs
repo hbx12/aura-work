@@ -5,6 +5,7 @@ use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::path::{Component, Path, PathBuf};
 use tauri::State;
 
 const MAX_SNAPSHOT_BYTES: u64 = 8 * 1024 * 1024;
@@ -37,6 +38,60 @@ fn decode_snapshot_content(content: &str, rel_path: &str) -> Result<Vec<u8>, Str
     }
 
     Ok(content.as_bytes().to_vec())
+}
+
+fn validate_snapshot_rel_path(rel_path: &str) -> Result<String, String> {
+    let rel_path = normalize_rel(rel_path);
+    if rel_path.trim().is_empty() {
+        return Err("Snapshot path is required.".into());
+    }
+    if looks_like_windows_absolute_path(&rel_path) {
+        return Err("Snapshot path must be relative.".into());
+    }
+    let path = Path::new(&rel_path);
+    if path.is_absolute() {
+        return Err("Snapshot path must be relative.".into());
+    }
+    for component in path.components() {
+        match component {
+            Component::Normal(_) | Component::CurDir => {}
+            Component::ParentDir => return Err("Snapshot path traversal is not allowed.".into()),
+            Component::RootDir | Component::Prefix(_) => {
+                return Err("Snapshot path must be relative.".into())
+            }
+        }
+    }
+    Ok(rel_path)
+}
+
+fn looks_like_windows_absolute_path(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 3
+        && bytes[1] == b':'
+        && bytes[0].is_ascii_alphabetic()
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
+}
+
+fn resolve_snapshot_path(root: &str, rel_path: &str) -> Result<PathBuf, String> {
+    let rel_path = validate_snapshot_rel_path(rel_path)?;
+    let canonical_root = PathBuf::from(root)
+        .canonicalize()
+        .map_err(|e| format!("Project folder not accessible: {e}"))?;
+    let joined = canonical_root.join(&rel_path);
+    let mut check = joined.clone();
+    while !check.exists() {
+        let Some(parent) = check.parent() else {
+            break;
+        };
+        check = parent.to_path_buf();
+    }
+    let canonical_existing = check
+        .canonicalize()
+        .map_err(|e| format!("Snapshot path parent is not accessible: {e}"))?;
+    if !canonical_existing.starts_with(&canonical_root) {
+        return Err("Snapshot path is outside the project folder.".into());
+    }
+    Ok(joined)
 }
 
 pub fn capture_snapshot_for_file(
@@ -248,7 +303,7 @@ pub async fn rollback_task(db: State<'_, DbState>, task_id: String) -> Result<St
     // Perform file restoration/deletion
     for entry in &entries {
         let rel_path = normalize_rel(&entry.file_path);
-        let path = resolve_project_path(&root, &rel_path)?;
+        let path = resolve_snapshot_path(&root, &rel_path)?;
 
         if entry.is_new {
             if path.exists() && path.is_file() {
@@ -301,4 +356,44 @@ pub async fn rollback_task(db: State<'_, DbState>, task_id: String) -> Result<St
     )?;
 
     Ok("Rollback completed successfully.".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_snapshot_root(name: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "aura-work-snapshot-{name}-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        root
+    }
+
+    #[test]
+    fn snapshot_path_allows_missing_file_under_project() {
+        let root = temp_snapshot_root("missing-file");
+        let resolved = resolve_snapshot_path(root.to_str().unwrap(), "src/deleted.ts").unwrap();
+
+        assert_eq!(
+            resolved,
+            root.canonicalize().unwrap().join("src").join("deleted.ts")
+        );
+
+        let _ = fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn snapshot_path_rejects_escape() {
+        let root = temp_snapshot_root("escape");
+
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "../secret.txt").is_err());
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "/tmp/secret.txt").is_err());
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "C:/Users/example/secret.txt").is_err());
+        assert!(resolve_snapshot_path(root.to_str().unwrap(), "C:\\Users\\example\\secret.txt").is_err());
+
+        let _ = fs::remove_dir_all(root);
+    }
 }

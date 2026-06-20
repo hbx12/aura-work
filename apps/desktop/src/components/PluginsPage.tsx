@@ -255,7 +255,7 @@ export function PluginsPage({
         filters: [
           {
             name: "Aura Skill",
-            extensions: ["aura-skill", "json"]
+            extensions: ["aura-skill"]
           }
         ]
       });

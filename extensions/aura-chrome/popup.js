@@ -37,7 +37,7 @@ async function loadSession() {
 async function loadProjects(selectedId) {
   const data = await bridgeFetch("/v1/projects");
   const sel = document.getElementById("project");
-  sel.innerHTML = "";
+  sel.replaceChildren();
   for (const p of data.projects ?? []) {
     const opt = document.createElement("option");
     opt.value = p.id;

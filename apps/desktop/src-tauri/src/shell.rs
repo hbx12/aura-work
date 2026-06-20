@@ -76,10 +76,22 @@ pub fn categorize_command(command: &str) -> (CommandCategory, &'static str) {
         "apt" | "apt-get" | "brew" | "yum" | "dnf" | "pacman" => {
             (CommandCategory::Install, "high")
         }
-        "pytest" | "python" | "python3" | "node" | "go" | "make" | "cmake" | "dotnet"
-        | "mvn" | "gradle" | "tsc" | "vitest" | "jest" => {
-            (CommandCategory::BuildTest, "medium")
+        "python" | "python3" | "py" => {
+            if has_inline_code_arg(&lower, &["-c"]) {
+                (CommandCategory::Unknown, "high")
+            } else {
+                (CommandCategory::BuildTest, "medium")
+            }
         }
+        "node" => {
+            if has_inline_code_arg(&lower, &["-e", "--eval", "-p", "--print"]) {
+                (CommandCategory::Unknown, "high")
+            } else {
+                (CommandCategory::BuildTest, "medium")
+            }
+        }
+        "pytest" | "go" | "make" | "cmake" | "dotnet" | "mvn" | "gradle" | "tsc"
+        | "vitest" | "jest" => (CommandCategory::BuildTest, "medium"),
         "rm" | "del" | "rmdir" | "format" | "mkfs" | "dd" => {
             (CommandCategory::Destructive, "critical")
         }
@@ -134,6 +146,15 @@ fn categorize_pkg_manager(lower: &str) -> (CommandCategory, &'static str) {
     } else {
         (CommandCategory::Unknown, "medium")
     }
+}
+
+fn has_inline_code_arg(lower: &str, flags: &[&str]) -> bool {
+    let normalized = lower.replace('"', " ").replace('\'', " ");
+    flags.iter().any(|flag| {
+        normalized.contains(&format!(" {flag} "))
+            || normalized.contains(&format!(" {flag}="))
+            || normalized.ends_with(&format!(" {flag}"))
+    })
 }
 
 pub fn always_requires_approval(category: CommandCategory) -> bool {
@@ -354,6 +375,19 @@ mod tests {
         let chained = categorize_command("cat package.json && npm install");
         assert_eq!(chained.0, CommandCategory::Unknown);
         assert!(always_requires_approval(chained.0));
+    }
+
+    #[test]
+    fn inline_interpreters_require_approval() {
+        let node = categorize_command("node -e \"require('fs').writeFileSync('x','y')\"");
+        assert_eq!(node.0, CommandCategory::Unknown);
+        assert_eq!(node.1, "high");
+        assert!(always_requires_approval(node.0));
+
+        let python = categorize_command("python -c \"open('x','w').write('y')\"");
+        assert_eq!(python.0, CommandCategory::Unknown);
+        assert_eq!(python.1, "high");
+        assert!(always_requires_approval(python.0));
     }
 
     #[test]

@@ -6,7 +6,33 @@ interface ProviderBrandIconProps {
   className?: string;
 }
 
+const simpleIconProviders: Record<string, { slug: string; title: string }> = {
+  "brand-openai": { slug: "openai", title: "OpenAI" },
+  "brand-anthropic": { slug: "anthropic", title: "Anthropic" },
+  "brand-gemini": { slug: "googlegemini", title: "Google Gemini" },
+  "brand-deepseek": { slug: "deepseek", title: "DeepSeek" },
+  "brand-ollama": { slug: "ollama", title: "Ollama" },
+  "brand-minimax": { slug: "minimax", title: "Minimax" },
+  "brand-qwen": { slug: "alibabacloud", title: "Qwen" },
+  "brand-lmstudio": { slug: "lmstudio", title: "LM Studio" },
+};
+
 export function ProviderBrandIcon({ name, size = 18, className }: ProviderBrandIconProps) {
+  const simpleIcon = name ? simpleIconProviders[name] : undefined;
+  if (simpleIcon) {
+    return (
+      <img
+        src={`https://cdn.simpleicons.org/${simpleIcon.slug}`}
+        alt=""
+        title={simpleIcon.title}
+        width={size}
+        height={size}
+        className={className}
+        aria-hidden="true"
+      />
+    );
+  }
+
   const common = {
     className,
     width: size,
