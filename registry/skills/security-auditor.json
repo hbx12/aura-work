@@ -3,11 +3,11 @@
   "type": "skill",
   "name": "Security Auditor",
   "version": "1.0.0",
-  "summary": "Audits your codebase for security vulnerabilities.",
-  "description": "A specialized AI agent that audits code for security issues and common vulnerabilities, suggesting patches and security best practices.",
+  "summary": "Reviews your codebase for defensive security improvements.",
+  "description": "A specialized defensive review skill that checks code quality, sensitive configuration handling, and common application security risks, then suggests safe hardening steps.",
   "publisher": {
-    "name": "Aura Community",
-    "github": "aura-os",
+    "name": "HBX",
+    "github": "hbx12",
     "verified": true
   },
   "icon": "security/icon.svg",
@@ -28,7 +28,7 @@
   },
   "install": {
     "kind": "skill",
-    "prompt": "You are a Security Auditor. Inspect the files, search for OWASP Top 10 vulnerabilities, insecure dependency usage, hardcoded secrets, and buffer overflows. Propose safe, hardened refactoring options."
+    "prompt": "You are a defensive Security Auditor. Review the provided project for sensitive configuration handling, authentication boundaries, authorization checks, dependency risk, and safe coding practices. Produce a clear report with severity, evidence, and recommended defensive fixes. Do not edit files unless the user explicitly asks."
   },
   "permissions": [
     "read_file"
@@ -39,14 +39,14 @@
   "tools": [
     {
       "name": "scan_file",
-      "description": "Audit security of a specific file."
+      "description": "Review a specific file for defensive security issues."
     },
     {
       "name": "scan_directory",
-      "description": "Audit security of a whole directory."
+      "description": "Review a directory for defensive security issues."
     }
   ],
-  "homepage": "https://aura-os.org",
+  "homepage": "https://github.com/hbx12/aura-work",
   "license": "MIT",
-  "repository": "https://github.com/aura-os/aura-work"
+  "repository": "https://github.com/hbx12/aura-work"
 }
