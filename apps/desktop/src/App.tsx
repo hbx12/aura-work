@@ -1271,34 +1271,66 @@ You can open and customize it to instruct the agent on workspace rules.`;
         );
       }
       return (
-        <div className="empty-task">
-          <div className="et-inner">
-            <TaskWelcome projectName={activeProject.name} phase={11} labels={taskWelcomeLabels} />
-            <div className="composer-wrap">
-              <Composer
-                value={composer}
-                onChange={setComposer}
-                onSend={() => void handleComposerPrimary()}
-                onRunTask={mode === "ask" ? () => void handleNewTask() : undefined}
-                mode={mode}
-                onToggleMode={() => void handleToggleMode()}
-                disabled={agent.running || tasks.running || chatStreamText !== null}
-                models={chatModels.models}
-                selectedModel={selectedModel}
-                onModelChange={handleModelChange}
-                labels={composerLabels}
-                locale={i18n.locale}
-                skills={pluginsApi.skills}
-                messages={chatMessages}
-                modelContextWindow={currentModelContextWindow}
-                showRunTask={mode === "ask"}
-                activeAgent={activeAgent}
-                onAgentChange={setActiveAgent}
-                agents={agents}
-              />
+        <>
+          <div className="ws-head">
+            <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+              <h1>{activeProject.name}</h1>
+              {renderCanvasToggleButton()}
+            </div>
+            <div className="row2">
+              <span className="ws-meta">{activeProject.folderPath}</span>
+              <span className="chat-meta">
+                <span className="tag local">{t("chat.modeAsk")}</span>
+              </span>
             </div>
           </div>
-        </div>
+          <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+              <div className="ws-scroll">
+                <div className="ws-canvas">
+                  <TaskWelcome projectName={activeProject.name} phase={11} labels={taskWelcomeLabels} />
+                </div>
+              </div>
+              <div className="composer-wrap">
+                <Composer
+                  value={composer}
+                  onChange={setComposer}
+                  onSend={() => void handleComposerPrimary()}
+                  onRunTask={mode === "ask" ? () => void handleNewTask() : undefined}
+                  mode={mode}
+                  onToggleMode={() => void handleToggleMode()}
+                  disabled={agent.running || tasks.running || chatStreamText !== null}
+                  models={chatModels.models}
+                  selectedModel={selectedModel}
+                  onModelChange={handleModelChange}
+                  labels={composerLabels}
+                  locale={i18n.locale}
+                  skills={pluginsApi.skills}
+                  messages={chatMessages}
+                  modelContextWindow={currentModelContextWindow}
+                  showRunTask={mode === "ask"}
+                  activeAgent={activeAgent}
+                  onAgentChange={setActiveAgent}
+                  agents={agents}
+                />
+              </div>
+            </div>
+            {showCanvas && (
+              <CanvasPanel
+                projectId={activeProjectId!}
+                taskId={null}
+                isAr={i18n.settings?.locale === "ar"}
+                activeFile={activeCanvasFile}
+                onChangeActiveFile={setActiveCanvasFile}
+                onSendPrompt={handleCanvasSendPrompt}
+                onRefreshWorkspace={refreshProjects}
+                modifiedFiles={canvasFiles}
+                width={canvasWidth}
+                onWidthChange={handleCanvasWidthChange}
+              />
+            )}
+          </div>
+        </>
       );
     }
 

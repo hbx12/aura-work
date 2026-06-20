@@ -420,6 +420,7 @@ export async function generatePlan(req: TaskPlanRequest) {
           { role: "system", content: system },
           { role: "user", content: req.prompt },
         ],
+        jsonMode: true,
       },
       req.credentials,
     );
@@ -583,6 +584,7 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
         onChunk: req.onChunk,
         temperature: agentConfig.temperature,
         topP: agentConfig.top_p,
+        jsonMode: true,
         ...customParams,
       },
       req.credentials,

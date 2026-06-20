@@ -143,6 +143,10 @@ function openAiRequestBody(request: ChatRequest) {
     body.max_tokens = request.maxOutputTokens;
   }
 
+  if (request.jsonMode || request.responseFormat === "json_object") {
+    body.response_format = { type: "json_object" };
+  }
+
   return body;
 }
 
@@ -410,9 +414,10 @@ const geminiAdapter: ProviderAdapter = {
       body: JSON.stringify({
         contents,
         ...(systemInstruction ? { systemInstruction } : {}),
-        ...(request.maxOutputTokens != null
-          ? { generationConfig: { maxOutputTokens: request.maxOutputTokens } }
-          : {}),
+        generationConfig: {
+          ...(request.maxOutputTokens != null ? { maxOutputTokens: request.maxOutputTokens } : {}),
+          ...(request.jsonMode ? { responseMimeType: "application/json" } : {}),
+        },
       }),
     });
     if (!res.ok) throw new Error(`Gemini chat failed (${res.status})`);
@@ -474,6 +479,7 @@ const ollamaAdapter: ProviderAdapter = {
         model: request.model,
         messages: request.messages,
         stream: false,
+        ...(request.jsonMode ? { format: "json" } : {}),
       }),
     });
     if (!res.ok) {
