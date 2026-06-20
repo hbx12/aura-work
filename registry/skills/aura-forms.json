@@ -24,7 +24,7 @@
     "questionnaire",
     "template"
   ],
-  "risk": "low",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

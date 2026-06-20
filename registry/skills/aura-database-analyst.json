@@ -24,7 +24,7 @@
     "sql",
     "export"
   ],
-  "risk": "medium",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

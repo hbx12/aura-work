@@ -24,7 +24,7 @@
     "dashboard",
     "landing-page"
   ],
-  "risk": "low",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

@@ -24,7 +24,7 @@
     "workflow",
     "connector"
   ],
-  "risk": "medium",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

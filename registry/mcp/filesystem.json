@@ -22,7 +22,7 @@
     "mcp",
     "io"
   ],
-  "risk": "medium",
+  "risk": "high",
   "auth": {
     "type": "none",
     "fields": [

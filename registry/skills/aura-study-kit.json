@@ -24,7 +24,7 @@
     "flashcards",
     "lesson"
   ],
-  "risk": "low",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

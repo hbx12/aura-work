@@ -24,7 +24,7 @@
     "svg",
     "poster"
   ],
-  "risk": "low",
+  "risk": "high",
   "auth": {
     "type": "none"
   },
