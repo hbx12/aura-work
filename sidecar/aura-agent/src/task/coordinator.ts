@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 import type { ProviderCredentials } from "../types.js";
 import { getAdapter } from "../providers/index.js";
 import type { ProviderId } from "@aura-os/shared";
@@ -42,30 +43,224 @@ export interface TaskIterateRequest {
   onChunk?: (text: string) => void;
 }
 
-function findProjectRules(projectPath?: string): string | undefined {
-  if (!projectPath) return undefined;
-  const filesToTry = [
-    "AURA.md",
-    ".aura/rules.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "CONTINUE.md",
-    ".cursorrules",
-    ".windsurfrules",
-  ];
+// Helper function to resolve glob patterns (e.g. packages/*/AGENTS.md)
+function resolveGlob(pattern: string, baseDir: string): string[] {
+  const normalizedPattern = pattern.replace(/\\/g, "/");
+  const parts = normalizedPattern.split("/");
+  
+  let currentDirs = [baseDir];
+  
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (!part) continue;
+    
+    const nextDirs: string[] = [];
+    
+    if (part.includes("*")) {
+      const isLast = i === parts.length - 1;
+      const regex = new RegExp("^" + part.replace(/\./g, "\\.").replace(/\*/g, ".*") + "$");
+      
+      for (const dir of currentDirs) {
+        try {
+          if (!fs.existsSync(dir)) continue;
+          const stat = fs.statSync(dir);
+          if (!stat.isDirectory()) continue;
+          
+          const entries = fs.readdirSync(dir);
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry);
+            const entryStat = fs.statSync(fullPath);
+            
+            if (isLast) {
+              if (entryStat.isFile() && regex.test(entry)) {
+                nextDirs.push(fullPath);
+              }
+            } else {
+              if (entryStat.isDirectory() && (part === "*" || regex.test(entry))) {
+                nextDirs.push(fullPath);
+              }
+            }
+          }
+        } catch {
+          // ignore error
+        }
+      }
+      currentDirs = nextDirs;
+    } else {
+      for (const dir of currentDirs) {
+        const fullPath = path.join(dir, part);
+        if (fs.existsSync(fullPath)) {
+          nextDirs.push(fullPath);
+        }
+      }
+      currentDirs = nextDirs;
+    }
+  }
+  
+  return currentDirs.filter(p => {
+    try {
+      return fs.statSync(p).isFile();
+    } catch {
+      return false;
+    }
+  });
+}
 
-  for (const file of filesToTry) {
-    const fullPath = path.resolve(projectPath, file);
-    if (fs.existsSync(fullPath)) {
-      try {
-        const content = fs.readFileSync(fullPath, "utf-8");
-        if (content.trim()) return content.slice(0, 24_000);
-      } catch {
-        // Ignore unreadable rules files; the agent can continue without them.
+// Fetch remote file via HTTP/HTTPS with timeout
+async function fetchRemoteInstruction(url: string): Promise<string | undefined> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      return await res.text();
+    }
+  } catch (err) {
+    console.warn(`[rules] Failed to fetch remote instruction from ${url}:`, err);
+  }
+  return undefined;
+}
+
+// Read rules based on priority and configurations
+async function findProjectRules(projectPath?: string): Promise<string | undefined> {
+  let projectRulesContent = "";
+
+  // 1. Check local rule files (AURA.md, AGENTS.md, CLAUDE.md, etc.)
+  let localRulesFileContent = "";
+  if (projectPath) {
+    const filesToTry = [
+      "AURA.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CONTINUE.md",
+      ".cursorrules",
+      ".windsurfrules",
+      ".aura/rules.md",
+    ];
+    for (const file of filesToTry) {
+      const fullPath = path.resolve(projectPath, file);
+      if (fs.existsSync(fullPath)) {
+        try {
+          const content = fs.readFileSync(fullPath, "utf-8");
+          if (content.trim()) {
+            localRulesFileContent = content;
+            break;
+          }
+        } catch {
+          // ignore
+        }
       }
     }
   }
-  return undefined;
+
+  // 2. Check global rules files (in ~/.config/aura/AURA.md, ~/.config/aura/AGENTS.md, and fallbacks)
+  let globalRulesFileContent = "";
+  const home = os.homedir();
+  const globalPathsToTry = [
+    path.join(home, ".config", "aura", "AURA.md"),
+    path.join(home, ".config", "aura", "AGENTS.md"),
+    path.join(home, ".config", "opencode", "AGENTS.md"), // fallback
+    path.join(home, ".claude", "CLAUDE.md"), // fallback
+  ];
+  for (const fullPath of globalPathsToTry) {
+    if (fs.existsSync(fullPath)) {
+      try {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        if (content.trim()) {
+          globalRulesFileContent = content;
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  // Choose project-local rule content or fallback to global rule content
+  if (localRulesFileContent) {
+    projectRulesContent = localRulesFileContent;
+  } else if (globalRulesFileContent) {
+    projectRulesContent = globalRulesFileContent;
+  }
+
+  // 3. Check for aura.json (or opencode.json as fallback) to load extra instructions
+  const configInstructions: string[] = [];
+  if (projectPath) {
+    const configsToTry = [
+      path.resolve(projectPath, "aura.json"),
+      path.resolve(projectPath, "opencode.json"),
+      path.resolve(projectPath, "aura.jsonc"),
+    ];
+    for (const configPath of configsToTry) {
+      if (fs.existsSync(configPath)) {
+        try {
+          const raw = fs.readFileSync(configPath, "utf-8");
+          // Simple JSON comment stripping if jsonc
+          const clean = raw.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1");
+          const parsed = JSON.parse(clean);
+          if (parsed && Array.isArray(parsed.instructions)) {
+            configInstructions.push(...parsed.instructions);
+            break;
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  // Also check global configs: ~/.config/aura/aura.json or ~/.config/opencode/opencode.json
+  const globalConfigsToTry = [
+    path.join(home, ".config", "aura", "aura.json"),
+    path.join(home, ".config", "opencode", "opencode.json"),
+  ];
+  for (const configPath of globalConfigsToTry) {
+    if (fs.existsSync(configPath)) {
+      try {
+        const raw = fs.readFileSync(configPath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.instructions)) {
+          configInstructions.push(...parsed.instructions);
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  // 4. Resolve instructions (could be local paths, globs, or remote URLs)
+  const resolvedInstructions: string[] = [];
+  for (const inst of configInstructions) {
+    if (inst.startsWith("http://") || inst.startsWith("https://")) {
+      const content = await fetchRemoteInstruction(inst);
+      if (content) {
+        resolvedInstructions.push(content);
+      }
+    } else if (projectPath) {
+      // It's a local file path or glob pattern
+      const matches = resolveGlob(inst, projectPath);
+      for (const filePath of matches) {
+        try {
+          const content = fs.readFileSync(filePath, "utf-8");
+          if (content.trim()) {
+            resolvedInstructions.push(content);
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  // Merge everything together
+  let finalRules = projectRulesContent;
+  if (resolvedInstructions.length > 0) {
+    finalRules += (finalRules ? "\n\n" : "") + resolvedInstructions.join("\n\n");
+  }
+
+  return finalRules || undefined;
 }
 
 const SUBAGENT_ROLES = [
@@ -192,7 +387,7 @@ export async function iterateTask(req: TaskIterateRequest) {
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
-  const projectRules = findProjectRules(req.projectPath);
+  const projectRules = await findProjectRules(req.projectPath);
 
   const baseSystem = getSystemPrompt(
     req.providerId,
