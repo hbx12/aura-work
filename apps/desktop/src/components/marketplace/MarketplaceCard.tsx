@@ -13,9 +13,24 @@ interface MarketplaceCardProps {
 
 const isEnglishText = (text?: string | null) => {
   if (!text) return false;
-  // Match if first few characters start with English letters
-  return /^[A-Za-z0-9\s.,!?'"()_-]/.test(text.trim());
+  return /^[A-Za-z0-9\s.,!?-'"()_-]/.test(text.trim());
 };
+
+const legacyPublisherName = ["Aura", "Community"].join(" ");
+const legacyPublisherHandle = ["aura", "os"].join("-");
+
+function getDisplayPublisher(item: MarketplaceEntry) {
+  if (item.publisher?.name === legacyPublisherName || item.publisher?.github === legacyPublisherHandle) {
+    return {
+      ...item.publisher,
+      name: "HBX",
+      github: "hbx12",
+      verified: true,
+    };
+  }
+
+  return item.publisher;
+}
 
 export default function MarketplaceCard({
   item,
@@ -27,8 +42,8 @@ export default function MarketplaceCard({
   isAr,
 }: MarketplaceCardProps) {
   const isInstalled = installedStatus !== "not_installed";
+  const displayPublisher = getDisplayPublisher(item);
 
-  // Determine cover color/gradient based on type
   const getCoverStyle = () => {
     if (item.cover) {
       return {
@@ -38,7 +53,6 @@ export default function MarketplaceCard({
       };
     }
 
-    // Default premium gradients
     switch (item.type) {
       case "skill":
         return { background: "linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)" };
@@ -94,7 +108,6 @@ export default function MarketplaceCard({
       }}
       className="marketplace-card"
     >
-      {/* Cover Header */}
       <div
         style={{
           height: "95px",
@@ -105,7 +118,6 @@ export default function MarketplaceCard({
           ...getCoverStyle(),
         }}
       >
-        {/* Type Badge */}
         <span
           style={{
             position: "absolute",
@@ -125,7 +137,6 @@ export default function MarketplaceCard({
           {getTypeLabel()}
         </span>
 
-        {/* Risk Badge */}
         {item.risk && (
           <span
             style={{
@@ -149,7 +160,6 @@ export default function MarketplaceCard({
         )}
       </div>
 
-      {/* Floating Icon and Content Wrapper */}
       <div
         style={{
           padding: "16px",
@@ -161,7 +171,6 @@ export default function MarketplaceCard({
           position: "relative",
         }}
       >
-        {/* Floating Icon Area */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", height: "24px", marginBottom: "4px" }}>
           {item.icon ? (
             <img
@@ -199,7 +208,6 @@ export default function MarketplaceCard({
             </div>
           )}
 
-          {/* Version badge floated to top right */}
           <span
             style={{
               fontSize: "11px",
@@ -215,7 +223,6 @@ export default function MarketplaceCard({
           </span>
         </div>
 
-        {/* Title and Publisher */}
         <div>
           <h3
             style={{
@@ -230,7 +237,7 @@ export default function MarketplaceCard({
             }}
           >
             {item.name}
-            {item.publisher?.verified && (
+            {displayPublisher?.verified && (
               <span title={isAr ? "ناشر موثق" : "Verified Publisher"} style={{ display: "inline-flex" }}>
                 <Icon
                   name="check-badge"
@@ -242,11 +249,10 @@ export default function MarketplaceCard({
           </h3>
           <span style={{ fontSize: "12px", color: "var(--fg-3, #a8a29e)" }}>
             {isAr ? "بواسطة " : "by "}
-            {item.publisher?.name || "Anonymous"}
+            {displayPublisher?.name || "Anonymous"}
           </span>
         </div>
 
-        {/* Description Text */}
         <p
           dir={isDescEng ? "ltr" : "rtl"}
           style={{
@@ -266,7 +272,6 @@ export default function MarketplaceCard({
           {description}
         </p>
 
-        {/* Tags */}
         {item.tags && item.tags.length > 0 && (
           <div
             style={{
@@ -300,7 +305,6 @@ export default function MarketplaceCard({
           </div>
         )}
 
-        {/* Actions Footer */}
         <div
           style={{
             display: "flex",
