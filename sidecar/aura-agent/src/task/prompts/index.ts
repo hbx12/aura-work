@@ -9,13 +9,43 @@ import { CONTEXT_PROMPT as contextPrompt } from "./context.js";
 import { SAFETY_PROMPT } from "./safety.js";
 import { getProviderOverride } from "./provider-overrides.js";
 
+export function getFilteredToolsPrompt(agentConfig?: any): string {
+  if (!agentConfig || !agentConfig.tools) {
+    return toolsPrompt;
+  }
+  const lines = toolsPrompt.split("\n");
+  const filteredLines = lines.filter(line => {
+    const match = line.trim().match(/^-\s*([a-zA-Z0-9_]+)/);
+    if (match) {
+      const toolName = match[1];
+      if (toolName === "write_file" && agentConfig.tools.write === false) return false;
+      if (toolName === "replace_in_file" && agentConfig.tools.edit === false) return false;
+      if (toolName === "delete_file" && agentConfig.tools.edit === false) return false;
+      if (toolName === "run_shell" && agentConfig.tools.bash === false) return false;
+      if (agentConfig.tools[toolName] === false) return false;
+      
+      for (const [pattern, enabled] of Object.entries(agentConfig.tools)) {
+        if (!enabled) {
+          const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+          if (regex.test(toolName)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+  return filteredLines.join("\n");
+}
+
 export function getSystemPrompt(
   providerId: string,
   modelId: string,
   iteration: number,
   planText: string,
   responseLanguage?: string,
-  projectRules?: string
+  projectRules?: string,
+  agentConfig?: any
 ): string {
   const providerOverride = getProviderOverride(providerId);
   const langRule = responseLanguage
@@ -26,10 +56,12 @@ export function getSystemPrompt(
     ? `\nPROJECT LOCAL RULES:\n<project_rules>\n${projectRules}\n</project_rules>`
     : "";
 
+  const activeToolsPrompt = getFilteredToolsPrompt(agentConfig);
+
   return `${BASE_PROMPT}
 ${QUALITY_PROMPT}
 ${WORKFLOW_PROMPT}
-${toolsPrompt}
+${activeToolsPrompt}
 ${EXECUTOR_PROMPT}
 ${REVIEWER_PROMPT}
 ${SAFETY_PROMPT}

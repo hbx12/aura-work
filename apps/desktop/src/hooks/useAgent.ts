@@ -50,6 +50,7 @@ export interface RunChatOptions {
   preferredProvider?: string | null;
   preferredModel?: string | null;
   fallbackApproved?: boolean;
+  activeAgent?: string | null;
 }
 
 export function useAgent() {
@@ -83,6 +84,7 @@ export function useAgent() {
           preferredModel: options.preferredModel ?? null,
           messages: options.messages ?? null,
           fallbackApproved: options.fallbackApproved ?? false,
+          activeAgent: options.activeAgent ?? null,
         },
       });
 

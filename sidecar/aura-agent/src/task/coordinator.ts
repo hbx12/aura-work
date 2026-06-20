@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 import type { ProviderCredentials } from "../types.js";
 import { getAdapter } from "../providers/index.js";
 import type { ProviderId } from "@aura-os/shared";
@@ -7,6 +8,7 @@ import { isFileTask } from "./extract-writes.js";
 import { coerceAgentResponse } from "./coerce-response.js";
 import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
 import { getSystemPrompt, getPlannerSystemPrompt } from "./prompts/index.js";
+import { loadAgents, type AgentConfig } from "./agent-loader.js";
 
 export interface PlanStep {
   title: string;
@@ -40,32 +42,227 @@ export interface TaskIterateRequest {
   allowPlainText?: boolean;
   responseLanguage?: string;
   onChunk?: (text: string) => void;
+  activeAgent?: string;
 }
 
-function findProjectRules(projectPath?: string): string | undefined {
-  if (!projectPath) return undefined;
-  const filesToTry = [
-    "AURA.md",
-    ".aura/rules.md",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "CONTINUE.md",
-    ".cursorrules",
-    ".windsurfrules",
-  ];
+// Helper function to resolve glob patterns (e.g. packages/*/AGENTS.md)
+function resolveGlob(pattern: string, baseDir: string): string[] {
+  const normalizedPattern = pattern.replace(/\\/g, "/");
+  const parts = normalizedPattern.split("/");
+  
+  let currentDirs = [baseDir];
+  
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (!part) continue;
+    
+    const nextDirs: string[] = [];
+    
+    if (part.includes("*")) {
+      const isLast = i === parts.length - 1;
+      const regex = new RegExp("^" + part.replace(/\./g, "\\.").replace(/\*/g, ".*") + "$");
+      
+      for (const dir of currentDirs) {
+        try {
+          if (!fs.existsSync(dir)) continue;
+          const stat = fs.statSync(dir);
+          if (!stat.isDirectory()) continue;
+          
+          const entries = fs.readdirSync(dir);
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry);
+            const entryStat = fs.statSync(fullPath);
+            
+            if (isLast) {
+              if (entryStat.isFile() && regex.test(entry)) {
+                nextDirs.push(fullPath);
+              }
+            } else {
+              if (entryStat.isDirectory() && (part === "*" || regex.test(entry))) {
+                nextDirs.push(fullPath);
+              }
+            }
+          }
+        } catch {
+          // ignore error
+        }
+      }
+      currentDirs = nextDirs;
+    } else {
+      for (const dir of currentDirs) {
+        const fullPath = path.join(dir, part);
+        if (fs.existsSync(fullPath)) {
+          nextDirs.push(fullPath);
+        }
+      }
+      currentDirs = nextDirs;
+    }
+  }
+  
+  return currentDirs.filter(p => {
+    try {
+      return fs.statSync(p).isFile();
+    } catch {
+      return false;
+    }
+  });
+}
 
-  for (const file of filesToTry) {
-    const fullPath = path.resolve(projectPath, file);
-    if (fs.existsSync(fullPath)) {
-      try {
-        const content = fs.readFileSync(fullPath, "utf-8");
-        if (content.trim()) return content.slice(0, 24_000);
-      } catch {
-        // Ignore unreadable rules files; the agent can continue without them.
+// Fetch remote file via HTTP/HTTPS with timeout
+async function fetchRemoteInstruction(url: string): Promise<string | undefined> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (res.ok) {
+      return await res.text();
+    }
+  } catch (err) {
+    console.warn(`[rules] Failed to fetch remote instruction from ${url}:`, err);
+  }
+  return undefined;
+}
+
+// Read rules based on priority and configurations
+async function findProjectRules(projectPath?: string): Promise<string | undefined> {
+  let projectRulesContent = "";
+
+  // 1. Check local rule files (AURA.md, AGENTS.md, CLAUDE.md, etc.)
+  let localRulesFileContent = "";
+  if (projectPath) {
+    const filesToTry = [
+      "AURA.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CONTINUE.md",
+      ".cursorrules",
+      ".windsurfrules",
+      ".aura/rules.md",
+    ];
+    for (const file of filesToTry) {
+      const fullPath = path.resolve(projectPath, file);
+      if (fs.existsSync(fullPath)) {
+        try {
+          const content = fs.readFileSync(fullPath, "utf-8");
+          if (content.trim()) {
+            localRulesFileContent = content;
+            break;
+          }
+        } catch {
+          // ignore
+        }
       }
     }
   }
-  return undefined;
+
+  // 2. Check global rules files (in ~/.config/aura/AURA.md, ~/.config/aura/AGENTS.md, and fallbacks)
+  let globalRulesFileContent = "";
+  const home = os.homedir();
+  const globalPathsToTry = [
+    path.join(home, ".config", "aura", "AURA.md"),
+    path.join(home, ".config", "aura", "AGENTS.md"),
+    path.join(home, ".config", "opencode", "AGENTS.md"), // fallback
+    path.join(home, ".claude", "CLAUDE.md"), // fallback
+  ];
+  for (const fullPath of globalPathsToTry) {
+    if (fs.existsSync(fullPath)) {
+      try {
+        const content = fs.readFileSync(fullPath, "utf-8");
+        if (content.trim()) {
+          globalRulesFileContent = content;
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  // Choose project-local rule content or fallback to global rule content
+  if (localRulesFileContent) {
+    projectRulesContent = localRulesFileContent;
+  } else if (globalRulesFileContent) {
+    projectRulesContent = globalRulesFileContent;
+  }
+
+  // 3. Check for aura.json (or opencode.json as fallback) to load extra instructions
+  const configInstructions: string[] = [];
+  if (projectPath) {
+    const configsToTry = [
+      path.resolve(projectPath, "aura.json"),
+      path.resolve(projectPath, "opencode.json"),
+      path.resolve(projectPath, "aura.jsonc"),
+    ];
+    for (const configPath of configsToTry) {
+      if (fs.existsSync(configPath)) {
+        try {
+          const raw = fs.readFileSync(configPath, "utf-8");
+          // Simple JSON comment stripping if jsonc
+          const clean = raw.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1");
+          const parsed = JSON.parse(clean);
+          if (parsed && Array.isArray(parsed.instructions)) {
+            configInstructions.push(...parsed.instructions);
+            break;
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  // Also check global configs: ~/.config/aura/aura.json or ~/.config/opencode/opencode.json
+  const globalConfigsToTry = [
+    path.join(home, ".config", "aura", "aura.json"),
+    path.join(home, ".config", "opencode", "opencode.json"),
+  ];
+  for (const configPath of globalConfigsToTry) {
+    if (fs.existsSync(configPath)) {
+      try {
+        const raw = fs.readFileSync(configPath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.instructions)) {
+          configInstructions.push(...parsed.instructions);
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  // 4. Resolve instructions (could be local paths, globs, or remote URLs)
+  const resolvedInstructions: string[] = [];
+  for (const inst of configInstructions) {
+    if (inst.startsWith("http://") || inst.startsWith("https://")) {
+      const content = await fetchRemoteInstruction(inst);
+      if (content) {
+        resolvedInstructions.push(content);
+      }
+    } else if (projectPath) {
+      // It's a local file path or glob pattern
+      const matches = resolveGlob(inst, projectPath);
+      for (const filePath of matches) {
+        try {
+          const content = fs.readFileSync(filePath, "utf-8");
+          if (content.trim()) {
+            resolvedInstructions.push(content);
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  // Merge everything together
+  let finalRules = projectRulesContent;
+  if (resolvedInstructions.length > 0) {
+    finalRules += (finalRules ? "\n\n" : "") + resolvedInstructions.join("\n\n");
+  }
+
+  return finalRules || undefined;
 }
 
 const SUBAGENT_ROLES = [
@@ -180,8 +377,94 @@ export async function generatePlan(req: TaskPlanRequest) {
   return fallbackPlan(req.prompt);
 }
 
+// Helper function to check if a tool is permitted
+function isToolPermitted(toolName: string, args: any, agent: AgentConfig): { permitted: boolean; reason?: string } {
+  if (agent.tools) {
+    for (const [pattern, enabled] of Object.entries(agent.tools)) {
+      if (!enabled) {
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+        if (regex.test(toolName)) {
+          return { permitted: false, reason: `Tool '${toolName}' is disabled by agent tools policy.` };
+        }
+      }
+    }
+  }
+
+  if (agent.permission) {
+    if (["write_file", "replace_in_file", "delete_file"].includes(toolName)) {
+      if (agent.permission.edit === "deny") {
+        return { permitted: false, reason: `File modifications are denied by agent permissions.` };
+      }
+    }
+    
+    if (toolName === "browse_url") {
+      if (agent.permission.webfetch === "deny") {
+        return { permitted: false, reason: `Web browsing is denied by agent permissions.` };
+      }
+    }
+
+    if (toolName === "run_shell" && agent.permission.bash) {
+      const cmd = (args.command || "").trim();
+      if (typeof agent.permission.bash === "string") {
+        if (agent.permission.bash === "deny") {
+          return { permitted: false, reason: `Shell command execution is denied by agent permissions.` };
+        }
+      } else if (typeof agent.permission.bash === "object") {
+        let decision: string | null = null;
+        for (const [pattern, value] of Object.entries(agent.permission.bash)) {
+          const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+          if (regex.test(cmd)) {
+            decision = value as string;
+          }
+        }
+        if (decision === "deny") {
+          return { permitted: false, reason: `Shell command '${cmd}' is denied by agent permissions.` };
+        }
+      }
+    }
+
+    if (toolName === "task" || toolName === "plugin_tool" || toolName === "mcp_tool") {
+      const subagentName = args.role || args.name || args.toolId || "";
+      if (agent.permission.task) {
+        let decision: string | null = null;
+        for (const [pattern, value] of Object.entries(agent.permission.task)) {
+          const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
+          if (regex.test(subagentName)) {
+            decision = value as string;
+          }
+        }
+        if (decision === "deny") {
+          return { permitted: false, reason: `Summoning subagent/task '${subagentName}' is denied by agent permissions.` };
+        }
+      }
+    }
+  }
+
+  return { permitted: true };
+}
+
 export async function iterateTask(req: TaskIterateRequest) {
-  const adapter = getAdapter(req.providerId as ProviderId);
+  const agents = loadAgents(req.projectPath);
+  const activeAgentId = req.activeAgent || "build";
+  const agentConfig = agents.find(a => a.name === activeAgentId) || agents.find(a => a.name === "build") || {
+    name: "build",
+    description: "Development agent",
+    mode: "primary" as const
+  };
+
+  const modelId = agentConfig.model || req.modelId;
+  const providerId = agentConfig.model ? agentConfig.model.split("/")[0] : req.providerId;
+  const adapter = getAdapter(providerId as ProviderId);
+
+  // Extract model/provider options
+  const customParams: Record<string, any> = {};
+  for (const [key, value] of Object.entries(agentConfig)) {
+    if (["name", "description", "mode", "model", "prompt", "temperature", "steps", "maxSteps", "disable", "tools", "permission", "hidden", "color", "top_p"].includes(key)) {
+      continue;
+    }
+    customParams[key] = value;
+  }
+
   const planText = req.plan.map((s, i) => `${i + 1}. [${s.role ?? "coordinator"}] ${s.title}`).join("\n");
   const history = req.messages
     .slice(-8)
@@ -192,17 +475,27 @@ export async function iterateTask(req: TaskIterateRequest) {
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
-  const projectRules = findProjectRules(req.projectPath);
+  const projectRules = await findProjectRules(req.projectPath);
 
   const baseSystem = getSystemPrompt(
-    req.providerId,
-    req.modelId,
+    providerId,
+    modelId,
     req.iteration,
     planText,
     req.responseLanguage,
     projectRules,
+    agentConfig,
   );
-  const system = `${baseSystem}${skillsXml}`;
+  let system = `${baseSystem}${skillsXml}`;
+
+  if (agentConfig.prompt) {
+    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${agentConfig.name}":\n${agentConfig.prompt}`;
+  }
+
+  const stepsLimit = agentConfig.steps ?? agentConfig.maxSteps;
+  if (stepsLimit && req.iteration >= stepsLimit) {
+    system += `\n\n[WARNING: STEPS LIMIT REACHED. You have reached the maximum execution steps of ${stepsLimit}. You must NOT call any more tools. Summarize your work and list remaining recommendations, then output 'complete' or 'blocked'.]`;
+  }
 
   const userContent = `Task: ${req.prompt}
 
@@ -218,12 +511,15 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
   try {
     const result = await adapter.chat(
       {
-        model: req.modelId,
+        model: modelId,
         messages: [
           { role: "system", content: system },
           { role: "user", content: userContent },
         ],
         onChunk: req.onChunk,
+        temperature: agentConfig.temperature,
+        topP: agentConfig.top_p,
+        ...customParams,
       },
       req.credentials,
     );
@@ -244,6 +540,24 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
           usage: result.usage,
         };
       }
+
+      // Enforce tool permissions gating in sidecar
+      if (coerced.type === "tool_calls") {
+        for (const call of coerced.toolCalls) {
+          const check = isToolPermitted(call.name, call.arguments, agentConfig);
+          if (!check.permitted) {
+            return {
+              type: "blocked" as const,
+              role: "coordinator",
+              content: check.reason || "Tool execution blocked by agent policy.",
+              summary: check.reason || "Tool execution blocked by agent policy.",
+              complete: false,
+              usage: result.usage,
+            };
+          }
+        }
+      }
+
       return { ...coerced, usage: result.usage };
     }
 

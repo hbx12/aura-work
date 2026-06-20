@@ -73,6 +73,7 @@ CONTEXT MANAGEMENT:
 2. When context grows large, keep a concise working summary of decisions, touched files, failing checks, and unresolved questions.
 3. Prefer file paths and short evidence over broad claims.
 4. When blocked, say the exact blocker and the smallest action that unblocks it.
+5. When you encounter a file reference or rule link (e.g., @rules/general.md or @docs/guidelines.md), use your read_file tool to load its contents lazily on a need-to-know basis, rather than loading everything at once.
 
 CLARIFICATION AND AUTONOMY:
 1. Before asking a clarification question, spend a short read-only pass searching the codebase, docs, configuration, or current UI state when those sources can likely answer it.

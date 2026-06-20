@@ -202,7 +202,24 @@ input,textarea,button,select{font-family:inherit}
 
 .composer textarea{background:transparent;border:none;outline:none;box-sizing:border-box;display:block;width:100%;padding:14px 16px 4px;font:var(--text-body);color:var(--fg-1);resize:none;line-height:1.5;min-height:56px;overflow-y:auto}
 .composer textarea::placeholder{color:var(--fg-3)}
-.composer .crow{display:flex;align-items:center;gap:8px;padding:8px 10px 10px}
+.composer .crow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 10px 10px}
+.composer-model-select,
+.composer-agent-select {
+  font: var(--text-caption);
+  color: var(--fg-2);
+  background: var(--bg-1);
+  border: 1px solid var(--border-3);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.composer-model-select:focus,
+.composer-agent-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
 .chip-btn{display:inline-flex;align-items:center;gap:7px;font:var(--text-label);color:var(--fg-2);
   background:var(--bg-3);border:1px solid var(--border-1);border-radius:var(--r-pill);padding:6px 11px;cursor:pointer;
   transition:background var(--dur-fast),color var(--dur-fast)}
@@ -746,14 +763,14 @@ input,textarea,button,select{font-family:inherit}
 
 /* ---- Empty task state ----------------------------------------------------- */
 .empty-task{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;overflow-y:auto}
-.empty-task .et-inner{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.empty-task .et-inner{width:100%;max-width:680px;display:flex;flex-direction:column;align-items:center;text-align:center}
 .empty-task .et-mark{width:54px;height:54px;border-radius:15px;background:var(--accent);position:relative;margin-bottom:20px}
 .empty-task .et-mark .ring{position:absolute;inset:0;margin:auto;width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.6)}
 .empty-task .et-mark .dot{position:absolute;inset:0;margin:auto;width:10px;height:10px;border-radius:50%;background:#fff}
 .empty-task h1{font:var(--text-display);color:var(--fg-1);margin-bottom:8px}
 .empty-task .et-sub{font:var(--text-body);color:var(--fg-3);max-width:420px;margin-bottom:24px;line-height:1.6}
 .empty-task .composer-wrap{width:100%;padding:0}
-.empty-task .composer{max-width:560px}
+.empty-task .composer{max-width:680px}
 .suggests{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:20px}
 .suggest{display:inline-flex;align-items:center;gap:8px;font:var(--text-sm);color:var(--fg-2);
   background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-pill);padding:8px 14px;cursor:pointer;
