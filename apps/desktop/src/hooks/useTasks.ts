@@ -103,10 +103,9 @@ export function useTasks(projectId: string | null) {
         for (let i = 0; i < maxSteps; i++) {
           if (autoApproveEdits && task.state === "waiting-for-approval") {
             if (task.pendingEditId) {
-              await invoke("approve_pending_edit", { editId: task.pendingEditId });
-              task = await invoke<TaskRecord>("resume_after_edit", {
-                editId: task.pendingEditId,
-              });
+              const editId = task.pendingEditId;
+              await invoke("approve_pending_edit", { editId });
+              task = await invoke<TaskRecord>("resume_after_edit", { editId });
               setActiveTask(task);
               continue;
             }
@@ -122,15 +121,7 @@ export function useTasks(projectId: string | null) {
           if (task.state !== "running") break;
           task = await advanceTask(taskId);
           setActiveTask(task);
-          if (
-            task.state === "waiting-for-approval" ||
-            task.state === "completed" ||
-            task.state === "blocked" ||
-            task.state === "failed" ||
-            task.state === "paused"
-          ) {
-            break;
-          }
+          if (["waiting-for-approval", "completed", "blocked", "failed", "paused"].includes(task.state)) break;
         }
         await refreshPendingPermissions({ projectId: null, taskId });
         await refreshTasks();
@@ -148,14 +139,11 @@ export function useTasks(projectId: string | null) {
   const createAndStart = useCallback(
     async (options: CreateTaskOptions | string) => {
       if (!projectId) throw new Error("No project selected");
-      const opts: CreateTaskOptions =
-        typeof options === "string" ? { prompt: options } : options;
+      const opts: CreateTaskOptions = typeof options === "string" ? { prompt: options } : options;
       setRunning(true);
       setError(null);
       try {
-        const created = await invoke<TaskRecord>("create_task", {
-          input: { projectId, prompt: opts.prompt },
-        });
+        const created = await invoke<TaskRecord>("create_task", { input: { projectId, prompt: opts.prompt } });
         const planned = await invoke<TaskRecord>("start_task", {
           taskId: created.id,
           preferredProvider: opts.preferredProvider ?? null,
@@ -168,9 +156,7 @@ export function useTasks(projectId: string | null) {
           setActiveTask(approved);
           return runLoop(approved.id, MAX_TASK_STEPS, true);
         }
-        if (opts.autoApprove && planned.state === "running") {
-          return runLoop(planned.id, MAX_TASK_STEPS, true);
-        }
+        if (opts.autoApprove && planned.state === "running") return runLoop(planned.id, MAX_TASK_STEPS, true);
         return planned;
       } catch (e) {
         setError(String(e));
@@ -189,6 +175,8 @@ export function useTasks(projectId: string | null) {
       try {
         const task = await invoke<TaskRecord>("approve_task_plan", { taskId });
         setActiveTask(task);
+        if (task.state === "running") return await runLoop(task.id, MAX_TASK_STEPS, true);
+        await refreshTasks();
         return task;
       } catch (e) {
         setError(String(e));
@@ -197,15 +185,13 @@ export function useTasks(projectId: string | null) {
         setRunning(false);
       }
     },
-    [],
+    [runLoop, refreshTasks],
   );
 
   const continueTask = useCallback(
     async (taskId: string, autoApproveEdits = false) => {
       const task = await invoke<TaskRecord>("get_task", { taskId });
-      if (task.state === "running") {
-        return runLoop(taskId, MAX_TASK_STEPS, autoApproveEdits);
-      }
+      if (task.state === "running") return runLoop(taskId, MAX_TASK_STEPS, autoApproveEdits);
       return task;
     },
     [runLoop],
@@ -218,9 +204,7 @@ export function useTasks(projectId: string | null) {
       try {
         const task = await invoke<TaskRecord>("resume_after_edit", { editId });
         setActiveTask(task);
-        if (task.state === "running") {
-          return runLoop(task.id);
-        }
+        if (task.state === "running") return runLoop(task.id, MAX_TASK_STEPS, true);
         return task;
       } catch (e) {
         setError(String(e));
@@ -239,21 +223,13 @@ export function useTasks(projectId: string | null) {
       try {
         const pending = pendingPermissions.find((permission) => permission.id === permissionId);
         if (pending && !pending.taskId) {
-          await invoke("resolve_workspace_permission", {
-            permissionId,
-            decision,
-          });
+          await invoke("resolve_workspace_permission", { permissionId, decision });
           await refreshPendingPermissions({ projectId, taskId: null });
           return null;
         }
-        const task = await invoke<TaskRecord>("resume_after_permission", {
-          permissionId,
-          decision,
-        });
+        const task = await invoke<TaskRecord>("resume_after_permission", { permissionId, decision });
         setActiveTask(task);
-        if (task.state === "running") {
-          await runLoop(task.id);
-        }
+        if (task.state === "running") return await runLoop(task.id, MAX_TASK_STEPS, true);
         return task;
       } catch (e) {
         setError(String(e));
@@ -272,9 +248,7 @@ export function useTasks(projectId: string | null) {
       try {
         const task = await invoke<TaskRecord>("send_task_message", { taskId, content });
         setActiveTask(task);
-        if (task.state === "running") {
-          return runLoop(task.id);
-        }
+        if (task.state === "running") return runLoop(task.id);
         return task;
       } catch (e) {
         setError(String(e));
@@ -286,25 +260,5 @@ export function useTasks(projectId: string | null) {
     [runLoop],
   );
 
-  return {
-    tasks,
-    activeTask,
-    pendingPermissions,
-    loading,
-    running,
-    error,
-    setError,
-    streamText,
-    refreshTasks,
-    refreshPendingPermissions,
-    loadTask,
-    createAndStart,
-    approvePlan,
-    runLoop,
-    continueTask,
-    sendTaskMessage,
-    resumeAfterEdit,
-    resolvePermission,
-    setActiveTask,
-  };
+  return { tasks, activeTask, pendingPermissions, loading, running, error, setError, streamText, refreshTasks, refreshPendingPermissions, loadTask, createAndStart, approvePlan, runLoop, continueTask, sendTaskMessage, resumeAfterEdit, resolvePermission, setActiveTask };
 }
