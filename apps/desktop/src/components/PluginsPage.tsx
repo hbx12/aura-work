@@ -8,6 +8,7 @@ import type {
   McpServerRecord,
   PluginsHelperStatus,
 } from "@aura-os/shared";
+import MarketplaceGrid from "./marketplace/MarketplaceGrid";
 
 interface PluginsPageProps {
   projectId: string | null;
@@ -178,7 +179,7 @@ export function PluginsPage({
   const [mcpArgs, setMcpArgs] = useState("-y @modelcontextprotocol/server-filesystem .");
   const [message, setMessage] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"plugins" | "skills">("plugins");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills">("marketplace");
   const [skills, setSkills] = useState<any[]>([]);
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [skillName, setSkillName] = useState("");
@@ -386,6 +387,13 @@ export function PluginsPage({
             <div className="seg" style={{ marginTop: 10 }}>
               <button
                 type="button"
+                className={activeTab === "marketplace" ? "active" : ""}
+                onClick={() => setActiveTab("marketplace")}
+              >
+                {isAr ? "المتجر" : "Marketplace"}
+              </button>
+              <button
+                type="button"
                 className={activeTab === "plugins" ? "active" : ""}
                 onClick={() => setActiveTab("plugins")}
               >
@@ -401,7 +409,21 @@ export function PluginsPage({
             </div>
           </div>
           <div className="ph-actions">
-            {activeTab === "plugins" ? (
+            {activeTab === "marketplace" ? (
+              <button
+                type="button"
+                className="btn secondary sm"
+                disabled={loading}
+                onClick={async () => {
+                  if (onSyncMarketplace) {
+                    await onSyncMarketplace();
+                  }
+                }}
+              >
+                <Icon name="arrow-path" size={14} style={{ marginRight: isAr ? 0 : 4, marginLeft: isAr ? 4 : 0 }} />
+                {isAr ? "مزامنة المتجر" : "Sync Marketplace"}
+              </button>
+            ) : activeTab === "plugins" ? (
               <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void pickAndInstall()}>
                 <Icon name="plus" size={14} />
                 {t("plugins.addPlugin")}
@@ -423,6 +445,23 @@ export function PluginsPage({
       </div>
       <div className="page-scroll">
         <div className="page-canvas">
+          {activeTab === "marketplace" && (
+            <MarketplaceGrid
+              marketplace={marketplace}
+              plugins={plugins}
+              mcpServers={mcpServers}
+              skills={skills}
+              loading={loading}
+              isAr={isAr}
+              onRefresh={async () => {
+                await refreshSkills();
+                if (onSyncMarketplace) {
+                  await onSyncMarketplace();
+                }
+              }}
+            />
+          )}
+
           {activeTab === "plugins" && (
             <>
               {(message || error) && (

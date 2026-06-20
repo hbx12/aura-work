@@ -1115,3 +1115,20 @@
 .codeblock:hover .copy-btn {
   opacity: 1;
 }
+
+/* Marketplace Premium Styling */
+.marketplace-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent);
+  border-color: var(--accent) !important;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+

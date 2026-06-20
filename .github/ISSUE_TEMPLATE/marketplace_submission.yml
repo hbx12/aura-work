@@ -1,0 +1,66 @@
+name: Marketplace Submission
+description: Submit a new Skill, MCP Connector, or Aura Plugin to the registry
+title: "[Submission] <Name of your Item>"
+labels: ["marketplace-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting to the Aura Marketplace! Please fill out the template below to help us review and validate your submission.
+  - type: input
+    id: item-id
+    attributes:
+      label: Item Unique ID
+      placeholder: e.g. skill.my-awesome-skill or mcp.my-custom-mcp
+      description: Must match the regex `^[a-z0-9.-]+$` and be prefixed by its type (skill., mcp., plugin.).
+    validations:
+      required: true
+  - type: dropdown
+    id: item-type
+    attributes:
+      label: Item Type
+      options:
+        - Skill
+        - MCP Connector
+        - Aura Plugin
+    validations:
+      required: true
+  - type: textarea
+    id: manifest-json
+    attributes:
+      label: Manifest JSON Content
+      description: Copy and paste your full manifest JSON content conforming to the Marketplace Item schema.
+      render: json
+      placeholder: |
+        {
+          "id": "skill.prd-writer",
+          "type": "skill",
+          "name": "PRD Writer",
+          "version": "1.0.0",
+          ...
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: permissions-reasoning
+    attributes:
+      label: Requested Permissions & Security Reasoning
+      description: Detail why each permission (e.g. read_file, network) is necessary for your item.
+      placeholder: |
+        - read_file: Needed to read code components to write detailed PRDs.
+        - network: Required to reach GitHub API for repository integration.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have validated my manifest JSON against the official schema.
+          required: true
+        - label: I have tested my item locally in the Aura Work desktop sandbox/app.
+          required: true
+        - label: My submission does not contain any hardcoded private keys, tokens, or credentials.
+          required: true
+        - label: My commands and arguments do not perform arbitrary code download or execution (e.g. no `curl | sh` or hidden downloads).
+          required: true

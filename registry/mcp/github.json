@@ -1,0 +1,72 @@
+{
+  "id": "mcp.github",
+  "type": "mcp",
+  "name": "GitHub MCP",
+  "version": "0.2.0",
+  "summary": "Model Context Protocol server for managing GitHub repositories.",
+  "description": "Connects the AI agent to your GitHub account to manage repositories, create issues, review pull requests, search code, and submit comments.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "github/icon.svg",
+  "cover": "github/cover.svg",
+  "categories": [
+    "Developer Tools",
+    "Collaboration"
+  ],
+  "tags": [
+    "github",
+    "mcp",
+    "git",
+    "issues",
+    "pr"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "pat",
+    "requiresLogin": false,
+    "fields": [
+      {
+        "name": "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "label": "GitHub Personal Access Token (PAT)",
+        "secret": true,
+        "required": true
+      }
+    ]
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-github"
+    ]
+  },
+  "permissions": [
+    "network",
+    "github_api"
+  ],
+  "setup": [
+    "Generate a Personal Access Token (classic) on GitHub with 'repo', 'workflow', and 'user' scopes.",
+    "Input the token during configuration to securely store it in your Aura vault."
+  ],
+  "tools": [
+    {
+      "name": "get_issue",
+      "description": "Retrieve a GitHub issue description."
+    },
+    {
+      "name": "create_issue",
+      "description": "Create a new issue on GitHub."
+    },
+    {
+      "name": "search_code",
+      "description": "Search for text across GitHub repositories."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+  "license": "MIT"
+}

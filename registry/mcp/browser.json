@@ -1,0 +1,57 @@
+{
+  "id": "mcp.browser",
+  "type": "mcp",
+  "name": "Web Browser MCP",
+  "version": "0.2.1",
+  "summary": "Scrapes web pages with Puppeteer.",
+  "description": "Launches a headless browser to access web pages, extract markdown/text, capture screenshots, and click links.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Web Scraping",
+    "Developer Tools"
+  ],
+  "tags": [
+    "browser",
+    "puppeteer",
+    "web",
+    "scrape"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-puppeteer"
+    ]
+  },
+  "permissions": [
+    "network",
+    "browser_launch"
+  ],
+  "setup": [
+    "Downloads and launches Puppeteer automatically. Requires active internet connection."
+  ],
+  "tools": [
+    {
+      "name": "navigate",
+      "description": "Go to a URL."
+    },
+    {
+      "name": "click",
+      "description": "Click on an element."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+  "license": "MIT"
+}

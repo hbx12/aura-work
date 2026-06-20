@@ -1,0 +1,53 @@
+{
+  "id": "mcp.playwright",
+  "type": "mcp",
+  "name": "Playwright MCP",
+  "version": "0.1.2",
+  "summary": "Automate web tasks using Playwright.",
+  "description": "Gives the agent capability to run web automation scripts, test frontends, and interact with single-page applications.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Testing",
+    "Web Scraping"
+  ],
+  "tags": [
+    "playwright",
+    "automation",
+    "e2e",
+    "test"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-playwright"
+    ]
+  },
+  "permissions": [
+    "network",
+    "browser_launch",
+    "execute_command"
+  ],
+  "setup": [
+    "Runs Playwright server inside a node instance."
+  ],
+  "tools": [
+    {
+      "name": "run_automation",
+      "description": "Execute a web automation workflow."
+    }
+  ],
+  "license": "MIT"
+}

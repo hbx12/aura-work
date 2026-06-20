@@ -1,0 +1,67 @@
+{
+  "id": "mcp.filesystem",
+  "type": "mcp",
+  "name": "Filesystem MCP",
+  "version": "0.2.0",
+  "summary": "Secure filesystem access for reading and writing files.",
+  "description": "Gives the agent permission to perform file operations inside explicitly allowed directories.",
+  "publisher": {
+    "name": "Model Context Protocol",
+    "github": "modelcontextprotocol",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Developer Tools",
+    "Filesystem"
+  ],
+  "tags": [
+    "file",
+    "directory",
+    "mcp",
+    "io"
+  ],
+  "risk": "medium",
+  "auth": {
+    "type": "none",
+    "fields": [
+      {
+        "name": "FOLDER_PATH",
+        "label": "Allowed Directory Absolute Path",
+        "secret": false,
+        "required": true
+      }
+    ]
+  },
+  "install": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "[FOLDER_PATH]"
+    ]
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Specify an absolute directory path you want the agent to access.",
+    "The agent will only be able to perform filesystem tasks within that folder hierarchy."
+  ],
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read file contents."
+    },
+    {
+      "name": "write_file",
+      "description": "Write content to a file."
+    }
+  ],
+  "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+  "license": "MIT"
+}

@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MarketplaceItem",
+  "type": "object",
+  "required": ["id", "type", "name", "version"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9.-]+$"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["skill", "mcp", "plugin"]
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "github": { "type": "string" },
+        "verified": { "type": "boolean" }
+      }
+    },
+    "icon": {
+      "type": "string"
+    },
+    "cover": {
+      "type": "string"
+    },
+    "categories": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "auth": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "api-key", "pat", "oauth", "oauth-or-pat", "env", "connection-string", "local-file", "local-only"]
+        },
+        "requiresLogin": { "type": "boolean" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "label"],
+            "properties": {
+              "name": { "type": "string" },
+              "label": { "type": "string" },
+              "secret": { "type": "boolean" },
+              "required": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "install": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["skill", "mcp", "plugin"] },
+        "transport": { "type": "string" },
+        "command": { "type": "string" },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "script": { "type": "string" },
+        "prompt": { "type": "string" }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "setup": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "homepage": { "type": "string" },
+    "license": { "type": "string" },
+    "repository": { "type": "string" }
+  }
+}

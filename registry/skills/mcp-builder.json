@@ -1,0 +1,40 @@
+{
+  "id": "skill.mcp-builder",
+  "type": "skill",
+  "name": "MCP Builder",
+  "version": "1.0.0",
+  "summary": "Generates Model Context Protocol servers.",
+  "description": "Speeds up MCP server development by generating TypeScript or Python templates, schema mappings, and custom integrations.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Developer Tools",
+    "Automation"
+  ],
+  "tags": [
+    "mcp",
+    "builder",
+    "typescript",
+    "python"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are an MCP Developer. Write complete TypeScript or Python Model Context Protocol server templates conforming to the official MCP specification. Set up correct tool and resource definitions."
+  },
+  "permissions": [],
+  "setup": [
+    "No setup required."
+  ],
+  "tools": [],
+  "homepage": "https://aura-os.org",
+  "license": "MIT"
+}

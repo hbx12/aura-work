@@ -58,12 +58,18 @@
 - `project_mcp_settings`: تعطيل MCP per-project
 - Rust يدفع config إلى sidecar عبر `/config` بعد أي تغيير
 
-## Marketplace
+## Aura Marketplace (متجر Aura)
 
-- **metadata فقط** — لا binaries ولا secrets
-- Cache في SQLite: `marketplace_cache`
-- افتراضي: `docs/registry.json` المحلي
-- اختياري: `AURA_PLUGIN_REGISTRY` URL
+تمت ترقية قسم الإضافات إلى متجر متكامل (Aura Marketplace) داخل التطبيق يسهل اكتشاف وتثبيت وتكوين الملحقات:
+1. **المهارات (Skills)**: حزم تعليمات برمجية مسبقة للوكيل (مثل Security Auditor أو PRD Writer).
+2. **موصلات MCP (MCP Connectors)**: اتصالات جاهزة للأدوات والخدمات الخارجية (مثل GitHub MCP أو PostgreSQL MCP).
+3. **الإضافات (Plugins)**: ملحقات برمجية متكاملة لـ Aura Work.
+
+### المميزات الأمنية والتشغيلية للمتجر:
+- **تخزين المفاتيح في الخزنة الآمنة (Vault)**: لحفظ الأسرار والمفاتيح (مثل توكن GitHub أو رابط قاعدة البيانات) بأمان تام. يتم تمريرها كمتغيرات بيئة ديناميكية أثناء بدء تشغيل خوادم الـ MCP دون تخزينها بشكل نصي صريح في قاعدة بيانات SQLite.
+- **مستوى الخطورة وصلاحيات الوصول**: يوضح المتجر بشكل صريح الصلاحيات المطلوبة لكل إضافة ومستوى خطورتها (Low / Medium / High) مع إظهار تحذيرات واضحة للمكونات عالية الخطورة (مثل Docker و Postgres) قبل السماح بالتثبيت.
+- **سجل التسجيل المحلي (Registry)**: يقع في `registry/marketplace.json` ويحتوي على كافة العناصر الافتراضية مع الأيقونات والأغلفة الرسومية (SVG) تحت `registry/assets/`.
+- **مخزن ذاكرة التخزين المؤقت**: يتم تخزين البيانات مؤقتاً في SQLite في جدول `marketplace_cache`. في حال كانت قاعدة البيانات فارغة، يعتمد التطبيق على قراءة سجل `registry/marketplace.json` المحلي كخيار بديل مباشر لضمان سرعة التحميل.
 
 ## Tauri commands
 

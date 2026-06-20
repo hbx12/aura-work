@@ -6,6 +6,7 @@ use crate::extensions_helper::{
     HelperConfigPayload, InstalledPluginConfig, PluginManifest, PluginsHelperStatus,
 };
 use crate::permissions::check_task_permission;
+use crate::VaultHandle;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -30,16 +31,70 @@ pub struct InstalledPlugin {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct MarketplacePublisher {
+    pub name: String,
+    pub github: Option<String>,
+    pub verified: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarketplaceAuthField {
+    pub name: String,
+    pub label: String,
+    pub secret: Option<bool>,
+    pub required: Option<bool>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarketplaceAuth {
+    pub r#type: String,
+    pub requires_login: Option<bool>,
+    pub fields: Option<Vec<MarketplaceAuthField>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarketplaceInstall {
+    pub kind: String,
+    pub transport: Option<String>,
+    pub command: Option<String>,
+    pub args: Option<Vec<String>>,
+    pub script: Option<String>,
+    pub prompt: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MarketplaceTool {
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MarketplaceEntry {
     pub id: String,
+    pub r#type: String,
     pub name: String,
     pub version: String,
-    pub publisher: Option<String>,
+    pub summary: Option<String>,
     pub description: Option<String>,
+    pub publisher: Option<MarketplacePublisher>,
+    pub icon: Option<String>,
+    pub cover: Option<String>,
+    pub categories: Option<Vec<String>>,
+    pub tags: Option<Vec<String>>,
+    pub risk: Option<String>,
+    pub auth: Option<MarketplaceAuth>,
+    pub install: Option<MarketplaceInstall>,
+    pub permissions: Option<Vec<String>>,
+    pub setup: Option<Vec<String>>,
+    pub tools: Option<Vec<MarketplaceTool>>,
     pub homepage: Option<String>,
     pub license: Option<String>,
     pub repository: Option<String>,
-    pub tags: Option<Vec<String>>,
     pub synced_at: Option<String>,
 }
 
@@ -167,7 +222,10 @@ fn load_installed_plugins(conn: &Connection) -> Result<Vec<InstalledPlugin>, Str
     rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
 }
 
-pub fn build_helper_config(conn: &Connection) -> Result<HelperConfigPayload, String> {
+pub fn build_helper_config(
+    conn: &Connection,
+    vault: Option<&VaultHandle>,
+) -> Result<HelperConfigPayload, String> {
     let mut stmt = conn
         .prepare(
             "SELECT id, install_path, manifest_json, enabled FROM installed_plugins WHERE enabled = 1",
@@ -201,6 +259,26 @@ pub fn build_helper_config(conn: &Connection) -> Result<HelperConfigPayload, Str
         .collect();
 
     let mut mcp_servers = crate::mcp::load_mcp_server_configs(conn)?;
+
+    if let Some(v_handle) = vault {
+        if let Ok(v) = v_handle.0.lock() {
+            for server in &mut mcp_servers {
+                if let Some(secret) = v.get_secret(&server.id) {
+                    if let Some(ref api_key) = secret.api_key {
+                        let env_key = match server.id.as_str() {
+                            "mcp.github" => Some("GITHUB_PERSONAL_ACCESS_TOKEN"),
+                            "mcp.postgres" => Some("DATABASE_URL"),
+                            _ => None,
+                        };
+                        if let Some(key) = env_key {
+                            server.env.insert(key.to_string(), serde_json::Value::String(api_key.clone()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     let mut project_mcp_settings = crate::mcp::load_project_mcp_settings(conn)?;
 
     if let Some(app_data) = APP_DATA_DIR.get() {
@@ -246,10 +324,13 @@ pub fn build_helper_config(conn: &Connection) -> Result<HelperConfigPayload, Str
     })
 }
 
-pub async fn push_config_to_helper(db: &DbState) -> Result<PluginsHelperStatus, String> {
+pub async fn push_config_to_helper(
+    db: &DbState,
+    vault: Option<&VaultHandle>,
+) -> Result<PluginsHelperStatus, String> {
     let config = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
-        build_helper_config(&conn)?
+        build_helper_config(&conn, vault)?
     };
     let _ = ensure_plugins_helper_ready().await?;
     sync_helper_config(&config).await
@@ -285,6 +366,7 @@ pub struct InstallLocalPluginInput {
 #[tauri::command]
 pub async fn install_local_plugin(
     db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
     input: InstallLocalPluginInput,
 ) -> Result<InstalledPlugin, String> {
     let src = PathBuf::from(&input.source_path);
@@ -341,7 +423,7 @@ pub async fn install_local_plugin(
         )?;
     }
 
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     load_installed_plugins(&conn)?
         .into_iter()
@@ -350,7 +432,11 @@ pub async fn install_local_plugin(
 }
 
 #[tauri::command]
-pub async fn uninstall_plugin(db: State<'_, DbState>, plugin_id: String) -> Result<(), String> {
+pub async fn uninstall_plugin(
+    db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
+    plugin_id: String,
+) -> Result<(), String> {
     let install_path = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         let path: String = conn
@@ -387,13 +473,14 @@ pub async fn uninstall_plugin(db: State<'_, DbState>, plugin_id: String) -> Resu
     if p.exists() {
         let _ = fs::remove_dir_all(p);
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn set_plugin_enabled(
     db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
     plugin_id: String,
     enabled: bool,
 ) -> Result<InstalledPlugin, String> {
@@ -405,12 +492,56 @@ pub async fn set_plugin_enabled(
         )
         .map_err(|e| e.to_string())?;
     }
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, Some(&vault)).await;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     load_installed_plugins(&conn)?
         .into_iter()
         .find(|p| p.id == plugin_id)
         .ok_or_else(|| "Plugin not found".into())
+}
+
+fn resolve_asset_to_data_uri(asset_path: &str) -> Option<String> {
+    use base64::Engine;
+    let mut paths = vec![
+        PathBuf::from("registry/assets").join(asset_path),
+        PathBuf::from("../../registry/assets").join(asset_path),
+    ];
+    if let Ok(cwd) = std::env::current_dir() {
+        paths.push(cwd.join("registry/assets").join(asset_path));
+        paths.push(cwd.join("../../registry/assets").join(asset_path));
+    }
+    for p in paths {
+        if p.exists() {
+            if let Ok(bytes) = fs::read(&p) {
+                let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+                let mime = if asset_path.ends_with(".svg") {
+                    "image/svg+xml"
+                } else {
+                    "image/png"
+                };
+                return Some(format!("data:{};base64,{}", mime, b64));
+            }
+        }
+    }
+    None
+}
+
+fn process_marketplace_entry_assets(mut entry: MarketplaceEntry) -> MarketplaceEntry {
+    if let Some(ref icon_path) = entry.icon {
+        if !icon_path.starts_with("data:") {
+            if let Some(uri) = resolve_asset_to_data_uri(icon_path) {
+                entry.icon = Some(uri);
+            }
+        }
+    }
+    if let Some(ref cover_path) = entry.cover {
+        if !cover_path.starts_with("data:") {
+            if let Some(uri) = resolve_asset_to_data_uri(cover_path) {
+                entry.cover = Some(uri);
+            }
+        }
+    }
+    entry
 }
 
 #[tauri::command]
@@ -420,25 +551,18 @@ pub async fn sync_marketplace(
 ) -> Result<Vec<MarketplaceEntry>, String> {
     let data = fetch_marketplace_remote(registry_url.as_deref()).await?;
     let entries: Vec<MarketplaceEntry> = if let Some(arr) = data.get("entries").and_then(|v| v.as_array()) {
+        let synced_at = data.get("fetchedAt").and_then(|v| v.as_str()).map(String::from);
         arr.iter()
-            .filter_map(|e| {
-                let synced_at = data.get("fetchedAt").and_then(|v| v.as_str()).map(String::from);
-                Some(MarketplaceEntry {
-                    id: e.get("id")?.as_str()?.into(),
-                    name: e.get("name")?.as_str()?.into(),
-                    version: e.get("version")?.as_str()?.into(),
-                    publisher: e.get("publisher").and_then(|v| v.as_str()).map(String::from),
-                    description: e.get("description").and_then(|v| v.as_str()).map(String::from),
-                    homepage: e.get("homepage").and_then(|v| v.as_str()).map(String::from),
-                    license: e.get("license").and_then(|v| v.as_str()).map(String::from),
-                    repository: e.get("repository").and_then(|v| v.as_str()).map(String::from),
-                    tags: e.get("tags").and_then(|v| v.as_array()).map(|a| {
-                        a.iter()
-                            .filter_map(|t| t.as_str().map(String::from))
-                            .collect()
-                    }),
-                    synced_at,
-                })
+            .filter_map(|item_val| {
+                let mut entry: MarketplaceEntry = match serde_json::from_value(item_val.clone()) {
+                    Ok(entry) => entry,
+                    Err(e) => {
+                        eprintln!("[marketplace] Failed to deserialize entry: {}", e);
+                        return None;
+                    }
+                };
+                entry.synced_at = synced_at.clone();
+                Some(process_marketplace_entry_assets(entry))
             })
             .collect()
     } else {
@@ -473,12 +597,53 @@ pub fn list_marketplace_entries(db: State<'_, DbState>) -> Result<Vec<Marketplac
             serde_json::from_str(&raw).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))
         })
         .map_err(|e| e.to_string())?;
-    rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())
+    let list: Vec<MarketplaceEntry> = rows.collect::<Result<Vec<_>, _>>().map_err(|e| e.to_string())?;
+
+    let items = if list.is_empty() {
+        let mut paths = vec![
+            PathBuf::from("registry/marketplace.json"),
+            PathBuf::from("../../registry/marketplace.json"),
+        ];
+        if let Ok(cwd) = std::env::current_dir() {
+            paths.push(cwd.join("registry/marketplace.json"));
+            paths.push(cwd.join("../../registry/marketplace.json"));
+        }
+        let mut local_entries = vec![];
+        for p in paths {
+            if p.exists() {
+                if let Ok(raw) = fs::read_to_string(&p) {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&raw) {
+                        if let Some(arr) = val.get("plugins").and_then(|v| v.as_array()) {
+                            let entries: Vec<MarketplaceEntry> = arr.iter()
+                                .filter_map(|item| serde_json::from_value(item.clone()).ok())
+                                .collect();
+                            if !entries.is_empty() {
+                                local_entries = entries;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        local_entries
+    } else {
+        list
+    };
+
+    let processed: Vec<MarketplaceEntry> = items.into_iter()
+        .map(process_marketplace_entry_assets)
+        .collect();
+
+    Ok(processed)
 }
 
 #[tauri::command]
-pub async fn reload_plugins_helper(db: State<'_, DbState>) -> Result<PluginsHelperStatus, String> {
-    push_config_to_helper(&db).await
+pub async fn reload_plugins_helper(
+    db: State<'_, DbState>,
+    vault: State<'_, VaultHandle>,
+) -> Result<PluginsHelperStatus, String> {
+    push_config_to_helper(&db, Some(&vault)).await
 }
 
 /// Plugin tool entry used by the task engine.
@@ -506,7 +671,7 @@ pub async fn tool_plugin_call(
         tool_payload,
     )?;
 
-    let _ = push_config_to_helper(db).await?;
+    let _ = push_config_to_helper(db, None).await?;
     let result = call_plugin_tool_remote(project_id, plugin_id, tool_id, arguments).await?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
@@ -624,7 +789,7 @@ pub async fn create_local_skill(
         .map_err(|e| e.to_string())?;
     }
 
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, None).await;
 
     Ok(InstalledPlugin {
         id: plugin_id,
@@ -856,7 +1021,7 @@ pub async fn save_local_skill(
         ).map_err(|e| format!("Failed to update database: {}", e))?;
     }
     
-    let _ = push_config_to_helper(&db).await;
+    let _ = push_config_to_helper(&db, None).await;
     Ok(())
 }
 

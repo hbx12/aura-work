@@ -1,0 +1,880 @@
+{
+  "plugins": [
+    {
+      "id": "skill.security-auditor",
+      "type": "skill",
+      "name": "Security Auditor",
+      "version": "1.0.0",
+      "summary": "Audits your codebase for security vulnerabilities.",
+      "description": "A specialized AI agent that audits code for security issues and common vulnerabilities, suggesting patches and security best practices.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "security/icon.svg",
+      "cover": "security/cover.svg",
+      "categories": [
+        "Security",
+        "Quality"
+      ],
+      "tags": [
+        "security",
+        "audit",
+        "sast",
+        "owasp"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Security Auditor. Inspect the files, search for OWASP Top 10 vulnerabilities, insecure dependency usage, hardcoded secrets, and buffer overflows. Propose safe, hardened refactoring options."
+      },
+      "permissions": [
+        "read_file"
+      ],
+      "setup": [
+        "No extra setup required. Fully sandboxed."
+      ],
+      "tools": [
+        {
+          "name": "scan_file",
+          "description": "Audit security of a specific file."
+        },
+        {
+          "name": "scan_directory",
+          "description": "Audit security of a whole directory."
+        }
+      ],
+      "homepage": "https://aura-os.org",
+      "license": "MIT",
+      "repository": "https://github.com/aura-os/aura-work"
+    },
+    {
+      "id": "skill.prd-writer",
+      "type": "skill",
+      "name": "PRD Writer",
+      "version": "1.0.0",
+      "summary": "Drafts comprehensive Product Requirement Documents.",
+      "description": "Generates high-quality, structured Product Requirement Documents (PRDs) containing goals, user stories, success metrics, and technical considerations.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Productivity",
+        "Documentation"
+      ],
+      "tags": [
+        "prd",
+        "product",
+        "writing",
+        "spec"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Product Manager and PRD Writer. Help the user structure, draft, and refine product requirement documents. Focus on clear scope, metrics, user journeys, and technical constraints."
+      },
+      "permissions": [],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.bug-finder",
+      "type": "skill",
+      "name": "Bug Finder",
+      "version": "1.0.0",
+      "summary": "Locates bugs and logic flaws in your code.",
+      "description": "Uses advanced semantic search and syntax analysis to find bugs, logic flaws, race conditions, memory leaks, and performance issues in your source code.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Quality",
+        "Debugging"
+      ],
+      "tags": [
+        "bugs",
+        "debugging",
+        "linter",
+        "quality"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Senior Quality Assurance Engineer. Scan the codebase for hidden logic bugs, race conditions, unhandled exceptions, and memory leaks. Provide detailed explanations of the issue and fix suggestions."
+      },
+      "permissions": [
+        "read_file"
+      ],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.code-reviewer",
+      "type": "skill",
+      "name": "Code Reviewer",
+      "version": "1.0.0",
+      "summary": "Provides detailed feedback on pull requests and commits.",
+      "description": "Acts as a senior reviewer analyzing style, structure, complexity, test coverage, and performance. Emits standard code review checklists.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Quality",
+        "Collaboration"
+      ],
+      "tags": [
+        "review",
+        "pr",
+        "clean-code",
+        "refactoring"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Senior Software Engineer conducting a thorough code review. Assess readability, architectural alignment, style guidelines, edge case handling, and complexity. Provide polite and constructive feedback."
+      },
+      "permissions": [
+        "read_file"
+      ],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.docs-writer",
+      "type": "skill",
+      "name": "Docs Writer",
+      "version": "1.0.0",
+      "summary": "Generates beautiful markdown documentation.",
+      "description": "Analyzes code symbols, comments, and structure to generate clear, comprehensive Markdown documentation, API guides, and READMEs.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Documentation",
+        "Productivity"
+      ],
+      "tags": [
+        "documentation",
+        "markdown",
+        "api-docs",
+        "readme"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Technical Writer. Write clear, formatted, and elegant developer documentation. Create user guides, API references, architecture diagrams, and tutorials based on the provided code."
+      },
+      "permissions": [],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.open-source-maintainer",
+      "type": "skill",
+      "name": "OS Maintainer",
+      "version": "1.0.0",
+      "summary": "Assists in triaging issues and preparing releases.",
+      "description": "Automates release notes generation, triages issues, generates pull request templates, and ensures compliance with contributing guidelines.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Collaboration",
+        "Automation"
+      ],
+      "tags": [
+        "open-source",
+        "maintainer",
+        "github",
+        "issues"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are an Open Source Project Maintainer. Help package libraries, draft changelogs, manage release labels, check licensing issues, and format contributions templates."
+      },
+      "permissions": [],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.mcp-builder",
+      "type": "skill",
+      "name": "MCP Builder",
+      "version": "1.0.0",
+      "summary": "Generates Model Context Protocol servers.",
+      "description": "Speeds up MCP server development by generating TypeScript or Python templates, schema mappings, and custom integrations.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Developer Tools",
+        "Automation"
+      ],
+      "tags": [
+        "mcp",
+        "builder",
+        "typescript",
+        "python"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are an MCP Developer. Write complete TypeScript or Python Model Context Protocol server templates conforming to the official MCP specification. Set up correct tool and resource definitions."
+      },
+      "permissions": [],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "skill.database-analyst",
+      "type": "skill",
+      "name": "Database Analyst",
+      "version": "1.0.0",
+      "summary": "Writes optimized SQL queries and database schemas.",
+      "description": "Helps design database schemas, drafts efficient SQL queries, analyzes query execution plans, and formats migrations.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Database",
+        "Quality"
+      ],
+      "tags": [
+        "sql",
+        "database",
+        "analytics",
+        "postgres",
+        "sqlite"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are a Database Administrator and Data Analyst. Optimize relational schemas, write queries, analyze indexes, explain execution plans, and write migrations."
+      },
+      "permissions": [],
+      "setup": [
+        "No setup required."
+      ],
+      "tools": [],
+      "homepage": "https://aura-os.org",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.github",
+      "type": "mcp",
+      "name": "GitHub MCP",
+      "version": "0.2.0",
+      "summary": "Model Context Protocol server for managing GitHub repositories.",
+      "description": "Connects the AI agent to your GitHub account to manage repositories, create issues, review pull requests, search code, and submit comments.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "github/icon.svg",
+      "cover": "github/cover.svg",
+      "categories": [
+        "Developer Tools",
+        "Collaboration"
+      ],
+      "tags": [
+        "github",
+        "mcp",
+        "git",
+        "issues",
+        "pr"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "pat",
+        "requiresLogin": false,
+        "fields": [
+          {
+            "name": "GITHUB_PERSONAL_ACCESS_TOKEN",
+            "label": "GitHub Personal Access Token (PAT)",
+            "secret": true,
+            "required": true
+          }
+        ]
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-github"
+        ]
+      },
+      "permissions": [
+        "network",
+        "github_api"
+      ],
+      "setup": [
+        "Generate a Personal Access Token (classic) on GitHub with 'repo', 'workflow', and 'user' scopes.",
+        "Input the token during configuration to securely store it in your Aura vault."
+      ],
+      "tools": [
+        {
+          "name": "get_issue",
+          "description": "Retrieve a GitHub issue description."
+        },
+        {
+          "name": "create_issue",
+          "description": "Create a new issue on GitHub."
+        },
+        {
+          "name": "search_code",
+          "description": "Search for text across GitHub repositories."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.filesystem",
+      "type": "mcp",
+      "name": "Filesystem MCP",
+      "version": "0.2.0",
+      "summary": "Secure filesystem access for reading and writing files.",
+      "description": "Gives the agent permission to perform file operations inside explicitly allowed directories.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Developer Tools",
+        "Filesystem"
+      ],
+      "tags": [
+        "file",
+        "directory",
+        "mcp",
+        "io"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none",
+        "fields": [
+          {
+            "name": "FOLDER_PATH",
+            "label": "Allowed Directory Absolute Path",
+            "secret": false,
+            "required": true
+          }
+        ]
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "[FOLDER_PATH]"
+        ]
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Specify an absolute directory path you want the agent to access.",
+        "The agent will only be able to perform filesystem tasks within that folder hierarchy."
+      ],
+      "tools": [
+        {
+          "name": "read_file",
+          "description": "Read file contents."
+        },
+        {
+          "name": "write_file",
+          "description": "Write content to a file."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.postgres",
+      "type": "mcp",
+      "name": "PostgreSQL MCP",
+      "version": "0.1.5",
+      "summary": "Enables read/write database queries on Postgres.",
+      "description": "Allows the agent to explore schemas, run queries, list tables, and analyze performance of a PostgreSQL database.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Database"
+      ],
+      "tags": [
+        "postgres",
+        "sql",
+        "mcp",
+        "database"
+      ],
+      "risk": "high",
+      "auth": {
+        "type": "connection-string",
+        "fields": [
+          {
+            "name": "DATABASE_URL",
+            "label": "PostgreSQL Connection URI (postgres://...)",
+            "secret": true,
+            "required": true
+          }
+        ]
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-postgres",
+          "[DATABASE_URL]"
+        ]
+      },
+      "permissions": [
+        "network",
+        "database_access"
+      ],
+      "setup": [
+        "Ensure you have a running Postgres database.",
+        "Input your connection string. Make sure the database user has limited/safe privileges if running in production."
+      ],
+      "tools": [
+        {
+          "name": "query",
+          "description": "Execute a read or write SQL query."
+        },
+        {
+          "name": "describe_table",
+          "description": "Retrieve schema information for a table."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.sqlite",
+      "type": "mcp",
+      "name": "SQLite MCP",
+      "version": "0.1.5",
+      "summary": "Interact with local SQLite database files.",
+      "description": "Enables querying SQLite databases, inspecting tables, and importing schemas directly.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Database"
+      ],
+      "tags": [
+        "sqlite",
+        "sql",
+        "mcp",
+        "database"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "local-file",
+        "fields": [
+          {
+            "name": "SQLITE_PATH",
+            "label": "SQLite Database File Path (.db/.sqlite)",
+            "secret": false,
+            "required": true
+          }
+        ]
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sqlite",
+          "[SQLITE_PATH]"
+        ]
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Provide the full path to a local SQLite database file."
+      ],
+      "tools": [
+        {
+          "name": "query",
+          "description": "Execute SQL queries on SQLite."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.browser",
+      "type": "mcp",
+      "name": "Web Browser MCP",
+      "version": "0.2.1",
+      "summary": "Scrapes web pages with Puppeteer.",
+      "description": "Launches a headless browser to access web pages, extract markdown/text, capture screenshots, and click links.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Web Scraping",
+        "Developer Tools"
+      ],
+      "tags": [
+        "browser",
+        "puppeteer",
+        "web",
+        "scrape"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-puppeteer"
+        ]
+      },
+      "permissions": [
+        "network",
+        "browser_launch"
+      ],
+      "setup": [
+        "Downloads and launches Puppeteer automatically. Requires active internet connection."
+      ],
+      "tools": [
+        {
+          "name": "navigate",
+          "description": "Go to a URL."
+        },
+        {
+          "name": "click",
+          "description": "Click on an element."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.playwright",
+      "type": "mcp",
+      "name": "Playwright MCP",
+      "version": "0.1.2",
+      "summary": "Automate web tasks using Playwright.",
+      "description": "Gives the agent capability to run web automation scripts, test frontends, and interact with single-page applications.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Testing",
+        "Web Scraping"
+      ],
+      "tags": [
+        "playwright",
+        "automation",
+        "e2e",
+        "test"
+      ],
+      "risk": "high",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-playwright"
+        ]
+      },
+      "permissions": [
+        "network",
+        "browser_launch",
+        "execute_command"
+      ],
+      "setup": [
+        "Runs Playwright server inside a node instance."
+      ],
+      "tools": [
+        {
+          "name": "run_automation",
+          "description": "Execute a web automation workflow."
+        }
+      ],
+      "license": "MIT"
+    },
+    {
+      "id": "mcp.docker",
+      "type": "mcp",
+      "name": "Docker MCP",
+      "version": "0.1.0",
+      "summary": "Interact with local Docker containers.",
+      "description": "Allows the agent to manage Docker containers, list images, inspect networks, and start/stop environments.",
+      "publisher": {
+        "name": "Aura Community",
+        "github": "aura-os",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "DevOps",
+        "Developer Tools"
+      ],
+      "tags": [
+        "docker",
+        "containers",
+        "devops",
+        "mcp"
+      ],
+      "risk": "high",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "mcp-server-docker"
+        ]
+      },
+      "permissions": [
+        "execute_command",
+        "docker_api"
+      ],
+      "setup": [
+        "Ensure Docker Desktop is running locally on your computer.",
+        "The agent will connect to the local Docker socket (/var/run/docker.sock or named pipe)."
+      ],
+      "tools": [
+        {
+          "name": "docker_ps",
+          "description": "List running containers."
+        },
+        {
+          "name": "docker_logs",
+          "description": "Fetch container logs."
+        }
+      ],
+      "license": "Apache-2.0"
+    },
+    {
+      "id": "mcp.memory",
+      "type": "mcp",
+      "name": "Memory MCP",
+      "version": "0.1.0",
+      "summary": "Simple graph-based local memory.",
+      "description": "Enables semantic entity-relation graph storage to help the agent remember facts across conversations.",
+      "publisher": {
+        "name": "Model Context Protocol",
+        "github": "modelcontextprotocol",
+        "verified": true
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Database",
+        "Productivity"
+      ],
+      "tags": [
+        "memory",
+        "graph",
+        "knowledge",
+        "mcp"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "mcp",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Stores memory database in a local JSON file under your app data directory."
+      ],
+      "tools": [
+        {
+          "name": "remember_fact",
+          "description": "Add a new fact to memory."
+        },
+        {
+          "name": "recall_facts",
+          "description": "Query memory for facts."
+        }
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "license": "MIT"
+    },
+    {
+      "id": "plugin.sample-local",
+      "type": "plugin",
+      "name": "Aura Dev Plugin",
+      "version": "1.0.0",
+      "summary": "An example plugin to kickstart local development.",
+      "description": "Demonstrates plugin integration in Aura Work, highlighting tool bindings, assets, and custom settings integration.",
+      "publisher": {
+        "name": "User",
+        "verified": false
+      },
+      "icon": "default/icon.svg",
+      "cover": "default/cover.svg",
+      "categories": [
+        "Developer Tools"
+      ],
+      "tags": [
+        "sample",
+        "plugin",
+        "development",
+        "local"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "plugin",
+        "command": "npm",
+        "args": [
+          "run",
+          "start"
+        ]
+      },
+      "permissions": [
+        "read_file"
+      ],
+      "setup": [
+        "Open your plugin folder and run npm install.",
+        "Select the folder path inside the app to load it locally."
+      ],
+      "tools": [
+        {
+          "name": "sample_tool",
+          "description": "A simple dummy tool returning greeting messages."
+        }
+      ],
+      "license": "MIT"
+    }
+  ]
+}

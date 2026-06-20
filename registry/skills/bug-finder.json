@@ -1,0 +1,42 @@
+{
+  "id": "skill.bug-finder",
+  "type": "skill",
+  "name": "Bug Finder",
+  "version": "1.0.0",
+  "summary": "Locates bugs and logic flaws in your code.",
+  "description": "Uses advanced semantic search and syntax analysis to find bugs, logic flaws, race conditions, memory leaks, and performance issues in your source code.",
+  "publisher": {
+    "name": "Aura Community",
+    "github": "aura-os",
+    "verified": true
+  },
+  "icon": "default/icon.svg",
+  "cover": "default/cover.svg",
+  "categories": [
+    "Quality",
+    "Debugging"
+  ],
+  "tags": [
+    "bugs",
+    "debugging",
+    "linter",
+    "quality"
+  ],
+  "risk": "low",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are a Senior Quality Assurance Engineer. Scan the codebase for hidden logic bugs, race conditions, unhandled exceptions, and memory leaks. Provide detailed explanations of the issue and fix suggestions."
+  },
+  "permissions": [
+    "read_file"
+  ],
+  "setup": [
+    "No setup required."
+  ],
+  "tools": [],
+  "homepage": "https://aura-os.org",
+  "license": "MIT"
+}
