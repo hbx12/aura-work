@@ -299,13 +299,7 @@ export default function MarketplaceGrid({
       {/* Grid Canvas */}
       {loading ? (
         // Grid skeleton loaders
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "20px",
-          }}
-        >
+        <div className="marketplace-grid">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
@@ -359,13 +353,7 @@ export default function MarketplaceGrid({
         </div>
       ) : (
         // Grid cards
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
-            gap: "20px",
-          }}
-        >
+        <div className="marketplace-grid">
           {filteredItems.map((item) => (
             <MarketplaceCard
               key={item.id}

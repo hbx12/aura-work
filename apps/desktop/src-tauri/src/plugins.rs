@@ -504,10 +504,12 @@ fn resolve_asset_to_data_uri(asset_path: &str) -> Option<String> {
     use base64::Engine;
     let mut paths = vec![
         PathBuf::from("registry/assets").join(asset_path),
+        PathBuf::from("../../../registry/assets").join(asset_path),
         PathBuf::from("../../registry/assets").join(asset_path),
     ];
     if let Ok(cwd) = std::env::current_dir() {
         paths.push(cwd.join("registry/assets").join(asset_path));
+        paths.push(cwd.join("../../../registry/assets").join(asset_path));
         paths.push(cwd.join("../../registry/assets").join(asset_path));
     }
     for p in paths {
