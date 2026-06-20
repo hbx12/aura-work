@@ -58,6 +58,7 @@ import { useI18n, usePackaging, usePendingOpenTask } from "./hooks/useI18n";
 import type { MessageCatalog } from "@aura-os/i18n";
 import { useChatModels, parseModelSelection } from "./hooks/useChatModels";
 import { PetWindowContent } from "./components/PetWindowContent";
+import CanvasPanel from "./components/CanvasPanel";
 import "@aura-os/ui/tokens.css";
 import "@aura-os/ui/app.css";
 import "./app-overrides.css";
@@ -247,6 +248,27 @@ export default function App() {
   );
   const [settingsTab, setSettingsTab] = useState<string>("general");
   const [showCtx, setShowCtx] = useState(true);
+  const [showCanvas, setShowCanvas] = useState<boolean>(() => {
+    return localStorage.getItem("aura-show-canvas") === "true";
+  });
+  const [canvasWidth, setCanvasWidth] = useState<number>(() => {
+    const saved = localStorage.getItem("aura-canvas-width");
+    return saved ? parseInt(saved, 10) : 480;
+  });
+  const [activeCanvasFile, setActiveCanvasFile] = useState<string | null>(null);
+
+  const handleToggleCanvas = () => {
+    setShowCanvas((prev) => {
+      const next = !prev;
+      localStorage.setItem("aura-show-canvas", String(next));
+      return next;
+    });
+  };
+
+  const handleCanvasWidthChange = (w: number) => {
+    setCanvasWidth(w);
+    localStorage.setItem("aura-canvas-width", String(w));
+  };
   const [search, setSearch] = useState("");
   const [composer, setComposer] = useState("");
   const [mode, setMode] = useState<"ask" | "act">("act");
@@ -355,6 +377,64 @@ export default function App() {
   const memoryApi = useMemory(activeProjectId);
   const i18n = useI18n();
   const packaging = usePackaging();
+
+  const canvasFiles = useMemo(() => {
+    return tasks.activeTask?.modifiedFiles || [];
+  }, [tasks.activeTask?.modifiedFiles]);
+
+  useEffect(() => {
+    if (canvasFiles.length > 0) {
+      if (!activeCanvasFile || !canvasFiles.includes(activeCanvasFile)) {
+        setActiveCanvasFile(canvasFiles[canvasFiles.length - 1]);
+      }
+    } else {
+      setActiveCanvasFile(null);
+    }
+  }, [canvasFiles, activeCanvasFile]);
+
+  const handleCanvasSendPrompt = (prompt: string) => {
+    setComposer(prompt);
+    setTimeout(() => {
+      if (tasks.activeTask) {
+        if (mode === "act" && tasks.activeTask.state !== "running" && tasks.activeTask.state !== "paused") {
+          void handleNewTask();
+        } else {
+          void handleContinueTask();
+        }
+      } else {
+        if (mode === "act") {
+          void handleNewTask();
+        } else {
+          void handleSendChat();
+        }
+      }
+    }, 50);
+  };
+
+  const renderCanvasToggleButton = () => {
+    const isAr = i18n.settings?.locale === "ar";
+    return (
+      <button
+        onClick={handleToggleCanvas}
+        className={`chip-btn ${showCanvas ? "active" : ""}`}
+        style={{
+          background: showCanvas ? "var(--accent)" : "var(--bg-3)",
+          color: showCanvas ? "#fff" : "var(--fg-2)",
+          border: "1px solid var(--border-3)",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontWeight: 600,
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+      >
+        <span>📋</span>
+        <span>{isAr ? "اللوحة" : "Canvas"}</span>
+      </button>
+    );
+  };
   const chatModels = useChatModels(
     providersApi.providers.filter((p) => p.enabled && p.hasSecret).length +
       providersApi.providers.map((p) => p.defaultModel ?? "").join(",").length,
@@ -1096,8 +1176,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
         return (
           <>
             <div className="ws-head">
-              <div className="row1">
+              <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                 <h1>{activeProject.name}</h1>
+                {renderCanvasToggleButton()}
               </div>
               <div className="row2">
                 <span className="ws-meta">{activeProject.folderPath}</span>
@@ -1106,68 +1187,86 @@ You can open and customize it to instruct the agent on workspace rules.`;
                 </span>
               </div>
             </div>
-            <div className="ws-scroll">
-              <div className="ws-canvas">
-                {showOnboarding && activeProjectId && (
-                  <OnboardingWizard
-                    projectId={activeProjectId}
-                    onClose={() => setShowOnboarding(false)}
-                    isArabic={i18n.settings?.locale === "ar"}
-                  />
-                )}
-                {chatMessages.map((m, i) => (
-                  <Msg
-                    key={i}
-                    who={m.role === "user" ? t("chat.you") : t("chat.aura")}
-                    agent={m.role === "assistant"}
-                    role={m.model}
-                  >
-                    {m.content}
-                  </Msg>
-                ))}
-                {chatStreamText !== null && (
-                  <StreamingMsg
-                    who={t("chat.aura")}
-                    agent
-                    role={chatStreamModel}
-                    streaming
-                    liveText={chatStreamText}
-                  >
-                    {chatStreamText}
-                  </StreamingMsg>
-                )}
-                {tasks.pendingPermissions[0] && (
-                  <PermissionApprovalDialog
-                    permission={tasks.pendingPermissions[0]}
-                    labels={approvalLabels}
-                    onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
-                  />
-                )}
-                {chatError && <p className="modal-error">{chatError}</p>}
-                {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
+            <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+              <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+                <div className="ws-scroll">
+                  <div className="ws-canvas">
+                    {showOnboarding && activeProjectId && (
+                      <OnboardingWizard
+                        projectId={activeProjectId}
+                        onClose={() => setShowOnboarding(false)}
+                        isArabic={i18n.settings?.locale === "ar"}
+                      />
+                    )}
+                    {chatMessages.map((m, i) => (
+                      <Msg
+                        key={i}
+                        who={m.role === "user" ? t("chat.you") : t("chat.aura")}
+                        agent={m.role === "assistant"}
+                        role={m.model}
+                      >
+                        {m.content}
+                      </Msg>
+                    ))}
+                    {chatStreamText !== null && (
+                      <StreamingMsg
+                        who={t("chat.aura")}
+                        agent
+                        role={chatStreamModel}
+                        streaming
+                        liveText={chatStreamText}
+                      >
+                        {chatStreamText}
+                      </StreamingMsg>
+                    )}
+                    {tasks.pendingPermissions[0] && (
+                      <PermissionApprovalDialog
+                        permission={tasks.pendingPermissions[0]}
+                        labels={approvalLabels}
+                        onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
+                      />
+                    )}
+                    {chatError && <p className="modal-error">{chatError}</p>}
+                    {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
+                  </div>
+                </div>
+                <Composer
+                  value={composer}
+                  onChange={setComposer}
+                  onSend={() => void handleComposerPrimary()}
+                  onRunTask={() => void handleNewTask()}
+                  mode={mode}
+                  onToggleMode={() => void handleToggleMode()}
+                  disabled={agent.running || tasks.running || chatStreamText !== null}
+                  models={chatModels.models}
+                  selectedModel={selectedModel}
+                  onModelChange={handleModelChange}
+                  labels={composerLabels}
+                  locale={i18n.locale}
+                  skills={pluginsApi.skills}
+                  messages={chatMessages}
+                  modelContextWindow={currentModelContextWindow}
+                  showRunTask
+                  activeAgent={activeAgent}
+                  onAgentChange={setActiveAgent}
+                  agents={agents}
+                />
               </div>
+              {showCanvas && (
+                <CanvasPanel
+                  projectId={activeProjectId!}
+                  taskId={null}
+                  isAr={i18n.settings?.locale === "ar"}
+                  activeFile={activeCanvasFile}
+                  onChangeActiveFile={setActiveCanvasFile}
+                  onSendPrompt={handleCanvasSendPrompt}
+                  onRefreshWorkspace={refreshProjects}
+                  modifiedFiles={canvasFiles}
+                  width={canvasWidth}
+                  onWidthChange={handleCanvasWidthChange}
+                />
+              )}
             </div>
-            <Composer
-              value={composer}
-              onChange={setComposer}
-              onSend={() => void handleComposerPrimary()}
-              onRunTask={() => void handleNewTask()}
-              mode={mode}
-              onToggleMode={() => void handleToggleMode()}
-              disabled={agent.running || tasks.running || chatStreamText !== null}
-              models={chatModels.models}
-              selectedModel={selectedModel}
-              onModelChange={handleModelChange}
-              labels={composerLabels}
-              locale={i18n.locale}
-              skills={pluginsApi.skills}
-              messages={chatMessages}
-              modelContextWindow={currentModelContextWindow}
-              showRunTask
-              activeAgent={activeAgent}
-              onAgentChange={setActiveAgent}
-              agents={agents}
-            />
           </>
         );
       }
@@ -1208,15 +1307,18 @@ You can open and customize it to instruct the agent on workspace rules.`;
         <div className="ws-head">
           <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <h1>{task?.title ?? t("chat.taskFallback")}</h1>
-            {canRollback && (
-              <button
-                onClick={handleRollback}
-                className="chip-btn"
-                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)", padding: "4px 8px", borderRadius: "6px" }}
-              >
-                ↩️ {i18n.settings?.locale === "ar" ? "تراجع واستعادة الملفات" : "Undo & Restore"}
-              </button>
-            )}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {canRollback && (
+                <button
+                  onClick={handleRollback}
+                  className="chip-btn"
+                  style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)", padding: "4px 8px", borderRadius: "6px" }}
+                >
+                  ↩️ {i18n.settings?.locale === "ar" ? "تراجع واستعادة الملفات" : "Undo & Restore"}
+                </button>
+              )}
+              {renderCanvasToggleButton()}
+            </div>
           </div>
           <div className="row2">
             <span className="ws-meta">{activeProject.folderPath}</span>
@@ -1235,207 +1337,225 @@ You can open and customize it to instruct the agent on workspace rules.`;
             )}
           </div>
         </div>
-        <div className="ws-scroll">
-          <div className="ws-canvas">
-            {showOnboarding && activeProjectId && (
-              <OnboardingWizard
-                projectId={activeProjectId}
-                onClose={() => setShowOnboarding(false)}
-                isArabic={i18n.settings?.locale === "ar"}
-              />
-            )}
-            {tasks.loading && !task && <Thinking label={t("common.loading")} labels={thinkingLabels} />}
-            {task?.messages.map((m, i) => {
-              const isClarification = m.content.trim().startsWith('{"type":"clarification"');
-              if (isClarification) {
-                try {
-                  const data = JSON.parse(m.content);
-                  const isLatest = i === task.messages.length - 1;
-                  return (
-                    <ClarificationCard
-                      key={i}
-                      data={data}
-                      isLatest={isLatest}
-                      isArabic={i18n.locale?.startsWith("ar")}
-                      onSubmit={async (response) => {
-                        setComposer("");
-                        await tasks.sendTaskMessage(task.id, response);
-                        await tasks.continueTask(task.id, mode === "act");
-                      }}
-                    />
-                  );
-                } catch (e) {
-                  // fallback
-                }
-              }
-
-              return (
-                <StreamingMsg
-                  key={i}
-                  who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
-                  agent={m.role !== "user"}
-                  role={m.agentRole ?? undefined}
-                  streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
-                  liveText={
-                    tasks.running && m.role === "assistant" && i === task.messages.length - 1
-                      ? tasks.streamText
-                      : null
+        <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+            <div className="ws-scroll">
+              <div className="ws-canvas">
+                {showOnboarding && activeProjectId && (
+                  <OnboardingWizard
+                    projectId={activeProjectId}
+                    onClose={() => setShowOnboarding(false)}
+                    isArabic={i18n.settings?.locale === "ar"}
+                  />
+                )}
+                {tasks.loading && !task && <Thinking label={t("common.loading")} labels={thinkingLabels} />}
+                {task?.messages.map((m, i) => {
+                  const isClarification = m.content.trim().startsWith('{"type":"clarification"');
+                  if (isClarification) {
+                    try {
+                      const data = JSON.parse(m.content);
+                      const isLatest = i === task.messages.length - 1;
+                      return (
+                        <ClarificationCard
+                          key={i}
+                          data={data}
+                          isLatest={isLatest}
+                          isArabic={i18n.locale?.startsWith("ar")}
+                          onSubmit={async (response) => {
+                            setComposer("");
+                            await tasks.sendTaskMessage(task.id, response);
+                            await tasks.continueTask(task.id, mode === "act");
+                          }}
+                        />
+                      );
+                    } catch (e) {
+                      // fallback
+                    }
                   }
-                >
-                  {m.content}
-                </StreamingMsg>
-              );
-            })}
 
-            {tasks.running && tasks.streamText && (!task?.messages.length || task.messages[task.messages.length - 1]?.role === "user") && (
-              <StreamingMsg
-                who={t("chat.aura")}
-                agent
-                role="coordinator"
-                streaming
-                liveText={tasks.streamText}
-              >
-                {tasks.streamText.replace(/```[\s\S]*$/g, "").trim() || "…"}
-              </StreamingMsg>
-            )}
+                  return (
+                    <StreamingMsg
+                      key={i}
+                      who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
+                      agent={m.role !== "user"}
+                      role={m.agentRole ?? undefined}
+                      streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
+                      liveText={
+                        tasks.running && m.role === "assistant" && i === task.messages.length - 1
+                          ? tasks.streamText
+                          : null
+                      }
+                    >
+                      {m.content}
+                    </StreamingMsg>
+                  );
+                })}
 
-            {task?.pendingEditId && task.state === "waiting-for-approval" && (
-              <p className="modal-desc">
-                {t("files.pendingEdits")}{" "}
-                <button type="button" className="btn sm" onClick={() => setView("files")}>
-                  {t("files.approveWrite")}
-                </button>
-              </p>
-            )}
+                {tasks.running && tasks.streamText && (!task?.messages.length || task.messages[task.messages.length - 1]?.role === "user") && (
+                  <StreamingMsg
+                    who={t("chat.aura")}
+                    agent
+                    role="coordinator"
+                    streaming
+                    liveText={tasks.streamText}
+                  >
+                    {tasks.streamText.replace(/```[\s\S]*$/g, "").trim() || "…"}
+                  </StreamingMsg>
+                )}
 
-            {task && (task.state === "running" || task.state === "paused") && !tasks.running && (
-              <div className="section">
-                <button type="button" className="btn primary sm" onClick={() => void handleContinueTask()}>
-                  {task.state === "paused" ? t("chat.send") : t("chat.continueTask")}
-                </button>
-              </div>
-            )}
+                {task?.pendingEditId && task.state === "waiting-for-approval" && (
+                  <p className="modal-desc">
+                    {t("files.pendingEdits")}{" "}
+                    <button type="button" className="btn sm" onClick={() => setView("files")}>
+                      {t("files.approveWrite")}
+                    </button>
+                  </p>
+                )}
 
-            {task && task.plan.length > 0 && (
-              <PlanBlock
-                steps={task.plan}
-                approved={task.planApproved}
-                collapsed={planCollapsed && task.planApproved}
-                onExpand={() => setPlanCollapsed(false)}
-                labels={planBlockLabels}
-                onApprove={
-                  task.state === "waiting-for-approval" && !task.planApproved
-                    ? () => void handleApprovePlan()
-                    : undefined
-                }
-              />
-            )}
+                {task && (task.state === "running" || task.state === "paused") && !tasks.running && (
+                  <div className="section">
+                    <button type="button" className="btn primary sm" onClick={() => void handleContinueTask()}>
+                      {task.state === "paused" ? t("chat.send") : t("chat.continueTask")}
+                    </button>
+                  </div>
+                )}
 
-            {task && task.steps.length > 0 && <Steps items={task.steps} />}
+                {task && task.plan.length > 0 && (
+                  <PlanBlock
+                    steps={task.plan}
+                    approved={task.planApproved}
+                    collapsed={planCollapsed && task.planApproved}
+                    onExpand={() => setPlanCollapsed(false)}
+                    labels={planBlockLabels}
+                    onApprove={
+                      task.state === "waiting-for-approval" && !task.planApproved
+                        ? () => void handleApprovePlan()
+                        : undefined
+                    }
+                  />
+                )}
 
-            {tasks.pendingPermissions[0] && (
-              <PermissionApprovalDialog
-                permission={tasks.pendingPermissions[0]}
-                labels={approvalLabels}
-                onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
-              />
-            )}
+                {task && task.steps.length > 0 && <Steps items={task.steps} />}
 
-            {task?.state === "completed" && task.summary && (
-              <Summary
-                data={{
-                  points: [task.summary],
-                  files: task.modifiedFiles.map((p) => ({ path: p })),
-                }}
-                labels={summaryLabels}
-              />
-            )}
+                {tasks.pendingPermissions[0] && (
+                  <PermissionApprovalDialog
+                    permission={tasks.pendingPermissions[0]}
+                    labels={approvalLabels}
+                    onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
+                  />
+                )}
 
-            {tasks.running && <Thinking label={t("task.thinking.coordinator")} labels={thinkingLabels} />}
-            {(tasks.error) && (
-              <p className="modal-error">{tasks.error}</p>
-            )}
-            
-            {activeEditor && (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 12px",
-                background: "color-mix(in srgb, var(--accent) 8%, var(--bg-1))",
-                border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--border-1))",
-                borderRadius: "8px",
-                marginBottom: "8px",
-                fontSize: "12px",
-                color: "var(--fg-2)"
-              }}>
-                <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#5a8a52" }} />
-                <span>{t("settings.ideConnected") || "VS Code Connected"}: <strong>{activeEditor.filePath.split('/').pop()}</strong>{activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}</span>
-                <button
-                  onClick={() => setActiveEditor(null)}
-                  style={{
-                    marginLeft: "auto",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--fg-3)",
-                    cursor: "pointer",
+                {task?.state === "completed" && task.summary && (
+                  <Summary
+                    data={{
+                      points: [task.summary],
+                      files: task.modifiedFiles.map((p) => ({ path: p })),
+                    }}
+                    labels={summaryLabels}
+                  />
+                )}
+
+                {tasks.running && <Thinking label={t("task.thinking.coordinator")} labels={thinkingLabels} />}
+                {tasks.error && (
+                  <p className="modal-error">{tasks.error}</p>
+                )}
+
+                {activeEditor && (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    background: "color-mix(in srgb, var(--accent) 8%, var(--bg-1))",
+                    border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--border-1))",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
                     fontSize: "12px",
-                    padding: "0 4px"
-                  }}
-                >
-                  ✕
-                </button>
+                    color: "var(--fg-2)"
+                  }}>
+                    <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#5a8a52" }} />
+                    <span>{t("settings.ideConnected") || "VS Code Connected"}: <strong>{activeEditor.filePath.split('/').pop()}</strong>{activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}</span>
+                    <button
+                      onClick={() => setActiveEditor(null)}
+                      style={{
+                        marginLeft: "auto",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--fg-3)",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        padding: "0 4px"
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+            <Composer
+              value={composer}
+              onChange={setComposer}
+              onSend={() => {
+                if (handleCheckPetCommand(composer)) return;
+                if (
+                  mode === "act" &&
+                  task &&
+                  task.state !== "running" &&
+                  task.state !== "paused"
+                ) {
+                  void handleNewTask();
+                  return;
+                }
+                void handleContinueTask();
+              }}
+              onRunTask={() => void handleNewTask()}
+              mode={mode}
+              onToggleMode={() => void handleToggleMode()}
+              disabled={
+                agent.running ||
+                tasks.running ||
+                (task?.state === "running" && tasks.running)
+              }
+              models={chatModels.models}
+              selectedModel={selectedModel}
+              onModelChange={handleModelChange}
+              labels={{
+                ...composerLabels,
+                send:
+                  mode === "act" && task && task.state !== "running"
+                    ? t("chat.send")
+                    : t("chat.continueTask"),
+                placeholder:
+                  mode === "act" && task && task.state !== "running"
+                    ? t("chat.placeholder")
+                    : t("chat.taskPlaceholder"),
+              }}
+              locale={i18n.locale}
+              skills={pluginsApi.skills}
+              messages={task?.messages || []}
+              workspaceFiles={task?.modifiedFiles.join(",") || ""}
+              modelContextWindow={currentModelContextWindow}
+              activeAgent={activeAgent}
+              onAgentChange={setActiveAgent}
+              agents={agents}
+            />
           </div>
+          {showCanvas && (
+            <CanvasPanel
+              projectId={activeProjectId!}
+              taskId={task?.id || null}
+              isAr={i18n.settings?.locale === "ar"}
+              activeFile={activeCanvasFile}
+              onChangeActiveFile={setActiveCanvasFile}
+              onSendPrompt={handleCanvasSendPrompt}
+              onRefreshWorkspace={refreshProjects}
+              modifiedFiles={canvasFiles}
+              width={canvasWidth}
+              onWidthChange={handleCanvasWidthChange}
+            />
+          )}
         </div>
-        <Composer
-          value={composer}
-          onChange={setComposer}
-          onSend={() => {
-            if (handleCheckPetCommand(composer)) return;
-            if (
-              mode === "act" &&
-              task &&
-              task.state !== "running" &&
-              task.state !== "paused"
-            ) {
-              void handleNewTask();
-              return;
-            }
-            void handleContinueTask();
-          }}
-          onRunTask={() => void handleNewTask()}
-          mode={mode}
-          onToggleMode={() => void handleToggleMode()}
-          disabled={
-            agent.running ||
-            tasks.running ||
-            (task?.state === "running" && tasks.running)
-          }
-          models={chatModels.models}
-          selectedModel={selectedModel}
-          onModelChange={handleModelChange}
-          labels={{
-            ...composerLabels,
-            send:
-              mode === "act" && task && task.state !== "running"
-                ? t("chat.send")
-                : t("chat.continueTask"),
-            placeholder:
-              mode === "act" && task && task.state !== "running"
-                ? t("chat.placeholder")
-                : t("chat.taskPlaceholder"),
-          }}
-          locale={i18n.locale}
-          skills={pluginsApi.skills}
-          messages={task?.messages || []}
-          workspaceFiles={task?.modifiedFiles.join(",") || ""}
-          modelContextWindow={currentModelContextWindow}
-          activeAgent={activeAgent}
-          onAgentChange={setActiveAgent}
-          agents={agents}
-        />
       </>
     );
   };
