@@ -103,10 +103,9 @@ export function useTasks(projectId: string | null) {
         for (let i = 0; i < maxSteps; i++) {
           if (autoApproveEdits && task.state === "waiting-for-approval") {
             if (task.pendingEditId) {
-              await invoke("approve_pending_edit", { editId: task.pendingEditId });
-              task = await invoke<TaskRecord>("resume_after_edit", {
-                editId: task.pendingEditId,
-              });
+              const editId = task.pendingEditId;
+              await invoke("approve_pending_edit", { editId });
+              task = await invoke<TaskRecord>("resume_after_edit", { editId });
               setActiveTask(task);
               continue;
             }
@@ -189,6 +188,10 @@ export function useTasks(projectId: string | null) {
       try {
         const task = await invoke<TaskRecord>("approve_task_plan", { taskId });
         setActiveTask(task);
+        if (task.state === "running") {
+          return await runLoop(task.id, MAX_TASK_STEPS, true);
+        }
+        await refreshTasks();
         return task;
       } catch (e) {
         setError(String(e));
@@ -197,7 +200,7 @@ export function useTasks(projectId: string | null) {
         setRunning(false);
       }
     },
-    [],
+    [runLoop, refreshTasks],
   );
 
   const continueTask = useCallback(
@@ -219,7 +222,7 @@ export function useTasks(projectId: string | null) {
         const task = await invoke<TaskRecord>("resume_after_edit", { editId });
         setActiveTask(task);
         if (task.state === "running") {
-          return runLoop(task.id);
+          return runLoop(task.id, MAX_TASK_STEPS, true);
         }
         return task;
       } catch (e) {
@@ -252,7 +255,7 @@ export function useTasks(projectId: string | null) {
         });
         setActiveTask(task);
         if (task.state === "running") {
-          await runLoop(task.id);
+          return await runLoop(task.id, MAX_TASK_STEPS, true);
         }
         return task;
       } catch (e) {
