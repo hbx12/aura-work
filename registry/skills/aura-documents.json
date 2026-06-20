@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-documents",
+  "type": "skill",
+  "name": "Aura Documents",
+  "version": "1.0.0",
+  "summary": "Create and edit document-style files, reports, letters, resumes, and policies.",
+  "description": "A document workspace skill for structured writing. It routes formal text, letters, reports, resumes, policies, and contract drafts into artifact-first document work. It uses available file tools to create Markdown or text deliverables now, keeps DOCX/PDF export as an explicit tool-backed path when available, and verifies generated content before completion.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-documents/icon.svg",
+  "cover": "aura-documents/cover.svg",
+  "categories": [
+    "Documents",
+    "Productivity",
+    "Business"
+  ],
+  "tags": [
+    "document",
+    "markdown",
+    "report",
+    "letter",
+    "resume"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Documents, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "document_create",
+      "description": "Create structured Markdown or text documents using file tools."
+    },
+    {
+      "name": "document_edit",
+      "description": "Apply targeted edits to existing document files."
+    },
+    {
+      "name": "document_verify",
+      "description": "Read back generated document content and check headings, tables, and references."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للمستندات",
+      "summary": "ينشئ ويعدل المستندات والتقارير والخطابات والسير الذاتية والسياسات.",
+      "description": "مهارة للمستندات والكتابة المنظمة. تفهم الخطابات والتقارير والسير الذاتية والسياسات والعقود كعمل على ملف حقيقي. تستخدم أدوات الملفات المتاحة لإنشاء Markdown أو نص حالياً، ولا تدعي تصدير DOCX/PDF إلا عند توفر أداة فعلية، وتتحقق من الناتج قبل الإنهاء.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "إنشاء مستند",
+          "description": "إنشاء مستند Markdown أو نص منظم باستخدام أدوات الملفات."
+        },
+        {
+          "name": "تعديل مستند",
+          "description": "تطبيق تعديلات محددة على ملفات مستندات موجودة."
+        },
+        {
+          "name": "تحقق",
+          "description": "قراءة الناتج والتحقق من العناوين والجداول والمراجع."
+        }
+      ],
+      "categories": [
+        "مستندات",
+        "إنتاجية",
+        "أعمال"
+      ]
+    }
+  }
+}

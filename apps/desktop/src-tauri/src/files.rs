@@ -122,6 +122,14 @@ fn validate_relative_project_path(rel: &str) -> Result<(), String> {
     if trimmed.contains('\0') {
         return Err("Path contains an invalid character.".into());
     }
+    let bytes = trimmed.as_bytes();
+    if bytes.len() >= 3
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && (bytes[2] == b'/' || bytes[2] == b'\\')
+    {
+        return Err("Absolute paths are not allowed.".into());
+    }
     let path = Path::new(trimmed);
     if path.is_absolute() {
         return Err("Absolute paths are not allowed.".into());

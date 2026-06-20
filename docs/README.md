@@ -28,6 +28,9 @@
 | [features/vault.md](./features/vault.md) | Vault مشفر محلي |
 | [features/providers.md](./features/providers.md) | المزودون، routing، chat، cost |
 | [features/task-engine.md](./features/task-engine.md) | محرك المهام، حالة المهمة، أدوات الملفات |
+| [features/universal-workspace.md](./features/universal-workspace.md) | Universal Workspace، تصنيف النوايا، وسلوك artifact-first |
+| [features/artifact-tools.md](./features/artifact-tools.md) | أدوات الملفات والمخرجات وحدود التصدير native الحالية |
+| [features/marketplace-localization.md](./features/marketplace-localization.md) | تعريب Marketplace، بحث عربي/إنجليزي، ومهارات HBX الرسمية |
 | [features/vm-execution.md](./features/vm-execution.md) | VM helper، shell، mounts، سياسة أوامر |
 | [features/browser-web.md](./features/browser-web.md) | Browser helper، WebView، browse_url، profiles |
 | [features/plugins-mcp.md](./features/plugins-mcp.md) | Plugins helper، MCP، marketplace، plugin_tool/mcp_tool |

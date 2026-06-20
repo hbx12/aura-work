@@ -1205,7 +1205,595 @@ async fn execute_tool(
             let payload = serde_json::to_value(tc).ok();
             tool_computer_focus(db, project_id, task_id, window_id, process_name, title, payload).await
         }
-        _ => Err(format!("Unknown tool: {}", tc.name)),
+        _ => {
+            if let Some(output) = execute_universal_workspace_tool(db, project_id, task_id, tc, app).await? {
+                Ok(output)
+            } else {
+                Err(format!("Unknown tool: {}", tc.name))
+            }
+        }
+    }
+}
+
+const UNIVERSAL_WRITE_TOOLS: &[&str] = &[
+    "artifact_create",
+    "artifact_update",
+    "artifact_version",
+    "artifact_export",
+    "document_create",
+    "document_insert_paragraph",
+    "document_insert_heading",
+    "document_insert_table",
+    "document_format_styles",
+    "document_add_comment",
+    "document_reply_comment",
+    "document_track_changes_on",
+    "document_propose_edits",
+    "document_accept_reject_changes",
+    "document_export_docx",
+    "document_export_pdf",
+    "spreadsheet_create_workbook",
+    "spreadsheet_create_sheet",
+    "spreadsheet_rename_sheet",
+    "spreadsheet_write_range",
+    "spreadsheet_set_formula",
+    "spreadsheet_copy_formula",
+    "spreadsheet_format_range",
+    "spreadsheet_autofit_columns",
+    "spreadsheet_create_table",
+    "spreadsheet_create_pivot_table",
+    "spreadsheet_create_chart",
+    "spreadsheet_sort_filter",
+    "spreadsheet_add_dropdown",
+    "spreadsheet_add_comment",
+    "spreadsheet_export_xlsx",
+    "spreadsheet_export_csv",
+    "spreadsheet_export_pdf",
+    "presentation_create_deck",
+    "presentation_create_storyline",
+    "presentation_add_slide",
+    "presentation_edit_slide_text",
+    "presentation_apply_theme",
+    "presentation_insert_image",
+    "presentation_create_chart",
+    "presentation_create_diagram",
+    "presentation_create_timeline",
+    "presentation_create_process_flow",
+    "presentation_reorder_slides",
+    "presentation_export_pptx",
+    "presentation_export_pdf",
+    "pdf_summarize",
+    "pdf_annotate",
+    "pdf_convert_to_docx",
+    "pdf_convert_to_xlsx",
+    "pdf_convert_to_markdown",
+    "pdf_export",
+    "image_generate",
+    "image_create_banner",
+    "image_create_logo_concept",
+    "image_create_icon",
+    "image_export_svg",
+    "design_create_html",
+    "design_update_html",
+    "design_export_image",
+    "research_plan",
+    "research_create_report",
+    "citation_insert",
+    "data_clean",
+    "data_transform",
+    "data_join",
+    "data_groupby",
+    "data_chart",
+    "data_export_xlsx",
+    "data_export_csv",
+    "data_export_report",
+    "database_export_csv",
+    "database_export_xlsx",
+    "database_create_report",
+    "database_safe_migration_plan",
+    "automation_create_task",
+    "automation_schedule",
+    "automation_monitor_condition",
+    "automation_run_workflow",
+    "github_issue_create",
+    "github_pr_review",
+    "notion_create_page",
+];
+
+const UNIVERSAL_READ_TOOLS: &[&str] = &[
+    "artifact_preview",
+    "artifact_share",
+    "share_file",
+    "create_download_link",
+    "artifact_read_back",
+    "artifact_verify",
+    "document_open",
+    "document_read_section",
+    "document_verify",
+    "spreadsheet_open_workbook",
+    "spreadsheet_read_range",
+    "spreadsheet_validate_formulas",
+    "spreadsheet_find_errors",
+    "spreadsheet_verify",
+    "presentation_open_deck",
+    "presentation_verify_layout",
+    "presentation_verify_text_overflow",
+    "presentation_verify_contrast",
+    "presentation_verify",
+    "pdf_read",
+    "pdf_extract_text",
+    "pdf_extract_tables",
+    "pdf_verify",
+    "design_preview",
+    "design_verify",
+    "data_profile",
+    "data_detect_columns",
+    "data_detect_missing_values",
+    "data_detect_duplicates",
+    "data_detect_anomalies",
+    "data_statistics",
+    "data_forecast",
+    "database_schema_inspect",
+    "database_query",
+    "database_explain_query",
+    "database_detect_sensitive_fields",
+    "source_quality_check",
+    "automation_list",
+];
+
+const UNIVERSAL_SEARCH_TOOLS: &[&str] = &[
+    "document_search_text",
+    "pdf_search",
+    "web_search",
+    "web_search_images",
+    "web_search_videos",
+    "web_search_academic",
+    "web_search_shopping",
+    "web_search_jobs",
+];
+
+const UNIVERSAL_BROWSER_TOOLS: &[&str] = &[
+    "web_open",
+    "web_extract",
+    "web_compare_sources",
+    "browser_open",
+    "browser_read_page",
+    "browser_extract_table",
+    "browser_verify_page",
+];
+
+const UNIVERSAL_UNAVAILABLE_NATIVE_TOOLS: &[&str] = &[
+    "pdf_extract_images",
+    "pdf_split",
+    "pdf_merge",
+    "image_edit",
+    "image_remove_background",
+    "image_upscale",
+    "image_crop_resize",
+    "image_export_png",
+    "browser_click",
+    "browser_type",
+    "browser_fill_form",
+    "browser_screenshot",
+    "browser_download_file",
+    "automation_cancel",
+    "email_search",
+    "email_draft",
+    "email_send_with_confirmation",
+    "calendar_search",
+    "calendar_create_event",
+    "slack_search",
+    "slack_send_with_confirmation",
+];
+
+async fn execute_universal_workspace_tool(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    tc: &SidecarToolCall,
+    app: Option<&AppHandle>,
+) -> Result<Option<String>, String> {
+    let name = tc.name.as_str();
+
+    if UNIVERSAL_WRITE_TOOLS.contains(&name) {
+        let path = universal_output_path(name, &tc.arguments)?;
+        let content = universal_output_content(name, &tc.arguments)?;
+        let edit = tool_write_file(db, project_id, task_id, &path, &content)?;
+        if edit.status == "pending" {
+            return Err(format!("Pending edit approval required: {}", edit.id));
+        }
+        return Ok(Some(format!("Wrote {path} using {name}")));
+    }
+
+    if name == "document_replace_text" || name == "artifact_update_text" {
+        let path = arg_str(&tc.arguments, &["path", "filePath", "documentPath"])
+            .ok_or("Missing path")?;
+        let old_text = arg_str(&tc.arguments, &["oldText", "find", "searchText"])
+            .ok_or("Missing oldText")?;
+        let new_text = arg_str(&tc.arguments, &["newText", "replacement", "replaceWith"])
+            .ok_or("Missing newText")?;
+        let replace_all = tc
+            .arguments
+            .get("replaceAll")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let edit = tool_replace_in_file(db, project_id, task_id, path, old_text, new_text, replace_all)?;
+        if edit.status == "pending" {
+            return Err(format!("Pending edit approval required: {}", edit.id));
+        }
+        return Ok(Some(format!("Edited {path} using {name}")));
+    }
+
+    if UNIVERSAL_READ_TOOLS.contains(&name) {
+        if name.starts_with("database_") {
+            return Ok(Some(handle_database_read_tool(db, project_id, task_id, name, &tc.arguments)?));
+        }
+        let path = arg_str(&tc.arguments, &["path", "filePath", "sourcePath", "documentPath", "workbookPath", "deckPath", "pdfPath"])
+            .ok_or("Missing path")?;
+        let window = tool_read_file_window(db, project_id, task_id, path, Some(1), Some(400))?;
+        let mut output = serde_json::to_string(&window).unwrap_or_else(|_| window.content.clone());
+        if name.starts_with("data_") || name.starts_with("spreadsheet_") {
+            output = format!("{}\n\n{}", summarize_table_like_content(&window.content), output);
+        }
+        return Ok(Some(output));
+    }
+
+    if UNIVERSAL_SEARCH_TOOLS.contains(&name) {
+        if let Some(url) = arg_str(&tc.arguments, &["url"]) {
+            let extract = tc.arguments.get("extract").and_then(|v| v.as_str());
+            let payload = serde_json::to_value(tc).ok();
+            return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload).await?));
+        }
+        let query = arg_str(&tc.arguments, &["query", "pattern", "text", "searchText"])
+            .ok_or("Missing query")?;
+        let path = tc.arguments.get("path").and_then(|v| v.as_str());
+        let matches = tool_grep_files(db, project_id, query, path, None)?;
+        return Ok(Some(serde_json::to_string(&matches).unwrap_or_else(|_| "[]".into())));
+    }
+
+    if UNIVERSAL_BROWSER_TOOLS.contains(&name) {
+        let url = arg_str(&tc.arguments, &["url"]).ok_or("Missing url")?;
+        let extract = tc
+            .arguments
+            .get("extract")
+            .and_then(|v| v.as_str())
+            .or(Some(if name == "browser_extract_table" { "text" } else { "text" }));
+        let payload = serde_json::to_value(tc).ok();
+        return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload).await?));
+    }
+
+    if let Some(output) = execute_connector_alias_tool(db, project_id, task_id, tc, name).await? {
+        return Ok(Some(output));
+    }
+
+    if UNIVERSAL_UNAVAILABLE_NATIVE_TOOLS.contains(&name) {
+        return Err(format!(
+            "{name} requires a native app, browser action, external connector, or image/PDF engine that is not configured in this project. Aura Work did not fake the result."
+        ));
+    }
+
+    let _ = app;
+    Ok(None)
+}
+
+async fn execute_connector_alias_tool(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    tc: &SidecarToolCall,
+    name: &str,
+) -> Result<Option<String>, String> {
+    if let (Some(server_id), Some(tool_name)) = (
+        arg_str(&tc.arguments, &["serverId", "mcpServerId"]),
+        arg_str(&tc.arguments, &["toolName", "mcpToolName"]),
+    ) {
+        let arguments = tc
+            .arguments
+            .get("arguments")
+            .cloned()
+            .unwrap_or_else(|| serde_json::json!({}));
+        let payload = serde_json::to_value(tc).ok();
+        return Ok(Some(tool_mcp_call(db, project_id, task_id, server_id, tool_name, &arguments, payload).await?));
+    }
+
+    if let (Some(plugin_id), Some(tool_id)) = (
+        arg_str(&tc.arguments, &["pluginId"]),
+        arg_str(&tc.arguments, &["toolId"]),
+    ) {
+        let arguments = tc
+            .arguments
+            .get("arguments")
+            .cloned()
+            .unwrap_or_else(|| serde_json::json!({}));
+        let payload = serde_json::to_value(tc).ok();
+        return Ok(Some(tool_plugin_call(db, project_id, task_id, plugin_id, tool_id, &arguments, payload).await?));
+    }
+
+    if name.starts_with("email_")
+        || name.starts_with("calendar_")
+        || name.starts_with("slack_")
+        || name.starts_with("github_")
+        || name.starts_with("notion_")
+    {
+        return Err(format!(
+            "{name} requires a configured MCP server or plugin. Pass serverId/toolName or pluginId/toolId; Aura Work will not perform external actions without an explicit connector."
+        ));
+    }
+
+    Ok(None)
+}
+
+fn arg_str<'a>(args: &'a serde_json::Value, keys: &[&str]) -> Option<&'a str> {
+    keys.iter().find_map(|key| args.get(*key).and_then(|v| v.as_str()))
+}
+
+fn universal_output_path(name: &str, args: &serde_json::Value) -> Result<String, String> {
+    if let Some(path) = arg_str(args, &["path", "filePath", "outputPath", "destination", "exportPath"]) {
+        reject_native_output_without_engine(name, path)?;
+        return Ok(path.to_string());
+    }
+    let title = arg_str(args, &["title", "name", "artifactName"]).unwrap_or(name);
+    let slug = slugify_file_stem(title);
+    Ok(format!("artifacts/{}.{}", slug, universal_default_extension(name, args)))
+}
+
+fn reject_native_output_without_engine(name: &str, path: &str) -> Result<(), String> {
+    let ext = path.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
+    if matches!(ext.as_str(), "docx" | "xlsx" | "pptx" | "pdf" | "png" | "jpg" | "jpeg" | "webp") {
+        return Err(format!(
+            "{name} cannot write native .{ext} output without a configured native exporter. Use an editable fallback path such as .md, .csv, .html, .svg, .json, .sql, or .txt."
+        ));
+    }
+    Ok(())
+}
+
+fn universal_default_extension(name: &str, args: &serde_json::Value) -> &'static str {
+    if let Some(format) = arg_str(args, &["format", "artifactType", "outputFormat"]) {
+        let f = format.trim_start_matches('.').to_ascii_lowercase();
+        match f.as_str() {
+            "md" | "markdown" => return "md",
+            "csv" => return "csv",
+            "html" => return "html",
+            "svg" => return "svg",
+            "json" => return "json",
+            "sql" => return "sql",
+            "txt" => return "txt",
+            _ => {}
+        }
+    }
+    if name.starts_with("spreadsheet_") || name == "data_export_csv" {
+        "csv"
+    } else if name.starts_with("image_") && name != "image_create_banner" {
+        "svg"
+    } else if name.starts_with("design_") || name == "image_create_banner" {
+        "html"
+    } else if name.starts_with("automation_") {
+        "json"
+    } else if name.contains("migration") {
+        "sql"
+    } else {
+        "md"
+    }
+}
+
+fn universal_output_content(name: &str, args: &serde_json::Value) -> Result<String, String> {
+    for key in ["content", "markdown", "csv", "html", "svg", "json", "sql", "text", "body", "report"] {
+        if let Some(value) = args.get(key) {
+            if let Some(s) = value.as_str() {
+                if !s.trim().is_empty() {
+                    return Ok(s.to_string());
+                }
+            } else {
+                return serde_json::to_string_pretty(value).map_err(|e| e.to_string());
+            }
+        }
+    }
+    if let Some(rows) = args.get("rows").and_then(|v| v.as_array()) {
+        if name.starts_with("spreadsheet_") || name.starts_with("data_") {
+            return Ok(json_rows_to_csv(rows));
+        }
+    }
+    if let Some(slides) = args.get("slides").and_then(|v| v.as_array()) {
+        return Ok(slides_to_markdown(slides));
+    }
+    if name.starts_with("automation_") {
+        return serde_json::to_string_pretty(args).map_err(|e| e.to_string());
+    }
+    Err("Missing content. Universal artifact tools require content, markdown, csv, html, svg, json, sql, rows, or slides.".into())
+}
+
+fn handle_database_read_tool(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    name: &str,
+    args: &serde_json::Value,
+) -> Result<String, String> {
+    let path = arg_str(args, &["path", "databasePath", "sqlitePath", "filePath"])
+        .ok_or("Missing database path")?;
+    if name == "database_schema_inspect" || name == "database_detect_sensitive_fields" {
+        let root = project_folder(db, project_id)?;
+        let db_path = crate::files::resolve_project_path(&root, path)?;
+        let conn = Connection::open(db_path).map_err(|e| format!("Open SQLite database failed: {e}"))?;
+        return inspect_sqlite_schema(&conn, name == "database_detect_sensitive_fields");
+    }
+    if name == "database_query" || name == "database_explain_query" {
+        let sql = arg_str(args, &["sql", "query"]).ok_or("Missing sql")?;
+        if !is_read_only_sql(sql) {
+            return Err("Only read-only SELECT/EXPLAIN SQLite queries are allowed through database_query.".into());
+        }
+        let root = project_folder(db, project_id)?;
+        let db_path = crate::files::resolve_project_path(&root, path)?;
+        let conn = Connection::open(db_path).map_err(|e| format!("Open SQLite database failed: {e}"))?;
+        return run_sqlite_query_preview(&conn, sql);
+    }
+    let window = tool_read_file_window(db, project_id, task_id, path, Some(1), Some(300))?;
+    Ok(serde_json::to_string(&window).unwrap_or_else(|_| window.content))
+}
+
+fn inspect_sqlite_schema(conn: &Connection, include_sensitive_scan: bool) -> Result<String, String> {
+    let mut stmt = conn
+        .prepare("SELECT name, sql FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY name")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)))
+        .map_err(|e| e.to_string())?;
+    let mut out = Vec::new();
+    for row in rows {
+        let (name, sql) = row.map_err(|e| e.to_string())?;
+        let schema = sql.unwrap_or_default();
+        let sensitive_hints = if include_sensitive_scan {
+            sensitive_field_hints(&format!("{name}\n{schema}"))
+        } else {
+            Vec::<String>::new()
+        };
+        out.push(serde_json::json!({
+            "name": name,
+            "schema": schema,
+            "sensitiveFieldHints": sensitive_hints,
+        }));
+    }
+    serde_json::to_string_pretty(&out).map_err(|e| e.to_string())
+}
+
+fn run_sqlite_query_preview(conn: &Connection, sql: &str) -> Result<String, String> {
+    let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
+    let column_names: Vec<String> = stmt.column_names().iter().map(|s| s.to_string()).collect();
+    let mut rows = stmt.query([]).map_err(|e| e.to_string())?;
+    let mut data = Vec::new();
+    while let Some(row) = rows.next().map_err(|e| e.to_string())? {
+        let mut item = serde_json::Map::new();
+        for (i, name) in column_names.iter().enumerate() {
+            let value: rusqlite::types::Value = row.get(i).map_err(|e| e.to_string())?;
+            item.insert(name.clone(), sqlite_value_to_json(value));
+        }
+        data.push(serde_json::Value::Object(item));
+        if data.len() >= 100 {
+            break;
+        }
+    }
+    serde_json::to_string_pretty(&serde_json::json!({
+        "columns": column_names,
+        "rows": data,
+        "truncated": data.len() >= 100
+    })).map_err(|e| e.to_string())
+}
+
+fn sqlite_value_to_json(value: rusqlite::types::Value) -> serde_json::Value {
+    match value {
+        rusqlite::types::Value::Null => serde_json::Value::Null,
+        rusqlite::types::Value::Integer(v) => serde_json::json!(v),
+        rusqlite::types::Value::Real(v) => serde_json::json!(v),
+        rusqlite::types::Value::Text(v) => serde_json::json!(v),
+        rusqlite::types::Value::Blob(v) => serde_json::json!(format!("<{} bytes>", v.len())),
+    }
+}
+
+fn is_read_only_sql(sql: &str) -> bool {
+    let trimmed = sql.trim_start().to_ascii_lowercase();
+    (trimmed.starts_with("select ") || trimmed.starts_with("with ") || trimmed.starts_with("explain "))
+        && !trimmed.contains(';')
+}
+
+fn sensitive_field_hints(schema_text: &str) -> Vec<String> {
+    let lower = schema_text.to_ascii_lowercase();
+    ["password", "token", "secret", "key", "email", "phone", "ssn", "credit", "card"]
+        .iter()
+        .filter(|term| lower.contains(**term))
+        .map(|term| term.to_string())
+        .collect()
+}
+
+fn summarize_table_like_content(content: &str) -> String {
+    let lines: Vec<&str> = content.lines().collect();
+    let header = lines.first().copied().unwrap_or("");
+    let delimiter = if header.contains('\t') { '\t' } else { ',' };
+    let columns: Vec<&str> = header.split(delimiter).collect();
+    let missing_cells = lines
+        .iter()
+        .skip(1)
+        .flat_map(|line| line.split(delimiter))
+        .filter(|cell| cell.trim().is_empty())
+        .count();
+    format!(
+        "Table profile: rows={}, columns={}, missingCells={}",
+        lines.len().saturating_sub(1),
+        columns.len(),
+        missing_cells
+    )
+}
+
+fn json_rows_to_csv(rows: &[serde_json::Value]) -> String {
+    let mut headers = Vec::<String>::new();
+    for row in rows {
+        if let Some(obj) = row.as_object() {
+            for key in obj.keys() {
+                if !headers.contains(key) {
+                    headers.push(key.clone());
+                }
+            }
+        }
+    }
+    let mut out = String::new();
+    out.push_str(&headers.iter().map(|h| csv_escape(h)).collect::<Vec<_>>().join(","));
+    for row in rows {
+        out.push('\n');
+        let values = headers.iter().map(|h| {
+            row.get(h)
+                .map(|v| v.as_str().map(str::to_string).unwrap_or_else(|| v.to_string()))
+                .unwrap_or_default()
+        });
+        out.push_str(&values.map(|v| csv_escape(&v)).collect::<Vec<_>>().join(","));
+    }
+    out
+}
+
+fn slides_to_markdown(slides: &[serde_json::Value]) -> String {
+    let mut out = String::from("# Slide Deck\n");
+    for (idx, slide) in slides.iter().enumerate() {
+        out.push_str(&format!("\n## Slide {}\n", idx + 1));
+        if let Some(title) = slide.get("title").and_then(|v| v.as_str()) {
+            out.push_str(&format!("\n### {title}\n"));
+        }
+        if let Some(body) = slide.get("body").and_then(|v| v.as_str()) {
+            out.push_str(body);
+            out.push('\n');
+        }
+        if let Some(points) = slide.get("bullets").and_then(|v| v.as_array()) {
+            for point in points {
+                out.push_str("- ");
+                out.push_str(point.as_str().unwrap_or(&point.to_string()));
+                out.push('\n');
+            }
+        }
+    }
+    out
+}
+
+fn csv_escape(value: &str) -> String {
+    if value.contains(',') || value.contains('"') || value.contains('\n') {
+        format!("\"{}\"", value.replace('"', "\"\""))
+    } else {
+        value.to_string()
+    }
+}
+
+fn slugify_file_stem(input: &str) -> String {
+    let mut out = String::new();
+    for ch in input.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+        } else if ch.is_whitespace() || ch == '-' || ch == '_' {
+            if !out.ends_with('-') {
+                out.push('-');
+            }
+        }
+    }
+    let trimmed = out.trim_matches('-');
+    if trimmed.is_empty() {
+        "artifact".into()
+    } else {
+        trimmed.chars().take(64).collect()
     }
 }
 

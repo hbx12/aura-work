@@ -162,8 +162,6 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
   const globalPathsToTry = [
     path.join(home, ".config", "aura", "AURA.md"),
     path.join(home, ".config", "aura", "AGENTS.md"),
-    path.join(home, ".config", "opencode", "AGENTS.md"), // fallback
-    path.join(home, ".claude", "CLAUDE.md"), // fallback
   ];
   for (const fullPath of globalPathsToTry) {
     if (fs.existsSync(fullPath)) {
@@ -186,12 +184,11 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     projectRulesContent = globalRulesFileContent;
   }
 
-  // 3. Check for aura.json (or opencode.json as fallback) to load extra instructions
+  // 3. Check Aura project config to load extra instructions.
   const configInstructions: string[] = [];
   if (projectPath) {
     const configsToTry = [
       path.resolve(projectPath, "aura.json"),
-      path.resolve(projectPath, "opencode.json"),
       path.resolve(projectPath, "aura.jsonc"),
     ];
     for (const configPath of configsToTry) {
@@ -212,10 +209,9 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     }
   }
 
-  // Also check global configs: ~/.config/aura/aura.json or ~/.config/opencode/opencode.json
+  // Also check global Aura config.
   const globalConfigsToTry = [
     path.join(home, ".config", "aura", "aura.json"),
-    path.join(home, ".config", "opencode", "opencode.json"),
   ];
   for (const configPath of globalConfigsToTry) {
     if (fs.existsSync(configPath)) {
@@ -266,6 +262,7 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
 }
 
 const SUBAGENT_ROLES = [
+  "dispatch",
   "coordinator",
   "research",
   "coder",
@@ -273,6 +270,13 @@ const SUBAGENT_ROLES = [
   "security",
   "data",
   "document",
+  "spreadsheet",
+  "presentation",
+  "pdf",
+  "image",
+  "design",
+  "automation",
+  "database",
   "browser",
   "computer",
 ] as const;
@@ -295,20 +299,78 @@ function localizedInvalidStructure(prompt: string, responseLanguage?: string) {
     : BLOCKED_INVALID_STRUCTURE.content;
 }
 
+function classifyWorkspaceIntent(prompt: string): {
+  mode: typeof SUBAGENT_ROLES[number] | "mixed";
+  artifactType: string;
+  expectedDeliverable: string;
+  needsClarification: boolean;
+} {
+  const lower = prompt.toLowerCase();
+  const hasArabic = /[\u0600-\u06ff]/.test(prompt);
+  const includesAny = (terms: string[]) => terms.some((term) => lower.includes(term.toLowerCase()));
+
+  if (includesAny(["جدول", "شيت", "excel", "ميزانية", "مصاريف", "إيرادات", "مبيعات", "فورملا", "csv"])) {
+    return { mode: "spreadsheet", artifactType: "csv/xlsx", expectedDeliverable: "spreadsheet artifact", needsClarification: false };
+  }
+  if (includesAny(["ملف نص", "وورد", "word", "خطاب", "عقد", "تقرير رسمي", "سيرة ذاتية", "policy", "document"])) {
+    return { mode: "document", artifactType: "md/docx", expectedDeliverable: "document artifact", needsClarification: false };
+  }
+  if (includesAny(["عرض", "بوربوينت", "شرائح", "presentation", "slides", "pitch deck"])) {
+    return { mode: "presentation", artifactType: "md/pptx", expectedDeliverable: "presentation outline", needsClarification: prompt.length < 80 };
+  }
+  if (includesAny(["pdf", "لخص الملف", "استخرج الجداول"])) {
+    return { mode: "pdf", artifactType: "md/csv", expectedDeliverable: "PDF-derived report", needsClarification: false };
+  }
+  if (includesAny(["صورة", "بانر", "لوقو", "أيقونة", "بوستر", "إعلان", "image", "logo", "banner"])) {
+    return { mode: "image", artifactType: "svg/png brief", expectedDeliverable: "visual artifact", needsClarification: prompt.length < 80 };
+  }
+  if (includesAny(["ابحث", "قارن", "latest", "أسعار", "شروط", "قوانين", "research", "compare"])) {
+    return { mode: "research", artifactType: "md", expectedDeliverable: "cited report", needsClarification: false };
+  }
+  if (includesAny(["data", "داتا", "تحليل", "رسوم", "dashboard", "json", "dataset"])) {
+    return { mode: "data", artifactType: "csv/md", expectedDeliverable: "data analysis report", needsClarification: false };
+  }
+  if (includesAny(["قاعدة بيانات", "sql", "postgres", "sqlite", "supabase", "neon"])) {
+    return { mode: "database", artifactType: "query/report", expectedDeliverable: "database report", needsClarification: true };
+  }
+  if (includesAny(["ذكّرني", "جدولة", "راقب", "كل يوم", "أرسل", "automation", "schedule", "monitor"])) {
+    return { mode: "automation", artifactType: "workflow", expectedDeliverable: "scheduled workflow", needsClarification: true };
+  }
+  if (includesAny(["افتح موقع", "عب النموذج", "اضغط", "browser", "form", "website"])) {
+    return { mode: "browser", artifactType: "browser workflow", expectedDeliverable: "verified browser action", needsClarification: true };
+  }
+
+  return {
+    mode: includesAny(["edit", "fix", "implement", "code", "bug", "build"]) ? "coder" : "coordinator",
+    artifactType: hasArabic ? "ملف أو رد مناسب" : "appropriate response or artifact",
+    expectedDeliverable: hasArabic ? "ناتج مناسب للطلب" : "appropriate deliverable",
+    needsClarification: false,
+  };
+}
+
 function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: string } {
   const lower = prompt.toLowerCase();
+  const intent = classifyWorkspaceIntent(prompt);
   const plan: PlanStep[] = [
     {
-      title: "Understand the request",
-      subtitle: "Parse goal and project context",
-      role: "coordinator",
+      title: "Classify intent",
+      subtitle: `Mode: ${intent.mode}; output: ${intent.artifactType}; deliverable: ${intent.expectedDeliverable}`,
+      role: intent.mode === "mixed" ? "dispatch" : "coordinator",
     },
     {
       title: "Inspect relevant files",
       subtitle: "Read and search project files",
-      role: "research",
+      role: intent.mode === "coordinator" ? "research" : intent.mode,
     },
   ];
+
+  if (intent.needsClarification) {
+    plan.unshift({
+      title: "Clarify requirements",
+      subtitle: "Ask only for details that materially affect the artifact, risk, audience, format, or external action.",
+      role: "coordinator",
+    });
+  }
 
   if (lower.includes("edit") || lower.includes("fix") || lower.includes("implement") || lower.includes("code")) {
     plan.push({
@@ -333,7 +395,9 @@ function fallbackPlan(prompt: string): { plan: PlanStep[]; coordinatorMessage: s
 
   return {
     plan,
-    coordinatorMessage: `I've prepared a ${plan.length}-step plan for your task. Review and approve to begin.`,
+    coordinatorMessage: intent.needsClarification
+      ? `I classified this as ${intent.mode}. Before execution, confirm the missing format/audience/scope details that affect the result.`
+      : `I classified this as ${intent.mode} and prepared a ${plan.length}-step artifact-first plan. Review and approve to begin.`,
   };
 }
 

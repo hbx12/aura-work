@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-image-studio",
+  "type": "skill",
+  "name": "Aura Image Studio",
+  "version": "1.0.0",
+  "summary": "Create image briefs, banners, icons, SVG concepts, and visual asset plans.",
+  "description": "A visual asset workspace skill for image briefs, banners, posters, icons, logo concepts, and SVG outputs. It respects exact dimensions, brand constraints, readability, contrast, and layout verification.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-image-studio/icon.svg",
+  "cover": "aura-image-studio/cover.svg",
+  "categories": [
+    "Images",
+    "Design",
+    "Marketing"
+  ],
+  "tags": [
+    "image",
+    "banner",
+    "icon",
+    "svg",
+    "poster"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Image Studio, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "image_create_brief",
+      "description": "Create precise generation or editing briefs."
+    },
+    {
+      "name": "image_export_svg",
+      "description": "Create simple SVG visual assets when appropriate."
+    },
+    {
+      "name": "image_verify",
+      "description": "Check dimensions, contrast, and text readability."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للصور",
+      "summary": "ينشئ أوصاف صور وبانرات وأيقونات ومفاهيم SVG وخطط أصول بصرية.",
+      "description": "مهارة للأصول البصرية مثل أوصاف الصور والبانرات والبوسترات والأيقونات ومفاهيم الشعارات وملفات SVG. تراعي المقاسات والهوية ووضوح النص والتباين وتتحقق من التخطيط.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "وصف صورة",
+          "description": "صياغة وصف دقيق للتوليد أو التعديل."
+        },
+        {
+          "name": "تصدير SVG",
+          "description": "إنشاء أصول SVG بسيطة عند الحاجة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص المقاس والتباين ووضوح النص."
+        }
+      ],
+      "categories": [
+        "صور",
+        "تصميم",
+        "تسويق"
+      ]
+    }
+  }
+}

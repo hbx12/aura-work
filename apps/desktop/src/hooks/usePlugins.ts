@@ -18,7 +18,7 @@ export interface SkillInfo {
 }
 
 function withMarketplaceFallback(entries: MarketplaceEntry[] | null | undefined) {
-  return mergeMarketplaceEntries(entries ?? [], universalWorkspaceEntries);
+  return mergeMarketplaceEntries(universalWorkspaceEntries, entries ?? []);
 }
 
 async function loadMarketplaceEntries() {

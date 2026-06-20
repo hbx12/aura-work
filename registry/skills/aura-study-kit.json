@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-study-kit",
+  "type": "skill",
+  "name": "Aura Study Kit",
+  "version": "1.0.0",
+  "summary": "Create study notes, lesson plans, quizzes, flashcards, and learning reports.",
+  "description": "A study workspace kit for notes, summaries, lesson plans, quizzes, flashcards, and learning schedules. It adapts tone and depth to the audience and creates files instead of long chat dumps for substantial material.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-study-kit/icon.svg",
+  "cover": "aura-study-kit/cover.svg",
+  "categories": [
+    "Study",
+    "Documents",
+    "Productivity"
+  ],
+  "tags": [
+    "study",
+    "notes",
+    "quiz",
+    "flashcards",
+    "lesson"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Study Kit, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "study_notes",
+      "description": "Create structured learning notes."
+    },
+    {
+      "name": "quiz_create",
+      "description": "Create quizzes or flashcards."
+    },
+    {
+      "name": "study_verify",
+      "description": "Check coverage and clarity."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للدراسة",
+      "summary": "ينشئ ملاحظات دراسية وخطط دروس واختبارات وبطاقات وتقارير تعلم.",
+      "description": "حزمة دراسة للملاحظات والملخصات وخطط الدروس والاختبارات والبطاقات والجداول التعليمية. تضبط الأسلوب والعمق حسب الجمهور وتنشئ ملفات بدل حشو الشات عند وجود محتوى كبير.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "ملاحظات",
+          "description": "إنشاء ملاحظات تعليمية منظمة."
+        },
+        {
+          "name": "اختبار",
+          "description": "إنشاء اختبارات أو بطاقات."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص الشمول والوضوح."
+        }
+      ],
+      "categories": [
+        "دراسة",
+        "مستندات",
+        "إنتاجية"
+      ]
+    }
+  }
+}

@@ -82,6 +82,65 @@ export type ModelResponseParseResult =
 const PLACEHOLDER_CONTENT =
   /\/\/\s*Created for:|\/\/\s*<prompt|placeholder file|TODO:\s*replace this/i;
 
+const WRITE_LIKE_TOOL_NAMES = new Set([
+  "write_file",
+  "artifact_create",
+  "artifact_update",
+  "artifact_export",
+  "document_create",
+  "document_insert_paragraph",
+  "document_insert_heading",
+  "document_insert_table",
+  "document_format_styles",
+  "document_add_comment",
+  "document_propose_edits",
+  "spreadsheet_create_workbook",
+  "spreadsheet_create_sheet",
+  "spreadsheet_write_range",
+  "spreadsheet_set_formula",
+  "spreadsheet_create_table",
+  "spreadsheet_create_pivot_table",
+  "spreadsheet_create_chart",
+  "spreadsheet_export_csv",
+  "presentation_create_deck",
+  "presentation_create_storyline",
+  "presentation_add_slide",
+  "presentation_edit_slide_text",
+  "presentation_create_chart",
+  "presentation_create_diagram",
+  "presentation_create_timeline",
+  "presentation_create_process_flow",
+  "pdf_summarize",
+  "pdf_annotate",
+  "pdf_convert_to_markdown",
+  "image_generate",
+  "image_create_banner",
+  "image_create_logo_concept",
+  "image_create_icon",
+  "image_export_svg",
+  "design_create_html",
+  "design_update_html",
+  "research_plan",
+  "research_create_report",
+  "citation_insert",
+  "data_clean",
+  "data_transform",
+  "data_join",
+  "data_groupby",
+  "data_chart",
+  "data_export_csv",
+  "data_export_report",
+  "database_create_report",
+  "database_safe_migration_plan",
+  "automation_create_task",
+  "automation_schedule",
+  "automation_monitor_condition",
+  "automation_run_workflow",
+  "github_issue_create",
+  "github_pr_review",
+  "notion_create_page",
+]);
+
 export function extractJson(text: string): unknown {
   const trimmed = text.trim();
   if (!trimmed) return null;
@@ -123,11 +182,13 @@ export function toolCallHasPlaceholderContent(
   toolCalls: { name: string; arguments: Record<string, unknown> }[],
 ): boolean {
   for (const call of toolCalls) {
-    if (call.name !== "write_file") continue;
-    const content = call.arguments.content;
-    if (typeof content !== "string") return true;
-    if (!content.trim()) return true;
-    if (PLACEHOLDER_CONTENT.test(content)) return true;
+    if (!WRITE_LIKE_TOOL_NAMES.has(call.name)) continue;
+    const candidates = ["content", "markdown", "csv", "html", "svg", "json", "sql", "text", "body", "report"];
+    const content = candidates
+      .map((key) => call.arguments[key])
+      .find((value) => typeof value === "string" && value.trim());
+    if (content === undefined && !call.arguments.rows && !call.arguments.slides) return true;
+    if (typeof content === "string" && PLACEHOLDER_CONTENT.test(content)) return true;
   }
   return false;
 }

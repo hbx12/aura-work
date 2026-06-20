@@ -21,7 +21,7 @@
     "mcp",
     "database"
   ],
-  "risk": "medium",
+  "risk": "high",
   "auth": {
     "type": "local-file",
     "fields": [

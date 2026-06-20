@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Aura Automation">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="34" fill="url(#g)"/>
+  <circle cx="132" cy="28" r="34" fill="white" opacity=".10"/>
+  <circle cx="24" cy="140" r="46" fill="black" opacity=".16"/>
+  <circle stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" cx="80" cy="80" r="26"/><path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M80 36v14M80 110v14M36 80h14M110 80h14M49 49l10 10M101 101l10 10M111 49l-10 10M59 101l-10 10"/>
+</svg>

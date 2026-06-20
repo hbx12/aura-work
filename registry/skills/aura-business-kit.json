@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-business-kit",
+  "type": "skill",
+  "name": "Aura Business Kit",
+  "version": "1.0.0",
+  "summary": "Create business plans, policies, proposals, operations docs, and KPI reports.",
+  "description": "A business workspace kit combining document, spreadsheet, research, and dashboard patterns for operational work. It clarifies audience and constraints when needed and produces verified, shareable artifacts.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-business-kit/icon.svg",
+  "cover": "aura-business-kit/cover.svg",
+  "categories": [
+    "Business",
+    "Documents",
+    "Productivity"
+  ],
+  "tags": [
+    "business",
+    "proposal",
+    "policy",
+    "kpi",
+    "operations"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Business Kit, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "business_brief",
+      "description": "Create business briefs and proposals."
+    },
+    {
+      "name": "kpi_report",
+      "description": "Structure KPI reports and dashboards."
+    },
+    {
+      "name": "business_verify",
+      "description": "Check assumptions and deliverable completeness."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للأعمال",
+      "summary": "ينشئ خطط أعمال وسياسات ومقترحات ومستندات تشغيل وتقارير مؤشرات.",
+      "description": "حزمة أعمال تجمع أنماط المستندات والجداول والبحث واللوحات للعمل التشغيلي. تستوضح الجمهور والقيود عند الحاجة وتنتج ملفات قابلة للمشاركة والتحقق.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "ملخص أعمال",
+          "description": "إنشاء ملخصات ومقترحات أعمال."
+        },
+        {
+          "name": "تقرير مؤشرات",
+          "description": "تنظيم تقارير KPI ولوحات المتابعة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص الافتراضات واكتمال المخرجات."
+        }
+      ],
+      "categories": [
+        "أعمال",
+        "مستندات",
+        "إنتاجية"
+      ]
+    }
+  }
+}

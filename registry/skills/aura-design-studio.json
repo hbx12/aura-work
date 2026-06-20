@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-design-studio",
+  "type": "skill",
+  "name": "Aura Design Studio",
+  "version": "1.0.0",
+  "summary": "Create UI mockups, HTML previews, dashboards, landing pages, and design systems.",
+  "description": "A design workspace skill for UI screens, dashboards, landing pages, components, visual systems, and HTML/CSS previews. It verifies responsive layout, RTL behavior, spacing, contrast, and text overflow.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-design-studio/icon.svg",
+  "cover": "aura-design-studio/cover.svg",
+  "categories": [
+    "Design",
+    "Productivity",
+    "Marketing"
+  ],
+  "tags": [
+    "design",
+    "ui",
+    "html",
+    "dashboard",
+    "landing-page"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Design Studio, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "design_create_html",
+      "description": "Create HTML/CSS design previews."
+    },
+    {
+      "name": "design_update_html",
+      "description": "Refine existing design files."
+    },
+    {
+      "name": "design_verify",
+      "description": "Check responsive layout, RTL, and overflow."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للتصميم",
+      "summary": "ينشئ واجهات وHTML previews ولوحات ومواقع تعريفية وأنظمة تصميم.",
+      "description": "مهارة للتصميم والواجهات والداشبورد والصفحات التعريفية والمكونات وأنظمة التصميم وHTML/CSS previews. تتحقق من التجاوب وRTL والمسافات والتباين وتداخل النصوص.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "إنشاء HTML",
+          "description": "إنشاء معاينات تصميم HTML/CSS."
+        },
+        {
+          "name": "تحديث التصميم",
+          "description": "تحسين ملفات تصميم موجودة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص التجاوب وRTL وتداخل النصوص."
+        }
+      ],
+      "categories": [
+        "تصميم",
+        "إنتاجية",
+        "تسويق"
+      ]
+    }
+  }
+}

@@ -176,12 +176,10 @@ export function loadAgents(projectPath?: string): AgentConfig[] {
   const home = os.homedir();
   const configPaths = [
     path.join(home, ".config", "aura", "aura.json"),
-    path.join(home, ".config", "opencode", "opencode.json"),
   ];
   if (projectPath) {
     configPaths.push(
       path.resolve(projectPath, "aura.json"),
-      path.resolve(projectPath, "opencode.json"),
       path.resolve(projectPath, "aura.jsonc"),
     );
   }
@@ -209,12 +207,10 @@ export function loadAgents(projectPath?: string): AgentConfig[] {
   // 3. Read Markdown config files from directories
   const mdDirs = [
     path.join(home, ".config", "aura", "agents"),
-    path.join(home, ".config", "opencode", "agents"),
   ];
   if (projectPath) {
     mdDirs.push(
       path.resolve(projectPath, ".aura", "agents"),
-      path.resolve(projectPath, ".opencode", "agents"),
     );
   }
 

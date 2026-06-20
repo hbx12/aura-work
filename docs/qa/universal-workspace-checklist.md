@@ -1,45 +1,42 @@
 # Universal Workspace QA Checklist
 
-Use this checklist before merging Universal Workspace changes.
+## Approval Continuation
+
+- Create a task that writes a file.
+- Approve the plan.
+- Confirm execution continues to the pending edit.
+- Approve the edit.
+- Confirm execution resumes and completes.
+- Create a task requiring browser, shell, plugin, MCP, or database permission.
+- Approve the permission.
+- Confirm the task resumes without repeating the same approval.
+
+## Intent Routing
+
+- `اعمل لي جدول مصاريف شهرية` routes to spreadsheet.
+- `اعمل لي ملف نص رسمي` routes to document.
+- `سو لي عرض عن الذكاء الاصطناعي` routes to presentation.
+- `لخص هذا PDF` routes to PDF.
+- `حلل هذا CSV` routes to data analysis.
+- `سو لي بانر` routes to image/design.
+- `ابحث وقارن` routes to research.
+- `حلل قاعدة البيانات` routes to database.
+- `عب النموذج في الموقع` routes to browser/computer.
+- `ذكرني بكرة` routes to automation.
 
 ## Marketplace
 
-- [ ] Marketplace opens without runtime errors.
-- [ ] HBX skills appear even when backend marketplace sync fails.
-- [ ] Skill cards show icon, cover, publisher, version, type, risk, tags, and install action.
-- [ ] English UI shows English names and descriptions.
-- [ ] Arabic UI shows Arabic names and descriptions.
-- [ ] Details modal shows localized overview, setup, tools, and permissions.
+- English UI shows English marketplace metadata.
+- Arabic UI shows Arabic metadata.
+- Search finds English and Arabic words.
+- Category filters display localized categories in Arabic.
+- Official HBX entries show real icon and cover SVG assets.
+- Installing a skill from Arabic UI uses a stable plugin id and does not fail because of Arabic display text.
+- `node scripts/validate-marketplace-manifests.js` passes.
 
-## Installation
+## Artifact Honesty
 
-- [ ] Install Aura Documents.
-- [ ] Install Aura Spreadsheets.
-- [ ] Install Aura Presentations.
-- [ ] Install Aura PDF.
-- [ ] Install Aura Research.
-- [ ] Install Aura Image Studio.
-- [ ] Install Aura Data Analyst.
-- [ ] Install Aura File Converter.
-- [ ] Install Aura Automation.
-- [ ] Installed skills appear in local skills.
-
-## Task continuation
-
-- [ ] Start a task that requires plan approval.
-- [ ] Approve the plan.
-- [ ] Verify the task continues without another user message.
-- [ ] Approve a pending edit.
-- [ ] Verify the task continues after edit approval.
-- [ ] Approve a pending permission.
-- [ ] Verify the task continues after permission approval.
-
-## Intent behavior
-
-- [ ] Ask for a table and verify spreadsheet-style planning.
-- [ ] Ask for a formal text file and verify document-style planning.
-- [ ] Ask for a presentation and verify slide-style planning.
-- [ ] Ask for PDF work and verify PDF-style planning.
-- [ ] Ask for image/design work and verify visual planning.
-- [ ] Ask for research and verify source-focused planning.
-- [ ] Ask for data analysis and verify data-focused planning.
+- The agent creates actual files for substantial artifacts.
+- It verifies files before saying the work is complete.
+- It states fallback format limitations when native DOCX/XLSX/PPTX/PDF/image export is not available.
+- It does not claim external actions, database writes, publishing, or sending occurred without approval.

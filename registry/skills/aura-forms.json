@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-forms",
+  "type": "skill",
+  "name": "Aura Forms",
+  "version": "1.0.0",
+  "summary": "Create forms, surveys, intake sheets, checklists, and response templates.",
+  "description": "A forms workspace skill for surveys, intake forms, checklists, questionnaires, and response templates. It creates structured Markdown/CSV artifacts and asks before publishing or sending forms externally.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-forms/icon.svg",
+  "cover": "aura-forms/cover.svg",
+  "categories": [
+    "Forms",
+    "Business",
+    "Productivity"
+  ],
+  "tags": [
+    "forms",
+    "survey",
+    "checklist",
+    "questionnaire",
+    "template"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Forms, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "form_create",
+      "description": "Create structured form questions."
+    },
+    {
+      "name": "form_export",
+      "description": "Export forms to Markdown or CSV."
+    },
+    {
+      "name": "form_verify",
+      "description": "Check required fields and answer options."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للنماذج",
+      "summary": "ينشئ نماذج واستبيانات واستمارات وقوائم تحقق وقوالب ردود.",
+      "description": "مهارة للنماذج والاستبيانات والاستمارات وقوائم التحقق وقوالب الردود. تنشئ ملفات Markdown/CSV منظمة وتسأل قبل نشر أو إرسال أي نموذج خارجياً.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "إنشاء نموذج",
+          "description": "إنشاء أسئلة نموذج منظمة."
+        },
+        {
+          "name": "تصدير",
+          "description": "تصدير النماذج إلى Markdown أو CSV."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص الحقول المطلوبة وخيارات الإجابة."
+        }
+      ],
+      "categories": [
+        "نماذج",
+        "أعمال",
+        "إنتاجية"
+      ]
+    }
+  }
+}

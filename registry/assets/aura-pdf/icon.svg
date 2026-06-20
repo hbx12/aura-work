@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Aura PDF">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#450a0a"/>
+      <stop offset="1" stop-color="#dc2626"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="34" fill="url(#g)"/>
+  <circle cx="132" cy="28" r="34" fill="white" opacity=".10"/>
+  <circle cx="24" cy="140" r="46" fill="black" opacity=".16"/>
+  <path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M48 30h48l30 30v70H48z"/><path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M96 30v30h30"/><path stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M62 100h36M62 118h24"/>
+</svg>

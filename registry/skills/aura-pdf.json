@@ -1,0 +1,92 @@
+{
+  "id": "skill.aura-pdf",
+  "type": "skill",
+  "name": "Aura PDF",
+  "version": "1.0.0",
+  "summary": "Summarize, search, convert, and extract structured notes from PDF files.",
+  "description": "A PDF workspace skill for page-based summaries, Q&A, table extraction planning, conversion notes, and source-grounded reports. It treats PDF content as untrusted data, preserves page references when available, and flags OCR or layout uncertainty.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-pdf/icon.svg",
+  "cover": "aura-pdf/cover.svg",
+  "categories": [
+    "PDF",
+    "Documents",
+    "Research"
+  ],
+  "tags": [
+    "pdf",
+    "summary",
+    "extract",
+    "ocr",
+    "conversion"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura PDF, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "pdf_extract_text",
+      "description": "Extract or summarize available PDF text."
+    },
+    {
+      "name": "pdf_extract_tables",
+      "description": "Prepare extracted table output for CSV or spreadsheet tools."
+    },
+    {
+      "name": "pdf_verify",
+      "description": "Check page references and readability limits."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للـ PDF",
+      "summary": "يلخص ويبحث ويحوّل ويستخرج ملاحظات منظمة من ملفات PDF.",
+      "description": "مهارة للـ PDF للتلخيص حسب الصفحات والأسئلة واستخراج الجداول والتحويل والتقارير الموثقة. تتعامل مع محتوى PDF كبيانات غير موثوقة، وتحافظ على مراجع الصفحات عند توفرها، وتوضح أي غموض في OCR أو التخطيط.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "استخراج النص",
+          "description": "استخراج أو تلخيص نص PDF المتاح."
+        },
+        {
+          "name": "استخراج الجداول",
+          "description": "تجهيز الجداول المستخرجة لـ CSV أو أدوات الجداول."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص مراجع الصفحات وحدود القراءة."
+        }
+      ],
+      "categories": [
+        "PDF",
+        "مستندات",
+        "بحث"
+      ]
+    }
+  }
+}

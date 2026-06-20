@@ -1,0 +1,93 @@
+{
+  "id": "skill.aura-automation",
+  "type": "skill",
+  "name": "Aura Automation",
+  "version": "1.0.0",
+  "summary": "Plan and run repeatable workflows, reminders, monitors, and connector actions.",
+  "description": "An automation workspace skill for scheduled tasks, monitors, browser workflows, file workflows, and connector actions. It identifies approval points and never performs externally visible actions without explicit approval.",
+  "publisher": {
+    "name": "HBX",
+    "github": "hbx12",
+    "verified": true
+  },
+  "icon": "aura-automation/icon.svg",
+  "cover": "aura-automation/cover.svg",
+  "categories": [
+    "Automation",
+    "Workflow",
+    "Productivity"
+  ],
+  "tags": [
+    "automation",
+    "schedule",
+    "monitor",
+    "workflow",
+    "connector"
+  ],
+  "risk": "high",
+  "auth": {
+    "type": "none"
+  },
+  "install": {
+    "kind": "skill",
+    "prompt": "You are Aura Automation, an official Aura Work workspace skill. Classify the request before acting and choose the most appropriate artifact format. Use real workspace tools for file creation, editing, reading, verification, and approved browser/connector work when available. Do not claim native Office/PDF/image export succeeded unless a real tool created and verified that file. When native export is unavailable, create the best editable fallback artifact and state the limitation clearly. Ask concise clarification questions only when missing details materially change the output or risk. Keep externally visible, destructive, credential, and database write actions approval-gated. Verify the artifact exists and is readable before reporting completion."
+  },
+  "permissions": [
+    "read_file",
+    "write_file",
+    "browse_url"
+  ],
+  "setup": [
+    "Install the skill from Aura Marketplace.",
+    "Describe the artifact or workflow you want in normal language.",
+    "Review and approve file edits, browser actions, connector calls, or shell/database work when Aura Work asks."
+  ],
+  "tools": [
+    {
+      "name": "automation_create_task",
+      "description": "Create a repeatable workflow plan."
+    },
+    {
+      "name": "automation_schedule",
+      "description": "Plan scheduled or recurring task behavior."
+    },
+    {
+      "name": "automation_verify",
+      "description": "Check that workflow outputs completed."
+    }
+  ],
+  "homepage": "https://github.com/hbx12/aura-work",
+  "license": "MIT",
+  "repository": "https://github.com/hbx12/aura-work",
+  "localized": {
+    "ar": {
+      "name": "Aura للأتمتة",
+      "summary": "يخطط وينفذ مهام متكررة وتذكيرات ومراقبة وتكاملات.",
+      "description": "مهارة للأتمتة والجداول والمراقبة والتصفح وسير عمل الملفات والتكاملات. تحدد نقاط الموافقة ولا تنفذ أي إجراء خارجي واضح بدون موافقة صريحة.",
+      "setup": [
+        "ثبّت المهارة من متجر Aura.",
+        "اكتب نوع الملف أو سير العمل المطلوب بلغتك الطبيعية.",
+        "راجع ووافق على تعديلات الملفات أو إجراءات المتصفح أو الموصلات أو أوامر النظام/قاعدة البيانات عند طلب Aura Work."
+      ],
+      "tools": [
+        {
+          "name": "إنشاء مهمة",
+          "description": "إنشاء خطة سير عمل قابلة للتكرار."
+        },
+        {
+          "name": "جدولة",
+          "description": "تخطيط مهمة مجدولة أو متكررة."
+        },
+        {
+          "name": "تحقق",
+          "description": "فحص اكتمال مخرجات سير العمل."
+        }
+      ],
+      "categories": [
+        "أتمتة",
+        "سير عمل",
+        "إنتاجية"
+      ]
+    }
+  }
+}

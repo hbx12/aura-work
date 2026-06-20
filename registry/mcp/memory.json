@@ -22,7 +22,7 @@
     "knowledge",
     "mcp"
   ],
-  "risk": "low",
+  "risk": "high",
   "auth": {
     "type": "none"
   },

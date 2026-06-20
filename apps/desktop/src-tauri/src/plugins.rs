@@ -74,6 +74,17 @@ pub struct MarketplaceTool {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct MarketplaceLocalizedText {
+    pub name: Option<String>,
+    pub summary: Option<String>,
+    pub description: Option<String>,
+    pub setup: Option<Vec<String>>,
+    pub tools: Option<Vec<MarketplaceTool>>,
+    pub categories: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MarketplaceEntry {
     pub id: String,
     pub r#type: String,
@@ -95,6 +106,7 @@ pub struct MarketplaceEntry {
     pub homepage: Option<String>,
     pub license: Option<String>,
     pub repository: Option<String>,
+    pub localized: Option<std::collections::HashMap<String, MarketplaceLocalizedText>>,
     pub synced_at: Option<String>,
 }
 

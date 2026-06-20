@@ -6,8 +6,8 @@
   "summary": "Assists in triaging issues and preparing releases.",
   "description": "Automates release notes generation, triages issues, generates pull request templates, and ensures compliance with contributing guidelines.",
   "publisher": {
-    "name": "Aura Community",
-    "github": "aura-os",
+    "name": "HBX",
+    "github": "hbx12",
     "verified": true
   },
   "icon": "default/icon.svg",
@@ -35,6 +35,6 @@
     "No setup required."
   ],
   "tools": [],
-  "homepage": "https://aura-os.org",
+  "homepage": "https://github.com/hbx12/aura-work",
   "license": "MIT"
 }

@@ -1,32 +1,65 @@
-# Universal Workspace Mode
+# Universal Workspace
 
-Universal Workspace Mode expands Aura Work beyond coding tasks.
+Aura Work is a universal workspace agent, not a coding-only assistant. The task planner now classifies normal user requests into work modes before execution:
 
-## Modes
+- coding
+- document
+- spreadsheet
+- presentation
+- pdf
+- image
+- design
+- research
+- data-analysis
+- file-conversion
+- automation
+- database
+- browser
+- computer
+- mixed/dispatch
 
-- Documents
-- Spreadsheets
-- Presentations
-- PDF
-- Images and design
-- Research
-- Data analysis
-- File conversion
-- Automation
-- Coding
+## Intent Routing
 
-## Marketplace skills
+The planner prompt and sidecar fallback classifier infer the mode from natural language. Examples:
 
-The PR adds built-in HBX skills for these modes. These skills are shown in the Marketplace even when the remote registry is empty.
+| Request | Mode | Expected artifact |
+|---|---|---|
+| `اعمل لي جدول مصاريف شهرية` | spreadsheet | CSV/XLSX-style table |
+| `اعمل لي ملف نص رسمي` | document | structured document |
+| `سو لي عرض عن الذكاء الاصطناعي` | presentation | slide outline or deck artifact |
+| `لخص هذا PDF` | pdf | page-aware summary/report |
+| `حلل هذا CSV` | data-analysis | analysis report/export |
+| `سو لي بانر` | image/design | SVG/HTML/image brief |
+| `ابحث وقارن` | research | cited report |
+| `حلل قاعدة البيانات` | database | safe query/report |
+| `عب النموذج في الموقع` | browser/computer | approved browser workflow |
 
-## Localized metadata
+## Artifact-First Behavior
 
-Each built-in skill has English and Arabic metadata. The Marketplace UI uses the Arabic metadata when the app is in Arabic.
+When the user asks for a document, table, report, presentation, design, dashboard, website, or other deliverable, the artifact is the deliverable and chat is the cover note.
 
-## Approval continuation
+Aura Work should:
 
-After a user approves a task plan, pending edit, or pending permission, the task loop continues automatically.
+- create or edit real files through approved tools
+- verify generated files exist and can be read
+- report file names and relevant sections/ranges/slides
+- avoid dumping long artifacts into chat unless requested
+- ask concise clarification questions only when missing details materially affect output or risk
 
-## Limitation
+## Current Native Export Limits
 
-Native binary writers for DOCX, XLSX, and PPTX are not included in this PR. The app can still produce editable source formats and use installed tools when available.
+The current implementation supports real file creation through the workspace file tools. Native DOCX/XLSX/PPTX/PDF/image export is not claimed unless a concrete tool creates and verifies that file type. When native export is unavailable, the agent must create the best editable fallback, usually Markdown, CSV, SVG, HTML, or text, and state the limitation clearly.
+
+## Safety
+
+High-impact actions remain approval-gated:
+
+- file writes/deletes
+- shell commands
+- browser form submission
+- connector/MCP calls
+- database writes
+- external messages or publishing
+- credential changes
+
+File, document, PDF, webpage, database, and dataset contents are treated as untrusted data. User chat instructions outrank embedded artifact content.

@@ -1,25 +1,12 @@
-import type { MarketplaceEntry, MarketplaceTool } from "@aura-os/shared";
-
-type LocalizedMarketplaceText = {
-  name?: string;
-  summary?: string;
-  description?: string;
-  setup?: string[];
-  tools?: MarketplaceTool[];
-  categories?: string[];
-};
-
-type LocalizedMarketplaceEntry = MarketplaceEntry & {
-  localized?: Record<string, LocalizedMarketplaceText> | null;
-};
+import type { MarketplaceEntry, MarketplaceLocalizedText } from "@aura-os/shared";
 
 export function marketplaceLocale(isAr?: boolean) {
   return isAr ? "ar" : "en";
 }
 
 export function localizedMarketplace(entry: MarketplaceEntry, isAr?: boolean): MarketplaceEntry {
-  const localizedEntry = entry as LocalizedMarketplaceEntry;
-  const localized = localizedEntry.localized?.[marketplaceLocale(isAr)];
+  const locale = marketplaceLocale(isAr);
+  const localized: MarketplaceLocalizedText | undefined = entry.localized?.[locale];
   if (!localized) return entry;
 
   return {
@@ -36,7 +23,9 @@ export function localizedMarketplace(entry: MarketplaceEntry, isAr?: boolean): M
 export function mergeMarketplaceEntries(...groups: MarketplaceEntry[][]) {
   const map = new Map<string, MarketplaceEntry>();
   for (const group of groups) {
-    for (const entry of group) map.set(entry.id, entry);
+    for (const entry of group) {
+      map.set(entry.id, entry);
+    }
   }
   return Array.from(map.values());
 }

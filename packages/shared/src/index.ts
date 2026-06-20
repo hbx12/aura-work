@@ -501,6 +501,15 @@ export interface MarketplaceTool {
   description?: string;
 }
 
+export interface MarketplaceLocalizedText {
+  name?: string;
+  summary?: string;
+  description?: string;
+  setup?: string[];
+  tools?: MarketplaceTool[];
+  categories?: string[];
+}
+
 export interface MarketplaceEntry {
   id: string;
   type: "skill" | "mcp" | "plugin";
@@ -522,6 +531,7 @@ export interface MarketplaceEntry {
   homepage?: string | null;
   license?: string | null;
   repository?: string | null;
+  localized?: Record<string, MarketplaceLocalizedText> | null;
   syncedAt?: string | null;
 }
 
