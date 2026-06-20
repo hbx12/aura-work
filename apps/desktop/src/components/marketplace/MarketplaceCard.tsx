@@ -13,7 +13,8 @@ interface MarketplaceCardProps {
 
 const isEnglishText = (text?: string | null) => {
   if (!text) return false;
-  return /^[A-Za-z0-9\s.,!?-'"()_-]/.test(text.trim());
+  const first = text.trim().charCodeAt(0);
+  return first > 0 && first < 128;
 };
 
 const legacyPublisherName = ["Aura", "Community"].join(" ");
@@ -239,11 +240,7 @@ export default function MarketplaceCard({
             {item.name}
             {displayPublisher?.verified && (
               <span title={isAr ? "ناشر موثق" : "Verified Publisher"} style={{ display: "inline-flex" }}>
-                <Icon
-                  name="check-badge"
-                  size={15}
-                  style={{ color: "var(--accent, #ea580c)" }}
-                />
+                <Icon name="check-badge" size={15} style={{ color: "var(--accent, #ea580c)" }} />
               </span>
             )}
           </h3>
@@ -329,11 +326,7 @@ export default function MarketplaceCard({
                 <button
                   type="button"
                   className="btn secondary sm"
-                  style={{
-                    flex: 1,
-                    borderColor: "var(--accent, #ea580c)",
-                    color: "var(--accent, #ea580c)",
-                  }}
+                  style={{ flex: 1, borderColor: "var(--accent, #ea580c)", color: "var(--accent, #ea580c)" }}
                   onClick={() => onConfigure(item)}
                 >
                   <Icon name="cog" size={13} />
@@ -343,11 +336,7 @@ export default function MarketplaceCard({
                 <button
                   type="button"
                   className="btn secondary sm"
-                  style={{
-                    flex: 1,
-                    color: "var(--danger, #ef4444)",
-                    borderColor: "rgba(239, 68, 68, 0.2)",
-                  }}
+                  style={{ flex: 1, color: "var(--danger, #ef4444)", borderColor: "rgba(239, 68, 68, 0.2)" }}
                   onClick={() => onUninstall(item)}
                   title={isAr ? "إلغاء التثبيت" : "Uninstall"}
                 >
