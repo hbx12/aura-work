@@ -5,6 +5,7 @@ import MarketplaceCard from "./MarketplaceCard";
 import MarketplaceDetailModal from "./MarketplaceDetailModal";
 import InstallFlowModal from "./InstallFlowModal";
 import { invoke } from "@tauri-apps/api/core";
+import "./marketplace.css";
 
 interface MarketplaceGridProps {
   marketplace: MarketplaceEntry[];
@@ -200,7 +201,7 @@ export default function MarketplaceGrid({
               transform: "translateY(-50%)",
               color: "var(--fg-3)",
               display: "flex",
-              alignItems: "center",
+              alignItems: "center"
             }}
           >
             <Icon name="magnifying-glass" size={15} />
