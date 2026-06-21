@@ -16,7 +16,7 @@
     "@aura-os/shared": "*",
     "@aura-os/ui": "*",
     "@monaco-editor/react": "^4.7.0",
-    "@tauri-apps/api": "^2",
+    "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-updater": "^2",
