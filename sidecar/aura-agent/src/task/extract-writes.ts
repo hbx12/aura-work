@@ -4,10 +4,10 @@ const EXPLICIT_PATH =
   /[`"']?([\w./-]+\.(?:tsx?|jsx?|py|html|css|json|md|rs|go|java|cpp|c|h|vue|svelte|sql|yaml|yml|toml|sh|ps1))[`"']?/i;
 
 const FILE_ACTION =
-  /(?:^|[\s؟?،,.!;:])(?:create|make|write|add|build|scaffold|generate|implement|fix|edit|modify|delete|remove|انشئ|أنشئ|انشاء|إنشاء|اكتب|برمج|عدل|عدّل|احذف|حذف|اضف|أضف|اعمل|سوي|سوّ|سوی)(?=$|[\s؟?،,.!;:])/i;
+  /(?:^|[\s؟?،,.!;:])(?:create|make|write|add|build|scaffold|generate|implement|fix|edit|modify|delete|remove|انشئ|أنشئ|انشاء|إنشاء|اكتب|اكتبلي|مبرمج|برمج|عدل|عدّل|عدّللي|احذف|حذف|اضف|أضف|اعمل|يعمل|سوي|سوّ|سوی|سويلي|سوّلي|جدد|حدّث|صحح|صلح|صلّح|ظبط|اضبط|أظبط)(?=$|[\s؟?،,.!;:])/i;
 
 const FILE_OBJECT =
-  /(?:file|files|folder|folders|directory|directories|project|app|component|page|route|api|database|schema|code|bug|error|test|readme|ملف|ملفات|فايل|مجلد|مجلدات|مشروع|تطبيق|صفحة|مكون|واجهة|كود|برنامج|دالة|مشكلة|خطأ|ثغرة|اختبار)/i;
+  /(?:file|files|folder|folders|directory|directories|project|app|component|page|route|api|database|schema|code|bug|error|test|readme|ملف|ملفات|فايل|فايلات|مجلد|مجلدات|مشروع|تطبيق|صفحة|مكون|واجهة|كود|برنامج|دالة|مشكلة|خطأ|ثغرة|اختبار|سكربت|سكريبت|ملحق|إعدادات|كونفق|برنامچ)/i;
 
 const CHAT_ONLY =
   /^(?:hello|hi|hey|who are you|what do you do|tell me about yourself|من\s+أنت|من\s+انت|وش\s+تسوي|ايش\s+تسوي|ماذا\s+تفعل|عرفني|تكلم(?:\s+معي)?)/i;

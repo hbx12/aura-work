@@ -10,6 +10,16 @@ import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
 import { getSystemPrompt, getPlannerSystemPrompt } from "./prompts/index.js";
 import { loadAgents, type AgentConfig } from "./agent-loader.js";
 
+/** Escape XML special characters to prevent prompt injection via XML tag boundaries. */
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export interface PlanStep {
   title: string;
   subtitle?: string;
@@ -116,7 +126,9 @@ async function fetchRemoteInstruction(url: string): Promise<string | undefined> 
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
     if (res.ok) {
-      return await res.text();
+      const text = await res.text();
+      // Sanitize remote content: strip XML-like tags that could break prompt structure
+      return text.replace(/<\/?[\w_]+[^>]*>/g, (match) => escapeXml(match));
     }
   } catch (err) {
     console.warn(`[rules] Failed to fetch remote instruction from ${url}:`, err);
@@ -553,7 +565,8 @@ export async function iterateTask(req: TaskIterateRequest) {
   let system = `${baseSystem}${skillsXml}`;
 
   if (agentConfig.prompt) {
-    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${agentConfig.name}":\n${agentConfig.prompt}`;
+    const safeAgentName = escapeXml(agentConfig.name);
+    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${safeAgentName}":\n${agentConfig.prompt}`;
   }
 
   const stepsLimit = agentConfig.steps ?? agentConfig.maxSteps;
@@ -561,10 +574,14 @@ export async function iterateTask(req: TaskIterateRequest) {
     system += `\n\n[WARNING: STEPS LIMIT REACHED. You have reached the maximum execution steps of ${stepsLimit}. You must NOT call any more tools. Summarize your work and list remaining recommendations, then output 'complete' or 'blocked'.]`;
   }
 
+  const safeWorkspaceFiles = req.workspaceFiles
+    ? req.workspaceFiles.split("\n").map(line => escapeXml(line)).join("\n")
+    : "(none found)";
+
   const userContent = `Task: ${req.prompt}
 
 Workspace files:
-${req.workspaceFiles || "(none found)"}
+${safeWorkspaceFiles}
 
 Recent context:
 ${history || "(none yet)"}

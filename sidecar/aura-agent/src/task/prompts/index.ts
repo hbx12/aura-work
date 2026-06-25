@@ -10,6 +10,16 @@ import { CONTEXT_PROMPT as contextPrompt } from "./context.js";
 import { SAFETY_PROMPT } from "./safety.js";
 import { getProviderOverride } from "./provider-overrides.js";
 
+/** Escape XML special characters to prevent prompt injection via XML tag boundaries. */
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export function getFilteredToolsPrompt(agentConfig?: any): string {
   if (!agentConfig || !agentConfig.tools) {
     return toolsPrompt;
@@ -54,7 +64,7 @@ export function getSystemPrompt(
     : "\nReply in the same language as the user's latest message.";
 
   const rulesContext = projectRules
-    ? `\nPROJECT LOCAL RULES:\n<project_rules>\n${projectRules}\n</project_rules>`
+    ? `\nPROJECT LOCAL RULES:\n<project_rules>\n${escapeXml(projectRules)}\n</project_rules>`
     : "";
 
   const activeToolsPrompt = getFilteredToolsPrompt(agentConfig);
