@@ -866,10 +866,16 @@ export default function App() {
       return true;
     }
 
-    if (msg.startsWith("/init-aura") || msg.startsWith("/تهيئة_اورا")) {
+    const isInitAura = msg.startsWith("/init-aura") || msg.startsWith("/تهيئة_اورا");
+    const isInitRules = msg.startsWith("/init") || msg.startsWith("/init-rules") || msg.startsWith("/تهيئة_القواعد");
+
+    if (isInitAura || isInitRules) {
       if (!activeProjectId) return false;
       setComposer("");
-      const statusMsg = isAr ? "جاري فحص مساحة العمل لإنشاء ملف AURA.md..." : "Scanning workspace to generate AURA.md...";
+      const targetFileName = isInitAura ? "AURA.md" : "AGENTS.md";
+      const statusMsg = isAr
+        ? `جاري فحص مساحة العمل لإنشاء ملف ${targetFileName}...`
+        : `Scanning workspace to generate ${targetFileName}...`;
       setChatMessages(prev => [...prev, { role: "user", content: msg }, { role: "assistant", content: statusMsg }]);
       
       let pkgName = activeProject?.name || "Aura Project";
@@ -887,9 +893,34 @@ export default function App() {
         // package.json might not exist or failed
       }
 
-      const auraMdContent = `# Aura Project Rules - ${pkgName}
+      let rulesContent = "";
+      if (isAr) {
+        rulesContent = `# قواعد المشروع - ${pkgName}
 
-This file contains coding conventions, build instructions, and guidelines for the Aura Work assistant in this workspace.
+يحتوي هذا الملف على قواعد الترميز، تعليمات البناء، والمبادئ التوجيهية لوكيل المساعد في مساحة العمل هذه.
+
+## بيئة عمل المشروع
+${depsList ? depsList : "- TypeScript / Javascript (لم يتم الكشف عن تبعيات)"}
+
+## إرشادات البنية البرمجية
+- إبقاء الكود نموذجياً ومعرفاً بشكل صارم (Strictly typed).
+- تفضيل الوحدات المساعدة (Helpers) على الملفات الضخمة.
+- إبقاء المكونات صغيرة وقابلة لإعادة الاستخدام.
+
+## أوامر البناء والتحقق
+- بناء المشروع: \`npm run build\` أو ما يعادله.
+- تشغيل الاختبارات: \`npm test\` أو ما يعادله.
+- فحص الأخطاء (Lint): \`npm run lint\` أو ما يعادله.
+
+## الأمن والقواعد
+- عدم إدراج مفاتيح الوصول (API keys) أو البيانات السرية نهائياً.
+- كتابة اختبارات للواجهات البرمجية وحالات الحواف.
+- تشغيل فحص البناء المحلي دائماً قبل إتمام المهام.
+`;
+      } else {
+        rulesContent = `# Project Rules - ${pkgName}
+
+This file contains coding conventions, build instructions, and guidelines for the assistant in this workspace.
 
 ## Project Stack
 ${depsList ? depsList : "- TypeScript / Javascript (No dependencies detected)"}
@@ -909,22 +940,23 @@ ${depsList ? depsList : "- TypeScript / Javascript (No dependencies detected)"}
 - Write unit tests for new APIs and edge cases.
 - Always run local compile checks before completing tasks.
 `;
+      }
 
       try {
         await invoke("write_project_file", {
           input: {
             projectId: activeProjectId,
-            filePath: "AURA.md",
-            content: auraMdContent,
+            filePath: targetFileName,
+            content: rulesContent,
             skipPermission: true
           }
         });
         const successText = isAr
           ? `✅ **تم إنشاء ملف القواعد بنجاح!**
-تم حفظ الملف في مسار المشروع باسم [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+تم حفظ الملف في مسار المشروع باسم [${targetFileName}](file://${activeProject?.folderPath}/${targetFileName}).
 يمكنك فتحه وتعديله لتخصيص سلوك الوكيل داخل هذا المشروع.`
-          : `✅ **AURA.md rules file created successfully!**
-The file has been saved to [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+          : `✅ **${targetFileName} rules file created successfully!**
+The file has been saved to [${targetFileName}](file://${activeProject?.folderPath}/${targetFileName}).
 You can open and customize it to instruct the agent on workspace rules.`;
 
         setChatMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: successText }]);

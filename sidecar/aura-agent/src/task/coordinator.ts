@@ -139,14 +139,15 @@ async function fetchRemoteInstruction(url: string): Promise<string | undefined> 
 // Read rules based on priority and configurations
 async function findProjectRules(projectPath?: string): Promise<string | undefined> {
   let projectRulesContent = "";
+  const disableClaude = process.env.AURA_DISABLE_CLAUDE_CODE === "1" || process.env.OPENCODE_DISABLE_CLAUDE_CODE === "1";
 
-  // 1. Check local rule files (AURA.md, AGENTS.md, CLAUDE.md, etc.)
+  // 1. Check local rule files (AGENTS.md, AURA.md, CLAUDE.md, etc.)
   let localRulesFileContent = "";
   if (projectPath) {
     const filesToTry = [
-      "AURA.md",
       "AGENTS.md",
-      "CLAUDE.md",
+      "AURA.md",
+      ...(disableClaude ? [] : ["CLAUDE.md"]),
       "CONTINUE.md",
       ".cursorrules",
       ".windsurfrules",
@@ -168,12 +169,14 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     }
   }
 
-  // 2. Check global rules files (in ~/.config/aura/AURA.md, ~/.config/aura/AGENTS.md, and fallbacks)
+  // 2. Check global rules files (opencode, aura, and claude fallbacks)
   let globalRulesFileContent = "";
   const home = os.homedir();
   const globalPathsToTry = [
-    path.join(home, ".config", "aura", "AURA.md"),
+    path.join(home, ".config", "opencode", "AGENTS.md"),
     path.join(home, ".config", "aura", "AGENTS.md"),
+    path.join(home, ".config", "aura", "AURA.md"),
+    ...(disableClaude ? [] : [path.join(home, ".claude", "CLAUDE.md")]),
   ];
   for (const fullPath of globalPathsToTry) {
     if (fs.existsSync(fullPath)) {
@@ -196,10 +199,13 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     projectRulesContent = globalRulesFileContent;
   }
 
-  // 3. Check Aura project config to load extra instructions.
+  // 3. Check project config to load extra instructions.
   const configInstructions: string[] = [];
   if (projectPath) {
     const configsToTry = [
+      path.resolve(projectPath, "opencode.json"),
+      path.resolve(projectPath, "opencode.jsonc"),
+      path.resolve(projectPath, "opencode.json5"),
       path.resolve(projectPath, "aura.json"),
       path.resolve(projectPath, "aura.jsonc"),
     ];
@@ -221,8 +227,9 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     }
   }
 
-  // Also check global Aura config.
+  // Also check global config.
   const globalConfigsToTry = [
+    path.join(home, ".config", "opencode", "opencode.json"),
     path.join(home, ".config", "aura", "aura.json"),
   ];
   for (const configPath of globalConfigsToTry) {
