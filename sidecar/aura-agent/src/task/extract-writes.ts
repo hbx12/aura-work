@@ -10,7 +10,7 @@ const FILE_OBJECT =
   /(?:file|files|folder|folders|directory|directories|project|app|component|page|route|api|database|schema|code|bug|error|test|readme|ملف|ملفات|فايل|فايلات|مجلد|مجلدات|مشروع|تطبيق|صفحة|مكون|واجهة|كود|برنامج|دالة|مشكلة|خطأ|ثغرة|اختبار|سكربت|سكريبت|ملحق|إعدادات|كونفق|برنامچ)/i;
 
 const CHAT_ONLY =
-  /^(?:hello|hi|hey|who are you|what do you do|tell me about yourself|من\s+أنت|من\s+انت|وش\s+تسوي|ايش\s+تسوي|ماذا\s+تفعل|عرفني|تكلم(?:\s+معي)?)/i;
+  /^(?:hello|hi|hey|who are you|what do you do|tell me about yourself|من\s+أنت|من\s+انت|وش\s+تسوي|ايش\s+تسوي|ماذا\s+تفعل|عرفني|تكلم(?:\s+معي)?|مرحبا|مرحباً|هلا|أهلاً|اهلان|سلام|السلام\s+عليكم|صباح\s+الخير|مساء\s+الخير|كيفك|كيف\s+الحال)/i;
 
 function userTaskText(prompt: string): string {
   const wrapped = prompt.match(/Workspace chat request:\s*([\s\S]*?)(?:\n\s*\n|$)/i);

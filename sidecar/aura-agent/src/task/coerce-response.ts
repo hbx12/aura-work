@@ -155,8 +155,8 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
     type: "message" as const,
     role: parsed.role ?? "coordinator",
     content,
-    complete: ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages),
-    summary: ctx.iteration >= ctx.planLength ? content : undefined,
+    complete: !fileTask || (ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages)),
+    summary: (!fileTask || ctx.iteration >= ctx.planLength) ? content : undefined,
   };
 }
 
@@ -188,6 +188,18 @@ export function coerceAgentResponse(text: string, ctx: CoerceContext) {
 
     if (parsed.reason === "invalid_json" || parsed.reason === "schema") {
       return blocked(BLOCKED_INVALID_STRUCTURE.content);
+    }
+  }
+
+  if (!fileTask && text.trim()) {
+    const clean = stripCodeFences(text);
+    if (clean) {
+      return {
+        type: "message" as const,
+        role: "coordinator",
+        content: clean,
+        complete: true,
+      };
     }
   }
 

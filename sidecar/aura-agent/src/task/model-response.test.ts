@@ -118,6 +118,31 @@ describe("coerceAgentResponse", () => {
       ]),
     ).toBe(true);
   });
+
+  it("allows non-file tasks to complete immediately on conversational/plain text", () => {
+    const chatCtx = {
+      prompt: "مرحبا",
+      messages: [] as { role: string; content: string }[],
+      iteration: 0,
+      planLength: 4,
+    };
+    const out = coerceAgentResponse("مرحباً بك! كيف أستطيع مساعدتك؟", chatCtx);
+    expect(out?.type).toBe("message");
+    expect(out?.complete).toBe(true);
+  });
+
+  it("handles invalid json for non-file tasks by falling back to plain text complete", () => {
+    const chatCtx = {
+      prompt: "مرحبا",
+      messages: [] as { role: string; content: string }[],
+      iteration: 0,
+      planLength: 4,
+    };
+    const out = coerceAgentResponse("{ invalid: json here ... مرحباً بك!", chatCtx);
+    expect(out?.type).toBe("message");
+    expect(out?.complete).toBe(true);
+    expect(out?.content).toContain("مرحباً بك!");
+  });
 });
 
 describe("extractFileWritesFromResponse", () => {
@@ -136,6 +161,8 @@ describe("extractFileWritesFromResponse", () => {
 describe("isFileTask", () => {
   it("does not treat Arabic identity questions as file tasks", () => {
     expect(isFileTask("وش تسوي؟")).toBe(false);
+    expect(isFileTask("مرحبا")).toBe(false);
+    expect(isFileTask("صباح الخير")).toBe(false);
     expect(
       isFileTask(
         "Workspace chat request: من انت و وش تسوي؟\n\nYou are running inside Aura Work.",
