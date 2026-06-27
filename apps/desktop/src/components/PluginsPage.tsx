@@ -11,6 +11,7 @@ import type {
 import MarketplaceGrid from "./marketplace/MarketplaceGrid";
 import SkillCreator from "./SkillCreator";
 import { ToolCreator } from "./ToolCreator";
+import { VisualBuilder } from "./VisualBuilder";
 
 interface PluginsPageProps {
   projectId: string | null;
@@ -182,7 +183,7 @@ export function PluginsPage({
   const [mcpArgs, setMcpArgs] = useState("-y @modelcontextprotocol/server-filesystem .");
   const [message, setMessage] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills" | "custom-tools">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills" | "custom-tools" | "visual-builder">("marketplace");
   const [skills, setSkills] = useState<any[]>([]);
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [skillName, setSkillName] = useState("");
@@ -441,6 +442,13 @@ export function PluginsPage({
                 onClick={() => setActiveTab("custom-tools")}
               >
                 {isAr ? "الأدوات المخصصة" : "Custom Tools"}
+              </button>
+              <button
+                type="button"
+                className={activeTab === "visual-builder" ? "active" : ""}
+                onClick={() => setActiveTab("visual-builder")}
+              >
+                {isAr ? "بناء" : "Build"}
               </button>
             </div>
           </div>
@@ -1238,6 +1246,20 @@ export function PluginsPage({
                 )}
               </div>
             </>
+          )}
+
+          {activeTab === "visual-builder" && (
+            <VisualBuilder
+              isAr={isAr}
+              projectId={projectId}
+              onSuccess={(msg) => {
+                setToolMessage(msg);
+                refreshCustomTools();
+              }}
+              onCancel={() => {
+                setActiveTab("custom-tools");
+              }}
+            />
           )}
         </div>
       </div>

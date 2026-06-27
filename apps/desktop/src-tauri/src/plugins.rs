@@ -1081,6 +1081,143 @@ pub async fn delete_custom_tool(file_path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct VisualSkillInfo {
+    pub name: String,
+    pub file_path: String,
+    pub graph_json: String,
+}
+
+#[tauri::command]
+pub async fn save_visual_skill(
+    project_id: Option<String>,
+    name: String,
+    graph_json: String,
+    compiled_js: String,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+
+    let dir = if let Some(ref pid) = project_id {
+        let proj_dir = crate::files::project_folder(&db, pid).unwrap_or_default();
+        if proj_dir.is_empty() {
+            return Err("Project directory not found".to_string());
+        }
+        std::path::PathBuf::from(proj_dir).join(".aura").join("tools")
+    } else {
+        if home.is_empty() {
+            return Err("User home directory not found".to_string());
+        }
+        std::path::PathBuf::from(home).join(".config").join("aura").join("tools")
+    };
+
+    if !dir.exists() {
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    }
+
+    let safe_name = name.replace(|c: char| !c.is_alphanumeric() && c != '_' && c != '-', "");
+    if safe_name.is_empty() {
+        return Err("Invalid tool name".to_string());
+    }
+
+    let json_path = dir.join(format!("{}.json", safe_name));
+    let ts_path = dir.join(format!("{}.ts", safe_name));
+
+    std::fs::write(&json_path, graph_json).map_err(|e| e.to_string())?;
+    std::fs::write(&ts_path, compiled_js).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn list_visual_skills(
+    project_id: Option<String>,
+    db: State<'_, DbState>,
+) -> Result<Vec<VisualSkillInfo>, String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+
+    let mut list = Vec::new();
+    let mut dirs = Vec::new();
+
+    if let Some(ref pid) = project_id {
+        let proj_dir = crate::files::project_folder(&db, pid).unwrap_or_default();
+        if !proj_dir.is_empty() {
+            dirs.push(std::path::PathBuf::from(proj_dir).join(".aura").join("tools"));
+        }
+    }
+    if !home.is_empty() {
+        dirs.push(std::path::PathBuf::from(home).join(".config").join("aura").join("tools"));
+    }
+
+    for dir in dirs {
+        if !dir.exists() {
+            continue;
+        }
+        let entries = std::fs::read_dir(dir).map_err(|e| e.to_string())?;
+        for entry in entries {
+            let entry = entry.map_err(|e| e.to_string())?;
+            let path = entry.path();
+            if path.is_file() && path.extension().map_or(false, |ext| ext == "json") {
+                let name = path.file_stem().unwrap_or_default().to_string_lossy().to_string();
+                if let Ok(graph_json) = std::fs::read_to_string(&path) {
+                    if graph_json.contains("\"nodes\"") && graph_json.contains("\"connections\"") {
+                        list.push(VisualSkillInfo {
+                            name,
+                            file_path: path.to_string_lossy().to_string(),
+                            graph_json,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(list)
+}
+
+#[tauri::command]
+pub async fn delete_visual_skill(
+    project_id: Option<String>,
+    name: String,
+    db: State<'_, DbState>,
+) -> Result<(), String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+
+    let mut dirs = Vec::new();
+    if let Some(ref pid) = project_id {
+        let proj_dir = crate::files::project_folder(&db, pid).unwrap_or_default();
+        if !proj_dir.is_empty() {
+            dirs.push(std::path::PathBuf::from(proj_dir).join(".aura").join("tools"));
+        }
+    }
+    if !home.is_empty() {
+        dirs.push(std::path::PathBuf::from(home).join(".config").join("aura").join("tools"));
+    }
+
+    let safe_name = name.replace(|c: char| !c.is_alphanumeric() && c != '_' && c != '-', "");
+
+    for dir in dirs {
+        let json_path = dir.join(format!("{}.json", safe_name));
+        let ts_path = dir.join(format!("{}.ts", safe_name));
+
+        if json_path.is_file() {
+            std::fs::remove_file(json_path).map_err(|e| e.to_string())?;
+        }
+        if ts_path.is_file() {
+            std::fs::remove_file(ts_path).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn test_custom_tool(
     project_id: Option<String>,
