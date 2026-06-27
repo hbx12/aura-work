@@ -52,17 +52,30 @@ export function useFiles(projectId: string | null) {
 
   const approveEdit = useCallback(
     async (editId: string, onTaskResumed?: (taskId: string) => void) => {
+      const edit = pendingEdits.find((e) => e.id === editId);
+      const taskId = edit?.taskId;
+
       await invoke("approve_pending_edit", { editId });
-      try {
-        const task = await invoke<{ id: string }>("resume_after_edit", { editId });
-        onTaskResumed?.(task.id);
-      } catch {
-        /* edit not linked to a task */
+      
+      if (taskId) {
+        onTaskResumed?.(taskId);
       }
+
+      // Resume task execution in the background
+      invoke<{ id: string }>("resume_after_edit", { editId })
+        .then((task) => {
+          if (!taskId) {
+            onTaskResumed?.(task.id);
+          }
+        })
+        .catch(() => {
+          /* edit not linked to a task */
+        });
+
       await refreshFiles();
       if (selectedPath) await openFile(selectedPath);
     },
-    [refreshFiles, openFile, selectedPath],
+    [pendingEdits, refreshFiles, openFile, selectedPath],
   );
 
   const saveFile = useCallback(
