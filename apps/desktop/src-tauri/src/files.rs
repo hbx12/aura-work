@@ -759,7 +759,13 @@ pub fn approve_pending_edit(db: State<'_, DbState>, edit_id: String) -> Result<P
         return Err("Edit already resolved.".into());
     }
 
-    let root = project_folder(&db, &edit.project_id)?;
+    let root: String = conn
+        .query_row(
+            "SELECT folder_path FROM projects WHERE id = ?1",
+            params![edit.project_id],
+            |row| row.get(0),
+        )
+        .map_err(|_| "Project folder not found.".to_string())?;
 
     if let Some(ref tid) = edit.task_id {
         crate::task_snapshots::capture_snapshot_for_file(&conn, &edit.project_id, tid, &edit.file_path)?;
