@@ -81,6 +81,11 @@ pub fn init_file_tables(conn: &Connection) -> Result<(), String> {
             status TEXT NOT NULL DEFAULT 'pending',
             created_at TEXT NOT NULL
         );
+        CREATE VIRTUAL TABLE IF NOT EXISTS files_fts USING fts5(
+            project_id UNINDEXED,
+            file_path,
+            content
+        );
         ",
     )
     .map_err(|e| e.to_string())
@@ -504,6 +509,32 @@ pub fn read_project_file(
     read_file_internal(&root, &file_path)
 }
 
+pub fn index_project_files_internal(db: &DbState, project_id: &str) -> Result<(), String> {
+    let root = project_folder(db, project_id)?;
+    let files = list_dir_internal(&root, None, 6)?;
+    
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    // Clear old FTS records
+    let _ = conn.execute("DELETE FROM files_fts WHERE project_id = ?1", params![project_id]);
+        
+    for f in files {
+        if f.is_dir {
+            continue;
+        }
+        if !looks_textual(&f.path) {
+            continue;
+        }
+        // Read file content
+        if let Ok(content) = read_file_internal(&root, &f.path) {
+            let _ = conn.execute(
+                "INSERT INTO files_fts (project_id, file_path, content) VALUES (?1, ?2, ?3)",
+                params![project_id, f.path, content],
+            );
+        }
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub fn search_project_files(
     db: State<'_, DbState>,
@@ -511,8 +542,54 @@ pub fn search_project_files(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchMatch>, String> {
+    // 1. Index files for this project to make sure the FTS5 index is fresh
+    let _ = index_project_files_internal(&db, &project_id);
+    
+    // 2. Query FTS5 table
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let limit_val = limit.unwrap_or(50);
+    
+    // Append wildcards to query if it doesn't contain them
+    let fts_query = if query.contains('*') || query.contains('"') {
+        query.clone()
+    } else {
+        format!("{}*", query.trim())
+    };
+
+    let stmt_res = conn.prepare(
+        "SELECT file_path, snippet(files_fts, 2, '`', '`', '...', 15) 
+         FROM files_fts 
+         WHERE project_id = ?1 AND files_fts MATCH ?2 
+         LIMIT ?3"
+    );
+
+    if let Ok(mut stmt) = stmt_res {
+        let rows = stmt.query_map(params![project_id, fts_query, limit_val], |row| {
+            let path: String = row.get(0)?;
+            let snippet: String = row.get(1)?;
+            Ok(SearchMatch {
+                path,
+                line: 1,
+                snippet,
+            })
+        });
+
+        if let Ok(rows_iter) = rows {
+            let mut results = Vec::new();
+            for r in rows_iter {
+                if let Ok(m) = r {
+                    results.push(m);
+                }
+            }
+            if !results.is_empty() {
+                return Ok(results);
+            }
+        }
+    }
+
+    // Fallback: If FTS5 query fails or is empty, use the brute-force search
     let root = project_folder(&db, &project_id)?;
-    search_files_internal(&root, &query, limit.unwrap_or(50))
+    search_files_internal(&root, &query, limit_val)
 }
 
 #[derive(Debug, Deserialize)]

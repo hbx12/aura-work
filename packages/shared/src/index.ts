@@ -176,6 +176,7 @@ export interface TaskRecord {
   providerId?: string | null;
   modelId?: string | null;
   error?: string | null;
+  activeAgent?: string | null;
   createdAt: string;
   updatedAt: string;
 }

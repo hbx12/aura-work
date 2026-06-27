@@ -114,6 +114,7 @@ pub struct TaskRecord {
     pub model_id: Option<String>,
     pub error: Option<String>,
     pub scheduled_task_id: Option<String>,
+    pub active_agent: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -166,6 +167,7 @@ pub fn init_task_tables(conn: &Connection) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
     let _ = conn.execute("ALTER TABLE tasks ADD COLUMN provider_id TEXT", []);
     let _ = conn.execute("ALTER TABLE tasks ADD COLUMN model_id TEXT", []);
+    let _ = conn.execute("ALTER TABLE tasks ADD COLUMN active_agent TEXT", []);
     Ok(())
 }
 
@@ -173,7 +175,7 @@ fn load_task(conn: &Connection, id: &str) -> Result<TaskRecord, String> {
     conn.query_row(
         "SELECT id, project_id, title, prompt, state, plan_json, steps_json, messages_json,
                 plan_approved, iteration, summary, modified_files_json, pending_permission_id,
-                pending_edit_id, error, scheduled_task_id, provider_id, model_id, created_at, updated_at
+                pending_edit_id, error, scheduled_task_id, provider_id, model_id, created_at, updated_at, active_agent
          FROM tasks WHERE id = ?1",
         params![id],
         |row| {
@@ -200,6 +202,7 @@ fn load_task(conn: &Connection, id: &str) -> Result<TaskRecord, String> {
                 scheduled_task_id: row.get(15)?,
                 provider_id: row.get(16)?,
                 model_id: row.get(17)?,
+                active_agent: row.get(20)?,
                 created_at: row.get(18)?,
                 updated_at: row.get(19)?,
             })
@@ -214,8 +217,8 @@ fn save_task(conn: &Connection, task: &TaskRecord) -> Result<(), String> {
         "UPDATE tasks SET title = ?1, state = ?2, plan_json = ?3, steps_json = ?4, messages_json = ?5,
          plan_approved = ?6, iteration = ?7, summary = ?8, modified_files_json = ?9,
          pending_permission_id = ?10, pending_edit_id = ?11, error = ?12, provider_id = ?13,
-         model_id = ?14, updated_at = ?15
-         WHERE id = ?16",
+         model_id = ?14, updated_at = ?15, active_agent = ?16
+         WHERE id = ?17",
         params![
             task.title,
             task.state,
@@ -232,6 +235,7 @@ fn save_task(conn: &Connection, task: &TaskRecord) -> Result<(), String> {
             task.provider_id,
             task.model_id,
             now,
+            task.active_agent,
             task.id
         ],
     )
@@ -266,8 +270,8 @@ pub fn create_task(db: State<'_, DbState>, input: CreateTaskInput) -> Result<Tas
     let now = chrono::Utc::now().to_rfc3339();
     let title = title_from_prompt(&input.prompt);
     conn.execute(
-        "INSERT INTO tasks (id, project_id, title, prompt, state, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, 'draft', ?5, ?6)",
+        "INSERT INTO tasks (id, project_id, title, prompt, state, created_at, updated_at, active_agent)
+         VALUES (?1, ?2, ?3, ?4, 'draft', ?5, ?6, 'general')",
         params![id, input.project_id, title, input.prompt.trim(), now, now],
     )
     .map_err(|e| e.to_string())?;
@@ -428,8 +432,9 @@ pub async fn start_task(
     task_id: String,
     preferred_provider: Option<String>,
     preferred_model: Option<String>,
+    active_agent: Option<String>,
 ) -> Result<TaskRecord, String> {
-    start_task_inner(&db, &vault, &task_id, preferred_provider, preferred_model).await
+    start_task_inner(&db, &vault, &task_id, preferred_provider, preferred_model, active_agent).await
 }
 
 pub async fn start_task_inner(
@@ -438,12 +443,17 @@ pub async fn start_task_inner(
     task_id: &str,
     preferred_provider: Option<String>,
     preferred_model: Option<String>,
+    active_agent: Option<String>,
 ) -> Result<TaskRecord, String> {
     let (prompt, project_id) = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
-        let task = load_task(&conn, &task_id)?;
+        let mut task = load_task(&conn, &task_id)?;
         if task.state != TaskState::Draft.as_str() && task.state != TaskState::Planning.as_str() {
             return Err("Task already started.".into());
+        }
+        if let Some(ref agent) = active_agent {
+            task.active_agent = Some(agent.clone());
+            save_task(&conn, &task)?;
         }
         (task.prompt.clone(), task.project_id.clone())
     };
@@ -453,11 +463,12 @@ pub async fn start_task_inner(
         return Err("Enable at least one provider.".into());
     }
 
+    let agent_name = active_agent.unwrap_or_else(|| "general".to_string());
     let chat = build_task_chat_bundle(
         &db,
         &vault,
         &allowed,
-        "general",
+        &agent_name,
         preferred_provider.as_deref(),
         preferred_model.as_deref(),
         None,
@@ -474,6 +485,7 @@ pub async fn start_task_inner(
             "providerId": chat.provider_id,
             "modelId": chat.model_id,
             "credentials": chat.credentials,
+            "activeAgent": agent_name,
         }),
     )
     .await?;
@@ -610,7 +622,7 @@ pub async fn advance_task_inner(
     task_id: &str,
     app: Option<&AppHandle>,
 ) -> Result<TaskRecord, String> {
-    let (state, iteration, project_id, prompt, plan, steps, messages, plan_approved, provider_id, model_id) = {
+    let (state, iteration, project_id, prompt, plan, steps, messages, plan_approved, provider_id, model_id, active_agent) = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         let task = load_task(&conn, &task_id)?;
         (
@@ -624,6 +636,7 @@ pub async fn advance_task_inner(
             task.plan_approved,
             task.provider_id.clone(),
             task.model_id.clone(),
+            task.active_agent.clone(),
         )
     };
 
@@ -643,11 +656,12 @@ pub async fn advance_task_inner(
     }
 
     let allowed = enabled_providers(&db, &vault)?;
+    let agent_name = active_agent.unwrap_or_else(|| "coding".to_string());
     let chat = build_task_chat_bundle(
         &db,
         &vault,
         &allowed,
-        "coding",
+        &agent_name,
         None,
         None,
         provider_id.as_deref(),
@@ -675,6 +689,7 @@ pub async fn advance_task_inner(
             "credentials": chat.credentials,
             "workspaceFiles": files_summary,
             "skills": skills_list,
+            "activeAgent": agent_name,
         }),
     )
     .await?;
@@ -1396,7 +1411,7 @@ async fn execute_universal_workspace_tool(
     let name = tc.name.as_str();
 
     if UNIVERSAL_WRITE_TOOLS.contains(&name) {
-        let path = universal_output_path(name, &tc.arguments)?;
+        let path = universal_output_path(db, project_id, name, &tc.arguments)?;
         let content = universal_output_content(name, &tc.arguments)?;
         let edit = tool_write_file(db, project_id, task_id, &path, &content)?;
         if edit.status == "pending" {
@@ -1527,14 +1542,39 @@ fn arg_str<'a>(args: &'a serde_json::Value, keys: &[&str]) -> Option<&'a str> {
     keys.iter().find_map(|key| args.get(*key).and_then(|v| v.as_str()))
 }
 
-fn universal_output_path(name: &str, args: &serde_json::Value) -> Result<String, String> {
-    if let Some(path) = arg_str(args, &["path", "filePath", "outputPath", "destination", "exportPath"]) {
+fn universal_output_path(
+    db: &DbState,
+    project_id: &str,
+    name: &str,
+    args: &serde_json::Value,
+) -> Result<String, String> {
+    let mut resolved_path = if let Some(path) = arg_str(args, &["path", "filePath", "outputPath", "destination", "exportPath"]) {
         reject_native_output_without_engine(name, path)?;
-        return Ok(path.to_string());
+        path.to_string()
+    } else {
+        let title = arg_str(args, &["title", "name", "artifactName"]).unwrap_or(name);
+        let slug = slugify_file_stem(title);
+        format!("{}.{}", slug, universal_default_extension(name, args))
+    };
+
+    if let Ok(root) = project_folder(db, project_id) {
+        let path_buf = std::path::Path::new(&resolved_path);
+        if let Some(parent) = path_buf.parent() {
+            if parent != std::path::Path::new("") {
+                let parent_str = parent.to_string_lossy().to_string();
+                if parent_str == "artifacts" || parent_str == "data" || parent_str == "docs" || parent_str == "decks" || parent_str == "reports" {
+                    let full_parent_path = std::path::Path::new(&root).join(parent);
+                    if !full_parent_path.exists() {
+                        if let Some(file_name) = path_buf.file_name() {
+                            resolved_path = file_name.to_string_lossy().to_string();
+                        }
+                    }
+                }
+            }
+        }
     }
-    let title = arg_str(args, &["title", "name", "artifactName"]).unwrap_or(name);
-    let slug = slugify_file_stem(title);
-    Ok(format!("artifacts/{}.{}", slug, universal_default_extension(name, args)))
+
+    Ok(resolved_path)
 }
 
 fn reject_native_output_without_engine(name: &str, path: &str) -> Result<(), String> {

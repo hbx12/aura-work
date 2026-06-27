@@ -642,7 +642,15 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
       return { ...coerced, usage: result.usage };
     }
 
-    if (req.allowPlainText && !isFileTask(req.prompt)) {
+    const fileTask = (() => {
+      const userMsgs = req.messages.filter((m) => m.role === "user");
+      if (userMsgs.length > 0) {
+        const lastUser = userMsgs[userMsgs.length - 1];
+        return isFileTask(lastUser.content);
+      }
+      return isFileTask(req.prompt);
+    })();
+    if (req.allowPlainText && !fileTask) {
       return {
         type: "complete" as const,
         role: "reviewer",

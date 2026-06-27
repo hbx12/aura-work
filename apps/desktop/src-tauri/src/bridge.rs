@@ -796,7 +796,7 @@ pub async fn internal_create_task(
     }
 
     if input.auto_start.unwrap_or(true) {
-        return start_task_inner(db, vault, &task.id, None, None).await;
+        return start_task_inner(db, vault, &task.id, None, None, None).await;
     }
     Ok(task)
 }

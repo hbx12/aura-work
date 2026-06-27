@@ -9,6 +9,7 @@ export interface CreateTaskOptions {
   preferredProvider?: string | null;
   preferredModel?: string | null;
   autoApprove?: boolean;
+  activeAgent?: string | null;
 }
 
 export function useTasks(projectId: string | null) {
@@ -159,6 +160,7 @@ export function useTasks(projectId: string | null) {
           taskId: created.id,
           preferredProvider: opts.preferredProvider ?? null,
           preferredModel: opts.preferredModel ?? null,
+          activeAgent: opts.activeAgent ?? null,
         });
         setActiveTask(planned);
         await refreshTasks();
@@ -242,12 +244,12 @@ export function useTasks(projectId: string | null) {
       try {
         const pending = pendingPermissions.find((permission) => permission.id === permissionId);
         if (pending && !pending.taskId) {
-          await invoke("resolve_workspace_permission", {
+          const res = await invoke<string>("resolve_workspace_permission", {
             permissionId,
             decision,
           });
           await refreshPendingPermissions({ projectId, taskId: null });
-          return null;
+          return { taskId: null, result: res, decision };
         }
         const task = await invoke<TaskRecord>("resume_after_permission", {
           permissionId,
@@ -255,9 +257,9 @@ export function useTasks(projectId: string | null) {
         });
         setActiveTask(task);
         if (task.state === "running") {
-          return await runLoop(task.id, MAX_TASK_STEPS, true);
+          return { taskId: task.id, result: await runLoop(task.id, MAX_TASK_STEPS, true), decision };
         }
-        return task;
+        return { taskId: task.id, result: task, decision };
       } catch (e) {
         setError(String(e));
         throw e;

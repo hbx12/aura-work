@@ -55,10 +55,9 @@ function headerToPath(header: string): string | null {
   return m?.[1]?.replace(/^\.\//, "") ?? null;
 }
 
-/** Legacy helper — only returns writes when the model names an explicit path in a fence header. */
 export function extractFileWritesFromResponse(
   text: string,
-  _prompt: string,
+  prompt: string,
 ): { path: string; content: string }[] {
   const files: { path: string; content: string }[] = [];
   const blockRe = /```([^\n]*)\n([\s\S]*?)```/g;
@@ -70,8 +69,27 @@ export function extractFileWritesFromResponse(
     if (!content.trim()) continue;
     if (header.trim().toLowerCase() === "json") continue;
 
-    const path = headerToPath(header);
-    if (!path) continue;
+    let path = headerToPath(header);
+    if (!path) {
+      path = inferPathFromPrompt(prompt);
+    }
+    if (!path) {
+      const lowerPrompt = prompt.toLowerCase();
+      if (
+        lowerPrompt.includes("جدول") ||
+        lowerPrompt.includes("table") ||
+        lowerPrompt.includes("sheet") ||
+        lowerPrompt.includes("spreadsheet") ||
+        lowerPrompt.includes("excel") ||
+        lowerPrompt.includes("csv") ||
+        lowerPrompt.includes("ميزانية") ||
+        lowerPrompt.includes("رواتب")
+      ) {
+        path = "spreadsheet.csv";
+      } else {
+        path = "document.md";
+      }
+    }
     files.push({ path, content });
   }
 

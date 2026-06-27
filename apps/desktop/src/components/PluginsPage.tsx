@@ -9,6 +9,7 @@ import type {
   PluginsHelperStatus,
 } from "@aura-os/shared";
 import MarketplaceGrid from "./marketplace/MarketplaceGrid";
+import SkillCreator from "./SkillCreator";
 
 interface PluginsPageProps {
   projectId: string | null;
@@ -770,55 +771,15 @@ export function PluginsPage({
               )}
 
               {showSkillForm && (
-                <div className="panel cloud-form" style={{ marginBottom: 12, gap: 14 }}>
-                  <div className="form-grid">
-                    <label>
-                      {isAr ? "اسم المهارة" : "Skill Name"}
-                      <input value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="frontend-design" />
-                    </label>
-                    <label>
-                      {isAr ? "وصف المهارة" : "Description"}
-                      <input value={skillDesc} onChange={(e) => setSkillDesc(e.target.value)} placeholder="A skill to design beautiful UIs" />
-                    </label>
-                  </div>
-                  <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <span>{isAr ? "التعليمات والـ Prompt" : "Instructions & Prompt"}</span>
-                    <textarea
-                      value={skillPrompt}
-                      onChange={(e) => setSkillPrompt(e.target.value)}
-                      placeholder={isAr ? "اكتب هنا التعليمات البرمجية للمهارة..." : "Enter the instructions for the skill here..."}
-                      rows={5}
-                      style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
-                    />
-                  </label>
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="btn primary sm"
-                      disabled={loading || !skillName.trim() || !skillPrompt.trim()}
-                      onClick={() => {
-                        void invoke("create_local_skill", {
-                          input: {
-                            name: skillName.trim(),
-                            description: skillDesc.trim(),
-                            prompt: skillPrompt.trim(),
-                          },
-                        }).then(() => {
-                          setSkillName("");
-                          setSkillDesc("");
-                          setSkillPrompt("");
-                          setShowSkillForm(false);
-                          setSkillMessage(isAr ? "تم إنشاء وحفظ المهارة بنجاح" : "Skill created and saved successfully");
-                          void refreshSkills();
-                        }).catch((err) => {
-                          setSkillMessage(String(err));
-                        });
-                      }}
-                    >
-                      {isAr ? "حفظ المهارة" : "Save Skill"}
-                    </button>
-                  </div>
-                </div>
+                <SkillCreator
+                  isAr={isAr}
+                  onSuccess={(msg) => {
+                    setSkillMessage(msg);
+                    setShowSkillForm(false);
+                    void refreshSkills();
+                  }}
+                  onCancel={() => setShowSkillForm(false)}
+                />
               )}
 
               {editingSkill && (
