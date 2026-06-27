@@ -425,6 +425,7 @@ pub fn check_task_permission(
         ("external_directory", _) => "external_directory",
         ("doom_loop", _) => "doom_loop",
         ("mcp", _) => "mcp",
+        ("custom_tool", _) => "custom_tools",
         _ => category,
     };
 

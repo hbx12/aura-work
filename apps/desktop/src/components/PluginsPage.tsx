@@ -10,6 +10,7 @@ import type {
 } from "@aura-os/shared";
 import MarketplaceGrid from "./marketplace/MarketplaceGrid";
 import SkillCreator from "./SkillCreator";
+import { ToolCreator } from "./ToolCreator";
 
 interface PluginsPageProps {
   projectId: string | null;
@@ -193,6 +194,9 @@ export function PluginsPage({
 
   const [customTools, setCustomTools] = useState<any[]>([]);
   const [loadingCustomTools, setLoadingCustomTools] = useState(false);
+  const [showToolForm, setShowToolForm] = useState(false);
+  const [editingTool, setEditingTool] = useState<any | null>(null);
+  const [toolMessage, setToolMessage] = useState<string | null>(null);
 
   const refreshCustomTools = () => {
     setLoadingCustomTools(true);
@@ -460,7 +464,7 @@ export function PluginsPage({
                 <Icon name="plus" size={14} />
                 {t("plugins.addPlugin")}
               </button>
-            ) : (
+            ) : activeTab === "skills" ? (
               <div style={{ display: "flex", gap: 8 }}>
                 <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void importSkill()}>
                   <Icon name="plus" size={14} />
@@ -471,6 +475,19 @@ export function PluginsPage({
                   {isAr ? "إنشاء مهارة جديدة" : "Create New Skill"}
                 </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                className="btn secondary sm"
+                disabled={loading}
+                onClick={() => {
+                  setEditingTool(null);
+                  setShowToolForm((t) => !t);
+                }}
+              >
+                <Icon name="plus" size={14} />
+                {isAr ? "إنشاء أداة مخصصة" : "Create Custom Tool"}
+              </button>
             )}
           </div>
         </div>
@@ -1071,6 +1088,28 @@ export function PluginsPage({
 
           {activeTab === "custom-tools" && (
             <>
+              {toolMessage && (
+                <div className="banner">{toolMessage}</div>
+              )}
+
+              {(showToolForm || editingTool) && (
+                <ToolCreator
+                  isAr={isAr}
+                  projectId={projectId}
+                  editingTool={editingTool}
+                  onSuccess={(msg) => {
+                    setToolMessage(msg);
+                    setShowToolForm(false);
+                    setEditingTool(null);
+                    refreshCustomTools();
+                  }}
+                  onCancel={() => {
+                    setShowToolForm(false);
+                    setEditingTool(null);
+                  }}
+                />
+              )}
+
               <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--fg-2)" }}>
                   {isAr ? "الأدوات المخصصة النشطة" : "Active Custom Tools"}
@@ -1161,6 +1200,38 @@ export function PluginsPage({
                           <Icon name="folder" size={11} />
                           <span>{tool.filePath}</span>
                         </div>
+                      </div>
+                      <div className="mini-acts" style={{ marginTop: 4 }}>
+                        <button
+                          type="button"
+                          className="btn ghost icon sm"
+                          title={isAr ? "تعديل الأداة" : "Edit Tool"}
+                          onClick={() => {
+                            setEditingTool(tool);
+                            setShowToolForm(false);
+                          }}
+                        >
+                          <Icon name="file-code" size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn ghost icon sm"
+                          title={isAr ? "حذف الأداة" : "Delete Tool"}
+                          onClick={() => {
+                            if (window.confirm(isAr ? `هل أنت متأكد من حذف الأداة المخصصة ${tool.name}؟` : `Are you sure you want to delete custom tool ${tool.name}?`)) {
+                              invoke("delete_custom_tool", { filePath: tool.filePath })
+                                .then(() => {
+                                  setToolMessage(isAr ? "تم حذف الأداة بنجاح" : "Tool deleted successfully");
+                                  refreshCustomTools();
+                                })
+                                .catch((err) => {
+                                  setToolMessage(String(err));
+                                });
+                            }
+                          }}
+                        >
+                          <Icon name="trash" size={15} />
+                        </button>
                       </div>
                     </div>
                   ))

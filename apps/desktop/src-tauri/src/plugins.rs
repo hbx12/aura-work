@@ -1029,6 +1029,85 @@ pub async fn list_custom_tools(project_id: Option<String>, db: State<'_, DbState
 }
 
 #[tauri::command]
+pub async fn save_custom_tool(
+    project_id: Option<String>,
+    name: String,
+    content: String,
+    db: State<'_, DbState>,
+) -> Result<String, String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+
+    let dir = if let Some(ref pid) = project_id {
+        let proj_dir = crate::files::project_folder(&db, pid).unwrap_or_default();
+        if proj_dir.is_empty() {
+            return Err("Project directory not found".to_string());
+        }
+        std::path::PathBuf::from(proj_dir).join(".aura").join("tools")
+    } else {
+        if home.is_empty() {
+            return Err("User home directory not found".to_string());
+        }
+        std::path::PathBuf::from(home).join(".config").join("aura").join("tools")
+    };
+
+    if !dir.exists() {
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    }
+
+    let safe_name = name.replace(|c: char| !c.is_alphanumeric() && c != '_' && c != '-', "");
+    if safe_name.is_empty() {
+        return Err("Invalid tool name".to_string());
+    }
+
+    let file_path = dir.join(format!("{}.ts", safe_name));
+    std::fs::write(&file_path, content).map_err(|e| e.to_string())?;
+
+    Ok(file_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub async fn delete_custom_tool(file_path: String) -> Result<(), String> {
+    let path = std::path::PathBuf::from(&file_path);
+    let canonical = path.canonicalize().unwrap_or(path.clone());
+    let path_str = canonical.to_string_lossy().to_string();
+    if !path_str.contains(".aura/tools") && !path_str.contains(".config/aura/tools") {
+        return Err("Unauthorized file deletion path".to_string());
+    }
+    if canonical.is_file() {
+        std::fs::remove_file(canonical).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn test_custom_tool(
+    project_id: Option<String>,
+    file_path: String,
+    arguments: serde_json::Value,
+    db: State<'_, DbState>,
+) -> Result<serde_json::Value, String> {
+    let project_path = if let Some(ref pid) = project_id {
+        crate::files::project_folder(&db, pid).unwrap_or_default()
+    } else {
+        String::new()
+    };
+
+    let resp_res: Result<serde_json::Value, String> = crate::agent::sidecar_post(
+        "/tools/test",
+        &serde_json::json!({
+            "filePath": file_path,
+            "arguments": arguments,
+            "projectPath": project_path,
+        }),
+    )
+    .await;
+
+    resp_res
+}
+
+#[tauri::command]
 pub fn list_local_skills(db: State<'_, DbState>) -> Result<Vec<SkillInfo>, String> {
     list_local_skills_internal(&db)
 }

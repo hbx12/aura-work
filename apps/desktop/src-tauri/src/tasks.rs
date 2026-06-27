@@ -1376,6 +1376,19 @@ async fn execute_tool_inner(
             if let Some(output) = execute_universal_workspace_tool(db, project_id, task_id, tc, app).await? {
                 Ok(output)
             } else {
+                crate::permissions::check_task_permission(
+                    db,
+                    project_id,
+                    task_id,
+                    "custom_tool",
+                    "execute",
+                    &tc.name,
+                    "Execution of custom tool",
+                    "medium",
+                    false,
+                    None,
+                )?;
+
                 #[derive(Debug, Deserialize)]
                 struct SidecarToolExecuteResponse {
                     output: Option<String>,

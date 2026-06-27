@@ -193,6 +193,39 @@ const server = createServer(async (req, res) => {
       }
     }
 
+    if (method === "POST" && url === "/tools/test") {
+      const body = await readJsonBody<{
+        filePath: string;
+        arguments: any;
+        projectPath?: string;
+      }>(req);
+      
+      console.log("[aura-agent] testing custom tool at path", body.filePath);
+      const { loadCustomTools } = await import("./task/custom-tools.js");
+      const tools = await loadCustomTools(body.projectPath);
+      const tool = tools.find(t => t.filePath === body.filePath);
+      
+      if (!tool) {
+        return json(res, 200, { error: "Custom tool file not found or failed compilation." });
+      }
+
+      const context = {
+        agent: "testing-sandbox",
+        sessionID: "sandbox",
+        messageID: "sandbox",
+        directory: body.projectPath || "",
+        worktree: body.projectPath || "",
+      };
+
+      try {
+        const output = await tool.execute(body.arguments, context);
+        const serialized = typeof output === "object" ? JSON.stringify(output, null, 2) : String(output);
+        return json(res, 200, { output: serialized });
+      } catch (err: any) {
+        return json(res, 200, { error: err.message || String(err) });
+      }
+    }
+
     if (method === "GET" && url.startsWith("/task/stream")) {
       const q = new URL(url, "http://local");
       const taskId = q.searchParams.get("taskId") ?? "";

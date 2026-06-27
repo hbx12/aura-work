@@ -54,7 +54,7 @@ export async function loadCustomTools(projectPath?: string): Promise<CustomTool[
               format: "esm",
               platform: "node",
               target: "node20",
-              external: ["@aura-os/plugin", "zod"],
+              external: ["@aura-os/plugin", "zod", "axios", "fs-extra"],
             });
           }
 
