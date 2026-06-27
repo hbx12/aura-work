@@ -16,10 +16,8 @@ export async function loadCustomTools(projectPath?: string): Promise<CustomTool[
   const dirsToScan: string[] = [];
 
   if (projectPath) {
-    dirsToScan.push(path.join(projectPath, ".opencode", "tools"));
     dirsToScan.push(path.join(projectPath, ".aura", "tools"));
   }
-  dirsToScan.push(path.join(home, ".config", "opencode", "tools"));
   dirsToScan.push(path.join(home, ".config", "aura", "tools"));
 
   for (const dir of dirsToScan) {

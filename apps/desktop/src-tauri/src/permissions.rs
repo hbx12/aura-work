@@ -355,14 +355,10 @@ fn resolve_permission_from_configs(
 
     let mut paths_to_try = Vec::new();
     if !folder_path.is_empty() {
-        paths_to_try.push(std::path::PathBuf::from(folder_path).join("opencode.json"));
-        paths_to_try.push(std::path::PathBuf::from(folder_path).join("opencode.jsonc"));
-        paths_to_try.push(std::path::PathBuf::from(folder_path).join("opencode.json5"));
         paths_to_try.push(std::path::PathBuf::from(folder_path).join("aura.json"));
         paths_to_try.push(std::path::PathBuf::from(folder_path).join("aura.jsonc"));
     }
     if !home.is_empty() {
-        paths_to_try.push(std::path::PathBuf::from(&home).join(".config/opencode/opencode.json"));
         paths_to_try.push(std::path::PathBuf::from(&home).join(".config/aura/aura.json"));
     }
 

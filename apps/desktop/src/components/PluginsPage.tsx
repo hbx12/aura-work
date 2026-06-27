@@ -1095,8 +1095,8 @@ export function PluginsPage({
                     <p>{isAr ? "لم يتم العثور على أدوات مخصصة." : "No custom tools found."}</p>
                     <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: 6 }}>
                       {isAr
-                        ? "أضف ملفات TypeScript/JavaScript في المجلد المحلي .opencode/tools/ أو العالمي ~/.config/opencode/tools/ للبدء."
-                        : "Add TypeScript/JavaScript files under .opencode/tools/ or ~/.config/opencode/tools/ to get started."}
+                        ? "أضف ملفات TypeScript/JavaScript في المجلد المحلي .aura/tools/ أو العالمي ~/.config/aura/tools/ للبدء."
+                        : "Add TypeScript/JavaScript files under .aura/tools/ or ~/.config/aura/tools/ to get started."}
                     </p>
                   </div>
                 ) : (

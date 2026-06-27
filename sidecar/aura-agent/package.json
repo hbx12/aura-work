@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@aura-os/shared": "*",
-    "@opencode-ai/plugin": "*",
+    "@aura-os/plugin": "*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

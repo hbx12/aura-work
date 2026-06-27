@@ -73,6 +73,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: packages/i18n/package.json
 
+@aura-os/plugin@0.1.0-alpha.1
+  License: Apache-2.0
+  Source: packages/aura-plugin/package.json
+
 @aura-os/plugins-helper@0.6.0
   License: Apache-2.0
   Source: sidecar/aura-plugins-helper/package.json
@@ -228,10 +232,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @napi-rs/wasm-runtime@1.1.5
   License: MIT
   Source: node_modules/@napi-rs/wasm-runtime
-
-@opencode-ai/plugin@0.1.0-alpha.1
-  License: Apache-2.0
-  Source: packages/opencode-ai-plugin/package.json
 
 @oxc-project/types@0.133.0
   License: MIT
