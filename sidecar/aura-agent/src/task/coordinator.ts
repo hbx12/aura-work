@@ -554,7 +554,8 @@ export async function iterateTask(req: TaskIterateRequest) {
     : "";
 
   const { loadCustomTools } = await import("./custom-tools.js");
-  const customTools = await loadCustomTools(req.projectPath);
+  const allCustomTools = await loadCustomTools(req.projectPath);
+  const customTools = allCustomTools.filter(t => !t.error);
   let customToolsPrompt = "";
   if (customTools.length > 0) {
     customToolsPrompt = `\n\nAvailable Custom Tools (you can call these just like other tools):\n` + customTools.map(t => {

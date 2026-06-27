@@ -1006,6 +1006,7 @@ pub struct CustomToolInfo {
     pub description: String,
     pub args: serde_json::Value,
     pub file_path: String,
+    pub error: Option<String>,
 }
 
 #[tauri::command]

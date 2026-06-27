@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
+import crypto from "crypto";
+import * as esbuild from "esbuild";
 
 export interface CustomTool {
   name: string;
@@ -8,6 +10,12 @@ export interface CustomTool {
   args: Record<string, any>;
   execute: (args: any, context: any) => Promise<any>;
   filePath: string;
+  error?: string;
+}
+
+const tmpDir = path.join(os.tmpdir(), "aura-custom-tools");
+if (!fs.existsSync(tmpDir)) {
+  fs.mkdirSync(tmpDir, { recursive: true });
 }
 
 export async function loadCustomTools(projectPath?: string): Promise<CustomTool[]> {
@@ -29,9 +37,29 @@ export async function loadCustomTools(projectPath?: string): Promise<CustomTool[
           continue;
         }
         const fullPath = path.resolve(dir, file);
+        const baseName = path.basename(file, path.extname(file));
+
         try {
-          const mod = await import(`file://${fullPath}`);
-          const baseName = path.basename(file, path.extname(file));
+          // Read content to hash it and build cache path
+          const content = fs.readFileSync(fullPath, "utf-8");
+          const hash = crypto.createHash("sha256").update(fullPath + content).digest("hex");
+          const cachedPath = path.join(tmpDir, `${hash}.js`);
+
+          // Compile using esbuild if cache misses
+          if (!fs.existsSync(cachedPath)) {
+            await esbuild.build({
+              entryPoints: [fullPath],
+              bundle: true,
+              outfile: cachedPath,
+              format: "esm",
+              platform: "node",
+              target: "node20",
+              external: ["@aura-os/plugin", "zod"],
+            });
+          }
+
+          // Import compiled ESM file
+          const mod = await import(`file://${cachedPath}`);
 
           // 1. Check default export
           if (mod.default) {
@@ -42,23 +70,52 @@ export async function loadCustomTools(projectPath?: string): Promise<CustomTool[
             const execute = toolDef.execute;
             if (typeof execute === "function") {
               tools.push({ name, description, args, execute, filePath: fullPath });
+            } else {
+              tools.push({
+                name: baseName,
+                description: "",
+                args: {},
+                execute: async () => {},
+                filePath: fullPath,
+                error: "Default export is missing a valid execute function.",
+              });
+            }
+          } else {
+            // 2. Check named exports
+            let namedFound = false;
+            for (const key of Object.keys(mod)) {
+              if (key === "default") continue;
+              const toolDef = mod[key];
+              if (toolDef && typeof toolDef.execute === "function") {
+                const name = `${baseName}_${key}`;
+                const description = toolDef.description || "";
+                const args = toolDef.args || {};
+                const execute = toolDef.execute;
+                tools.push({ name, description, args, execute, filePath: fullPath });
+                namedFound = true;
+              }
+            }
+            if (!namedFound) {
+              tools.push({
+                name: baseName,
+                description: "",
+                args: {},
+                execute: async () => {},
+                filePath: fullPath,
+                error: "No default or named tool exports with an execute function were found.",
+              });
             }
           }
-
-          // 2. Check named exports
-          for (const key of Object.keys(mod)) {
-            if (key === "default") continue;
-            const toolDef = mod[key];
-            if (toolDef && typeof toolDef.execute === "function") {
-              const name = `${baseName}_${key}`;
-              const description = toolDef.description || "";
-              const args = toolDef.args || {};
-              const execute = toolDef.execute;
-              tools.push({ name, description, args, execute, filePath: fullPath });
-            }
-          }
-        } catch (err) {
+        } catch (err: any) {
           console.warn(`[custom-tools] Failed to load custom tool file ${file}:`, err);
+          tools.push({
+            name: baseName,
+            description: "",
+            args: {},
+            execute: async () => {},
+            filePath: fullPath,
+            error: err.message || String(err),
+          });
         }
       }
     } catch (err) {
@@ -76,9 +133,9 @@ export async function executeCustomTool(
   projectPath?: string
 ): Promise<any> {
   const tools = await loadCustomTools(projectPath);
-  const tool = tools.find((t) => t.name === toolName);
+  const tool = tools.find((t) => t.name === toolName && !t.error);
   if (!tool) {
-    throw new Error(`Custom tool "${toolName}" not found.`);
+    throw new Error(`Custom tool "${toolName}" not found or failed compilation.`);
   }
   return await tool.execute(args, context);
 }

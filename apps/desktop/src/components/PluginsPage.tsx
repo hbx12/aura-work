@@ -1087,7 +1087,14 @@ export function PluginsPage({
               </div>
 
               <div className="panel">
-                {customTools.length === 0 ? (
+                {loadingCustomTools ? (
+                  <div className="empty" style={{ padding: 28 }}>
+                    <div className="em-ic">
+                      <Icon name="loader" size={26} style={{ animation: "spin 1s linear infinite" }} />
+                    </div>
+                    <p>{isAr ? "جاري تحميل الأدوات المخصصة..." : "Loading custom tools..."}</p>
+                  </div>
+                ) : customTools.length === 0 ? (
                   <div className="empty" style={{ padding: 28 }}>
                     <div className="em-ic">
                       <Icon name="braces" size={26} />
@@ -1102,18 +1109,35 @@ export function PluginsPage({
                 ) : (
                   customTools.map((tool) => (
                     <div key={tool.name} className="panel-row" style={{ alignItems: "flex-start", gap: 14 }}>
-                      <div className="prov-logo" style={{ background: "var(--accent)", marginTop: 4 }}>
-                        <Icon name="braces" size={17} />
+                      <div className="prov-logo" style={{ background: tool.error ? "rgba(239, 68, 68, 0.15)" : "var(--accent)", color: tool.error ? "var(--danger)" : "inherit", marginTop: 4 }}>
+                        <Icon name={tool.error ? "alert-triangle" : "braces"} size={17} />
                       </div>
                       <div className="prov-meta" style={{ flex: 1 }}>
-                        <div className="prov-name" style={{ fontWeight: 600, color: "var(--fg-1)" }}>
+                        <div className="prov-name" style={{ fontWeight: 600, color: tool.error ? "var(--danger)" : "var(--fg-1)", display: "flex", alignItems: "center", gap: 8 }}>
                           {tool.name}
+                          {tool.error && (
+                            <span className="tag" style={{ background: "rgba(239, 68, 68, 0.15)", color: "var(--danger)", border: "1px solid rgba(239, 68, 68, 0.2)", padding: "1px 6px", borderRadius: 4, fontSize: "10px" }}>
+                              {isAr ? "فشل التحميل" : "Failed to load"}
+                            </span>
+                          )}
                         </div>
                         <div className="prov-sub" style={{ fontSize: "13px", color: "var(--fg-2)", marginTop: 2 }}>
                           {tool.description || (isAr ? "(بلا وصف)" : "(No description provided)")}
                         </div>
                         
-                        {Object.keys(tool.args || {}).length > 0 && (
+                        {tool.error && (
+                          <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: 6, color: "var(--danger)" }}>
+                            <div style={{ fontWeight: 600, fontSize: "11px", display: "flex", alignItems: "center", gap: 4, textTransform: "uppercase" }}>
+                              <Icon name="alert-triangle" size={12} />
+                              {isAr ? "خطأ في التحميل/الترجمة:" : "Compilation / Load Error:"}
+                            </div>
+                            <div style={{ fontSize: "12px", fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre-wrap", marginTop: 4, opacity: 0.9 }}>
+                              {tool.error}
+                            </div>
+                          </div>
+                        )}
+
+                        {!tool.error && Object.keys(tool.args || {}).length > 0 && (
                           <div style={{ marginTop: 10 }}>
                             <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
                               {isAr ? "الوسائط المتوقعة (Parameters):" : "Arguments / Parameters:"}

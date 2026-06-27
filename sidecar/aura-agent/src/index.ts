@@ -160,6 +160,7 @@ const server = createServer(async (req, res) => {
           description: t.description,
           args: argMeta,
           filePath: t.filePath,
+          error: t.error,
         };
       });
       return json(res, 200, serializableTools);
