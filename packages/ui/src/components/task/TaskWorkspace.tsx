@@ -1057,7 +1057,7 @@ export function PlanBlock({
   onExpand,
   labels: labelOverrides,
 }: {
-  steps: { title: string; subtitle?: string | null; role?: string | null }[];
+  steps: { id?: string | null; title: string; subtitle?: string | null; role?: string | null; status?: string | null }[];
   onApprove?: () => void;
   approved?: boolean;
   collapsed?: boolean;
@@ -1065,6 +1065,20 @@ export function PlanBlock({
   labels?: Partial<typeof PLAN_BLOCK_LABELS>;
 }) {
   const labels = { ...PLAN_BLOCK_LABELS, ...labelOverrides };
+
+  const getStatusIcon = (status?: string | null) => {
+    switch (status) {
+      case "completed":
+        return <Icon name="check" size={14} style={{ color: "var(--success)" }} />;
+      case "in_progress":
+        return <Icon name="loader" size={14} style={{ color: "var(--accent)", animation: "spin 2s linear infinite" }} />;
+      case "cancelled":
+        return <Icon name="ban" size={14} style={{ color: "var(--danger)" }} />;
+      case "pending":
+      default:
+        return <Icon name="more-horizontal" size={14} style={{ color: "var(--fg-3)" }} />;
+    }
+  };
 
   if (collapsed) {
     return (
@@ -1087,9 +1101,11 @@ export function PlanBlock({
       </div>
       <ol>
         {steps.map((s, i) => (
-          <li key={i}>
-            <span className="num">{i + 1}</span>
-            <span className="st">
+          <li key={i} className={s.status ? `todo-item todo-${s.status}` : ""}>
+            <span className="num">
+              {s.status ? getStatusIcon(s.status) : (i + 1)}
+            </span>
+            <span className="st" style={s.status === "cancelled" ? { textDecoration: "line-through", opacity: 0.6 } : {}}>
               {s.title}
               {s.subtitle && <div className="sub">{s.subtitle}</div>}
               {s.role && !s.subtitle && <div className="sub">{s.role}</div>}

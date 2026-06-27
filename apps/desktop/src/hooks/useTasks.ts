@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { PermissionRequest, TaskListItem, TaskRecord } from "@aura-os/shared";
 
 const MAX_TASK_STEPS = 20;
@@ -21,6 +22,29 @@ export function useTasks(projectId: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
   const streamPollRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    const setupListener = async () => {
+      try {
+        unlisten = await listen<TaskRecord>("aura://task-update", (event) => {
+          const updatedTask = event.payload;
+          setActiveTask((current) => {
+            if (current && current.id === updatedTask.id) {
+              return updatedTask;
+            }
+            return current;
+          });
+        });
+      } catch (err) {
+        console.error("Failed to listen to task-update event:", err);
+      }
+    };
+    void setupListener();
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [setActiveTask]);
 
   const stopStreamPoll = useCallback(() => {
     if (streamPollRef.current != null) {

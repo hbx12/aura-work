@@ -77,9 +77,11 @@ impl TaskState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlanStep {
+    pub id: Option<String>,
     pub title: String,
     pub subtitle: Option<String>,
     pub role: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -499,9 +501,11 @@ pub async fn start_task_inner(
         .plan
         .into_iter()
         .map(|s| PlanStep {
+            id: None,
             title: s.title,
             subtitle: s.subtitle,
             role: s.role,
+            status: None,
         })
         .collect();
     if let Some(msg) = plan_resp.coordinator_message {
@@ -922,6 +926,130 @@ async fn execute_tool_inner(
     app: Option<&AppHandle>,
 ) -> Result<String, String> {
     match tc.name.as_str() {
+        "todo_write" => {
+            let todos_val = tc.arguments.get("todos").ok_or("Missing todos")?;
+            let merge = tc.arguments.get("merge").and_then(|v| v.as_bool()).unwrap_or(true);
+            let mut incoming_steps: Vec<PlanStep> = Vec::new();
+            if let Some(arr) = todos_val.as_array() {
+                for item in arr {
+                    let id = item.get("id").and_then(|v| v.as_str()).map(String::from);
+                    let content = item.get("content").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let status = item.get("status").and_then(|v| v.as_str()).unwrap_or("pending").to_string();
+                    incoming_steps.push(PlanStep {
+                        id,
+                        title: content,
+                        subtitle: None,
+                        role: None,
+                        status: Some(status),
+                    });
+                }
+            } else {
+                return Err("todos must be an array".into());
+            }
+
+            if let Some(t_id) = task_id {
+                let conn = db.0.lock().map_err(|e| e.to_string())?;
+                let mut task = load_task(&conn, t_id)?;
+                if merge {
+                    for incoming in incoming_steps {
+                        if let Some(ref incoming_id) = incoming.id {
+                            if let Some(existing) = task.plan.iter_mut().find(|s| s.id.as_ref() == Some(incoming_id)) {
+                                existing.title = incoming.title;
+                                existing.status = incoming.status;
+                            } else {
+                                task.plan.push(incoming);
+                            }
+                        } else {
+                            task.plan.push(incoming);
+                        }
+                    }
+                } else {
+                    task.plan = incoming_steps;
+                }
+                save_task(&conn, &task)?;
+                if let Some(app) = app {
+                    let _ = app.emit("aura://task-update", task);
+                }
+                Ok("Task todo list updated successfully.".into())
+            } else {
+                Err("No active task ID provided.".into())
+            }
+        }
+        "start_server" => {
+            let port = tc.arguments.get("port").and_then(|v| v.as_u64()).ok_or("Missing port")? as u16;
+            let command = tc.arguments.get("command").and_then(|v| v.as_str()).ok_or("Missing command")?;
+            let composite_cmd = format!(
+                "lsof -t -i:{} | xargs kill -9 2>/dev/null || true; nohup {} > /tmp/server_{}.log 2>&1 & \
+                 for i in {{1..10}}; do \
+                     if lsof -i:{} >/dev/null 2>&1; then \
+                         echo \"SERVER_READY\"; \
+                         exit 0; \
+                     fi; \
+                     sleep 1; \
+                 done; \
+                 echo \"SERVER_FAILED\"; \
+                 cat /tmp/server_{}.log | tail -n 20; \
+                 exit 1;",
+                port, command, port, port, port
+            );
+            let payload = serde_json::to_value(tc).ok();
+            crate::vm::tool_run_shell(db, project_id, task_id, &composite_cmd, payload).await
+        }
+        "schedule_cron" => {
+            let cron = tc.arguments.get("cron").and_then(|v| v.as_str()).ok_or("Missing cron")?;
+            let command = tc.arguments.get("command").and_then(|v| v.as_str()).ok_or("Missing command")?;
+            let conn = db.0.lock().map_err(|e| e.to_string())?;
+            let id = uuid::Uuid::new_v4().to_string();
+            let now = chrono::Utc::now().to_rfc3339();
+            let cadence = crate::scheduled::ScheduledCadence {
+                kind: "cron".into(),
+                cron: Some(cron.to_string()),
+                hour: None,
+                minute: None,
+                day_of_week: None,
+            };
+            let permissions = vec![
+                crate::permissions::PermissionProfileGrant {
+                    category: "file".into(),
+                    action: "read".into(),
+                    target_pattern: "*".into(),
+                },
+                crate::permissions::PermissionProfileGrant {
+                    category: "file".into(),
+                    action: "write".into(),
+                    target_pattern: "*".into(),
+                },
+                crate::permissions::PermissionProfileGrant {
+                    category: "shell".into(),
+                    action: "run".into(),
+                    target_pattern: "*".into(),
+                },
+            ];
+            conn.execute(
+                "INSERT INTO scheduled_tasks
+                 (id, name, description, prompt, project_id, routing_policy, cadence_json, permission_profile_json,
+                  paused, last_run_at, next_run_at, created_at, updated_at)
+                 VALUES (?1,?2,?3,?4,?5,NULL,?6,?7,0,NULL,?8,?9,?10)",
+                params![
+                    id,
+                    format!("Cron: {}", command.chars().take(30).collect::<String>()),
+                    Some(format!("Scheduled command: {}", command)),
+                    format!("Run shell command: {}", command),
+                    project_id,
+                    serde_json::to_string(&cadence).unwrap_or_default(),
+                    serde_json::to_string(&permissions).unwrap_or_default(),
+                    now,
+                    now,
+                    now,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+            Ok(format!("Successfully scheduled cron task with ID {}", id))
+        }
+        "list_external_tools" => {
+            let tools = crate::extensions_helper::get_all_tools_remote(Some(project_id)).await?;
+            Ok(serde_json::to_string(&tools).unwrap_or_else(|_| "{}".into()))
+        }
         "skill" => {
             let skill_name = tc
                 .arguments
@@ -2177,19 +2305,25 @@ pub async fn run_workspace_chat_agent(
 
     let plan = vec![
         PlanStep {
+            id: None,
             title: "Understand the request".into(),
             subtitle: Some("Use the current project context and recent chat history.".into()),
             role: Some("coordinator".into()),
+            status: None,
         },
         PlanStep {
+            id: None,
             title: "Inspect or modify workspace files".into(),
             subtitle: Some("Use file, search, shell, plugin, and MCP tools when needed.".into()),
             role: Some("coder".into()),
+            status: None,
         },
         PlanStep {
+            id: None,
             title: "Return a concise result".into(),
             subtitle: Some("Summarize actions, changed files, and remaining blockers.".into()),
             role: Some("reviewer".into()),
+            status: None,
         },
     ];
     let mut steps: Vec<TaskStep> = Vec::new();
