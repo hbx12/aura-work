@@ -59,18 +59,9 @@ export function useFiles(projectId: string | null) {
       
       if (taskId) {
         onTaskResumed?.(taskId);
+      } else {
+        await invoke("resume_after_edit", { editId }).catch(() => {});
       }
-
-      // Resume task execution in the background
-      invoke<{ id: string }>("resume_after_edit", { editId })
-        .then((task) => {
-          if (!taskId) {
-            onTaskResumed?.(task.id);
-          }
-        })
-        .catch(() => {
-          /* edit not linked to a task */
-        });
 
       await refreshFiles();
       if (selectedPath) await openFile(selectedPath);

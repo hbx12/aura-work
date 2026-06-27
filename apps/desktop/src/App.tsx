@@ -1344,7 +1344,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
                     await files.approveEdit(id, (taskId) => {
                       setView("tasks");
                       setActiveTaskId(taskId);
-                      void tasks.loadTask(taskId);
+                      void tasks.resumeAfterEdit(id);
                     });
                   }}
                 />
@@ -1426,7 +1426,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
                   await files.approveEdit(id, (taskId) => {
                     setView("tasks");
                     setActiveTaskId(taskId);
-                    void tasks.loadTask(taskId);
+                    void tasks.resumeAfterEdit(id);
                   });
                 }}
               />
@@ -1693,7 +1693,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
                 await files.approveEdit(id, (taskId) => {
                   setView("tasks");
                   setActiveTaskId(taskId);
-                  void tasks.loadTask(taskId);
+                  void tasks.resumeAfterEdit(id);
                 });
               }}
             />
@@ -1908,7 +1908,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
             void files.approveEdit(id, (taskId) => {
               setView("tasks");
               setActiveTaskId(taskId);
-              void tasks.loadTask(taskId);
+              void tasks.resumeAfterEdit(id);
             })
           }
           t={t}
