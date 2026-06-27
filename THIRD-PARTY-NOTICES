@@ -229,6 +229,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@napi-rs/wasm-runtime
 
+@opencode-ai/plugin@0.1.0-alpha.1
+  License: Apache-2.0
+  Source: packages/opencode-ai-plugin/package.json
+
 @oxc-project/types@0.133.0
   License: MIT
   Source: node_modules/@oxc-project/types
