@@ -23,7 +23,7 @@
     "start": "powershell -ExecutionPolicy Bypass -File scripts/start-aura.ps1",
     "dev:web": "npm run dev -w @aura-os/desktop",
     "build": "npm run build -w @aura-os/desktop",
-    "build:sidecar": "npm run build -w @aura-os/shared && npm run build -w @aura-os/agent",
+    "build:sidecar": "npm run build -w @aura-os/shared && npm run build -w @opencode-ai/plugin && npm run build -w @aura-os/agent",
     "build:vm": "npm run build -w @aura-os/vm-helper",
     "build:browser": "npm run build -w @aura-os/browser-helper",
     "build:plugins": "npm run build -w @aura-os/plugins-helper",

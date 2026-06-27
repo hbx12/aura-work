@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Icon } from "@aura-os/ui";
 
 interface SkillCreatorProps {
   isAr?: boolean;
@@ -180,7 +181,7 @@ export default function SkillCreator({ isAr, onSuccess, onCancel }: SkillCreator
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
-          <span>🛠️</span>
+          <Icon name="settings" size={17} />
           {isAr ? "صانع المهارات البصري" : "Visual Skill Creator"}
         </h3>
         <button
@@ -213,9 +214,13 @@ export default function SkillCreator({ isAr, onSuccess, onCancel }: SkillCreator
                 fontSize: "12px",
                 cursor: "pointer",
                 transition: "all 0.2s",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6
               }}
             >
-              🚀 {isAr ? tpl.nameAr : tpl.nameEn}
+              <Icon name="sparkles" size={12} />
+              {isAr ? tpl.nameAr : tpl.nameEn}
             </button>
           ))}
         </div>

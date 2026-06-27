@@ -344,6 +344,7 @@ pub fn run() {
             plugins::reload_plugins_helper,
             plugins::create_local_skill,
             plugins::list_local_skills,
+            plugins::list_custom_tools,
             plugins::save_local_skill,
             plugins::save_text_file,
             plugins::read_text_file,

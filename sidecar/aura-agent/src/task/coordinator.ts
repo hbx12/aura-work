@@ -558,6 +558,19 @@ export async function iterateTask(req: TaskIterateRequest) {
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
+  const { loadCustomTools } = await import("./custom-tools.js");
+  const customTools = await loadCustomTools(req.projectPath);
+  let customToolsPrompt = "";
+  if (customTools.length > 0) {
+    customToolsPrompt = `\n\nAvailable Custom Tools (you can call these just like other tools):\n` + customTools.map(t => {
+      const argsDesc = Object.entries(t.args).map(([argName, argSchema]: [string, any]) => {
+        const desc = argSchema?.description || (argSchema?._def?.description) || "";
+        return `    - ${argName}: ${desc}`;
+      }).join("\n");
+      return `- ${t.name}: ${t.description}\n  Arguments:\n${argsDesc || "    None"}`;
+    }).join("\n");
+  }
+
   const projectRules = await findProjectRules(req.projectPath);
 
   const baseSystem = getSystemPrompt(
@@ -569,7 +582,7 @@ export async function iterateTask(req: TaskIterateRequest) {
     projectRules,
     agentConfig,
   );
-  let system = `${baseSystem}${skillsXml}`;
+  let system = `${baseSystem}${skillsXml}${customToolsPrompt}`;
 
   if (agentConfig.prompt) {
     const safeAgentName = escapeXml(agentConfig.name);

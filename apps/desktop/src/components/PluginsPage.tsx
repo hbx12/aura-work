@@ -153,6 +153,7 @@ function pluginInitials(name: string) {
 }
 
 export function PluginsPage({
+  projectId,
   status,
   plugins,
   mcpServers,
@@ -180,7 +181,7 @@ export function PluginsPage({
   const [mcpArgs, setMcpArgs] = useState("-y @modelcontextprotocol/server-filesystem .");
   const [message, setMessage] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills" | "custom-tools">("marketplace");
   const [skills, setSkills] = useState<any[]>([]);
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [skillName, setSkillName] = useState("");
@@ -189,6 +190,29 @@ export function PluginsPage({
   const [skillMessage, setSkillMessage] = useState<string | null>(null);
   const [expandedSkills, setExpandedSkills] = useState<Record<string, boolean>>({});
   const [editingSkill, setEditingSkill] = useState<any | null>(null);
+
+  const [customTools, setCustomTools] = useState<any[]>([]);
+  const [loadingCustomTools, setLoadingCustomTools] = useState(false);
+
+  const refreshCustomTools = () => {
+    setLoadingCustomTools(true);
+    invoke("list_custom_tools", { projectId })
+      .then((res: any) => {
+        setCustomTools(res || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load custom tools:", err);
+      })
+      .finally(() => {
+        setLoadingCustomTools(false);
+      });
+  };
+
+  useEffect(() => {
+    if (activeTab === "custom-tools") {
+      refreshCustomTools();
+    }
+  }, [activeTab, projectId]);
 
   const [chatModels, setChatModels] = useState<any[]>([]);
   const [sandboxModel, setSandboxModel] = useState<string>("auto");
@@ -406,6 +430,13 @@ export function PluginsPage({
                 onClick={() => setActiveTab("skills")}
               >
                 {isAr ? "المهارات (Skills)" : "Skills"}
+              </button>
+              <button
+                type="button"
+                className={activeTab === "custom-tools" ? "active" : ""}
+                onClick={() => setActiveTab("custom-tools")}
+              >
+                {isAr ? "الأدوات المخصصة" : "Custom Tools"}
               </button>
             </div>
           </div>
@@ -1033,6 +1064,82 @@ export function PluginsPage({
                       </div>
                     );
                   })
+                )}
+              </div>
+            </>
+          )}
+
+          {activeTab === "custom-tools" && (
+            <>
+              <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--fg-2)" }}>
+                  {isAr ? "الأدوات المخصصة النشطة" : "Active Custom Tools"}
+                </span>
+                <button
+                  type="button"
+                  className="btn secondary sm"
+                  disabled={loadingCustomTools}
+                  onClick={refreshCustomTools}
+                >
+                  <Icon name="rotate-cw" size={14} style={{ marginRight: 6 }} />
+                  {isAr ? "تحديث" : "Refresh"}
+                </button>
+              </div>
+
+              <div className="panel">
+                {customTools.length === 0 ? (
+                  <div className="empty" style={{ padding: 28 }}>
+                    <div className="em-ic">
+                      <Icon name="braces" size={26} />
+                    </div>
+                    <p>{isAr ? "لم يتم العثور على أدوات مخصصة." : "No custom tools found."}</p>
+                    <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: 6 }}>
+                      {isAr
+                        ? "أضف ملفات TypeScript/JavaScript في المجلد المحلي .opencode/tools/ أو العالمي ~/.config/opencode/tools/ للبدء."
+                        : "Add TypeScript/JavaScript files under .opencode/tools/ or ~/.config/opencode/tools/ to get started."}
+                    </p>
+                  </div>
+                ) : (
+                  customTools.map((tool) => (
+                    <div key={tool.name} className="panel-row" style={{ alignItems: "flex-start", gap: 14 }}>
+                      <div className="prov-logo" style={{ background: "var(--accent)", marginTop: 4 }}>
+                        <Icon name="braces" size={17} />
+                      </div>
+                      <div className="prov-meta" style={{ flex: 1 }}>
+                        <div className="prov-name" style={{ fontWeight: 600, color: "var(--fg-1)" }}>
+                          {tool.name}
+                        </div>
+                        <div className="prov-sub" style={{ fontSize: "13px", color: "var(--fg-2)", marginTop: 2 }}>
+                          {tool.description || (isAr ? "(بلا وصف)" : "(No description provided)")}
+                        </div>
+                        
+                        {Object.keys(tool.args || {}).length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                              {isAr ? "الوسائط المتوقعة (Parameters):" : "Arguments / Parameters:"}
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+                              {Object.entries(tool.args).map(([argName, argVal]: [string, any]) => (
+                                <div key={argName} style={{ display: "flex", gap: 8, fontSize: "12px" }}>
+                                  <code style={{ background: "var(--bg-3)", padding: "1px 6px", borderRadius: 4, color: "var(--accent)" }}>
+                                    {argName}
+                                  </code>
+                                  <span style={{ color: "var(--fg-3)" }}>
+                                    {argVal.description || (isAr ? "بلا وصف" : "No description")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ marginTop: 10, fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
+                          <Icon name="folder" size={11} />
+                          <span>{tool.filePath}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
             </>

@@ -999,6 +999,34 @@ pub fn list_local_skills_internal(db: &DbState) -> Result<Vec<SkillInfo>, String
     Ok(list)
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomToolInfo {
+    pub name: String,
+    pub description: String,
+    pub args: serde_json::Value,
+    pub file_path: String,
+}
+
+#[tauri::command]
+pub async fn list_custom_tools(project_id: Option<String>, db: State<'_, DbState>) -> Result<Vec<CustomToolInfo>, String> {
+    let project_path = if let Some(ref pid) = project_id {
+        crate::files::project_folder(&db, pid).unwrap_or_default()
+    } else {
+        String::new()
+    };
+
+    let resp_res: Result<Vec<CustomToolInfo>, String> = crate::agent::sidecar_post(
+        "/tools/list",
+        &serde_json::json!({
+            "projectPath": project_path,
+        }),
+    )
+    .await;
+
+    resp_res
+}
+
 #[tauri::command]
 pub fn list_local_skills(db: State<'_, DbState>) -> Result<Vec<SkillInfo>, String> {
     list_local_skills_internal(&db)

@@ -1376,7 +1376,43 @@ async fn execute_tool_inner(
             if let Some(output) = execute_universal_workspace_tool(db, project_id, task_id, tc, app).await? {
                 Ok(output)
             } else {
-                Err(format!("Unknown tool: {}", tc.name))
+                #[derive(Debug, Deserialize)]
+                struct SidecarToolExecuteResponse {
+                    output: Option<String>,
+                    error: Option<String>,
+                }
+
+                let project_path = project_folder(db, project_id).unwrap_or_default();
+                let resp_res: Result<SidecarToolExecuteResponse, String> = crate::agent::sidecar_post(
+                    "/tools/execute",
+                    &serde_json::json!({
+                        "name": tc.name,
+                        "arguments": tc.arguments,
+                        "projectId": project_id,
+                        "projectPath": project_path,
+                        "taskId": task_id,
+                    }),
+                )
+                .await;
+
+                match resp_res {
+                    Ok(resp) => {
+                        if let Some(err) = resp.error {
+                            Err(err)
+                        } else if let Some(output) = resp.output {
+                            Ok(output)
+                        } else {
+                            Err(format!("Unknown tool: {}", tc.name))
+                        }
+                    }
+                    Err(e) => {
+                        if e.contains("404") || e.contains("Not found") || e.contains("Unknown tool") {
+                            Err(format!("Unknown tool: {}", tc.name))
+                        } else {
+                            Err(format!("Custom tool execution failed: {}", e))
+                        }
+                    }
+                }
             }
         }
     }
