@@ -897,6 +897,30 @@ async fn execute_tool(
     tc: &SidecarToolCall,
     app: Option<&AppHandle>,
 ) -> Result<String, String> {
+    let res = execute_tool_inner(db, project_id, task_id, tc, app).await;
+    if let Err(ref e) = res {
+        if e.starts_with("permission_required:") {
+            let pending_id = e.replace("permission_required:", "");
+            if let Ok(conn) = db.0.lock() {
+                if let Ok(payload_str) = serde_json::to_string(tc) {
+                    let _ = conn.execute(
+                        "UPDATE pending_permissions SET payload = ?1 WHERE id = ?2",
+                        params![payload_str, pending_id],
+                    );
+                }
+            }
+        }
+    }
+    res
+}
+
+async fn execute_tool_inner(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    tc: &SidecarToolCall,
+    app: Option<&AppHandle>,
+) -> Result<String, String> {
     match tc.name.as_str() {
         "skill" => {
             let skill_name = tc
