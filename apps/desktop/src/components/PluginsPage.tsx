@@ -9,6 +9,9 @@ import type {
   PluginsHelperStatus,
 } from "@aura-os/shared";
 import MarketplaceGrid from "./marketplace/MarketplaceGrid";
+import SkillCreator from "./SkillCreator";
+import { ToolCreator } from "./ToolCreator";
+import { VisualBuilder } from "./VisualBuilder";
 
 interface PluginsPageProps {
   projectId: string | null;
@@ -152,6 +155,7 @@ function pluginInitials(name: string) {
 }
 
 export function PluginsPage({
+  projectId,
   status,
   plugins,
   mcpServers,
@@ -179,7 +183,7 @@ export function PluginsPage({
   const [mcpArgs, setMcpArgs] = useState("-y @modelcontextprotocol/server-filesystem .");
   const [message, setMessage] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "plugins" | "skills" | "custom-tools" | "visual-builder">("marketplace");
   const [skills, setSkills] = useState<any[]>([]);
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [skillName, setSkillName] = useState("");
@@ -188,6 +192,32 @@ export function PluginsPage({
   const [skillMessage, setSkillMessage] = useState<string | null>(null);
   const [expandedSkills, setExpandedSkills] = useState<Record<string, boolean>>({});
   const [editingSkill, setEditingSkill] = useState<any | null>(null);
+
+  const [customTools, setCustomTools] = useState<any[]>([]);
+  const [loadingCustomTools, setLoadingCustomTools] = useState(false);
+  const [showToolForm, setShowToolForm] = useState(false);
+  const [editingTool, setEditingTool] = useState<any | null>(null);
+  const [toolMessage, setToolMessage] = useState<string | null>(null);
+
+  const refreshCustomTools = () => {
+    setLoadingCustomTools(true);
+    invoke("list_custom_tools", { projectId })
+      .then((res: any) => {
+        setCustomTools(res || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load custom tools:", err);
+      })
+      .finally(() => {
+        setLoadingCustomTools(false);
+      });
+  };
+
+  useEffect(() => {
+    if (activeTab === "custom-tools") {
+      refreshCustomTools();
+    }
+  }, [activeTab, projectId]);
 
   const [chatModels, setChatModels] = useState<any[]>([]);
   const [sandboxModel, setSandboxModel] = useState<string>("auto");
@@ -406,6 +436,20 @@ export function PluginsPage({
               >
                 {isAr ? "المهارات (Skills)" : "Skills"}
               </button>
+              <button
+                type="button"
+                className={activeTab === "custom-tools" ? "active" : ""}
+                onClick={() => setActiveTab("custom-tools")}
+              >
+                {isAr ? "الأدوات المخصصة" : "Custom Tools"}
+              </button>
+              <button
+                type="button"
+                className={activeTab === "visual-builder" ? "active" : ""}
+                onClick={() => setActiveTab("visual-builder")}
+              >
+                {isAr ? "بناء" : "Build"}
+              </button>
             </div>
           </div>
           <div className="ph-actions">
@@ -428,7 +472,7 @@ export function PluginsPage({
                 <Icon name="plus" size={14} />
                 {t("plugins.addPlugin")}
               </button>
-            ) : (
+            ) : activeTab === "skills" ? (
               <div style={{ display: "flex", gap: 8 }}>
                 <button type="button" className="btn secondary sm" disabled={loading} onClick={() => void importSkill()}>
                   <Icon name="plus" size={14} />
@@ -439,6 +483,19 @@ export function PluginsPage({
                   {isAr ? "إنشاء مهارة جديدة" : "Create New Skill"}
                 </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                className="btn secondary sm"
+                disabled={loading}
+                onClick={() => {
+                  setEditingTool(null);
+                  setShowToolForm((t) => !t);
+                }}
+              >
+                <Icon name="plus" size={14} />
+                {isAr ? "إنشاء أداة مخصصة" : "Create Custom Tool"}
+              </button>
             )}
           </div>
         </div>
@@ -770,55 +827,15 @@ export function PluginsPage({
               )}
 
               {showSkillForm && (
-                <div className="panel cloud-form" style={{ marginBottom: 12, gap: 14 }}>
-                  <div className="form-grid">
-                    <label>
-                      {isAr ? "اسم المهارة" : "Skill Name"}
-                      <input value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="frontend-design" />
-                    </label>
-                    <label>
-                      {isAr ? "وصف المهارة" : "Description"}
-                      <input value={skillDesc} onChange={(e) => setSkillDesc(e.target.value)} placeholder="A skill to design beautiful UIs" />
-                    </label>
-                  </div>
-                  <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <span>{isAr ? "التعليمات والـ Prompt" : "Instructions & Prompt"}</span>
-                    <textarea
-                      value={skillPrompt}
-                      onChange={(e) => setSkillPrompt(e.target.value)}
-                      placeholder={isAr ? "اكتب هنا التعليمات البرمجية للمهارة..." : "Enter the instructions for the skill here..."}
-                      rows={5}
-                      style={{ background: "var(--bg-1)", border: "1px solid var(--border-3)", padding: "9px 12px", borderRadius: "var(--r-sm)", color: "var(--fg-1)", font: "inherit", resize: "vertical" }}
-                    />
-                  </label>
-                  <div className="form-actions">
-                    <button
-                      type="button"
-                      className="btn primary sm"
-                      disabled={loading || !skillName.trim() || !skillPrompt.trim()}
-                      onClick={() => {
-                        void invoke("create_local_skill", {
-                          input: {
-                            name: skillName.trim(),
-                            description: skillDesc.trim(),
-                            prompt: skillPrompt.trim(),
-                          },
-                        }).then(() => {
-                          setSkillName("");
-                          setSkillDesc("");
-                          setSkillPrompt("");
-                          setShowSkillForm(false);
-                          setSkillMessage(isAr ? "تم إنشاء وحفظ المهارة بنجاح" : "Skill created and saved successfully");
-                          void refreshSkills();
-                        }).catch((err) => {
-                          setSkillMessage(String(err));
-                        });
-                      }}
-                    >
-                      {isAr ? "حفظ المهارة" : "Save Skill"}
-                    </button>
-                  </div>
-                </div>
+                <SkillCreator
+                  isAr={isAr}
+                  onSuccess={(msg) => {
+                    setSkillMessage(msg);
+                    setShowSkillForm(false);
+                    void refreshSkills();
+                  }}
+                  onCancel={() => setShowSkillForm(false)}
+                />
               )}
 
               {editingSkill && (
@@ -1075,6 +1092,174 @@ export function PluginsPage({
                 )}
               </div>
             </>
+          )}
+
+          {activeTab === "custom-tools" && (
+            <>
+              {toolMessage && (
+                <div className="banner">{toolMessage}</div>
+              )}
+
+              {(showToolForm || editingTool) && (
+                <ToolCreator
+                  isAr={isAr}
+                  projectId={projectId}
+                  editingTool={editingTool}
+                  onSuccess={(msg) => {
+                    setToolMessage(msg);
+                    setShowToolForm(false);
+                    setEditingTool(null);
+                    refreshCustomTools();
+                  }}
+                  onCancel={() => {
+                    setShowToolForm(false);
+                    setEditingTool(null);
+                  }}
+                />
+              )}
+
+              <div className="section-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--fg-2)" }}>
+                  {isAr ? "الأدوات المخصصة النشطة" : "Active Custom Tools"}
+                </span>
+                <button
+                  type="button"
+                  className="btn secondary sm"
+                  disabled={loadingCustomTools}
+                  onClick={refreshCustomTools}
+                >
+                  <Icon name="rotate-cw" size={14} style={{ marginRight: 6 }} />
+                  {isAr ? "تحديث" : "Refresh"}
+                </button>
+              </div>
+
+              <div className="panel">
+                {loadingCustomTools ? (
+                  <div className="empty" style={{ padding: 28 }}>
+                    <div className="em-ic">
+                      <Icon name="loader" size={26} style={{ animation: "spin 1s linear infinite" }} />
+                    </div>
+                    <p>{isAr ? "جاري تحميل الأدوات المخصصة..." : "Loading custom tools..."}</p>
+                  </div>
+                ) : customTools.length === 0 ? (
+                  <div className="empty" style={{ padding: 28 }}>
+                    <div className="em-ic">
+                      <Icon name="braces" size={26} />
+                    </div>
+                    <p>{isAr ? "لم يتم العثور على أدوات مخصصة." : "No custom tools found."}</p>
+                    <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: 6 }}>
+                      {isAr
+                        ? "أضف ملفات TypeScript/JavaScript في المجلد المحلي .aura/tools/ أو العالمي ~/.config/aura/tools/ للبدء."
+                        : "Add TypeScript/JavaScript files under .aura/tools/ or ~/.config/aura/tools/ to get started."}
+                    </p>
+                  </div>
+                ) : (
+                  customTools.map((tool) => (
+                    <div key={tool.name} className="panel-row" style={{ alignItems: "flex-start", gap: 14 }}>
+                      <div className="prov-logo" style={{ background: tool.error ? "rgba(239, 68, 68, 0.15)" : "var(--accent)", color: tool.error ? "var(--danger)" : "inherit", marginTop: 4 }}>
+                        <Icon name={tool.error ? "alert-triangle" : "braces"} size={17} />
+                      </div>
+                      <div className="prov-meta" style={{ flex: 1 }}>
+                        <div className="prov-name" style={{ fontWeight: 600, color: tool.error ? "var(--danger)" : "var(--fg-1)", display: "flex", alignItems: "center", gap: 8 }}>
+                          {tool.name}
+                          {tool.error && (
+                            <span className="tag" style={{ background: "rgba(239, 68, 68, 0.15)", color: "var(--danger)", border: "1px solid rgba(239, 68, 68, 0.2)", padding: "1px 6px", borderRadius: 4, fontSize: "10px" }}>
+                              {isAr ? "فشل التحميل" : "Failed to load"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="prov-sub" style={{ fontSize: "13px", color: "var(--fg-2)", marginTop: 2 }}>
+                          {tool.description || (isAr ? "(بلا وصف)" : "(No description provided)")}
+                        </div>
+                        
+                        {tool.error && (
+                          <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: 6, color: "var(--danger)" }}>
+                            <div style={{ fontWeight: 600, fontSize: "11px", display: "flex", alignItems: "center", gap: 4, textTransform: "uppercase" }}>
+                              <Icon name="alert-triangle" size={12} />
+                              {isAr ? "خطأ في التحميل/الترجمة:" : "Compilation / Load Error:"}
+                            </div>
+                            <div style={{ fontSize: "12px", fontFamily: "var(--font-mono, monospace)", whiteSpace: "pre-wrap", marginTop: 4, opacity: 0.9 }}>
+                              {tool.error}
+                            </div>
+                          </div>
+                        )}
+
+                        {!tool.error && Object.keys(tool.args || {}).length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                              {isAr ? "الوسائط المتوقعة (Parameters):" : "Arguments / Parameters:"}
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+                              {Object.entries(tool.args).map(([argName, argVal]: [string, any]) => (
+                                <div key={argName} style={{ display: "flex", gap: 8, fontSize: "12px" }}>
+                                  <code style={{ background: "var(--bg-3)", padding: "1px 6px", borderRadius: 4, color: "var(--accent)" }}>
+                                    {argName}
+                                  </code>
+                                  <span style={{ color: "var(--fg-3)" }}>
+                                    {argVal.description || (isAr ? "بلا وصف" : "No description")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div style={{ marginTop: 10, fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
+                          <Icon name="folder" size={11} />
+                          <span>{tool.filePath}</span>
+                        </div>
+                      </div>
+                      <div className="mini-acts" style={{ marginTop: 4 }}>
+                        <button
+                          type="button"
+                          className="btn ghost icon sm"
+                          title={isAr ? "تعديل الأداة" : "Edit Tool"}
+                          onClick={() => {
+                            setEditingTool(tool);
+                            setShowToolForm(false);
+                          }}
+                        >
+                          <Icon name="file-code" size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn ghost icon sm"
+                          title={isAr ? "حذف الأداة" : "Delete Tool"}
+                          onClick={() => {
+                            if (window.confirm(isAr ? `هل أنت متأكد من حذف الأداة المخصصة ${tool.name}؟` : `Are you sure you want to delete custom tool ${tool.name}?`)) {
+                              invoke("delete_custom_tool", { filePath: tool.filePath })
+                                .then(() => {
+                                  setToolMessage(isAr ? "تم حذف الأداة بنجاح" : "Tool deleted successfully");
+                                  refreshCustomTools();
+                                })
+                                .catch((err) => {
+                                  setToolMessage(String(err));
+                                });
+                            }
+                          }}
+                        >
+                          <Icon name="trash" size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          )}
+
+          {activeTab === "visual-builder" && (
+            <VisualBuilder
+              isAr={isAr}
+              projectId={projectId}
+              onSuccess={(msg) => {
+                setToolMessage(msg);
+                refreshCustomTools();
+              }}
+              onCancel={() => {
+                setActiveTab("custom-tools");
+              }}
+            />
           )}
         </div>
       </div>

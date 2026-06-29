@@ -13,9 +13,14 @@
   },
   "dependencies": {
     "@aura-os/shared": "*",
+    "@aura-os/plugin": "*",
+    "axios": "^1.7.9",
+    "esbuild": "^0.28.1",
+    "fs-extra": "^11.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.0.0",
     "typescript": "~5.8.3",
     "vitest": "^4.1.8"

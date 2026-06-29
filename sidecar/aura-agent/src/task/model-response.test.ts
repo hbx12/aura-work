@@ -94,10 +94,13 @@ describe("coerceAgentResponse", () => {
     expect(out?.type).toBe("blocked");
   });
 
-  it("blocks plain text for file tasks", () => {
-    const out = coerceAgentResponse("Here is the code you asked for...", baseCtx);
-    expect(out?.type).toBe("blocked");
-    expect(out && "content" in out ? out.content : "").toContain(BLOCKED_INVALID_STRUCTURE.content);
+  it("allows plain conversational text and converts plain text with file writes into tool calls for file tasks", () => {
+    const outMsg = coerceAgentResponse("Here is a question about index.ts: what is the entrypoint?", baseCtx);
+    expect(outMsg?.type).toBe("message");
+
+    const outBlock = coerceAgentResponse("Here is the code:\n```index.ts\nconsole.log(1)\n```", baseCtx);
+    expect(outBlock?.type).toBe("tool_calls");
+    expect(outBlock && "toolCalls" in outBlock ? outBlock.toolCalls[0].arguments.path : "").toBe("index.ts");
   });
 
   it("blocks completion without prior writes", () => {
@@ -115,12 +118,38 @@ describe("coerceAgentResponse", () => {
       ]),
     ).toBe(true);
   });
+
+  it("allows non-file tasks to complete immediately on conversational/plain text", () => {
+    const chatCtx = {
+      prompt: "مرحبا",
+      messages: [] as { role: string; content: string }[],
+      iteration: 0,
+      planLength: 4,
+    };
+    const out = coerceAgentResponse("مرحباً بك! كيف أستطيع مساعدتك؟", chatCtx);
+    expect(out?.type).toBe("message");
+    expect(out?.complete).toBe(true);
+  });
+
+  it("handles invalid json for non-file tasks by falling back to plain text complete", () => {
+    const chatCtx = {
+      prompt: "مرحبا",
+      messages: [] as { role: string; content: string }[],
+      iteration: 0,
+      planLength: 4,
+    };
+    const out = coerceAgentResponse("{ invalid: json here ... مرحباً بك!", chatCtx);
+    expect(out?.type).toBe("message");
+    expect(out?.complete).toBe(true);
+    expect(out?.content).toContain("مرحباً بك!");
+  });
 });
 
 describe("extractFileWritesFromResponse", () => {
-  it("does not guess paths from bare code fences", () => {
+  it("infers paths from bare code fences using the prompt", () => {
     const writes = extractFileWritesFromResponse("```typescript\nconsole.log(1)\n```", "create index.ts");
-    expect(writes).toHaveLength(0);
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toEqual({ path: "index.ts", content: "console.log(1)" });
   });
 
   it("keeps explicit header paths only", () => {
@@ -132,6 +161,8 @@ describe("extractFileWritesFromResponse", () => {
 describe("isFileTask", () => {
   it("does not treat Arabic identity questions as file tasks", () => {
     expect(isFileTask("وش تسوي؟")).toBe(false);
+    expect(isFileTask("مرحبا")).toBe(false);
+    expect(isFileTask("صباح الخير")).toBe(false);
     expect(
       isFileTask(
         "Workspace chat request: من انت و وش تسوي؟\n\nYou are running inside Aura Work.",

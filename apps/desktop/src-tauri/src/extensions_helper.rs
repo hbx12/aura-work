@@ -260,3 +260,12 @@ pub async fn fetch_marketplace_remote(registry_url: Option<&str>) -> Result<serd
     )
     .await
 }
+
+pub async fn get_all_tools_remote(project_id: Option<&str>) -> Result<serde_json::Value, String> {
+    let path = if let Some(pid) = project_id {
+        format!("/tools?projectId={pid}")
+    } else {
+        "/tools".to_string()
+    };
+    helper_get(&path).await
+}

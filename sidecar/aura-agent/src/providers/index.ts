@@ -143,6 +143,10 @@ function openAiRequestBody(request: ChatRequest) {
     body.max_tokens = request.maxOutputTokens;
   }
 
+  if (request.jsonMode || request.responseFormat === "json_object") {
+    body.response_format = { type: "json_object" };
+  }
+
   return body;
 }
 
@@ -300,6 +304,11 @@ const anthropicAdapter: ProviderAdapter = {
     return { valid: false, message: `Validation failed (${res.status})` };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
+    const systemMessages = request.messages.filter((m: { role: string }) => m.role === "system");
+    const systemContent = systemMessages.length > 0
+      ? systemMessages.map(m => m.content).join("\n\n")
+      : undefined;
+
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -311,7 +320,7 @@ const anthropicAdapter: ProviderAdapter = {
         model: request.model,
         max_tokens: anthropicMaxOutputTokens(request),
         messages: request.messages.filter((m: { role: string }) => m.role !== "system"),
-        system: request.messages.find((m: { role: string }) => m.role === "system")?.content,
+        ...(systemContent ? { system: systemContent } : {}),
       }),
     });
     if (!res.ok) throw new Error(`Anthropic chat failed (${res.status})`);
@@ -342,8 +351,9 @@ const geminiAdapter: ProviderAdapter = {
   async listModels(credentials: ProviderCredentials) {
     if (!credentials.apiKey) return DEFAULT_MODELS.gemini;
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${credentials.apiKey}`;
-      const res = await fetch(url);
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+        headers: { "x-goog-api-key": credentials.apiKey },
+      });
       if (!res.ok) return DEFAULT_MODELS.gemini;
       const data = (await res.json()) as {
         models?: {
@@ -374,14 +384,15 @@ const geminiAdapter: ProviderAdapter = {
   },
   async validateCredentials(credentials: ProviderCredentials) {
     if (!credentials.apiKey) return { valid: false, message: "API key is required." };
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${credentials.apiKey}`;
-    const res = await fetch(url);
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+      headers: { "x-goog-api-key": credentials.apiKey },
+    });
     if (!res.ok) return { valid: false, message: `Validation failed (${res.status})` };
     return { valid: true, message: "Credentials accepted." };
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
     const model = request.model.startsWith("models/") ? request.model : `models/${request.model}`;
-    const url = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${credentials.apiKey ?? ""}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent`;
 
     const systemMessages = request.messages.filter((m: { role: string }) => m.role === "system");
     const chatMessages = request.messages.filter((m: { role: string }) => m.role !== "system");
@@ -406,13 +417,17 @@ const geminiAdapter: ProviderAdapter = {
 
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": credentials.apiKey ?? "",
+      },
       body: JSON.stringify({
         contents,
         ...(systemInstruction ? { systemInstruction } : {}),
-        ...(request.maxOutputTokens != null
-          ? { generationConfig: { maxOutputTokens: request.maxOutputTokens } }
-          : {}),
+        generationConfig: {
+          ...(request.maxOutputTokens != null ? { maxOutputTokens: request.maxOutputTokens } : {}),
+          ...(request.jsonMode ? { responseMimeType: "application/json" } : {}),
+        },
       }),
     });
     if (!res.ok) throw new Error(`Gemini chat failed (${res.status})`);
@@ -467,19 +482,56 @@ const ollamaAdapter: ProviderAdapter = {
   },
   async chat(request: ChatRequest, credentials: ProviderCredentials) {
     const root = baseUrl(credentials, "http://127.0.0.1:11434");
+    const useStream = Boolean(request.onChunk);
+
     const res = await fetch(`${root}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: request.model,
         messages: request.messages,
-        stream: false,
+        stream: useStream,
+        ...(request.jsonMode ? { format: "json" } : {}),
       }),
     });
+
     if (!res.ok) {
       const err = await res.text();
       throw new Error(`Ollama chat failed (${res.status}): ${err.slice(0, 200)}`);
     }
+
+    if (useStream && res.body && request.onChunk) {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      let inputTokens: number | undefined;
+      let outputTokens: number | undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const evt = JSON.parse(line);
+            if (evt.message?.content) {
+              text += evt.message.content;
+              request.onChunk(evt.message.content);
+            }
+            if (evt.done) {
+              inputTokens = evt.prompt_eval_count;
+              outputTokens = evt.eval_count;
+            }
+          } catch {
+            /* ignore malformed chunks */
+          }
+        }
+      }
+
+      return { text, usage: { inputTokens, outputTokens } };
+    }
+
     const data = (await res.json()) as {
       message?: { content?: string };
       prompt_eval_count?: number;

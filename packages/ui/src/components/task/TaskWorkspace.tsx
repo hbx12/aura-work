@@ -381,6 +381,7 @@ export function Composer({
   activeAgent = "build",
   onAgentChange,
   agents = [],
+  mcpServers = [],
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -411,9 +412,61 @@ export function Composer({
   activeAgent?: string;
   onAgentChange?: (agent: string) => void;
   agents?: any[];
+  mcpServers?: any[];
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const [selectionStart, setSelectionStart] = useState(0);
+  const [mentionIdx, setMentionIdx] = useState(0);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(isAr ? "التعرف على الصوت غير مدعوم في هذا المتصفح/النظام." : "Speech recognition is not supported in this browser/environment.");
+      return;
+    }
+
+    const rec = new SpeechRecognition();
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = isAr ? "ar-SA" : "en-US";
+
+    rec.onstart = () => {
+      setIsListening(true);
+    };
+
+    rec.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      if (transcript) {
+        onChange(value ? `${value} ${transcript}` : transcript);
+      }
+    };
+
+    rec.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+      let errMsg = isAr ? `فشل التعرف على الصوت. خطأ: ${event.error}` : `Speech recognition failed. Error: ${event.error}`;
+      if (event.error === 'not-allowed') {
+        errMsg += isAr ? " (يرجى التحقق من صلاحيات الميكروفون في إعدادات النظام)" : " (please check microphone permissions in system settings)";
+      }
+      alert(errMsg);
+    };
+
+    rec.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = rec;
+    rec.start();
+  };
 
   const showCommands = value.startsWith("/") && !value.includes(" ");
   const filterText = value.slice(1).toLowerCase();
@@ -436,6 +489,75 @@ export function Composer({
       return isAr ? found.ar : found.en;
     }
     return name.toUpperCase();
+  };
+
+  const textBeforeCursor = value.slice(0, selectionStart);
+  const mentionMatch = textBeforeCursor.match(/(?:^|\s)@(\w*)$/);
+  const showMentions = !!mentionMatch;
+  const mentionQuery = mentionMatch ? mentionMatch[1].toLowerCase() : "";
+
+  interface MentionItem {
+    name: string;
+    type: "agent" | "mcp";
+    label: string;
+    desc: string;
+    icon: string;
+  }
+
+  const mentionItems: MentionItem[] = [];
+
+  const finalAgents = agents.length > 0 ? agents : [
+    { name: "build", description: isAr ? "أعمال تطوير كاملة مع تفعيل جميع الأدوات" : "Full development with all tools active" },
+    { name: "plan", description: isAr ? "تحليل وتخطيط بدون إجراء تغييرات" : "Planning and analysis without mutation" },
+    { name: "general", description: isAr ? "البحث في أسئلة معقدة وتنفيذ مهام" : "General research and implementation" },
+    { name: "explore", description: isAr ? "استكشاف قواعد الشفرة وقراءة الملفات فقط" : "Explore codebase and read-only search" },
+    { name: "scout", description: isAr ? "البحث في الوثائق الخارجية والتبعيات" : "Search external docs and dependencies" },
+  ];
+
+  for (const agent of finalAgents) {
+    if (agent.hidden) continue;
+    mentionItems.push({
+      name: `@${agent.name}`,
+      type: "agent",
+      label: getAgentDisplayName(agent.name),
+      desc: agent.description || "",
+      icon: "bot",
+    });
+  }
+
+  for (const srv of (mcpServers || [])) {
+    mentionItems.push({
+      name: `@mcp.${srv.name}`,
+      type: "mcp",
+      label: srv.name,
+      desc: srv.enabled ? (isAr ? "خادم MCP مفعل" : "Enabled MCP Server") : (isAr ? "خادم MCP غير مفعل" : "Disabled MCP Server"),
+      icon: "zap",
+    });
+  }
+
+  const filteredMentions = mentionItems.filter((item) =>
+    item.name.toLowerCase().includes(mentionQuery) ||
+    item.label.toLowerCase().includes(mentionQuery) ||
+    item.desc.toLowerCase().includes(mentionQuery)
+  );
+
+  const handleSelectMention = (item: MentionItem) => {
+    if (!mentionMatch) return;
+    const matchedText = mentionMatch[0];
+    const startIdx = selectionStart - matchedText.length + (matchedText.startsWith(' ') ? 1 : 0);
+    const endIdx = selectionStart;
+    const insertText = item.name + " ";
+    const newValue = value.slice(0, startIdx) + insertText + value.slice(endIdx);
+    onChange(newValue);
+    const newCursorPos = startIdx + insertText.length;
+    setSelectionStart(newCursorPos);
+    setMentionIdx(0);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 10);
   };
   
   const customSkills = skills.map((s) => ({
@@ -489,6 +611,23 @@ export function Composer({
             ))}
           </div>
         )}
+        {showMentions && filteredMentions.length > 0 && (
+          <div className="composer-commands">
+            {filteredMentions.map((item, i) => (
+              <button
+                key={item.name}
+                type="button"
+                className={`composer-command-item${i === mentionIdx ? " active" : ""}`}
+                onClick={() => handleSelectMention(item)}
+                onMouseEnter={() => setMentionIdx(i)}
+              >
+                <Icon name={item.icon} size={14} />
+                <span className="cmd-name">{item.name}</span>
+                <span className="cmd-desc">{item.desc}</span>
+              </button>
+            ))}
+          </div>
+        )}
         <textarea
           ref={textareaRef}
           rows={2}
@@ -496,10 +635,42 @@ export function Composer({
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
+            setSelectionStart(e.target.selectionStart);
+            setMentionIdx(0);
             setActiveIdx(0);
           }}
+          onKeyUp={(e: any) => {
+            setSelectionStart(e.target.selectionStart);
+          }}
+          onClick={(e: any) => {
+            setSelectionStart(e.target.selectionStart);
+          }}
+          onFocus={(e: any) => {
+            setSelectionStart(e.target.selectionStart);
+          }}
           onKeyDown={(e) => {
-            if (showCommands && filteredCommands.length > 0) {
+            if (showMentions && filteredMentions.length > 0) {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setMentionIdx((prev) => (prev + 1) % filteredMentions.length);
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setMentionIdx((prev) => (prev - 1 + filteredMentions.length) % filteredMentions.length);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                handleSelectMention(filteredMentions[mentionIdx]);
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                const spaceText = " ";
+                const newValue = value.slice(0, selectionStart) + spaceText + value.slice(selectionStart);
+                onChange(newValue);
+                const newPos = selectionStart + spaceText.length;
+                setSelectionStart(newPos);
+                setTimeout(() => {
+                  textareaRef.current?.setSelectionRange(newPos, newPos);
+                }, 10);
+              }
+            } else if (showCommands && filteredCommands.length > 0) {
               if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setActiveIdx((prev) => (prev + 1) % filteredCommands.length);
@@ -574,6 +745,38 @@ export function Composer({
             <Icon name={mode === "ask" ? "shield-check" : "bot"} size={14} />
             {mode === "ask" ? labels.modeAsk : labels.modeAct}
           </button>
+          <button
+            type="button"
+            className="chip-btn"
+            onClick={toggleListening}
+            title={isAr ? "إملاء صوتي" : "Voice Dictation"}
+            style={{
+              color: isListening ? "#ef4444" : "var(--fg-3)",
+              background: isListening ? "rgba(239, 68, 68, 0.12)" : "rgba(255,255,255,0.02)",
+              border: isListening ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid var(--border-3)",
+              animation: isListening ? "pulse-anim 1.5s infinite" : "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <svg style={{ width: 13, height: 13 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+            <span style={{ fontSize: "11px" }}>
+              {isListening ? (isAr ? "استماع..." : "Listening...") : (isAr ? "إملاء" : "Dictate")}
+            </span>
+          </button>
+          <style>{`
+            @keyframes pulse-anim {
+              0% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.75; transform: scale(0.97); }
+              100% { opacity: 1; transform: scale(1); }
+            }
+          `}</style>
           <div className="cspacer" />
           {showRunTask && onRunTask && mode === "ask" && (
             <button
@@ -854,7 +1057,7 @@ export function PlanBlock({
   onExpand,
   labels: labelOverrides,
 }: {
-  steps: { title: string; subtitle?: string | null; role?: string | null }[];
+  steps: { id?: string | null; title: string; subtitle?: string | null; role?: string | null; status?: string | null }[];
   onApprove?: () => void;
   approved?: boolean;
   collapsed?: boolean;
@@ -862,6 +1065,20 @@ export function PlanBlock({
   labels?: Partial<typeof PLAN_BLOCK_LABELS>;
 }) {
   const labels = { ...PLAN_BLOCK_LABELS, ...labelOverrides };
+
+  const getStatusIcon = (status?: string | null) => {
+    switch (status) {
+      case "completed":
+        return <Icon name="check" size={14} style={{ color: "var(--success)" }} />;
+      case "in_progress":
+        return <Icon name="loader" size={14} style={{ color: "var(--accent)", animation: "spin 2s linear infinite" }} />;
+      case "cancelled":
+        return <Icon name="ban" size={14} style={{ color: "var(--danger)" }} />;
+      case "pending":
+      default:
+        return <Icon name="more-horizontal" size={14} style={{ color: "var(--fg-3)" }} />;
+    }
+  };
 
   if (collapsed) {
     return (
@@ -884,9 +1101,11 @@ export function PlanBlock({
       </div>
       <ol>
         {steps.map((s, i) => (
-          <li key={i}>
-            <span className="num">{i + 1}</span>
-            <span className="st">
+          <li key={i} className={s.status ? `todo-item todo-${s.status}` : ""}>
+            <span className="num">
+              {s.status ? getStatusIcon(s.status) : (i + 1)}
+            </span>
+            <span className="st" style={s.status === "cancelled" ? { textDecoration: "line-through", opacity: 0.6 } : {}}>
               {s.title}
               {s.subtitle && <div className="sub">{s.subtitle}</div>}
               {s.role && !s.subtitle && <div className="sub">{s.role}</div>}
@@ -1069,12 +1288,88 @@ export function Summary({
   labels?: Partial<typeof SUMMARY_LABELS>;
 }) {
   const labels = { ...SUMMARY_LABELS, ...labelOverrides };
+  const [speaking, setSpeaking] = useState(false);
+
+  const toggleSpeech = () => {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    if (!data.points || data.points.length === 0) return;
+
+    // Clean markdown text for reading
+    const textToSpeak = data.points
+      .map((p) => p.replace(/[*_`#\-]/g, "")) // strip common md chars
+      .join(". ");
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Auto-detect language
+    const isArabic = /[\u0600-\u06FF]/.test(textToSpeak);
+    utterance.lang = isArabic ? "ar-SA" : "en-US";
+
+    // Select suitable voice
+    if (window.speechSynthesis.getVoices) {
+      const voices = window.speechSynthesis.getVoices();
+      const voice = voices.find((v) => v.lang.startsWith(isArabic ? "ar" : "en"));
+      if (voice) utterance.voice = voice;
+    }
+
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   return (
     <div className="summary fade">
-      <div className="sh">
-        <Icon name="check" size={17} />
-        {labels.taskComplete}
+      <div className="sh" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="check" size={17} />
+          {labels.taskComplete}
+        </div>
+        <button
+          type="button"
+          onClick={toggleSpeech}
+          style={{
+            color: speaking ? "#34d399" : "var(--fg-3)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
+            gap: "6px",
+            background: speaking ? "rgba(52, 211, 153, 0.15)" : "rgba(255,255,255,0.03)",
+            border: speaking ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid var(--border-3)",
+            transition: "all 0.2s ease",
+          }}
+          title={speaking ? "Stop reading" : "Read out loud"}
+        >
+          <svg style={{ width: 13, height: 13 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            {speaking ? (
+              <>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </>
+            ) : (
+              <>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </>
+            )}
+          </svg>
+          <span>{speaking ? (data.points.some(p => /[\u0600-\u06FF]/.test(p)) ? "إيقاف" : "Stop") : (data.points.some(p => /[\u0600-\u06FF]/.test(p)) ? "استمع للملخص" : "Speak Summary")}</span>
+        </button>
       </div>
       <ul>
         {data.points.map((p, i) => (
@@ -1160,11 +1455,12 @@ export function ClarificationCard({
   const [selections, setSelections] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const q of data.questions) {
-      const rec = q.options.find(o => o.recommended);
+      const opts = q.options || [];
+      const rec = opts.find(o => o.recommended);
       if (rec) {
         initial[q.id] = rec.value;
-      } else if (q.options.length > 0) {
-        initial[q.id] = q.options[0].value;
+      } else if (opts.length > 0) {
+        initial[q.id] = opts[0].value;
       }
     }
     return initial;
@@ -1193,7 +1489,8 @@ export function ClarificationCard({
       if (selectedVal === "__custom__") {
         displayVal = customAnswers[q.id] || "";
       } else {
-        const opt = q.options.find(o => o.value === selectedVal);
+        const opts = q.options || [];
+        const opt = opts.find(o => o.value === selectedVal);
         displayVal = opt ? opt.label : selectedVal;
       }
       parts.push(`${q.question}: ${displayVal}`);
@@ -1208,7 +1505,8 @@ export function ClarificationCard({
     if (submitted || !isLatest) return;
     const recommendedSelections = { ...selections };
     for (const q of data.questions) {
-      const rec = q.options.find(o => o.recommended);
+      const opts = q.options || [];
+      const rec = opts.find(o => o.recommended);
       if (rec) {
         recommendedSelections[q.id] = rec.value;
       }
@@ -1217,7 +1515,8 @@ export function ClarificationCard({
     const parts: string[] = [];
     for (const q of data.questions) {
       const selectedVal = recommendedSelections[q.id];
-      const opt = q.options.find(o => o.value === selectedVal);
+      const opts = q.options || [];
+      const opt = opts.find(o => o.value === selectedVal);
       const displayVal = opt ? opt.label : selectedVal;
       parts.push(`${q.question}: ${displayVal}`);
     }
@@ -1268,7 +1567,7 @@ export function ClarificationCard({
                   </div>
 
                   <div className="q-options-list" style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "4px" }}>
-                    {q.options.map((opt) => {
+                    {(q.options || []).map((opt) => {
                       const isSelected = selectedValue === opt.value;
                       return (
                         <button

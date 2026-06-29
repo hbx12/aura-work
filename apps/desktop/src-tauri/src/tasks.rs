@@ -77,9 +77,11 @@ impl TaskState {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlanStep {
+    pub id: Option<String>,
     pub title: String,
     pub subtitle: Option<String>,
     pub role: Option<String>,
+    pub status: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,6 +116,7 @@ pub struct TaskRecord {
     pub model_id: Option<String>,
     pub error: Option<String>,
     pub scheduled_task_id: Option<String>,
+    pub active_agent: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -166,6 +169,7 @@ pub fn init_task_tables(conn: &Connection) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
     let _ = conn.execute("ALTER TABLE tasks ADD COLUMN provider_id TEXT", []);
     let _ = conn.execute("ALTER TABLE tasks ADD COLUMN model_id TEXT", []);
+    let _ = conn.execute("ALTER TABLE tasks ADD COLUMN active_agent TEXT", []);
     Ok(())
 }
 
@@ -173,7 +177,7 @@ fn load_task(conn: &Connection, id: &str) -> Result<TaskRecord, String> {
     conn.query_row(
         "SELECT id, project_id, title, prompt, state, plan_json, steps_json, messages_json,
                 plan_approved, iteration, summary, modified_files_json, pending_permission_id,
-                pending_edit_id, error, scheduled_task_id, provider_id, model_id, created_at, updated_at
+                pending_edit_id, error, scheduled_task_id, provider_id, model_id, created_at, updated_at, active_agent
          FROM tasks WHERE id = ?1",
         params![id],
         |row| {
@@ -200,6 +204,7 @@ fn load_task(conn: &Connection, id: &str) -> Result<TaskRecord, String> {
                 scheduled_task_id: row.get(15)?,
                 provider_id: row.get(16)?,
                 model_id: row.get(17)?,
+                active_agent: row.get(20)?,
                 created_at: row.get(18)?,
                 updated_at: row.get(19)?,
             })
@@ -214,8 +219,8 @@ fn save_task(conn: &Connection, task: &TaskRecord) -> Result<(), String> {
         "UPDATE tasks SET title = ?1, state = ?2, plan_json = ?3, steps_json = ?4, messages_json = ?5,
          plan_approved = ?6, iteration = ?7, summary = ?8, modified_files_json = ?9,
          pending_permission_id = ?10, pending_edit_id = ?11, error = ?12, provider_id = ?13,
-         model_id = ?14, updated_at = ?15
-         WHERE id = ?16",
+         model_id = ?14, updated_at = ?15, active_agent = ?16
+         WHERE id = ?17",
         params![
             task.title,
             task.state,
@@ -232,6 +237,7 @@ fn save_task(conn: &Connection, task: &TaskRecord) -> Result<(), String> {
             task.provider_id,
             task.model_id,
             now,
+            task.active_agent,
             task.id
         ],
     )
@@ -266,8 +272,8 @@ pub fn create_task(db: State<'_, DbState>, input: CreateTaskInput) -> Result<Tas
     let now = chrono::Utc::now().to_rfc3339();
     let title = title_from_prompt(&input.prompt);
     conn.execute(
-        "INSERT INTO tasks (id, project_id, title, prompt, state, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, 'draft', ?5, ?6)",
+        "INSERT INTO tasks (id, project_id, title, prompt, state, created_at, updated_at, active_agent)
+         VALUES (?1, ?2, ?3, ?4, 'draft', ?5, ?6, 'general')",
         params![id, input.project_id, title, input.prompt.trim(), now, now],
     )
     .map_err(|e| e.to_string())?;
@@ -428,8 +434,9 @@ pub async fn start_task(
     task_id: String,
     preferred_provider: Option<String>,
     preferred_model: Option<String>,
+    active_agent: Option<String>,
 ) -> Result<TaskRecord, String> {
-    start_task_inner(&db, &vault, &task_id, preferred_provider, preferred_model).await
+    start_task_inner(&db, &vault, &task_id, preferred_provider, preferred_model, active_agent).await
 }
 
 pub async fn start_task_inner(
@@ -438,12 +445,17 @@ pub async fn start_task_inner(
     task_id: &str,
     preferred_provider: Option<String>,
     preferred_model: Option<String>,
+    active_agent: Option<String>,
 ) -> Result<TaskRecord, String> {
     let (prompt, project_id) = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
-        let task = load_task(&conn, &task_id)?;
+        let mut task = load_task(&conn, &task_id)?;
         if task.state != TaskState::Draft.as_str() && task.state != TaskState::Planning.as_str() {
             return Err("Task already started.".into());
+        }
+        if let Some(ref agent) = active_agent {
+            task.active_agent = Some(agent.clone());
+            save_task(&conn, &task)?;
         }
         (task.prompt.clone(), task.project_id.clone())
     };
@@ -453,11 +465,12 @@ pub async fn start_task_inner(
         return Err("Enable at least one provider.".into());
     }
 
+    let agent_name = active_agent.unwrap_or_else(|| "general".to_string());
     let chat = build_task_chat_bundle(
         &db,
         &vault,
         &allowed,
-        "general",
+        &agent_name,
         preferred_provider.as_deref(),
         preferred_model.as_deref(),
         None,
@@ -474,6 +487,7 @@ pub async fn start_task_inner(
             "providerId": chat.provider_id,
             "modelId": chat.model_id,
             "credentials": chat.credentials,
+            "activeAgent": agent_name,
         }),
     )
     .await?;
@@ -487,9 +501,11 @@ pub async fn start_task_inner(
         .plan
         .into_iter()
         .map(|s| PlanStep {
+            id: None,
             title: s.title,
             subtitle: s.subtitle,
             role: s.role,
+            status: None,
         })
         .collect();
     if let Some(msg) = plan_resp.coordinator_message {
@@ -610,7 +626,7 @@ pub async fn advance_task_inner(
     task_id: &str,
     app: Option<&AppHandle>,
 ) -> Result<TaskRecord, String> {
-    let (state, iteration, project_id, prompt, plan, steps, messages, plan_approved, provider_id, model_id) = {
+    let (state, iteration, project_id, prompt, plan, steps, messages, plan_approved, provider_id, model_id, active_agent) = {
         let conn = db.0.lock().map_err(|e| e.to_string())?;
         let task = load_task(&conn, &task_id)?;
         (
@@ -624,6 +640,7 @@ pub async fn advance_task_inner(
             task.plan_approved,
             task.provider_id.clone(),
             task.model_id.clone(),
+            task.active_agent.clone(),
         )
     };
 
@@ -643,11 +660,12 @@ pub async fn advance_task_inner(
     }
 
     let allowed = enabled_providers(&db, &vault)?;
+    let agent_name = active_agent.unwrap_or_else(|| "coding".to_string());
     let chat = build_task_chat_bundle(
         &db,
         &vault,
         &allowed,
-        "coding",
+        &agent_name,
         None,
         None,
         provider_id.as_deref(),
@@ -675,6 +693,7 @@ pub async fn advance_task_inner(
             "credentials": chat.credentials,
             "workspaceFiles": files_summary,
             "skills": skills_list,
+            "activeAgent": agent_name,
         }),
     )
     .await?;
@@ -882,7 +901,155 @@ async fn execute_tool(
     tc: &SidecarToolCall,
     app: Option<&AppHandle>,
 ) -> Result<String, String> {
+    let res = execute_tool_inner(db, project_id, task_id, tc, app).await;
+    if let Err(ref e) = res {
+        if e.starts_with("permission_required:") {
+            let pending_id = e.replace("permission_required:", "");
+            if let Ok(conn) = db.0.lock() {
+                if let Ok(payload_str) = serde_json::to_string(tc) {
+                    let _ = conn.execute(
+                        "UPDATE pending_permissions SET payload = ?1 WHERE id = ?2",
+                        params![payload_str, pending_id],
+                    );
+                }
+            }
+        }
+    }
+    res
+}
+
+async fn execute_tool_inner(
+    db: &DbState,
+    project_id: &str,
+    task_id: Option<&str>,
+    tc: &SidecarToolCall,
+    app: Option<&AppHandle>,
+) -> Result<String, String> {
     match tc.name.as_str() {
+        "todo_write" => {
+            let todos_val = tc.arguments.get("todos").ok_or("Missing todos")?;
+            let merge = tc.arguments.get("merge").and_then(|v| v.as_bool()).unwrap_or(true);
+            let mut incoming_steps: Vec<PlanStep> = Vec::new();
+            if let Some(arr) = todos_val.as_array() {
+                for item in arr {
+                    let id = item.get("id").and_then(|v| v.as_str()).map(String::from);
+                    let content = item.get("content").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let status = item.get("status").and_then(|v| v.as_str()).unwrap_or("pending").to_string();
+                    incoming_steps.push(PlanStep {
+                        id,
+                        title: content,
+                        subtitle: None,
+                        role: None,
+                        status: Some(status),
+                    });
+                }
+            } else {
+                return Err("todos must be an array".into());
+            }
+
+            if let Some(t_id) = task_id {
+                let conn = db.0.lock().map_err(|e| e.to_string())?;
+                let mut task = load_task(&conn, t_id)?;
+                if merge {
+                    for incoming in incoming_steps {
+                        if let Some(ref incoming_id) = incoming.id {
+                            if let Some(existing) = task.plan.iter_mut().find(|s| s.id.as_ref() == Some(incoming_id)) {
+                                existing.title = incoming.title;
+                                existing.status = incoming.status;
+                            } else {
+                                task.plan.push(incoming);
+                            }
+                        } else {
+                            task.plan.push(incoming);
+                        }
+                    }
+                } else {
+                    task.plan = incoming_steps;
+                }
+                save_task(&conn, &task)?;
+                if let Some(app) = app {
+                    let _ = app.emit("aura://task-update", task);
+                }
+                Ok("Task todo list updated successfully.".into())
+            } else {
+                Err("No active task ID provided.".into())
+            }
+        }
+        "start_server" => {
+            let port = tc.arguments.get("port").and_then(|v| v.as_u64()).ok_or("Missing port")? as u16;
+            let command = tc.arguments.get("command").and_then(|v| v.as_str()).ok_or("Missing command")?;
+            let composite_cmd = format!(
+                "lsof -t -i:{} | xargs kill -9 2>/dev/null || true; nohup {} > /tmp/server_{}.log 2>&1 & \
+                 for i in {{1..10}}; do \
+                     if lsof -i:{} >/dev/null 2>&1; then \
+                         echo \"SERVER_READY\"; \
+                         exit 0; \
+                     fi; \
+                     sleep 1; \
+                 done; \
+                 echo \"SERVER_FAILED\"; \
+                 cat /tmp/server_{}.log | tail -n 20; \
+                 exit 1;",
+                port, command, port, port, port
+            );
+            let payload = serde_json::to_value(tc).ok();
+            crate::vm::tool_run_shell(db, project_id, task_id, &composite_cmd, payload).await
+        }
+        "schedule_cron" => {
+            let cron = tc.arguments.get("cron").and_then(|v| v.as_str()).ok_or("Missing cron")?;
+            let command = tc.arguments.get("command").and_then(|v| v.as_str()).ok_or("Missing command")?;
+            let conn = db.0.lock().map_err(|e| e.to_string())?;
+            let id = uuid::Uuid::new_v4().to_string();
+            let now = chrono::Utc::now().to_rfc3339();
+            let cadence = crate::scheduled::ScheduledCadence {
+                kind: "cron".into(),
+                cron: Some(cron.to_string()),
+                hour: None,
+                minute: None,
+                day_of_week: None,
+            };
+            let permissions = vec![
+                crate::permissions::PermissionProfileGrant {
+                    category: "file".into(),
+                    action: "read".into(),
+                    target_pattern: "*".into(),
+                },
+                crate::permissions::PermissionProfileGrant {
+                    category: "file".into(),
+                    action: "write".into(),
+                    target_pattern: "*".into(),
+                },
+                crate::permissions::PermissionProfileGrant {
+                    category: "shell".into(),
+                    action: "run".into(),
+                    target_pattern: "*".into(),
+                },
+            ];
+            conn.execute(
+                "INSERT INTO scheduled_tasks
+                 (id, name, description, prompt, project_id, routing_policy, cadence_json, permission_profile_json,
+                  paused, last_run_at, next_run_at, created_at, updated_at)
+                 VALUES (?1,?2,?3,?4,?5,NULL,?6,?7,0,NULL,?8,?9,?10)",
+                params![
+                    id,
+                    format!("Cron: {}", command.chars().take(30).collect::<String>()),
+                    Some(format!("Scheduled command: {}", command)),
+                    format!("Run shell command: {}", command),
+                    project_id,
+                    serde_json::to_string(&cadence).unwrap_or_default(),
+                    serde_json::to_string(&permissions).unwrap_or_default(),
+                    now,
+                    now,
+                    now,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+            Ok(format!("Successfully scheduled cron task with ID {}", id))
+        }
+        "list_external_tools" => {
+            let tools = crate::extensions_helper::get_all_tools_remote(Some(project_id)).await?;
+            Ok(serde_json::to_string(&tools).unwrap_or_else(|_| "{}".into()))
+        }
         "skill" => {
             let skill_name = tc
                 .arguments
@@ -1209,7 +1376,56 @@ async fn execute_tool(
             if let Some(output) = execute_universal_workspace_tool(db, project_id, task_id, tc, app).await? {
                 Ok(output)
             } else {
-                Err(format!("Unknown tool: {}", tc.name))
+                crate::permissions::check_task_permission(
+                    db,
+                    project_id,
+                    task_id,
+                    "custom_tool",
+                    "execute",
+                    &tc.name,
+                    "Execution of custom tool",
+                    "medium",
+                    false,
+                    None,
+                )?;
+
+                #[derive(Debug, Deserialize)]
+                struct SidecarToolExecuteResponse {
+                    output: Option<String>,
+                    error: Option<String>,
+                }
+
+                let project_path = project_folder(db, project_id).unwrap_or_default();
+                let resp_res: Result<SidecarToolExecuteResponse, String> = crate::agent::sidecar_post(
+                    "/tools/execute",
+                    &serde_json::json!({
+                        "name": tc.name,
+                        "arguments": tc.arguments,
+                        "projectId": project_id,
+                        "projectPath": project_path,
+                        "taskId": task_id,
+                    }),
+                )
+                .await;
+
+                match resp_res {
+                    Ok(resp) => {
+                        if let Some(err) = resp.error {
+                            Err(err)
+                        } else if let Some(output) = resp.output {
+                            Ok(output)
+                        } else {
+                            Err(format!("Unknown tool: {}", tc.name))
+                        }
+                    }
+                    Err(e) => {
+                        if e.contains("404") || e.contains("Not found") || e.contains("Unknown tool") {
+                            Err(format!("Unknown tool: {}", tc.name))
+                        } else {
+                            Err(format!("Custom tool execution failed: {}", e))
+                        }
+                    }
+                }
             }
         }
     }
@@ -1396,7 +1612,7 @@ async fn execute_universal_workspace_tool(
     let name = tc.name.as_str();
 
     if UNIVERSAL_WRITE_TOOLS.contains(&name) {
-        let path = universal_output_path(name, &tc.arguments)?;
+        let path = universal_output_path(db, project_id, name, &tc.arguments)?;
         let content = universal_output_content(name, &tc.arguments)?;
         let edit = tool_write_file(db, project_id, task_id, &path, &content)?;
         if edit.status == "pending" {
@@ -1527,14 +1743,39 @@ fn arg_str<'a>(args: &'a serde_json::Value, keys: &[&str]) -> Option<&'a str> {
     keys.iter().find_map(|key| args.get(*key).and_then(|v| v.as_str()))
 }
 
-fn universal_output_path(name: &str, args: &serde_json::Value) -> Result<String, String> {
-    if let Some(path) = arg_str(args, &["path", "filePath", "outputPath", "destination", "exportPath"]) {
+fn universal_output_path(
+    db: &DbState,
+    project_id: &str,
+    name: &str,
+    args: &serde_json::Value,
+) -> Result<String, String> {
+    let mut resolved_path = if let Some(path) = arg_str(args, &["path", "filePath", "outputPath", "destination", "exportPath"]) {
         reject_native_output_without_engine(name, path)?;
-        return Ok(path.to_string());
+        path.to_string()
+    } else {
+        let title = arg_str(args, &["title", "name", "artifactName"]).unwrap_or(name);
+        let slug = slugify_file_stem(title);
+        format!("{}.{}", slug, universal_default_extension(name, args))
+    };
+
+    if let Ok(root) = project_folder(db, project_id) {
+        let path_buf = std::path::Path::new(&resolved_path);
+        if let Some(parent) = path_buf.parent() {
+            if parent != std::path::Path::new("") {
+                let parent_str = parent.to_string_lossy().to_string();
+                if parent_str == "artifacts" || parent_str == "data" || parent_str == "docs" || parent_str == "decks" || parent_str == "reports" {
+                    let full_parent_path = std::path::Path::new(&root).join(parent);
+                    if !full_parent_path.exists() {
+                        if let Some(file_name) = path_buf.file_name() {
+                            resolved_path = file_name.to_string_lossy().to_string();
+                        }
+                    }
+                }
+            }
+        }
     }
-    let title = arg_str(args, &["title", "name", "artifactName"]).unwrap_or(name);
-    let slug = slugify_file_stem(title);
-    Ok(format!("artifacts/{}.{}", slug, universal_default_extension(name, args)))
+
+    Ok(resolved_path)
 }
 
 fn reject_native_output_without_engine(name: &str, path: &str) -> Result<(), String> {
@@ -2113,19 +2354,25 @@ pub async fn run_workspace_chat_agent(
 
     let plan = vec![
         PlanStep {
+            id: None,
             title: "Understand the request".into(),
             subtitle: Some("Use the current project context and recent chat history.".into()),
             role: Some("coordinator".into()),
+            status: None,
         },
         PlanStep {
+            id: None,
             title: "Inspect or modify workspace files".into(),
             subtitle: Some("Use file, search, shell, plugin, and MCP tools when needed.".into()),
             role: Some("coder".into()),
+            status: None,
         },
         PlanStep {
+            id: None,
             title: "Return a concise result".into(),
             subtitle: Some("Summarize actions, changed files, and remaining blockers.".into()),
             role: Some("reviewer".into()),
+            status: None,
         },
     ];
     let mut steps: Vec<TaskStep> = Vec::new();

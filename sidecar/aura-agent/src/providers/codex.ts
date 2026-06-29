@@ -186,29 +186,44 @@ export async function codexValidateCredentials(credentials: ProviderCredentials)
 
 function parseSseText(raw: string): string {
   let text = "";
+  const seen = new Set<string>();
   for (const line of raw.split("\n")) {
     if (!line.startsWith("data:")) continue;
     const payload = line.slice(5).trim();
     if (!payload || payload === "[DONE]") continue;
     try {
       const evt = JSON.parse(payload) as Record<string, unknown>;
-      if (typeof evt.delta === "string") text += evt.delta;
-      if (typeof evt.text === "string") text += evt.text;
-      const response = evt.response as { output?: { content?: { text?: string }[] }[] } | undefined;
-      const output = response?.output ?? (evt.output as typeof response extends undefined ? never : unknown);
-      if (Array.isArray(output)) {
-        for (const item of output) {
-          const content = (item as { content?: { text?: string }[] }).content;
-          if (Array.isArray(content)) {
-            for (const c of content) {
-              if (c.text) text += c.text;
+      const type = evt.type as string | undefined;
+
+      // Collect delta text from streaming events (avoid duplicates)
+      if (typeof evt.delta === "string" && evt.delta) {
+        const key = `delta:${evt.delta}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          text += evt.delta;
+        }
+      }
+
+      // Collect final response output (only from completed response events)
+      if (type === "response.completed" || type === "response.done") {
+        const response = evt.response as { output?: { content?: { text?: string }[] }[] } | undefined;
+        const output = response?.output ?? (evt.output as typeof response extends undefined ? never : unknown);
+        if (Array.isArray(output)) {
+          for (const item of output) {
+            const content = (item as { content?: { text?: string }[] }).content;
+            if (Array.isArray(content)) {
+              for (const c of content) {
+                if (c.text) {
+                  const key = `output:${c.text}`;
+                  if (!seen.has(key)) {
+                    seen.add(key);
+                    text += c.text;
+                  }
+                }
+              }
             }
           }
         }
-      }
-      const type = evt.type as string | undefined;
-      if (type?.includes("output_text") && typeof evt.delta === "string") {
-        text += evt.delta;
       }
     } catch {
       /* ignore malformed chunks */

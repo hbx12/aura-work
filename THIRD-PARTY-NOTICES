@@ -73,6 +73,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: packages/i18n/package.json
 
+@aura-os/plugin@0.1.0-alpha.1
+  License: Apache-2.0
+  Source: packages/aura-plugin/package.json
+
 @aura-os/plugins-helper@0.6.0
   License: Apache-2.0
   Source: sidecar/aura-plugins-helper/package.json
@@ -389,6 +393,14 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@types/estree
 
+@types/fs-extra@11.0.4
+  License: MIT
+  Source: node_modules/@types/fs-extra
+
+@types/jsonfile@6.1.4
+  License: MIT
+  Source: node_modules/@types/jsonfile
+
 @types/node@22.19.19
   License: MIT
   Source: node_modules/@types/node
@@ -469,6 +481,26 @@ ast-types@0.13.4
   License: MIT
   Source: node_modules/ast-types
 
+asynckit@0.4.0
+  License: MIT
+  Source: node_modules/asynckit
+
+axios@1.18.1
+  License: MIT
+  Source: node_modules/axios
+
+axios/node_modules/agent-base@6.0.2
+  License: MIT
+  Source: node_modules/axios/node_modules/agent-base
+
+axios/node_modules/https-proxy-agent@5.0.1
+  License: MIT
+  Source: node_modules/axios/node_modules/https-proxy-agent
+
+axios/node_modules/proxy-from-env@2.1.0
+  License: MIT
+  Source: node_modules/axios/node_modules/proxy-from-env
+
 b4a@1.8.1
   License: Apache-2.0
   Source: node_modules/b4a
@@ -541,6 +573,10 @@ color-name@1.1.4
   License: MIT
   Source: node_modules/color-name
 
+combined-stream@1.0.8
+  License: MIT
+  Source: node_modules/combined-stream
+
 content-disposition@1.1.0
   License: MIT
   Source: node_modules/content-disposition
@@ -584,6 +620,10 @@ debug@4.4.3
 degenerator@5.0.1
   License: MIT
   Source: node_modules/degenerator
+
+delayed-stream@1.0.0
+  License: MIT
+  Source: node_modules/delayed-stream
 
 depd@2.0.0
   License: MIT
@@ -632,6 +672,10 @@ es-module-lexer@2.1.0
 es-object-atoms@1.1.2
   License: MIT
   Source: node_modules/es-object-atoms
+
+es-set-tostringtag@2.1.0
+  License: MIT
+  Source: node_modules/es-set-tostringtag
 
 esbuild@0.28.1
   License: MIT
@@ -721,6 +765,22 @@ finalhandler@2.1.1
   License: MIT
   Source: node_modules/finalhandler
 
+follow-redirects@1.16.0
+  License: MIT
+  Source: node_modules/follow-redirects
+
+form-data@4.0.6
+  License: MIT
+  Source: node_modules/form-data
+
+form-data/node_modules/mime-db@1.52.0
+  License: MIT
+  Source: node_modules/form-data/node_modules/mime-db
+
+form-data/node_modules/mime-types@2.1.35
+  License: MIT
+  Source: node_modules/form-data/node_modules/mime-types
+
 forwarded@0.2.0
   License: MIT
   Source: node_modules/forwarded
@@ -728,6 +788,10 @@ forwarded@0.2.0
 fresh@2.0.0
   License: MIT
   Source: node_modules/fresh
+
+fs-extra@11.3.5
+  License: MIT
+  Source: node_modules/fs-extra
 
 fsevents@2.3.3
   License: MIT
@@ -761,9 +825,17 @@ gopd@1.2.0
   License: MIT
   Source: node_modules/gopd
 
+graceful-fs@4.2.11
+  License: ISC
+  Source: node_modules/graceful-fs
+
 has-symbols@1.1.0
   License: MIT
   Source: node_modules/has-symbols
+
+has-tostringtag@1.0.2
+  License: MIT
+  Source: node_modules/has-tostringtag
 
 hasown@2.0.4
   License: MIT
@@ -824,6 +896,10 @@ json-schema-traverse@1.0.0
 json-schema-typed@8.0.2
   License: BSD-2-Clause
   Source: node_modules/json-schema-typed
+
+jsonfile@6.2.1
+  License: MIT
+  Source: node_modules/jsonfile
 
 lightningcss@1.32.0
   License: MPL-2.0
@@ -1208,6 +1284,10 @@ typescript@5.8.3
 undici-types@6.21.0
   License: MIT
   Source: node_modules/undici-types
+
+universalify@2.0.1
+  License: MIT
+  Source: node_modules/universalify
 
 unpipe@1.0.0
   License: MIT

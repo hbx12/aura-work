@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { PermissionRequest, TaskListItem, TaskRecord } from "@aura-os/shared";
 
 const MAX_TASK_STEPS = 20;
@@ -9,6 +10,7 @@ export interface CreateTaskOptions {
   preferredProvider?: string | null;
   preferredModel?: string | null;
   autoApprove?: boolean;
+  activeAgent?: string | null;
 }
 
 export function useTasks(projectId: string | null) {
@@ -20,6 +22,29 @@ export function useTasks(projectId: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [streamText, setStreamText] = useState("");
   const streamPollRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    const setupListener = async () => {
+      try {
+        unlisten = await listen<TaskRecord>("aura://task-update", (event) => {
+          const updatedTask = event.payload;
+          setActiveTask((current) => {
+            if (current && current.id === updatedTask.id) {
+              return updatedTask;
+            }
+            return current;
+          });
+        });
+      } catch (err) {
+        console.error("Failed to listen to task-update event:", err);
+      }
+    };
+    void setupListener();
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [setActiveTask]);
 
   const stopStreamPoll = useCallback(() => {
     if (streamPollRef.current != null) {
@@ -159,6 +184,7 @@ export function useTasks(projectId: string | null) {
           taskId: created.id,
           preferredProvider: opts.preferredProvider ?? null,
           preferredModel: opts.preferredModel ?? null,
+          activeAgent: opts.activeAgent ?? null,
         });
         setActiveTask(planned);
         await refreshTasks();
@@ -242,12 +268,12 @@ export function useTasks(projectId: string | null) {
       try {
         const pending = pendingPermissions.find((permission) => permission.id === permissionId);
         if (pending && !pending.taskId) {
-          await invoke("resolve_workspace_permission", {
+          const res = await invoke<string>("resolve_workspace_permission", {
             permissionId,
             decision,
           });
           await refreshPendingPermissions({ projectId, taskId: null });
-          return null;
+          return { taskId: null, result: res, decision };
         }
         const task = await invoke<TaskRecord>("resume_after_permission", {
           permissionId,
@@ -255,9 +281,9 @@ export function useTasks(projectId: string | null) {
         });
         setActiveTask(task);
         if (task.state === "running") {
-          return await runLoop(task.id, MAX_TASK_STEPS, true);
+          return { taskId: task.id, result: await runLoop(task.id, MAX_TASK_STEPS, true), decision };
         }
-        return task;
+        return { taskId: task.id, result: task, decision };
       } catch (e) {
         setError(String(e));
         throw e;

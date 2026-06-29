@@ -13,7 +13,6 @@ import {
   Sidebar,
   Steps,
   Summary,
-  TaskWelcome,
   Thinking,
   TitleBar,
   type AppView,
@@ -23,6 +22,7 @@ import {
 } from "@aura-os/ui";
 import { PROVIDER_META } from "@aura-os/shared";
 import { NewProjectDialog } from "./components/NewProjectDialog";
+import { Dashboard } from "./components/Dashboard";
 import { ProviderKeyDialog } from "./components/ProviderKeyDialog";
 import { ProvidersPageLive } from "./components/ProvidersPageLive";
 import { SettingsPage } from "./components/SettingsPage";
@@ -58,6 +58,7 @@ import { useI18n, usePackaging, usePendingOpenTask } from "./hooks/useI18n";
 import type { MessageCatalog } from "@aura-os/i18n";
 import { useChatModels, parseModelSelection } from "./hooks/useChatModels";
 import { PetWindowContent } from "./components/PetWindowContent";
+import CanvasPanel from "./components/CanvasPanel";
 import "@aura-os/ui/tokens.css";
 import "@aura-os/ui/app.css";
 import "./app-overrides.css";
@@ -247,6 +248,27 @@ export default function App() {
   );
   const [settingsTab, setSettingsTab] = useState<string>("general");
   const [showCtx, setShowCtx] = useState(true);
+  const [showCanvas, setShowCanvas] = useState<boolean>(() => {
+    return localStorage.getItem("aura-show-canvas") === "true";
+  });
+  const [canvasWidth, setCanvasWidth] = useState<number>(() => {
+    const saved = localStorage.getItem("aura-canvas-width");
+    return saved ? parseInt(saved, 10) : 480;
+  });
+  const [activeCanvasFile, setActiveCanvasFile] = useState<string | null>(null);
+
+  const handleToggleCanvas = () => {
+    setShowCanvas((prev) => {
+      const next = !prev;
+      localStorage.setItem("aura-show-canvas", String(next));
+      return next;
+    });
+  };
+
+  const handleCanvasWidthChange = (w: number) => {
+    setCanvasWidth(w);
+    localStorage.setItem("aura-canvas-width", String(w));
+  };
   const [search, setSearch] = useState("");
   const [composer, setComposer] = useState("");
   const [mode, setMode] = useState<"ask" | "act">("act");
@@ -355,6 +377,64 @@ export default function App() {
   const memoryApi = useMemory(activeProjectId);
   const i18n = useI18n();
   const packaging = usePackaging();
+
+  const canvasFiles = useMemo(() => {
+    return tasks.activeTask?.modifiedFiles || [];
+  }, [tasks.activeTask?.modifiedFiles]);
+
+  useEffect(() => {
+    if (canvasFiles.length > 0) {
+      if (!activeCanvasFile || !canvasFiles.includes(activeCanvasFile)) {
+        setActiveCanvasFile(canvasFiles[canvasFiles.length - 1]);
+      }
+    } else {
+      setActiveCanvasFile(null);
+    }
+  }, [canvasFiles, activeCanvasFile]);
+
+  const handleCanvasSendPrompt = (prompt: string) => {
+    setComposer(prompt);
+    setTimeout(() => {
+      if (tasks.activeTask) {
+        if (mode === "act" && tasks.activeTask.state !== "running" && tasks.activeTask.state !== "paused") {
+          void handleNewTask();
+        } else {
+          void handleContinueTask();
+        }
+      } else {
+        if (mode === "act") {
+          void handleNewTask();
+        } else {
+          void handleSendChat();
+        }
+      }
+    }, 50);
+  };
+
+  const renderCanvasToggleButton = () => {
+    const isAr = i18n.settings?.locale === "ar";
+    return (
+      <button
+        onClick={handleToggleCanvas}
+        className={`chip-btn ${showCanvas ? "active" : ""}`}
+        style={{
+          background: showCanvas ? "var(--accent)" : "var(--bg-3)",
+          color: showCanvas ? "#fff" : "var(--fg-2)",
+          border: "1px solid var(--border-3)",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontWeight: 600,
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+      >
+        <span>📋</span>
+        <span>{isAr ? "اللوحة" : "Canvas"}</span>
+      </button>
+    );
+  };
   const chatModels = useChatModels(
     providersApi.providers.filter((p) => p.enabled && p.hasSecret).length +
       providersApi.providers.map((p) => p.defaultModel ?? "").join(",").length,
@@ -632,13 +712,7 @@ export default function App() {
     [t],
   );
 
-  const taskWelcomeLabels = useMemo(
-    () => ({
-      titlePhase11: t("task.welcome.subtitle"),
-      descPhase11: t("task.welcome.desc"),
-    }),
-    [t],
-  );
+
 
   const planBlockLabels = useMemo(
     () => ({
@@ -792,10 +866,16 @@ export default function App() {
       return true;
     }
 
-    if (msg.startsWith("/init-aura") || msg.startsWith("/تهيئة_اورا")) {
+    const isInitAura = msg.startsWith("/init-aura") || msg.startsWith("/تهيئة_اورا");
+    const isInitRules = msg.startsWith("/init") || msg.startsWith("/init-rules") || msg.startsWith("/تهيئة_القواعد");
+
+    if (isInitAura || isInitRules) {
       if (!activeProjectId) return false;
       setComposer("");
-      const statusMsg = isAr ? "جاري فحص مساحة العمل لإنشاء ملف AURA.md..." : "Scanning workspace to generate AURA.md...";
+      const targetFileName = isInitAura ? "AURA.md" : "AGENTS.md";
+      const statusMsg = isAr
+        ? `جاري فحص مساحة العمل لإنشاء ملف ${targetFileName}...`
+        : `Scanning workspace to generate ${targetFileName}...`;
       setChatMessages(prev => [...prev, { role: "user", content: msg }, { role: "assistant", content: statusMsg }]);
       
       let pkgName = activeProject?.name || "Aura Project";
@@ -813,9 +893,34 @@ export default function App() {
         // package.json might not exist or failed
       }
 
-      const auraMdContent = `# Aura Project Rules - ${pkgName}
+      let rulesContent = "";
+      if (isAr) {
+        rulesContent = `# قواعد المشروع - ${pkgName}
 
-This file contains coding conventions, build instructions, and guidelines for the Aura Work assistant in this workspace.
+يحتوي هذا الملف على قواعد الترميز، تعليمات البناء، والمبادئ التوجيهية لوكيل المساعد في مساحة العمل هذه.
+
+## بيئة عمل المشروع
+${depsList ? depsList : "- TypeScript / Javascript (لم يتم الكشف عن تبعيات)"}
+
+## إرشادات البنية البرمجية
+- إبقاء الكود نموذجياً ومعرفاً بشكل صارم (Strictly typed).
+- تفضيل الوحدات المساعدة (Helpers) على الملفات الضخمة.
+- إبقاء المكونات صغيرة وقابلة لإعادة الاستخدام.
+
+## أوامر البناء والتحقق
+- بناء المشروع: \`npm run build\` أو ما يعادله.
+- تشغيل الاختبارات: \`npm test\` أو ما يعادله.
+- فحص الأخطاء (Lint): \`npm run lint\` أو ما يعادله.
+
+## الأمن والقواعد
+- عدم إدراج مفاتيح الوصول (API keys) أو البيانات السرية نهائياً.
+- كتابة اختبارات للواجهات البرمجية وحالات الحواف.
+- تشغيل فحص البناء المحلي دائماً قبل إتمام المهام.
+`;
+      } else {
+        rulesContent = `# Project Rules - ${pkgName}
+
+This file contains coding conventions, build instructions, and guidelines for the assistant in this workspace.
 
 ## Project Stack
 ${depsList ? depsList : "- TypeScript / Javascript (No dependencies detected)"}
@@ -835,22 +940,23 @@ ${depsList ? depsList : "- TypeScript / Javascript (No dependencies detected)"}
 - Write unit tests for new APIs and edge cases.
 - Always run local compile checks before completing tasks.
 `;
+      }
 
       try {
         await invoke("write_project_file", {
           input: {
             projectId: activeProjectId,
-            filePath: "AURA.md",
-            content: auraMdContent,
+            filePath: targetFileName,
+            content: rulesContent,
             skipPermission: true
           }
         });
         const successText = isAr
           ? `✅ **تم إنشاء ملف القواعد بنجاح!**
-تم حفظ الملف في مسار المشروع باسم [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+تم حفظ الملف في مسار المشروع باسم [${targetFileName}](file://${activeProject?.folderPath}/${targetFileName}).
 يمكنك فتحه وتعديله لتخصيص سلوك الوكيل داخل هذا المشروع.`
-          : `✅ **AURA.md rules file created successfully!**
-The file has been saved to [AURA.md](file://${activeProject?.folderPath}/AURA.md).
+          : `✅ **${targetFileName} rules file created successfully!**
+The file has been saved to [${targetFileName}](file://${activeProject?.folderPath}/${targetFileName}).
 You can open and customize it to instruct the agent on workspace rules.`;
 
         setChatMessages(prev => [...prev.slice(0, -1), { role: "assistant", content: successText }]);
@@ -866,10 +972,11 @@ You can open and customize it to instruct the agent on workspace rules.`;
     return false;
   };
 
-  const handleSendChat = async (fallbackApproved = false) => {
-    if (handleCheckPetCommand(composer)) return;
-    if (await handleCheckSlashCommands(composer)) return;
-    const msg = composer.trim();
+  const handleSendChat = async (fallbackApproved = false, customMsg?: string) => {
+    const inputMsg = customMsg !== undefined ? customMsg : composer;
+    if (handleCheckPetCommand(inputMsg)) return;
+    if (await handleCheckSlashCommands(inputMsg)) return;
+    const msg = inputMsg.trim();
     if (!msg || agent.running || tasks.running) return;
     if (activeTaskId) return;
 
@@ -889,7 +996,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
       }
     }
 
-    setComposer("");
+    if (customMsg === undefined) {
+      setComposer("");
+    }
     setChatError(null);
     const userLine = { role: "user" as const, content: msg };
     const history = [...chatMessages, userLine];
@@ -1034,6 +1143,17 @@ You can open and customize it to instruct the agent on workspace rules.`;
       finalMsg = `${msg}\n\n[Context from active file in VS Code: ${activeEditor.filePath}${activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}]\n\`\`\`\n${activeEditor.content}\n\`\`\``;
     }
 
+    let taskAgent = activeAgent;
+    const mentionMatch = msg.match(/^@([a-zA-Z0-9_-]+)/);
+    if (mentionMatch) {
+      const agentId = mentionMatch[1].toLowerCase();
+      const found = agents.find(a => a.name === agentId);
+      if (found) {
+        taskAgent = agentId;
+        finalMsg = msg.slice(mentionMatch[0].length).trim();
+      }
+    }
+
     const { preferredProvider, preferredModel } = parseModelSelection(selectedModel);
     try {
       if (mode === "act") await ensureActPermissions();
@@ -1042,6 +1162,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
         preferredProvider,
         preferredModel,
         autoApprove: mode === "act",
+        activeAgent: taskAgent,
       });
       setActiveTaskId(task.id);
     } catch {
@@ -1096,8 +1217,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
         return (
           <>
             <div className="ws-head">
-              <div className="row1">
+              <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                 <h1>{activeProject.name}</h1>
+                {renderCanvasToggleButton()}
               </div>
               <div className="row2">
                 <span className="ws-meta">{activeProject.folderPath}</span>
@@ -1106,100 +1228,211 @@ You can open and customize it to instruct the agent on workspace rules.`;
                 </span>
               </div>
             </div>
-            <div className="ws-scroll">
-              <div className="ws-canvas">
-                {showOnboarding && activeProjectId && (
-                  <OnboardingWizard
-                    projectId={activeProjectId}
-                    onClose={() => setShowOnboarding(false)}
-                    isArabic={i18n.settings?.locale === "ar"}
-                  />
-                )}
-                {chatMessages.map((m, i) => (
-                  <Msg
-                    key={i}
-                    who={m.role === "user" ? t("chat.you") : t("chat.aura")}
-                    agent={m.role === "assistant"}
-                    role={m.model}
-                  >
-                    {m.content}
-                  </Msg>
-                ))}
-                {chatStreamText !== null && (
-                  <StreamingMsg
-                    who={t("chat.aura")}
-                    agent
-                    role={chatStreamModel}
-                    streaming
-                    liveText={chatStreamText}
-                  >
-                    {chatStreamText}
-                  </StreamingMsg>
-                )}
-                {tasks.pendingPermissions[0] && (
-                  <PermissionApprovalDialog
-                    permission={tasks.pendingPermissions[0]}
-                    labels={approvalLabels}
-                    onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
-                  />
-                )}
-                {chatError && <p className="modal-error">{chatError}</p>}
-                {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
+            <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+              <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+                <div className="ws-scroll">
+                  <div className="ws-canvas">
+                    {showOnboarding && activeProjectId && (
+                      <OnboardingWizard
+                        projectId={activeProjectId}
+                        onClose={() => setShowOnboarding(false)}
+                        isArabic={i18n.settings?.locale === "ar"}
+                      />
+                    )}
+                    {chatMessages.map((m, i) => {
+                      const isClarification = m.content.trim().startsWith('{"type":"clarification"');
+                      if (isClarification) {
+                        try {
+                          const data = JSON.parse(m.content);
+                          const isLatest = i === chatMessages.length - 1;
+                          return (
+                            <ClarificationCard
+                              key={i}
+                              data={data}
+                              isLatest={isLatest}
+                              isArabic={i18n.locale?.startsWith("ar")}
+                              onSubmit={async (response) => {
+                                setComposer("");
+                                await handleSendChat(false, response);
+                              }}
+                            />
+                          );
+                        } catch (e) {
+                          // fallback
+                        }
+                      }
+
+                      return (
+                        <Msg
+                          key={i}
+                          who={m.role === "user" ? t("chat.you") : t("chat.aura")}
+                          agent={m.role === "assistant"}
+                          role={m.model}
+                        >
+                          {m.content}
+                        </Msg>
+                      );
+                    })}
+                    {chatStreamText !== null && (
+                      <StreamingMsg
+                        who={t("chat.aura")}
+                        agent
+                        role={chatStreamModel}
+                        streaming
+                        liveText={chatStreamText}
+                      >
+                        {chatStreamText}
+                      </StreamingMsg>
+                    )}
+                    {tasks.pendingPermissions[0] && (
+                      <PermissionApprovalDialog
+                        permission={tasks.pendingPermissions[0]}
+                        labels={approvalLabels}
+                        onDecide={async (d) => {
+                          const res = await tasks.resolvePermission(tasks.pendingPermissions[0].id, d);
+                          if (res && res.taskId === null && d !== "deny") {
+                            const toolOutput = res.result;
+                            const prompt = i18n.locale?.startsWith("ar")
+                              ? `[نظام: تم السماح بالعملية. نتيجة الأداة: ${toolOutput}]`
+                              : `[System: Permission granted. Tool output: ${toolOutput}]`;
+                            await handleSendChat(false, prompt);
+                          }
+                        }}
+                      />
+                    )}
+                    {chatError && <p className="modal-error">{chatError}</p>}
+                    {agent.running && <Thinking label={i18n.t("chat.thinking")} labels={thinkingLabels} />}
+                  </div>
+                </div>
+                <Composer
+                  value={composer}
+                  onChange={setComposer}
+                  onSend={() => void handleComposerPrimary()}
+                  onRunTask={() => void handleNewTask()}
+                  mode={mode}
+                  onToggleMode={() => void handleToggleMode()}
+                  disabled={agent.running || tasks.running || chatStreamText !== null}
+                  models={chatModels.models}
+                  selectedModel={selectedModel}
+                  onModelChange={handleModelChange}
+                  labels={composerLabels}
+                  locale={i18n.locale}
+                  skills={pluginsApi.skills}
+                  messages={chatMessages}
+                  modelContextWindow={currentModelContextWindow}
+                  showRunTask
+                  activeAgent={activeAgent}
+                  onAgentChange={setActiveAgent}
+                  agents={agents}
+                  mcpServers={pluginsApi.mcpServers}
+                />
               </div>
+              {showCanvas && (
+                <CanvasPanel
+                  projectId={activeProjectId!}
+                  taskId={null}
+                  isAr={i18n.settings?.locale === "ar"}
+                  activeFile={activeCanvasFile}
+                  onChangeActiveFile={setActiveCanvasFile}
+                  onSendPrompt={handleCanvasSendPrompt}
+                  onRefreshWorkspace={refreshProjects}
+                  modifiedFiles={canvasFiles}
+                  width={canvasWidth}
+                  onWidthChange={handleCanvasWidthChange}
+                  pendingEdits={files.pendingEdits}
+                  onApproveEdit={async (id) => {
+                    await files.approveEdit(id, (taskId) => {
+                      setView("tasks");
+                      setActiveTaskId(taskId);
+                      void tasks.resumeAfterEdit(id);
+                    });
+                  }}
+                />
+              )}
             </div>
-            <Composer
-              value={composer}
-              onChange={setComposer}
-              onSend={() => void handleComposerPrimary()}
-              onRunTask={() => void handleNewTask()}
-              mode={mode}
-              onToggleMode={() => void handleToggleMode()}
-              disabled={agent.running || tasks.running || chatStreamText !== null}
-              models={chatModels.models}
-              selectedModel={selectedModel}
-              onModelChange={handleModelChange}
-              labels={composerLabels}
-              locale={i18n.locale}
-              skills={pluginsApi.skills}
-              messages={chatMessages}
-              modelContextWindow={currentModelContextWindow}
-              showRunTask
-              activeAgent={activeAgent}
-              onAgentChange={setActiveAgent}
-              agents={agents}
-            />
           </>
         );
       }
       return (
-        <div className="empty-task">
-          <div className="et-inner">
-            <TaskWelcome projectName={activeProject.name} phase={11} labels={taskWelcomeLabels} />
-            <div className="composer-wrap">
-              <Composer
-                value={composer}
-                onChange={setComposer}
-                onSend={() => void handleComposerPrimary()}
-                onRunTask={mode === "ask" ? () => void handleNewTask() : undefined}
-                mode={mode}
-                onToggleMode={() => void handleToggleMode()}
-                disabled={agent.running || tasks.running || chatStreamText !== null}
-                models={chatModels.models}
-                selectedModel={selectedModel}
-                onModelChange={handleModelChange}
-                labels={composerLabels}
-                locale={i18n.locale}
-                skills={pluginsApi.skills}
-                messages={chatMessages}
-                modelContextWindow={currentModelContextWindow}
-                showRunTask={mode === "ask"}
-                activeAgent={activeAgent}
-                onAgentChange={setActiveAgent}
-                agents={agents}
-              />
+        <>
+          <div className="ws-head">
+            <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+              <h1>{activeProject.name}</h1>
+              {renderCanvasToggleButton()}
+            </div>
+            <div className="row2">
+              <span className="ws-meta">{activeProject.folderPath}</span>
+              <span className="chat-meta">
+                <span className="tag local">{t("chat.modeAsk")}</span>
+              </span>
             </div>
           </div>
-        </div>
+          <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+              <div className="ws-scroll">
+                <div className="ws-canvas">
+                  <Dashboard
+                    projectName={activeProject.name}
+                    projectPath={activeProject.folderPath}
+                    gitStatus={git.status}
+                    lastUsage={agent.lastUsage}
+                    filesCount={files.files.length}
+                    onNewTask={handleNewTaskWorkspace}
+                    onNavigate={(v) => setView(v as AppView)}
+                    isArabic={i18n.settings?.locale === "ar"}
+                    t={t}
+                  />
+                </div>
+              </div>
+              <div className="composer-wrap">
+                <Composer
+                  value={composer}
+                  onChange={setComposer}
+                  onSend={() => void handleComposerPrimary()}
+                  onRunTask={mode === "ask" ? () => void handleNewTask() : undefined}
+                  mode={mode}
+                  onToggleMode={() => void handleToggleMode()}
+                  disabled={agent.running || tasks.running || chatStreamText !== null}
+                  models={chatModels.models}
+                  selectedModel={selectedModel}
+                  onModelChange={handleModelChange}
+                  labels={composerLabels}
+                  locale={i18n.locale}
+                  skills={pluginsApi.skills}
+                  messages={chatMessages}
+                  modelContextWindow={currentModelContextWindow}
+                  showRunTask={mode === "ask"}
+                  activeAgent={activeAgent}
+                  onAgentChange={setActiveAgent}
+                  agents={agents}
+                  mcpServers={pluginsApi.mcpServers}
+                />
+              </div>
+            </div>
+            {showCanvas && (
+              <CanvasPanel
+                projectId={activeProjectId!}
+                taskId={null}
+                isAr={i18n.settings?.locale === "ar"}
+                activeFile={activeCanvasFile}
+                onChangeActiveFile={setActiveCanvasFile}
+                onSendPrompt={handleCanvasSendPrompt}
+                onRefreshWorkspace={refreshProjects}
+                modifiedFiles={canvasFiles}
+                width={canvasWidth}
+                onWidthChange={handleCanvasWidthChange}
+                pendingEdits={files.pendingEdits}
+                onApproveEdit={async (id) => {
+                  await files.approveEdit(id, (taskId) => {
+                    setView("tasks");
+                    setActiveTaskId(taskId);
+                    void tasks.resumeAfterEdit(id);
+                  });
+                }}
+              />
+            )}
+          </div>
+        </>
       );
     }
 
@@ -1208,15 +1441,18 @@ You can open and customize it to instruct the agent on workspace rules.`;
         <div className="ws-head">
           <div className="row1" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <h1>{task?.title ?? t("chat.taskFallback")}</h1>
-            {canRollback && (
-              <button
-                onClick={handleRollback}
-                className="chip-btn"
-                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)", padding: "4px 8px", borderRadius: "6px" }}
-              >
-                ↩️ {i18n.settings?.locale === "ar" ? "تراجع واستعادة الملفات" : "Undo & Restore"}
-              </button>
-            )}
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {canRollback && (
+                <button
+                  onClick={handleRollback}
+                  className="chip-btn"
+                  style={{ background: "rgba(239, 68, 68, 0.15)", color: "#f87171", border: "1px solid rgba(239, 68, 68, 0.3)", padding: "4px 8px", borderRadius: "6px" }}
+                >
+                  ↩️ {i18n.settings?.locale === "ar" ? "تراجع واستعادة الملفات" : "Undo & Restore"}
+                </button>
+              )}
+              {renderCanvasToggleButton()}
+            </div>
           </div>
           <div className="row2">
             <span className="ws-meta">{activeProject.folderPath}</span>
@@ -1235,207 +1471,234 @@ You can open and customize it to instruct the agent on workspace rules.`;
             )}
           </div>
         </div>
-        <div className="ws-scroll">
-          <div className="ws-canvas">
-            {showOnboarding && activeProjectId && (
-              <OnboardingWizard
-                projectId={activeProjectId}
-                onClose={() => setShowOnboarding(false)}
-                isArabic={i18n.settings?.locale === "ar"}
-              />
-            )}
-            {tasks.loading && !task && <Thinking label={t("common.loading")} labels={thinkingLabels} />}
-            {task?.messages.map((m, i) => {
-              const isClarification = m.content.trim().startsWith('{"type":"clarification"');
-              if (isClarification) {
-                try {
-                  const data = JSON.parse(m.content);
-                  const isLatest = i === task.messages.length - 1;
-                  return (
-                    <ClarificationCard
-                      key={i}
-                      data={data}
-                      isLatest={isLatest}
-                      isArabic={i18n.locale?.startsWith("ar")}
-                      onSubmit={async (response) => {
-                        setComposer("");
-                        await tasks.sendTaskMessage(task.id, response);
-                        await tasks.continueTask(task.id, mode === "act");
-                      }}
-                    />
-                  );
-                } catch (e) {
-                  // fallback
-                }
-              }
-
-              return (
-                <StreamingMsg
-                  key={i}
-                  who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
-                  agent={m.role !== "user"}
-                  role={m.agentRole ?? undefined}
-                  streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
-                  liveText={
-                    tasks.running && m.role === "assistant" && i === task.messages.length - 1
-                      ? tasks.streamText
-                      : null
+        <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, height: "100%" }}>
+            <div className="ws-scroll">
+              <div className="ws-canvas">
+                {showOnboarding && activeProjectId && (
+                  <OnboardingWizard
+                    projectId={activeProjectId}
+                    onClose={() => setShowOnboarding(false)}
+                    isArabic={i18n.settings?.locale === "ar"}
+                  />
+                )}
+                {tasks.loading && !task && <Thinking label={t("common.loading")} labels={thinkingLabels} />}
+                {task?.messages.map((m, i) => {
+                  const isClarification = m.content.trim().startsWith('{"type":"clarification"');
+                  if (isClarification) {
+                    try {
+                      const data = JSON.parse(m.content);
+                      const isLatest = i === task.messages.length - 1;
+                      return (
+                        <ClarificationCard
+                          key={i}
+                          data={data}
+                          isLatest={isLatest}
+                          isArabic={i18n.locale?.startsWith("ar")}
+                          onSubmit={async (response) => {
+                            setComposer("");
+                            await tasks.sendTaskMessage(task.id, response);
+                            await tasks.continueTask(task.id, mode === "act");
+                          }}
+                        />
+                      );
+                    } catch (e) {
+                      // fallback
+                    }
                   }
-                >
-                  {m.content}
-                </StreamingMsg>
-              );
-            })}
 
-            {tasks.running && tasks.streamText && (!task?.messages.length || task.messages[task.messages.length - 1]?.role === "user") && (
-              <StreamingMsg
-                who={t("chat.aura")}
-                agent
-                role="coordinator"
-                streaming
-                liveText={tasks.streamText}
-              >
-                {tasks.streamText.replace(/```[\s\S]*$/g, "").trim() || "…"}
-              </StreamingMsg>
-            )}
+                  return (
+                    <StreamingMsg
+                      key={i}
+                      who={m.agentRole ?? (m.role === "user" ? t("chat.you") : t("chat.aura"))}
+                      agent={m.role !== "user"}
+                      role={m.agentRole ?? undefined}
+                      streaming={tasks.running && m.role === "assistant" && i === task.messages.length - 1}
+                      liveText={
+                        tasks.running && m.role === "assistant" && i === task.messages.length - 1
+                          ? tasks.streamText
+                          : null
+                      }
+                    >
+                      {m.content}
+                    </StreamingMsg>
+                  );
+                })}
 
-            {task?.pendingEditId && task.state === "waiting-for-approval" && (
-              <p className="modal-desc">
-                {t("files.pendingEdits")}{" "}
-                <button type="button" className="btn sm" onClick={() => setView("files")}>
-                  {t("files.approveWrite")}
-                </button>
-              </p>
-            )}
+                {tasks.running && tasks.streamText && (!task?.messages.length || task.messages[task.messages.length - 1]?.role === "user") && (
+                  <StreamingMsg
+                    who={t("chat.aura")}
+                    agent
+                    role="coordinator"
+                    streaming
+                    liveText={tasks.streamText}
+                  >
+                    {tasks.streamText.replace(/```[\s\S]*$/g, "").trim() || "…"}
+                  </StreamingMsg>
+                )}
 
-            {task && (task.state === "running" || task.state === "paused") && !tasks.running && (
-              <div className="section">
-                <button type="button" className="btn primary sm" onClick={() => void handleContinueTask()}>
-                  {task.state === "paused" ? t("chat.send") : t("chat.continueTask")}
-                </button>
-              </div>
-            )}
+                {task?.pendingEditId && task.state === "waiting-for-approval" && (
+                  <p className="modal-desc">
+                    {t("files.pendingEdits")}{" "}
+                    <button type="button" className="btn sm" onClick={() => setView("files")}>
+                      {t("files.approveWrite")}
+                    </button>
+                  </p>
+                )}
 
-            {task && task.plan.length > 0 && (
-              <PlanBlock
-                steps={task.plan}
-                approved={task.planApproved}
-                collapsed={planCollapsed && task.planApproved}
-                onExpand={() => setPlanCollapsed(false)}
-                labels={planBlockLabels}
-                onApprove={
-                  task.state === "waiting-for-approval" && !task.planApproved
-                    ? () => void handleApprovePlan()
-                    : undefined
-                }
-              />
-            )}
+                {task && (task.state === "running" || task.state === "paused") && !tasks.running && (
+                  <div className="section">
+                    <button type="button" className="btn primary sm" onClick={() => void handleContinueTask()}>
+                      {task.state === "paused" ? t("chat.send") : t("chat.continueTask")}
+                    </button>
+                  </div>
+                )}
 
-            {task && task.steps.length > 0 && <Steps items={task.steps} />}
+                {task && task.plan.length > 0 && (
+                  <PlanBlock
+                    steps={task.plan}
+                    approved={task.planApproved}
+                    collapsed={planCollapsed && task.planApproved}
+                    onExpand={() => setPlanCollapsed(false)}
+                    labels={planBlockLabels}
+                    onApprove={
+                      task.state === "waiting-for-approval" && !task.planApproved
+                        ? () => void handleApprovePlan()
+                        : undefined
+                    }
+                  />
+                )}
 
-            {tasks.pendingPermissions[0] && (
-              <PermissionApprovalDialog
-                permission={tasks.pendingPermissions[0]}
-                labels={approvalLabels}
-                onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
-              />
-            )}
+                {task && task.steps.length > 0 && <Steps items={task.steps} />}
 
-            {task?.state === "completed" && task.summary && (
-              <Summary
-                data={{
-                  points: [task.summary],
-                  files: task.modifiedFiles.map((p) => ({ path: p })),
-                }}
-                labels={summaryLabels}
-              />
-            )}
+                {tasks.pendingPermissions[0] && (
+                  <PermissionApprovalDialog
+                    permission={tasks.pendingPermissions[0]}
+                    labels={approvalLabels}
+                    onDecide={(d) => void tasks.resolvePermission(tasks.pendingPermissions[0].id, d)}
+                  />
+                )}
 
-            {tasks.running && <Thinking label={t("task.thinking.coordinator")} labels={thinkingLabels} />}
-            {(tasks.error) && (
-              <p className="modal-error">{tasks.error}</p>
-            )}
-            
-            {activeEditor && (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 12px",
-                background: "color-mix(in srgb, var(--accent) 8%, var(--bg-1))",
-                border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--border-1))",
-                borderRadius: "8px",
-                marginBottom: "8px",
-                fontSize: "12px",
-                color: "var(--fg-2)"
-              }}>
-                <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#5a8a52" }} />
-                <span>{t("settings.ideConnected") || "VS Code Connected"}: <strong>{activeEditor.filePath.split('/').pop()}</strong>{activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}</span>
-                <button
-                  onClick={() => setActiveEditor(null)}
-                  style={{
-                    marginLeft: "auto",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--fg-3)",
-                    cursor: "pointer",
+                {task?.state === "completed" && task.summary && (
+                  <Summary
+                    data={{
+                      points: [task.summary],
+                      files: task.modifiedFiles.map((p) => ({ path: p })),
+                    }}
+                    labels={summaryLabels}
+                  />
+                )}
+
+                {tasks.running && <Thinking label={t("task.thinking.coordinator")} labels={thinkingLabels} />}
+                {tasks.error && (
+                  <p className="modal-error">{tasks.error}</p>
+                )}
+
+                {activeEditor && (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    background: "color-mix(in srgb, var(--accent) 8%, var(--bg-1))",
+                    border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--border-1))",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
                     fontSize: "12px",
-                    padding: "0 4px"
-                  }}
-                >
-                  ✕
-                </button>
+                    color: "var(--fg-2)"
+                  }}>
+                    <span style={{ display: "inline-block", width: "8px", height: "8px", borderRadius: "50%", background: "#5a8a52" }} />
+                    <span>{t("settings.ideConnected") || "VS Code Connected"}: <strong>{activeEditor.filePath.split('/').pop()}</strong>{activeEditor.cursorLine ? ` (Line ${activeEditor.cursorLine})` : ""}</span>
+                    <button
+                      onClick={() => setActiveEditor(null)}
+                      style={{
+                        marginLeft: "auto",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--fg-3)",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        padding: "0 4px"
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+            <Composer
+              value={composer}
+              onChange={setComposer}
+              onSend={() => {
+                if (handleCheckPetCommand(composer)) return;
+                if (
+                  mode === "act" &&
+                  task &&
+                  task.state !== "running" &&
+                  task.state !== "paused"
+                ) {
+                  void handleNewTask();
+                  return;
+                }
+                void handleContinueTask();
+              }}
+              onRunTask={() => void handleNewTask()}
+              mode={mode}
+              onToggleMode={() => void handleToggleMode()}
+              disabled={
+                agent.running ||
+                tasks.running ||
+                (task?.state === "running" && tasks.running)
+              }
+              models={chatModels.models}
+              selectedModel={selectedModel}
+              onModelChange={handleModelChange}
+              labels={{
+                ...composerLabels,
+                send:
+                  mode === "act" && task && task.state !== "running"
+                    ? t("chat.send")
+                    : t("chat.continueTask"),
+                placeholder:
+                  mode === "act" && task && task.state !== "running"
+                    ? t("chat.placeholder")
+                    : t("chat.taskPlaceholder"),
+              }}
+              locale={i18n.locale}
+              skills={pluginsApi.skills}
+              messages={task?.messages || []}
+              workspaceFiles={task?.modifiedFiles.join(",") || ""}
+              modelContextWindow={currentModelContextWindow}
+              activeAgent={activeAgent}
+              onAgentChange={setActiveAgent}
+              agents={agents}
+              mcpServers={pluginsApi.mcpServers}
+            />
           </div>
+          {showCanvas && (
+            <CanvasPanel
+              projectId={activeProjectId!}
+              taskId={task?.id || null}
+              isAr={i18n.settings?.locale === "ar"}
+              activeFile={activeCanvasFile}
+              onChangeActiveFile={setActiveCanvasFile}
+              onSendPrompt={handleCanvasSendPrompt}
+              onRefreshWorkspace={refreshProjects}
+              modifiedFiles={canvasFiles}
+              width={canvasWidth}
+              onWidthChange={handleCanvasWidthChange}
+              pendingEdits={files.pendingEdits}
+              onApproveEdit={async (id) => {
+                await files.approveEdit(id, (taskId) => {
+                  setView("tasks");
+                  setActiveTaskId(taskId);
+                  void tasks.resumeAfterEdit(id);
+                });
+              }}
+            />
+          )}
         </div>
-        <Composer
-          value={composer}
-          onChange={setComposer}
-          onSend={() => {
-            if (handleCheckPetCommand(composer)) return;
-            if (
-              mode === "act" &&
-              task &&
-              task.state !== "running" &&
-              task.state !== "paused"
-            ) {
-              void handleNewTask();
-              return;
-            }
-            void handleContinueTask();
-          }}
-          onRunTask={() => void handleNewTask()}
-          mode={mode}
-          onToggleMode={() => void handleToggleMode()}
-          disabled={
-            agent.running ||
-            tasks.running ||
-            (task?.state === "running" && tasks.running)
-          }
-          models={chatModels.models}
-          selectedModel={selectedModel}
-          onModelChange={handleModelChange}
-          labels={{
-            ...composerLabels,
-            send:
-              mode === "act" && task && task.state !== "running"
-                ? t("chat.send")
-                : t("chat.continueTask"),
-            placeholder:
-              mode === "act" && task && task.state !== "running"
-                ? t("chat.placeholder")
-                : t("chat.taskPlaceholder"),
-          }}
-          locale={i18n.locale}
-          skills={pluginsApi.skills}
-          messages={task?.messages || []}
-          workspaceFiles={task?.modifiedFiles.join(",") || ""}
-          modelContextWindow={currentModelContextWindow}
-          activeAgent={activeAgent}
-          onAgentChange={setActiveAgent}
-          agents={agents}
-        />
       </>
     );
   };
@@ -1645,7 +1908,7 @@ You can open and customize it to instruct the agent on workspace rules.`;
             void files.approveEdit(id, (taskId) => {
               setView("tasks");
               setActiveTaskId(taskId);
-              void tasks.loadTask(taskId);
+              void tasks.resumeAfterEdit(id);
             })
           }
           t={t}

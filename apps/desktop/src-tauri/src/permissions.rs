@@ -249,6 +249,148 @@ pub fn check_or_request(
     Err(format!("permission_required:{pending_id}"))
 }
 
+fn strip_json_comments(s: &str) -> String {
+    let mut res = String::new();
+    let mut in_block = false;
+    for line in s.lines() {
+        let mut line_str = line.trim();
+        if in_block {
+            if let Some(pos) = line_str.find("*/") {
+                line_str = &line_str[pos + 2..];
+                in_block = false;
+            } else {
+                continue;
+            }
+        }
+        if !in_block {
+            if let Some(pos) = line_str.find("/*") {
+                let before = &line_str[..pos];
+                res.push_str(before);
+                if let Some(end_pos) = line_str.find("*/") {
+                    res.push_str(&line_str[end_pos + 2..]);
+                } else {
+                    in_block = true;
+                }
+            } else if let Some(pos) = line_str.find("//") {
+                res.push_str(&line_str[..pos]);
+            } else {
+                res.push_str(line_str);
+            }
+        }
+        res.push('\n');
+    }
+    res
+}
+
+fn match_wildcard(pattern: &str, target: &str) -> bool {
+    fn match_helper(p_chars: &[char], t_chars: &[char]) -> bool {
+        if p_chars.is_empty() {
+            return t_chars.is_empty();
+        }
+        if p_chars[0] == '*' {
+            if match_helper(&p_chars[1..], t_chars) {
+                return true;
+            }
+            if !t_chars.is_empty() && match_helper(p_chars, &t_chars[1..]) {
+                return true;
+            }
+            return false;
+        }
+        if t_chars.is_empty() {
+            return false;
+        }
+        if p_chars[0] == '?' || p_chars[0] == t_chars[0] {
+            return match_helper(&p_chars[1..], &t_chars[1..]);
+        }
+        false
+    }
+    match_helper(&pattern.chars().collect::<Vec<_>>(), &target.chars().collect::<Vec<_>>())
+}
+
+fn evaluate_permission(
+    permission_value: &serde_json::Value,
+    target: &str,
+) -> Option<String> {
+    if let Some(s) = permission_value.as_str() {
+        return Some(s.to_string());
+    }
+    if let Some(obj) = permission_value.as_object() {
+        let mut last_match: Option<String> = None;
+        for (pattern, val) in obj {
+            let expanded_pattern = if pattern.starts_with('~') {
+                if let Ok(home) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
+                    pattern.replacen('~', &home, 1)
+                } else {
+                    pattern.clone()
+                }
+            } else if pattern.starts_with("$HOME") {
+                if let Ok(home) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
+                    pattern.replacen("$HOME", &home, 1)
+                } else {
+                    pattern.clone()
+                }
+            } else {
+                pattern.clone()
+            };
+
+            if match_wildcard(&expanded_pattern, target) {
+                if let Some(s) = val.as_str() {
+                    last_match = Some(s.to_string());
+                }
+            }
+        }
+        return last_match;
+    }
+    None
+}
+
+fn resolve_permission_from_configs(
+    folder_path: &str,
+    config_key: &str,
+    target: &str,
+) -> Option<String> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_default();
+
+    let mut paths_to_try = Vec::new();
+    if !folder_path.is_empty() {
+        paths_to_try.push(std::path::PathBuf::from(folder_path).join("aura.json"));
+        paths_to_try.push(std::path::PathBuf::from(folder_path).join("aura.jsonc"));
+    }
+    if !home.is_empty() {
+        paths_to_try.push(std::path::PathBuf::from(&home).join(".config/aura/aura.json"));
+    }
+
+    for path in paths_to_try {
+        if path.exists() {
+            if let Ok(raw) = std::fs::read_to_string(&path) {
+                let clean = strip_json_comments(&raw);
+                if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&clean) {
+                    if let Some(permission) = parsed.get("permission") {
+                        if let Some(s) = permission.as_str() {
+                            return Some(s.to_string());
+                        }
+                        if let Some(permission_obj) = permission.as_object() {
+                            if let Some(val) = permission_obj.get(config_key) {
+                                if let Some(res) = evaluate_permission(val, target) {
+                                    return Some(res);
+                                }
+                            }
+                            if let Some(val) = permission_obj.get("*") {
+                                if let Some(res) = evaluate_permission(val, target) {
+                                    return Some(res);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn check_task_permission(
     db: &DbState,
     project_id: &str,
@@ -262,14 +404,60 @@ pub fn check_task_permission(
     payload: Option<serde_json::Value>,
 ) -> Result<(), String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let mode: String = conn
+    let (mode, folder_path): (String, String) = conn
         .query_row(
-            "SELECT permission_mode FROM projects WHERE id = ?1",
+            "SELECT permission_mode, folder_path FROM projects WHERE id = ?1",
             params![project_id],
-            |row| row.get(0),
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
         .map_err(|_| "Project not found.".to_string())?;
 
+    // 1. Resolve custom permission configuration from JSON files
+    let config_key = match (category, action) {
+        ("file", "read") => "read",
+        ("file", _) => "edit",
+        ("shell", _) => "bash",
+        ("task", _) => "task",
+        ("skill", _) => "skill",
+        ("lsp", _) => "lsp",
+        ("webfetch", _) => "webfetch",
+        ("websearch", _) => "websearch",
+        ("external_directory", _) => "external_directory",
+        ("doom_loop", _) => "doom_loop",
+        ("mcp", _) => "mcp",
+        ("custom_tool", _) => "custom_tools",
+        _ => category,
+    };
+
+    if let Some(decision) = resolve_permission_from_configs(&folder_path, config_key, target) {
+        match decision.as_str() {
+            "allow" => return Ok(()),
+            "deny" => {
+                return Err(format!(
+                    "Operation '{}' on '{}' (target: '{}') was denied by project configuration rules.",
+                    action, category, target
+                ));
+            }
+            "ask" => {
+                return check_or_request(
+                    &conn,
+                    project_id,
+                    task_id,
+                    "ask-first",
+                    category,
+                    action,
+                    target,
+                    reason,
+                    risk,
+                    true, // force prompt
+                    payload,
+                );
+            }
+            _ => {} // Fallback to normal flow if invalid string
+        }
+    }
+
+    // 2. Default fallback logic:
     if mode == "read-only" {
         if category == "file" && (action == "read" || action == "search") {
             // allowed
@@ -526,6 +714,33 @@ mod tests {
         assert!(target_matches("*", "/any/path"));
         assert!(target_matches("/src/*", "/src/main.rs"));
         assert!(!target_matches("/src/*", "/lib/main.rs"));
+    }
+
+    #[test]
+    fn custom_wildcard_matching() {
+        assert!(match_wildcard("*", "anything"));
+        assert!(match_wildcard("git *", "git status"));
+        assert!(match_wildcard("git *", "git commit -m 'test'"));
+        assert!(!match_wildcard("git *", "npm run dev"));
+        assert!(match_wildcard("packages/web/src/content/docs/*.mdx", "packages/web/src/content/docs/rules.mdx"));
+        assert!(!match_wildcard("packages/web/src/content/docs/*.mdx", "packages/web/src/rules.mdx"));
+    }
+
+    #[test]
+    fn json_comment_stripper() {
+        let comment_json = r#"
+            {
+                // This is a comment
+                "permission": {
+                    /* block comment */
+                    "bash": "allow"
+                }
+            }
+        "#;
+        let clean = strip_json_comments(comment_json);
+        assert!(!clean.contains("//"));
+        assert!(!clean.contains("/*"));
+        assert!(clean.contains("\"bash\""));
     }
 
     #[test]

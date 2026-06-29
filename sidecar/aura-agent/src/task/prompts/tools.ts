@@ -181,6 +181,10 @@ Research, web, database, automation, and connector tools:
 - automation_cancel { "id": "..." } requires automation runtime.
 - automation_list { "path": "automation/workflow.json" }
 - email_search/email_draft/email_send_with_confirmation/calendar_search/calendar_create_event/slack_search/slack_send_with_confirmation/github_issue_create/github_pr_review/notion_create_page: pass { "serverId": "...", "toolName": "...", "arguments": {} } or { "pluginId": "...", "toolId": "...", "arguments": {} } when a connector is configured.
+- todo_write { "todos": [{"id": "todo-id", "content": "description", "status": "pending|in_progress|completed|cancelled"}], "merge": true }
+- start_server { "port": 3000, "command": "npm run dev" }
+- schedule_cron { "cron": "0 * * * *", "command": "npm run test" }
+- list_external_tools {}
 
 FORMATTING RULES:
 1. Every task-engine response must be a valid JSON object. Do not return plain text at the root.

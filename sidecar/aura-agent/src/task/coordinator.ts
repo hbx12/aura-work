@@ -10,6 +10,16 @@ import { BLOCKED_INVALID_STRUCTURE, extractJson } from "./model-response.js";
 import { getSystemPrompt, getPlannerSystemPrompt } from "./prompts/index.js";
 import { loadAgents, type AgentConfig } from "./agent-loader.js";
 
+/** Escape XML special characters to prevent prompt injection via XML tag boundaries. */
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export interface PlanStep {
   title: string;
   subtitle?: string;
@@ -116,7 +126,9 @@ async function fetchRemoteInstruction(url: string): Promise<string | undefined> 
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
     if (res.ok) {
-      return await res.text();
+      const text = await res.text();
+      // Sanitize remote content: strip XML-like tags that could break prompt structure
+      return text.replace(/<\/?[\w_]+[^>]*>/g, (match) => escapeXml(match));
     }
   } catch (err) {
     console.warn(`[rules] Failed to fetch remote instruction from ${url}:`, err);
@@ -127,14 +139,15 @@ async function fetchRemoteInstruction(url: string): Promise<string | undefined> 
 // Read rules based on priority and configurations
 async function findProjectRules(projectPath?: string): Promise<string | undefined> {
   let projectRulesContent = "";
+  const disableClaude = process.env.AURA_DISABLE_CLAUDE_CODE === "1";
 
-  // 1. Check local rule files (AURA.md, AGENTS.md, CLAUDE.md, etc.)
+  // 1. Check local rule files (AGENTS.md, AURA.md, CLAUDE.md, etc.)
   let localRulesFileContent = "";
   if (projectPath) {
     const filesToTry = [
-      "AURA.md",
       "AGENTS.md",
-      "CLAUDE.md",
+      "AURA.md",
+      ...(disableClaude ? [] : ["CLAUDE.md"]),
       "CONTINUE.md",
       ".cursorrules",
       ".windsurfrules",
@@ -156,12 +169,13 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     }
   }
 
-  // 2. Check global rules files (in ~/.config/aura/AURA.md, ~/.config/aura/AGENTS.md, and fallbacks)
+  // 2. Check global rules files (aura, and claude fallbacks)
   let globalRulesFileContent = "";
   const home = os.homedir();
   const globalPathsToTry = [
-    path.join(home, ".config", "aura", "AURA.md"),
     path.join(home, ".config", "aura", "AGENTS.md"),
+    path.join(home, ".config", "aura", "AURA.md"),
+    ...(disableClaude ? [] : [path.join(home, ".claude", "CLAUDE.md")]),
   ];
   for (const fullPath of globalPathsToTry) {
     if (fs.existsSync(fullPath)) {
@@ -184,7 +198,7 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     projectRulesContent = globalRulesFileContent;
   }
 
-  // 3. Check Aura project config to load extra instructions.
+  // 3. Check project config to load extra instructions.
   const configInstructions: string[] = [];
   if (projectPath) {
     const configsToTry = [
@@ -209,7 +223,7 @@ async function findProjectRules(projectPath?: string): Promise<string | undefine
     }
   }
 
-  // Also check global Aura config.
+  // Also check global config.
   const globalConfigsToTry = [
     path.join(home, ".config", "aura", "aura.json"),
   ];
@@ -539,6 +553,20 @@ export async function iterateTask(req: TaskIterateRequest) {
     ? `\nAvailable Agent Skills (use the skill tool to load them if needed):\n<available_skills>\n${req.skills.map(s => `  <skill>\n    <name>${s.name}</name>\n    <description>${s.description}</description>\n  </skill>`).join("\n")}\n</available_skills>`
     : "";
 
+  const { loadCustomTools } = await import("./custom-tools.js");
+  const allCustomTools = await loadCustomTools(req.projectPath);
+  const customTools = allCustomTools.filter(t => !t.error);
+  let customToolsPrompt = "";
+  if (customTools.length > 0) {
+    customToolsPrompt = `\n\nAvailable Custom Tools (you can call these just like other tools):\n` + customTools.map(t => {
+      const argsDesc = Object.entries(t.args).map(([argName, argSchema]: [string, any]) => {
+        const desc = argSchema?.description || (argSchema?._def?.description) || "";
+        return `    - ${argName}: ${desc}`;
+      }).join("\n");
+      return `- ${t.name}: ${t.description}\n  Arguments:\n${argsDesc || "    None"}`;
+    }).join("\n");
+  }
+
   const projectRules = await findProjectRules(req.projectPath);
 
   const baseSystem = getSystemPrompt(
@@ -550,10 +578,11 @@ export async function iterateTask(req: TaskIterateRequest) {
     projectRules,
     agentConfig,
   );
-  let system = `${baseSystem}${skillsXml}`;
+  let system = `${baseSystem}${skillsXml}${customToolsPrompt}`;
 
   if (agentConfig.prompt) {
-    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${agentConfig.name}":\n${agentConfig.prompt}`;
+    const safeAgentName = escapeXml(agentConfig.name);
+    system = `${system}\n\nACTIVE AGENT SYSTEM PROMPT FOR "${safeAgentName}":\n${agentConfig.prompt}`;
   }
 
   const stepsLimit = agentConfig.steps ?? agentConfig.maxSteps;
@@ -561,10 +590,14 @@ export async function iterateTask(req: TaskIterateRequest) {
     system += `\n\n[WARNING: STEPS LIMIT REACHED. You have reached the maximum execution steps of ${stepsLimit}. You must NOT call any more tools. Summarize your work and list remaining recommendations, then output 'complete' or 'blocked'.]`;
   }
 
+  const safeWorkspaceFiles = req.workspaceFiles
+    ? req.workspaceFiles.split("\n").map(line => escapeXml(line)).join("\n")
+    : "(none found)";
+
   const userContent = `Task: ${req.prompt}
 
 Workspace files:
-${req.workspaceFiles || "(none found)"}
+${safeWorkspaceFiles}
 
 Recent context:
 ${history || "(none yet)"}
@@ -625,7 +658,15 @@ If the user asks to create, edit, or scaffold code/files, call write_file in thi
       return { ...coerced, usage: result.usage };
     }
 
-    if (req.allowPlainText && !isFileTask(req.prompt)) {
+    const fileTask = (() => {
+      const userMsgs = req.messages.filter((m) => m.role === "user");
+      if (userMsgs.length > 0) {
+        const lastUser = userMsgs[userMsgs.length - 1];
+        return isFileTask(lastUser.content);
+      }
+      return isFileTask(req.prompt);
+    })();
+    if (req.allowPlainText && !fileTask) {
       return {
         type: "complete" as const,
         role: "reviewer",

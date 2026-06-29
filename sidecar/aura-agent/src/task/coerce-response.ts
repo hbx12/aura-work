@@ -1,4 +1,4 @@
-import { isFileTask, stripCodeFences } from "./extract-writes.js";
+import { extractFileWritesFromResponse, isFileTask, stripCodeFences } from "./extract-writes.js";
 import {
   BLOCKED_INVALID_STRUCTURE,
   parseModelResponse,
@@ -77,6 +77,15 @@ function wroteFilesYet(messages: CoerceContext["messages"]): boolean {
   );
 }
 
+function isFileTaskFromContext(ctx: CoerceContext): boolean {
+  const userMsgs = ctx.messages.filter((m) => m.role === "user");
+  if (userMsgs.length > 0) {
+    const lastUser = userMsgs[userMsgs.length - 1];
+    return isFileTask(lastUser.content);
+  }
+  return isFileTask(ctx.prompt);
+}
+
 function blocked(content: string) {
   return {
     type: "blocked" as const,
@@ -88,7 +97,7 @@ function blocked(content: string) {
 }
 
 function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
-  const fileTask = isFileTask(ctx.prompt);
+  const fileTask = isFileTaskFromContext(ctx);
 
   if (parsed.type === "tool_calls") {
     if (toolCallHasPlaceholderContent(parsed.toolCalls)) {
@@ -146,8 +155,8 @@ function fromParsed(parsed: ParsedModelResponse, ctx: CoerceContext) {
     type: "message" as const,
     role: parsed.role ?? "coordinator",
     content,
-    complete: ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages),
-    summary: ctx.iteration >= ctx.planLength ? content : undefined,
+    complete: !fileTask || (ctx.iteration >= ctx.planLength && wroteFilesYet(ctx.messages)),
+    summary: (!fileTask || ctx.iteration >= ctx.planLength) ? content : undefined,
   };
 }
 
@@ -157,10 +166,40 @@ export function coerceAgentResponse(text: string, ctx: CoerceContext) {
     return fromParsed(parsed.data, ctx);
   }
 
-  const fileTask = isFileTask(ctx.prompt);
+  const fileTask = isFileTaskFromContext(ctx);
   if (fileTask && !wroteFilesYet(ctx.messages)) {
-    if (parsed.reason === "plain_text" || parsed.reason === "invalid_json" || parsed.reason === "schema") {
+    const guessedWrites = extractFileWritesFromResponse(text, ctx.prompt);
+    if (guessedWrites.length > 0) {
+      const toolCalls = guessedWrites.map((w, index) => ({
+        id: `guessed_${index}_${Date.now()}`,
+        name: "write_file",
+        arguments: {
+          path: w.path,
+          content: w.content,
+        },
+      }));
+      return {
+        type: "tool_calls" as const,
+        role: "coder" as const,
+        toolCalls,
+        complete: false,
+      };
+    }
+
+    if (parsed.reason === "invalid_json" || parsed.reason === "schema") {
       return blocked(BLOCKED_INVALID_STRUCTURE.content);
+    }
+  }
+
+  if (!fileTask && text.trim()) {
+    const clean = stripCodeFences(text);
+    if (clean) {
+      return {
+        type: "message" as const,
+        role: "coordinator",
+        content: clean,
+        complete: true,
+      };
     }
   }
 

@@ -39,4 +39,9 @@ DELIVERY QUALITY:
 3. Mention changed files and why they changed.
 4. If no files changed, say so clearly.
 5. If the best answer is a recommendation rather than a code change, deliver a structured recommendation with rationale.
+
+TASK COMPLETION DISCIPLINE:
+1. Tool-call first, narration second. Pair any prose describing an action with the corresponding tool call in the same response.
+2. Maintain a structured todo list using the todo_write tool for any task with three or more steps. Update task statuses immediately as they change.
+3. Keep exactly one active task in progress. Mark items completed immediately when fully achieved.
 `;

@@ -619,7 +619,7 @@ async fn execute_scheduled_run_internal(
             .map_err(|e| e.to_string())?;
         }
 
-        let planned = start_task_inner(db, vault, &task.id, None, None).await?;
+        let planned = start_task_inner(db, vault, &task.id, None, None, None).await?;
         if planned.state != "waiting-for-approval" {
             return Err(format!("Unexpected task state after plan: {}", planned.state));
         }

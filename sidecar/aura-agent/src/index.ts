@@ -145,6 +145,87 @@ const server = createServer(async (req, res) => {
       return json(res, 200, { agents });
     }
 
+    if (method === "POST" && url === "/tools/list") {
+      const body = await readJsonBody<{ projectPath?: string }>(req);
+      const { loadCustomTools } = await import("./task/custom-tools.js");
+      const tools = await loadCustomTools(body.projectPath);
+      const serializableTools = tools.map(t => {
+        const argMeta: Record<string, any> = {};
+        for (const [argName, val] of Object.entries(t.args)) {
+          const description = (val as any)?.description || (val as any)?._def?.description || "";
+          argMeta[argName] = { description };
+        }
+        return {
+          name: t.name,
+          description: t.description,
+          args: argMeta,
+          filePath: t.filePath,
+          error: t.error,
+        };
+      });
+      return json(res, 200, serializableTools);
+    }
+
+    if (method === "POST" && url === "/tools/execute") {
+      const body = await readJsonBody<{
+        name: string;
+        arguments: any;
+        projectId: string;
+        projectPath?: string;
+        taskId?: string;
+      }>(req);
+      console.log("[aura-agent] executing custom tool", body.name);
+      const { executeCustomTool } = await import("./task/custom-tools.js");
+      
+      const context = {
+        agent: "coding",
+        sessionID: body.taskId || body.projectId,
+        messageID: body.taskId || body.projectId,
+        directory: body.projectPath || "",
+        worktree: body.projectPath || "",
+      };
+
+      try {
+        const output = await executeCustomTool(body.name, body.arguments, context, body.projectPath);
+        return json(res, 200, { output: String(output) });
+      } catch (err) {
+        return json(res, 200, { error: String(err) });
+      }
+    }
+
+    if (method === "POST" && url === "/tools/test") {
+      const body = await readJsonBody<{
+        filePath: string;
+        arguments: any;
+        projectPath?: string;
+      }>(req);
+      
+      console.log("[aura-agent] testing custom tool at path", body.filePath);
+      const { loadCustomTools } = await import("./task/custom-tools.js");
+      const tools = await loadCustomTools(body.projectPath);
+      const tool = tools.find(t => t.filePath === body.filePath);
+      
+      if (!tool) {
+        return json(res, 200, { error: "Custom tool file not found or failed compilation." });
+      }
+
+      const context = {
+        agent: "testing-sandbox",
+        sessionID: "sandbox",
+        messageID: "sandbox",
+        directory: body.projectPath || "",
+        worktree: body.projectPath || "",
+      };
+
+      try {
+        const output = await tool.execute(body.arguments, context);
+        const serialized = typeof output === "object" ? JSON.stringify(output, null, 2) : String(output);
+        return json(res, 200, { output: serialized });
+      } catch (err: any) {
+        return json(res, 200, { error: err.message || String(err) });
+      }
+    }
+
     if (method === "GET" && url.startsWith("/task/stream")) {
       const q = new URL(url, "http://local");
       const taskId = q.searchParams.get("taskId") ?? "";
