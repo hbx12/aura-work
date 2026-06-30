@@ -7,5 +7,18 @@ export default defineConfig({
       "packages/shared/**/*.test.ts",
     ],
     environment: "node",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      include: [
+        "sidecar/**/*.ts",
+        "packages/shared/**/*.ts",
+      ],
+      exclude: [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/node_modules/**",
+      ],
+    },
   },
 });

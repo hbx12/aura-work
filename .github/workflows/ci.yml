@@ -91,3 +91,22 @@ jobs:
         run: npm run tauri build -w @aura-os/desktop
         env:
           CI: true
+
+  coverage:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run build:sidecars
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --config vitest.sidecars.config.ts
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false

@@ -1,0 +1,50 @@
+# Auto-label PRs based on changed files
+# Docs: https://github.com/actions/labeler
+
+Rust:
+  - src-tauri/**/*
+  - '**/*.rs'
+
+TypeScript:
+  - apps/**/*.ts
+  - packages/**/*.ts
+  - server/**/*.ts
+  - cli/**/*.ts
+  - sidecar/**/*.ts
+
+Documentation:
+  - docs/**/*
+  - '**/*.md'
+  - '**/*.html'
+
+Arabic:
+  - '**/*.ar.*'
+
+English:
+  - '**/*.en.*'
+  - '**/*.html'
+
+UI/UX:
+  - packages/ui/**/*
+  - apps/desktop/src/**/*.css
+  - apps/desktop/src/**/*.tsx
+
+i18n / Translation:
+  - packages/i18n/**/*
+
+Sidecar:
+  - sidecar/**/*
+
+CI/CD:
+  - .github/**/*
+
+Security:
+  - '**/*security*'
+  - '**/*vuln*'
+  - '**/*hardening*'
+
+Config:
+  - '**/*.json'
+  - '**/*.yml'
+  - '**/*.yaml'
+  - '**/*.toml'

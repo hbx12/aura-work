@@ -60,6 +60,7 @@
     "monaco-editor": "0.53.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.9",
     "esbuild": "^0.28.1",
     "vitest": "^4.1.8"
   },
