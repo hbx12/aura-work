@@ -277,23 +277,23 @@
             <div id="lang-menu" class="lang-dropdown">
               <a href="https://hbx12.github.io/aura-work/">English</a>
               <a href="https://hbx12.github.io/aura-work/index.ar.html" class="active">العربية</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/fr.json">Français</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/es.json">Español</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/de.json">Deutsch</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/ja.json">日本語</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/zh-CN.json">简体中文</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/ko.json">한국어</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/ru.json">Русский</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/fa.json">فارسی</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/pt-BR.json">Português (BR)</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/tr.json">Türkçe</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/uk.json">Українська</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/vi.json">Tiếng Việt</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/th.json">ไทย</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/pl.json">Polski</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/nl.json">Nederlands</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/it.json">Italiano</a>
-              <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/hi.json">हिन्दी</a>
+              <a href="#" onclick="return switchLang('fr','Français')">Français</a>
+              <a href="#" onclick="return switchLang('es','Español')">Español</a>
+              <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
+              <a href="#" onclick="return switchLang('ja','日本語')">日本語</a>
+              <a href="#" onclick="return switchLang('zh','简体中文')">简体中文</a>
+              <a href="#" onclick="return switchLang('ko','한국어')">한국어</a>
+              <a href="#" onclick="return switchLang('ru','Русский')">Русский</a>
+              <a href="#" onclick="return switchLang('fa','فارسی')">فارسی</a>
+              <a href="#" onclick="return switchLang('pt','Português')">Português</a>
+              <a href="#" onclick="return switchLang('tr','Türkçe')">Türkçe</a>
+              <a href="#" onclick="return switchLang('uk','Українська')">Українська</a>
+              <a href="#" onclick="return switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
+              <a href="#" onclick="return switchLang('th','ไทย')">ไทย</a>
+              <a href="#" onclick="return switchLang('pl','Polski')">Polski</a>
+              <a href="#" onclick="return switchLang('nl','Nederlands')">Nederlands</a>
+              <a href="#" onclick="return switchLang('it','Italiano')">Italiano</a>
+              <a href="#" onclick="return switchLang('hi','हिन्दी')">हिन्दी</a>
             </div>
           </li>
           <li><a href="https://github.com/hbx12/aura-work/releases/latest" class="cta">
@@ -445,6 +445,25 @@
     function toggleLang(e) {
       var m = document.getElementById('lang-menu');
       m.classList.toggle('open');
+    }
+    function switchLang(code, name) {
+      var p = window.location.pathname.replace('/aura-work/','').replace(/^\//,'');
+      var base = 'https://hbx12.github.io/aura-work';
+      if (code === 'en') { window.location.href = base + '/' + p; return false; }
+      if (code === 'ar') {
+        var ap = p.replace(/\.html$/, '.ar.html');
+        if (!ap.includes('.ar.')) ap = p.replace(/\/?$/, '/index.ar.html');
+        if (!ap) ap = 'index.ar.html';
+        window.location.href = base + '/' + ap;
+        return false;
+      }
+      var t = document.createElement('div');
+      t.textContent = '🌍 ' + name + ' translation coming soon!';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#28241d;color:#faf9f5;padding:12px 24px;border-radius:8px;font-family:Inter,system-ui,sans-serif;font-size:.875rem;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.25);opacity:0;transition:opacity .3s ease';
+      document.body.appendChild(t);
+      requestAnimationFrame(function(){t.style.opacity='1'});
+      setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},2800);
+      return false;
     }
     document.addEventListener('click', function(e) {
       var m = document.getElementById('lang-menu');
