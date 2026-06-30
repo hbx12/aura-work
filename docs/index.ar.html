@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Work — منصة وكيل ذكاء اصطناعي مفتوحة المصدر</title>
+  <meta name="description" content="منصة وكيل ذكاء اصطناعي لسطح المكتب، مفتوحة المصدر، متعددة المزوّدين — محلية أولاً، محكومة بالصلاحيات، قابلة للاستضافة الذاتية.">
+  <meta property="og:title" content="Aura Work">
+  <meta property="og:description" content="منصة وكيل ذكاء اصطناعي مفتوحة المصدر">
+  <meta property="og:url" content="https://hbx12.github.io/aura-work/">
+  <meta property="og:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/demo.gif">
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --fg: #1a1a1a;
+      --accent: #8b5cf6;
+      --accent2: #6366f1;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --muted: #6b7280;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header { padding: 4rem 0 2rem; text-align: center; }
+    h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    h1 span { color: var(--accent); }
+    .subtitle { font-size: 1.125rem; color: var(--muted); margin-bottom: 2rem; }
+    .lang-toggle { display: inline-flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .lang-toggle a {
+      display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px;
+      font-size: 0.875rem; text-decoration: none; border: 1px solid var(--border); color: var(--muted);
+    }
+    .lang-toggle a.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; }
+    .badges img { height: 20px; }
+    .btn {
+      display: inline-block; padding: 0.75rem 1.5rem; border-radius: 8px;
+      font-weight: 600; text-decoration: none; font-size: 0.9375rem; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-outline { border: 1px solid var(--border); color: var(--fg); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-btns { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 2rem 0; }
+    section { margin: 3rem 0; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+    .feature-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.875rem; color: var(--muted); }
+    .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+    .links a {
+      display: block; padding: 0.75rem 1rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; text-decoration: none;
+      color: var(--fg); font-size: 0.875rem; transition: border-color 0.15s;
+    }
+    .links a:hover { border-color: var(--accent); }
+    .links a small { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 0.25rem; }
+    footer { text-align: center; padding: 2rem 0; color: var(--muted); font-size: 0.8125rem; border-top: 1px solid var(--border); }
+    @media (max-width: 600px) { h1 { font-size: 1.75rem; } .features { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="lang-toggle">
+        <a href="index.html">English</a>
+        <a href="index.ar.html" class="active">العربية</a>
+      </div>
+      <div class="badges">
+        <img src="https://img.shields.io/badge/License-See%20LICENSE-blue" alt="الترخيص">
+        <img src="https://img.shields.io/github/stars/hbx12/aura-work?style=social" alt="النجوم">
+        <img src="https://img.shields.io/github/v/release/hbx12/aura-work?include_prereleases" alt="الإصدار">
+        <img src="https://img.shields.io/github/issues/hbx12/aura-work/good%20first%20issue" alt="issues">
+      </div>
+      <h1><span>Aura</span> Work</h1>
+      <p class="subtitle">منصة وكيل ذكاء اصطناعي لسطح المكتب، مفتوحة المصدر، متعددة المزوّدين — محلية أولاً، محكومة بالصلاحيات، قابلة للاستضافة الذاتية.</p>
+      <div class="hero-btns">
+        <a href="https://github.com/hbx12/aura-work" class="btn btn-primary">⭐ GitHub</a>
+        <a href="https://github.com/hbx12/aura-work/releases/latest" class="btn btn-outline">⬇️ تحميل</a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/README.ar.md" class="btn btn-outline">📖 README</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>⚡ الميزات</h2>
+      <div class="features">
+        <div class="feature-card">
+          <h3>🤖 متعدد المزوّدين</h3>
+          <p>OpenAI, Anthropic, Gemini, DeepSeek, Ollama — استخدم مفاتيحك الخاصة.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🔒 محلي أولاً</h3>
+          <p>خزنة مشفّرة مع تخزين آمن بنظام التشغيل. لا توجد بيانات تتبع.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🛡️ محكوم بالصلاحيات</h3>
+          <p>الإجراءات عالية التأثير تتطلب موافقة صريحة. سجل تدقيق كامل.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🌍 20 لغة</h3>
+          <p>دعم كامل لـ RTL للعربية والفارسية. مع Weblate.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🧩 قابل للتوسيع</h3>
+          <p>نظام إضافات، دعم MCP، ومتجر رسمي.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🎨 17 ثيماً</h3>
+          <p>Nord, Dracula, Cyberpunk, Sakura, والمزيد.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>📚 التوثيق</h2>
+      <div class="links">
+        <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">
+          🧑‍💻 دليل المساهمة
+          <small>إعداد بيئة التطوير وعملية PR</small>
+        </a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">
+          🆕 دليل المساهم الجديد
+          <small>أول مساهمة خطوة بخطوة</small>
+        </a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTORS.md">
+          🤝 المساهمون
+          <small>قائمة الشكر</small>
+        </a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/ROADMAP.md">
+          🗺️ خارطة الطريق
+          <small>الاتجاه المستقبلي</small>
+        </a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/docs/architecture.ar.md">
+          🏗️ الهيكل المعماري
+          <small>هيكل monorepo والتقنيات</small>
+        </a>
+        <a href="https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+          🐛 Issues للمبتدئين
+          <small>مهام مناسبة للبدء</small>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>💬 المجتمع</h2>
+      <div class="links">
+        <a href="https://github.com/hbx12/aura-work/discussions">💡 مناقشات GitHub</a>
+        <a href="https://matrix.to/#/#aura-os:matrix.org">💬 دردشة Matrix</a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/SECURITY.md">🔒 سياسة الأمان</a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/CODE_OF_CONDUCT.md">📜 مدونة قواعد السلوك</a>
+      </div>
+    </section>
+
+    <footer>
+      <p>Aura Work مفتوح المصدر — مرخص تحت Apache 2.0.</p>
+      <p style="margin-top:0.5rem">تُصان بواسطة <a href="https://github.com/hbx12" style="color:var(--accent)">@hbx12</a></p>
+    </footer>
+  </div>
+</body>
+</html>
