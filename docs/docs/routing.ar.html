@@ -107,9 +107,26 @@ pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             AR
           </a>
-          <div id="lm" class="lang-dropdown">
+                    <div id="lm" class="lang-dropdown">
             <a href="https://hbx12.github.io/aura-work/docs/docs/docs.html">English</a>
             <a href="https://hbx12.github.io/aura-work/docs/docs/docs.ar.html" class="active">العربية</a>
+            <a href="#" onclick="return switchLang('fr','Français')">Français</a>
+            <a href="#" onclick="return switchLang('es','Español')">Español</a>
+            <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
+            <a href="#" onclick="return switchLang('ja','日本語')">日本語</a>
+            <a href="#" onclick="return switchLang('zh','简体中文')">简体中文</a>
+            <a href="#" onclick="return switchLang('ko','한국어')">한국어</a>
+            <a href="#" onclick="return switchLang('ru','Русский')">Русский</a>
+            <a href="#" onclick="return switchLang('fa','فارسی')">فارسی</a>
+            <a href="#" onclick="return switchLang('pt','Português')">Português</a>
+            <a href="#" onclick="return switchLang('tr','Türkçe')">Türkçe</a>
+            <a href="#" onclick="return switchLang('uk','Українська')">Українська</a>
+            <a href="#" onclick="return switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
+            <a href="#" onclick="return switchLang('th','ไทย')">ไทย</a>
+            <a href="#" onclick="return switchLang('pl','Polski')">Polski</a>
+            <a href="#" onclick="return switchLang('nl','Nederlands')">Nederlands</a>
+            <a href="#" onclick="return switchLang('it','Italiano')">Italiano</a>
+            <a href="#" onclick="return switchLang('hi','हिन्दी')">हिन्दी</a>
           </div>
         </li>
       </ul>
@@ -163,6 +180,8 @@ pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-
 <script>
 document.addEventListener('DOMContentLoaded',function(){var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(function(e){o.observe(e)})});
 document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
+
+function switchLang(code,name){var p=window.location.pathname.replace('/aura-work/','').replace(/^\//,'');var base='https://hbx12.github.io/aura-work';if(code==='en'){window.location.href=base+'/'+p;return false}if(code==='ar'){var ap=p.replace(/\.html$/,'.ar.html');if(!ap.includes('.ar.'))ap=p.replace(/\/?$/,'/index.ar.html');if(!ap)ap='index.ar.html';window.location.href=base+'/'+ap;return false}var t=document.createElement('div');t.textContent='🌍 '+name+' translation coming soon!';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#28241d;color:#faf9f5;padding:12px 24px;border-radius:8px;font-family:Inter,system-ui,sans-serif;font-size:.875rem;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.25);opacity:0;transition:opacity .3s ease';document.body.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1'});setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},2800);return false}
 </script>
 </body>
 </html>
