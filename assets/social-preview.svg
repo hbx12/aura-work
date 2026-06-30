@@ -1,0 +1,75 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#2e1065"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="1100" cy="100" r="250" fill="#8b5cf6" opacity="0.08"/>
+  <circle cx="200" cy="500" r="200" fill="#6366f1" opacity="0.06"/>
+  <circle cx="600" cy="320" r="400" fill="#a78bfa" opacity="0.04"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.04" stroke="white" stroke-width="1">
+    <line x1="0" y1="160" x2="1280" y2="160"/>
+    <line x1="0" y1="320" x2="1280" y2="320"/>
+    <line x1="0" y1="480" x2="1280" y2="480"/>
+    <line x1="320" y1="0" x2="320" y2="640"/>
+    <line x1="640" y1="0" x2="640" y2="640"/>
+    <line x1="960" y1="0" x2="960" y2="640"/>
+  </g>
+
+  <!-- Logo circle -->
+  <circle cx="120" cy="120" r="50" fill="url(#accent)" opacity="0.9"/>
+  <text x="120" y="132" text-anchor="middle" font-family="system-ui, sans-serif" font-size="36" font-weight="bold" fill="white">⚡</text>
+
+  <!-- Open-source badge -->
+  <rect x="180" y="95" width="160" height="32" rx="16" fill="url(#badge)"/>
+  <text x="260" y="116" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="white">Open Source</text>
+
+  <!-- Main title -->
+  <text x="80" y="280" font-family="system-ui, sans-serif" font-size="72" font-weight="800" fill="white" letter-spacing="-2">
+    Aura<tspan fill="#a78bfa"> Work</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="80" y="340" font-family="system-ui, sans-serif" font-size="28" fill="#c4b5fd" font-weight="400">
+    Open-source, multi-provider desktop AI agent platform
+  </text>
+
+  <!-- Feature pills -->
+  <g transform="translate(80, 400)">
+    <rect x="0" y="0" width="160" height="36" rx="18" fill="#8b5cf6" opacity="0.2" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="80" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#c4b5fd">🤖 Multi-Provider</text>
+
+    <rect x="175" y="0" width="140" height="36" rx="18" fill="#8b5cf6" opacity="0.2" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="245" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#c4b5fd">🔒 Local-First</text>
+
+    <rect x="330" y="0" width="170" height="36" rx="18" fill="#8b5cf6" opacity="0.2" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="415" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#c4b5fd">🛡️ Permission-Gated</text>
+
+    <rect x="515" y="0" width="140" height="36" rx="18" fill="#8b5cf6" opacity="0.2" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="585" y="24" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#c4b5fd">🌍 20 Languages</text>
+  </g>
+
+  <!-- Bottom info bar -->
+  <rect x="0" y="560" width="1280" height="80" fill="#000000" opacity="0.2"/>
+  <text x="80" y="606" font-family="system-ui, sans-serif" font-size="18" fill="#a78bfa">github.com/hbx12/aura-work</text>
+
+  <!-- Stars -->
+  <text x="1050" y="606" font-family="system-ui, sans-serif" font-size="18" fill="#c4b5fd" text-anchor="end">Tauri 2 · React 19 · Rust · TypeScript</text>
+</svg>
