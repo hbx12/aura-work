@@ -2,6 +2,8 @@
 
 [![License: Custom](https://img.shields.io/badge/License-See%20LICENSE-blue.svg)](LICENSE)
 [![CI](https://github.com/hbx12/aura-work/actions/workflows/ci.yml/badge.svg)](https://github.com/hbx12/aura-work/actions/workflows/ci.yml)
+[![English](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
+[![العربية](https://img.shields.io/badge/lang-ar-green.svg)](README.ar.md)
 
 **Current status: `0.1.0-alpha.11`** — under active security hardening.
 
@@ -32,6 +34,8 @@ Official desktop installers are published on the [GitHub Releases](https://githu
 
 Aura Work is maintained by **Habib (`hbx12`)**. Suggestions are reviewed actively, and useful ideas are turned into tracked implementation work with focused issues so contributors can pick up clear tasks without duplicating effort.
 
+- [🤝 Contributors](./CONTRIBUTORS.md) — thank you to everyone who helps
+- [🧑‍💻 New contributor guide](./docs/new-contributor.md) — step-by-step for first-timers
 - [Contributors wanted: help build Aura Work alpha](https://github.com/hbx12/aura-work/issues/16)
 - [Alpha release readiness epic](https://github.com/hbx12/aura-work/issues/30)
 - [Computer Use accessibility-tree epic](https://github.com/hbx12/aura-work/issues/22)
