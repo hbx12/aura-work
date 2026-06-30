@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-page="aura-work">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الهندسة — وثائق Aura Work</title>
+<meta name="description" content="وثائق Aura Work — الهندسة">
+<meta property="og:title" content="الهندسة — Aura Work">
+<meta property="og:description" content="وثائق Aura Work — الهندسة">
+<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--font-sans:"Inter","IBM Plex Sans","Noto Kufi Arabic",system-ui,-apple-system,sans-serif;--font-display:"Outfit","IBM Plex Sans","Noto Kufi Arabic",system-ui,sans-serif;--color-bg:#faf9f5;--color-bg-weak:#f5f3ec;--color-bg-card:#ffffff;--color-bg-strong:#1e1b16;--color-text:#5c5544;--color-text-weak:#938a76;--color-text-strong:#28241d;--color-text-inverted:#faf9f5;--color-border:#e7e1d3;--color-border-weak:rgba(40,36,29,0.08);--color-accent:#c2683f;--color-accent-warm:#cf7a52;--color-accent-subtle:rgba(194,104,63,0.11);--color-plum:#7a5c8e;--color-success:#4f7d47;--color-warning:#a9761f;--color-danger:#b8482f;--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13);--shadow-xl:0 24px 60px rgba(54,46,32,0.16)}
+@media(prefers-color-scheme:dark){:root{--color-bg:#161310;--color-bg-weak:#1e1b16;--color-bg-card:#25221c;--color-bg-strong:#ece7dc;--color-text:#a89e8b;--color-text-weak:#756c5b;--color-text-strong:#ece7dc;--color-text-inverted:#161310;--color-border:#322d25;--color-border-weak:rgba(236,231,220,0.08);--color-accent:#cf7a52;--color-accent-warm:#c2683f;--color-accent-subtle:rgba(207,122,82,0.16);--color-plum:#b794cc;--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60);--shadow-xl:0 20px 50px rgba(0,0,0,0.65)}}
+[dir="rtl"]{text-align:right}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.page{max-width:1200px;margin:0 auto;padding:0 2rem}
+@media(max-width:48rem){.page{padding:0 1rem}}
+header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--color-border-weak);padding:0 2rem}
+@media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--color-text-strong);font-size:1rem}
+.logo-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--color-accent);color:#fff;border-radius:4px;font-size:.875rem;font-weight:700}
+header nav ul{display:flex;align-items:center;gap:1.5rem;list-style:none}
+header nav a{text-decoration:none;font-size:.8125rem;color:var(--color-text);font-weight:500;transition:color .15s}
+header nav a:hover{color:var(--color-text-strong)}
+header nav a.active{color:var(--color-accent)}
+.hero{padding:5rem 0 3rem;text-align:center}
+.hero h1{font-family:var(--font-display);font-size:3.25rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.03em;line-height:1.1;margin-bottom:1.25rem}
+.hero h1 span{background:linear-gradient(135deg,var(--color-accent),var(--color-plum));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .subtitle{font-size:1.125rem;color:var(--color-text);max-width:32rem;margin:0 auto 2rem;line-height:1.7}
+.hero .meta-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--color-accent-subtle);border:1px solid var(--color-accent);border-radius:100px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-accent);margin-bottom:1.5rem}
+@media(max-width:48rem){.hero h1{font-size:2rem}.hero{padding:3rem 0 2rem}}
+.section{padding:4rem 0;border-bottom:1px solid var(--color-border-weak)}
+.section:last-child{border-bottom:none}
+.section-label{font-family:var(--font-mono);font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--color-border)}
+.section h2{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.02em;margin-bottom:.75rem}
+.section h2 .count{font-family:var(--font-mono);font-size:1rem;font-weight:400;color:var(--color-text-weak);letter-spacing:0}
+.section>p{max-width:40rem;margin-bottom:2.5rem;font-size:1rem;color:var(--color-text);line-height:1.8}
+.section p+p{margin-top:1rem}
+.section ul{margin:1rem 0 1.5rem 1.5rem;list-style:disc}
+.section ul li{margin-bottom:.5rem;font-size:.9375rem;line-height:1.7}
+.section ul li strong{color:var(--color-text-strong)}
+code{font-family:var(--font-mono);font-size:.8125rem;background:var(--color-bg-weak);padding:2px 6px;border-radius:4px;color:var(--color-text-strong)}
+pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.5;color:var(--color-text-strong)}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:2.5rem}
+.stat-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.25rem;text-align:center;transition:transform .2s,box-shadow .2s;opacity:0;transform:translateY(12px)}
+.stat-card.visible{opacity:1;transform:translateY(0)}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-card .num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--color-text-strong)}
+.stat-card .lbl{font-size:.75rem;color:var(--color-text-weak);margin-top:4px}
+.detail-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.5rem;margin-bottom:12px;transition:box-shadow .2s}
+.detail-card:hover{box-shadow:var(--shadow-sm)}
+.detail-card h3{font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--color-text-strong);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.detail-card .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-weak);margin-bottom:8px}
+.detail-card p{font-size:.9375rem;color:var(--color-text);line-height:1.7}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.lang-grid{display:flex;flex-wrap:wrap;gap:8px;margin:1.5rem 0}
+.lang-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text);text-decoration:none;transition:border-color .15s,background .15s}
+.lang-badge:hover{border-color:var(--color-accent);background:var(--color-accent-subtle);color:var(--color-accent)}
+.lang-badge .rtl-mark{font-size:.5625rem;font-weight:600;text-transform:uppercase;background:var(--color-accent-subtle);color:var(--color-accent);padding:1px 5px;border-radius:3px}
+.fade-in{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.delay-1{transition-delay:.1s}
+.delay-2{transition-delay:.2s}
+.delay-3{transition-delay:.3s}
+.delay-4{transition-delay:.4s}
+.lang-dropdown{display:none;position:absolute;right:0;top:100%;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:8px 0;min-width:200px;z-index:200;box-shadow:var(--shadow-lg)}
+.lang-dropdown.open{display:block}
+.lang-dropdown a{display:flex;padding:6px 16px;font-size:.8125rem;text-decoration:none;color:var(--color-text);transition:background .12s}
+.lang-dropdown a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+.lang-dropdown a.active{color:var(--color-text-strong);font-weight:600}
+@media(max-width:48rem){.card-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(3,1fr)}}</style>
+<style>
+  .hero { padding: 4rem 0 2.5rem; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%); pointer-events: none; }
+  .hero h1 { position: relative; z-index: 1; }
+  .hero .subtitle { position: relative; z-index: 1; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--color-text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
+  .back-link:hover { color: var(--color-accent); }
+  .section:first-of-type { padding-top: 2rem; }
+  .local-badge { display: inline-block; padding: 1px 6px; font-size: .5625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; border-radius: 3px; font-family: var(--font-mono); }
+  .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
+  .local-badge.no { background: rgba(184,72,47,0.10); color: var(--color-danger); }
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <div class="header-inner">
+    <a href="https://hbx12.github.io/aura-work/" class="logo">
+      <span class="logo-mark">A</span>
+      Aura Work
+    </a>
+    <nav>
+      <ul>
+        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
+        <li><a href="https://hbx12.github.io/aura-work/docs/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
+        <li style="position:relative">
+          <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            AR
+          </a>
+          <div id="lm" class="lang-dropdown">
+            <a href="https://hbx12.github.io/aura-work/docs/docs/docs.html">English</a>
+            <a href="https://hbx12.github.io/aura-work/docs/docs/docs.ar.html" class="active">العربية</a>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main>
+<a href="https://hbx12.github.io/aura-work/docs/docs/docs.ar.html" class="back-link" style="flex-direction:row-reverse">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  العودة إلى مركز الوثائق
+</a>
+<div class="hero">
+    <h1><span>الهندسة</span></h1>
+    <p class="subtitle">غوص في الهندسة متعددة العمليات</p>
+  </div>
+  <section class="section">
+    <p>Aura Work مبني على هندسة متعددة العمليات باستخدام Tauri 2 كغلاف سطح المكتب و React 19 للواجهة و Rust للخدمات الأساسية.</p>
+    <div class="section-label">مجموعة التقنيات</div>
+    <div class="stats-bar">
+      <div class="stat-card fade-in delay-1"><div class="num">Tauri 2</div><div class="lbl">غلاف سطح المكتب مع تكامل نظام التشغيل</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">React 19</div><div class="lbl">إطار واجهة مع دعم SSR للتدفق</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">Rust</div><div class="lbl">خدمات خلفية أساسية وأمان</div></div>
+      <div class="stat-card fade-in delay-4"><div class="num">TypeScript</div><div class="lbl">أمان أنواع شامل عبر المشروع</div></div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">نموذج العمليات</div>
+    <h2>نموذج العمليات</h2>
+    <p>تطبيق سطح المكتب يُنشئ عمليات مساعدة عند بدء التشغيل. كل خدمة تعمل كعملية نظام تشغيل منفصلة. التواصل يتم عبر جسر IPC آمن.</p>
+    <pre><code>┌─────────────────────────────────────────┐
+│           Tauri 2 (Desktop Shell)        │
+│  ┌────────────────────────────────────┐  │
+│  │  React 19 UI (WebView)             │  │
+│  └─────────────┬──────────────────────┘  │
+│                │ IPC                      │
+│  ┌─────────────▼──────────────────────┐  │
+│  │  Bridge Sidecar (Rust/Node.js)     │  │
+│  └─────────────┬──────────────────────┘  │
+├────────────────┼─────────────────────────┤
+│  ┌─────────────▼──────────────┐          │
+│  │  Agent Sidecar             │          │
+│  │  • Planner                 │          │
+│  │  • Executor                │          │
+│  │  • Reviewer                │          │
+│  └─────────────────────────────┘          │
+│  ┌─────────────┬──────────────┐           │
+│  │ Skills      │  MCP Servers │           │
+│  └─────────────┴──────────────┘           │
+└─────────────────────────────────────────┘</code></pre>
+  </section>
+  <section class="section">
+    <div class="section-label">نموذج الأمان</div>
+    <h2>نموذج الأمان</h2>
+    <p>جميع العمليات المساعدة تعمل بأقل الصلاحيات. مخزن بيانات الاعتماد يستخدم تشفير نظام التشغيل. تنفيذ الكود معزول في آلات افتراضية.</p>
+  </section>
+</main>
+<footer style="text-align:center;padding:2rem 0;font-size:.75rem;color:var(--color-text-weak);border-top:1px solid var(--color-border-weak);margin-top:2rem">
+  <div>&copy; 2026 مساهمو Aura Work &nbsp;&middot;&nbsp; <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a></div>
+  <div class="links" style="display:flex;gap:16px;justify-content:center;margin-top:8px">
+    <a href="https://github.com/hbx12/aura-work">غيت هاب</a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/CODE_OF_CONDUCT.md">مدونة السلوك</a>
+    <a href="https://github.com/hbx12/aura-work/security/policy">الأمان</a>
+  </div>
+</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(function(e){o.observe(e)})});
+document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
+</script>
+</body>
+</html>
