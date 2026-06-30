@@ -11,6 +11,7 @@ This project follows the [all-contributors](https://allcontributors.org) specifi
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://arjunavtani.com"><img src="https://avatars.githubusercontent.com/u/190979964?v=4?s=100" width="100px;" alt="ded-furby"/><br /><sub><b>ded-furby</b></sub></a><br /><a href="https://github.com/hbx12/aura-work/commits?author=ded-furby" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hbx12"><img src="https://avatars.githubusercontent.com/u/107771255?v=4?s=100" width="100px;" alt="HBX"/><br /><sub><b>HBX</b></sub></a><br /><a href="https://github.com/hbx12/aura-work/commits?author=hbx12" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://leno23.github.io/"><img src="https://avatars.githubusercontent.com/u/39647285?v=4?s=100" width="100px;" alt="Yangfan wu"/><br /><sub><b>Yangfan wu</b></sub></a><br /><a href="https://github.com/hbx12/aura-work/commits?author=wyf027" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
