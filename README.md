@@ -1,4 +1,7 @@
 # Aura Work
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![License: Custom](https://img.shields.io/badge/License-See%20LICENSE-blue.svg)](LICENSE)
 [![CI](https://github.com/hbx12/aura-work/actions/workflows/ci.yml/badge.svg)](https://github.com/hbx12/aura-work/actions/workflows/ci.yml)
@@ -122,3 +125,25 @@ See [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-NOTICES](./THIRD-
 ## Clean-machine installer smoke test
 
 For installed Windows build validation, see [docs/clean-machine-installer-smoke.md](./docs/clean-machine-installer-smoke.md).
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hbx12"><img src="https://avatars.githubusercontent.com/u/107771255?v=4?s=100" width="100px;" alt="HBX"/><br /><sub><b>HBX</b></sub></a><br /><a href="https://github.com/hbx12/aura-work/commits?author=hbx12" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
