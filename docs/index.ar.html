@@ -264,6 +264,32 @@
     }
     .lang-dropdown a:hover { background: var(--color-bg-weak); color: var(--color-text-strong); }
     .lang-dropdown a.active { color: var(--color-text-strong); font-weight: 600; }
+
+    .faq-section { padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
+    @media (max-width: 60rem) { .faq-section { padding: 3rem 1.5rem; } }
+    .faq-section h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.75rem; }
+    .faq-section > p { max-width: 36rem; margin-bottom: 2rem; }
+    .faq-list { max-width: 48rem; }
+    .faq-item { border-bottom: 1px solid var(--color-border-weak); padding: 0; }
+    .faq-question {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 0; background: none; border: none; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.875rem; font-weight: 500;
+      color: var(--color-text-strong); text-align: left; gap: 1rem;
+      transition: color 0.15s;
+    }
+    .faq-question:hover { color: var(--color-text); }
+    .faq-question svg { width: 16px; height: 16px; color: var(--color-icon); flex-shrink: 0; transition: transform 0.2s; }
+    .faq-item.open .faq-question svg { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
+      font-size: 0.8125rem; line-height: 1.7; color: var(--color-text-weak);
+    }
+    .faq-answer-inner { padding-bottom: 1.25rem; }
+    .faq-item.open .faq-answer { max-height: 300px; }
+
+    /* RTL fixes */
+    html[dir="rtl"] .faq-question { text-align: right; }
   </style>
 </head>
 <body>
@@ -437,15 +463,80 @@
       </div>
     </section>
 
+    <section class="faq-section">
+      <p class="section-label">الأسئلة الشائعة</p>
+      <h2>أسئلة مكررة</h2>
+      <p>كل ما تحتاج معرفته عن Aura Work.</p>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            كيف أثبّت Aura Work؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">حمّل أحدث إصدار من GitHub لنظام ويندوز أو ماك أو لينكس. شغّل المثبّت وافتح التطبيق — لا تحتاج حساب أو مفتاح API للبدء. هيّئ أول مزوّد من خلال الإعدادات &gt; المزوّدون.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            ما هي مزوّدو الذكاء الاصطناعي المدعومون؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">OpenAI وAnthropic (Claude) وGoogle Gemini وDeepSeek وOllama (نماذج محلية) وOpenRouter وGroq وTogether AI وMistral وGitHub Copilot. محرك التوجيه يكتشف المزوّدين المتاحين تلقائياً ويختار أفضل نموذج لكل مهمة.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            هل بياناتي خاصة؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">نعم. Aura Work يعمل محلياً أولاً — مفاتيح API مخزّنة في خزنة مشفّرة، لا توجد تتبع استخدام، وكل تنفيذ الوكيل يتم على جهازك. استخدم النماذج المحلية عبر Ollama للعمل بدون إنترنت.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            هل Aura Work مجاني؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">نعم، مجاني بالكامل ومفتوح المصدر تحت رخصة Apache 2.0. تدفع فقط مقابل استخدام API إذا استخدمت مزوّدين سحابيين مثل OpenAI أو Anthropic. النماذج المحلية عبر Ollama لا تكلف شيئاً.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            ما هي الخدمات المساعدة (Sidecars)؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">الخدمات المساعدة هي 8 برامج خلفية معيارية توسّع قدرات Aura Work — تنفيذ الوكلاء، أتمتة المتصفح، العزل في بيئة افتراضية، المزامنة السحابية، استخدام الكمبيوتر، والمزيد. يمكن تشغيل كل منها أو إيقافها من لوحة الإعدادات.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            كيف يمكنني المساهمة؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">اطّلع على دليل المساهم الجديد والمشاكل المناسبة للبدء في GitHub. نرحب بالمساهمات البرمجية والتوثيق والترجمات عبر Weblate والتصميم والأفكار. انضم إلى المناقشات للتواصل مع المجتمع.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            هل يمكن استخدام Aura Work بدون إنترنت؟
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">نعم — مع Ollama يمكنك تشغيل نماذج محلية بالكامل بدون أي اتصال بالإنترنت. المنصة الأساسية ومحرك التوجيه والخدمات المساعدة كلها تعمل بدون اتصال. فقط واجهات مزوّدي السحابة تتطلب اتصالاً.</div></div>
+        </div>
+
+      </div>
+    </section>
+
     <footer>
       <div>
-        <span>&copy; 2026 مساهمو آورا ورك</span>
+        <span>novir studio — Habeb bader 2026</span>
         &nbsp;&middot;&nbsp;
         <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
       </div>
       <div class="links">
         <a href="https://github.com/hbx12/aura-work">جيت‌هاب</a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/CODE_OF_CONDUCT.md">مدونة السلوك</a>
+        <a href="https://github.com/hbx12/aura-work/discussions">المناقشات</a>
         <a href="https://github.com/hbx12/aura-work/security/policy">الأمان</a>
       </div>
     </footer>
