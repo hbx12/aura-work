@@ -24,7 +24,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror GitHub ref to GitLab
+      - name: Fetch all branches
+        run: git fetch --all --tags
+
+      - name: Mirror all branches and tags to GitLab
         env:
           GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
           GITLAB_REPOSITORY: gitlab.com/hbybbdr558/aura-work.git
