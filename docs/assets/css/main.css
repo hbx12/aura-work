@@ -684,7 +684,7 @@ header nav ul li a.cta:hover { background: var(--bg-strong-hover); color: var(--
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  color: var(--icon);
+  color: var(--text-weak);
   transition: color 0.2s;
 }
 .provider-item:hover .provider-icon {
