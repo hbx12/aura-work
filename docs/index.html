@@ -264,6 +264,29 @@
     }
     .lang-dropdown a:hover { background: var(--color-bg-weak); color: var(--color-text-strong); }
     .lang-dropdown a.active { color: var(--color-text-strong); font-weight: 600; }
+
+    .faq-section { padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
+    @media (max-width: 60rem) { .faq-section { padding: 3rem 1.5rem; } }
+    .faq-section h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.75rem; }
+    .faq-section > p { max-width: 36rem; margin-bottom: 2rem; }
+    .faq-list { max-width: 48rem; }
+    .faq-item { border-bottom: 1px solid var(--color-border-weak); padding: 0; }
+    .faq-question {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 0; background: none; border: none; cursor: pointer;
+      font-family: var(--font-mono); font-size: 0.875rem; font-weight: 500;
+      color: var(--color-text-strong); text-align: left; gap: 1rem;
+      transition: color 0.15s;
+    }
+    .faq-question:hover { color: var(--color-text); }
+    .faq-question svg { width: 16px; height: 16px; color: var(--color-icon); flex-shrink: 0; transition: transform 0.2s; }
+    .faq-item.open .faq-question svg { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
+      font-size: 0.8125rem; line-height: 1.7; color: var(--color-text-weak);
+    }
+    .faq-answer-inner { padding-bottom: 1.25rem; }
+    .faq-item.open .faq-answer { max-height: 300px; }
   </style>
 </head>
 <body>
@@ -437,15 +460,80 @@
       </div>
     </section>
 
+    <section class="faq-section">
+      <p class="section-label">FAQ</p>
+      <h2>Common questions</h2>
+      <p>Everything you need to know about Aura Work.</p>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How do I install Aura Work?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Download the latest release from GitHub for Windows, macOS, or Linux. Run the installer and launch the app — no account or API key required to get started. Configure your first provider via Settings &gt; Providers.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Which AI providers are supported?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">OpenAI, Anthropic (Claude), Google Gemini, DeepSeek, Ollama (local models), OpenRouter, Groq, Together AI, Mistral, and GitHub Copilot. The routing engine auto-discovers available providers and picks the best model per task.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Is my data private?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Yes. Aura Work is local-first — your API keys are stored in an encrypted OS-backed vault, no telemetry is collected, and all agent execution happens on your machine. Use local models via Ollama for fully offline operation.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Is Aura Work free?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free and open source under the Apache 2.0 license. You only pay for API usage if you use cloud providers like OpenAI or Anthropic. Local models via Ollama cost nothing.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            What are sidecars?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Sidecars are 8 modular background daemons that extend Aura Work's capabilities — agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each runs independently and can be enabled or disabled from the Settings panel.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            How do I contribute?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Check the new-contributor guide and good first issues on GitHub. We welcome code, documentation, translations via Weblate, design, and ideas. Join the Discussions to connect with the community.</div></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+            Can I use Aura Work offline?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Yes — with Ollama you can run fully local models without any internet connection. The core platform, routing engine, and sidecars all work offline. Only cloud provider APIs require connectivity.</div></div>
+        </div>
+
+      </div>
+    </section>
+
     <footer>
       <div>
-        <span>&copy; 2026 Aura Work contributors</span>
+        <span>novir studio — Habeb bader 2026</span>
         &nbsp;&middot;&nbsp;
         <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
       </div>
       <div class="links">
         <a href="https://github.com/hbx12/aura-work">GitHub</a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        <a href="https://github.com/hbx12/aura-work/discussions">Discussions</a>
         <a href="https://github.com/hbx12/aura-work/security/policy">Security</a>
       </div>
     </footer>
