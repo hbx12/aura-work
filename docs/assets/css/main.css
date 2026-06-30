@@ -651,6 +651,48 @@ header nav ul li a.cta:hover { background: var(--bg-strong-hover); color: var(--
 }
 
 /* =========================================================
+   Provider Grid
+   ========================================================= */
+.provider-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+.provider-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid var(--border-weak);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-weak);
+  font-size: 0.85rem;
+  font-weight: 400;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  cursor: default;
+  user-select: none;
+}
+.provider-item:hover {
+  border-color: var(--text-weak);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+.provider-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--icon);
+  transition: color 0.2s;
+}
+.provider-item:hover .provider-icon {
+  color: var(--text);
+}
+.features-section .provider-grid + p { margin-top: 0; }
+
+/* =========================================================
    Contribute / CTA Section
    ========================================================= */
 .contribute {

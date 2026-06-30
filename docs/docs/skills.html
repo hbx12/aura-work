@@ -5,16 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skills — Aura Work</title>
 <meta name="description" content="Aura Work documentation">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-sans:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#faf9f5;--bg-weak:#f5f3ec;--bg-card:#fff;--bg-strong:#1e1b16;--text:#5c5544;--text-weak:#938a76;--text-strong:#28241d;--text-inverted:#faf9f5;--border:#e7e1d3;--border-weak:rgba(40,36,29,0.08);--accent:#c2683f;--accent-subtle:rgba(194,104,63,0.11);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
-@media(prefers-color-scheme:dark){:root{--bg:#161310;--bg-weak:#1e1b16;--bg-card:#25221c;--bg-strong:#ece7dc;--text:#a89e8b;--text-weak:#756c5b;--text-strong:#ece7dc;--text-inverted:#161310;--border:#322d25;--border-weak:rgba(236,231,220,0.08);--accent:#cf7a52;--accent-subtle:rgba(207,122,82,0.16);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#fcfbfa;--bg-weak:#f5f3ed;--bg-card:#ffffff;--bg-strong:#1d1a15;--text:#675e4b;--text-weak:#948c74;--text-strong:#1d1a15;--text-inverted:#fcfbfa;--border:#d8d0bd;--border-weak:rgba(74,66,55,0.10);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.12);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
+@media(prefers-color-scheme:dark){:root{--bg:#12100c;--bg-weak:#1a1713;--bg-card:#1f1c16;--bg-strong:#e8e3d9;--text:#a89f89;--text-weak:#7d7560;--text-strong:#e8e3d9;--text-inverted:#12100c;--border:#3f3c2b;--border-weak:rgba(232,227,217,0.08);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.15);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
+body{font-family:var(--font-mono),system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 
 /* Header */
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
+header{position:sticky;top:0;z-index:100;background:hsla(40,20%,99%,0.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
 @media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--text-strong);font-size:1rem}
@@ -72,9 +70,9 @@ header nav a.active{color:var(--accent)}
 .card{border:1px solid var(--border-weak);border-radius:8px;padding:1.25rem;background:var(--bg-card);transition:all .2s}
 .card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .card h3{font-size:.875rem;font-weight:600;color:var(--text-strong);margin-bottom:.375rem}
-.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6}
+.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6;overflow-wrap:break-word}
 .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border-weak);border-radius:8px;overflow:hidden;margin-bottom:2rem;border:1px solid var(--border-weak)}
-.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center}
+.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center;overflow-wrap:break-word;word-break:break-word}
 .stat-card .num{font-size:1.5rem;font-weight:700;color:var(--text-strong);font-family:var(--font-mono);letter-spacing:-.02em}
 .stat-card .lbl{font-size:.625rem;color:var(--text-weak);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:var(--font-mono)}
 
@@ -101,7 +99,7 @@ header nav a.active{color:var(--accent)}
 <header><div class="header-inner"><a href="https://hbx12.github.io/aura-work/" class="logo"><span class="logo-mark">A</span>Aura Work</a>    <nav>
       <ul>
         <li><a href="https://hbx12.github.io/aura-work/">Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://hbx12.github.io/aura-work/docs/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative">
           <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
@@ -109,7 +107,7 @@ header nav a.active{color:var(--accent)}
             EN
           </a>
           <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/skills.html">English</a>
+            <a href="https://hbx12.github.io/aura-work/docs/docs/skills.html">English</a>
             <a href="https://hbx12.github.io/aura-work/docs/skills.ar.html">العربية</a>
           </div>
         </li>
@@ -117,20 +115,20 @@ header nav a.active{color:var(--accent)}
     </nav><button class="nav-toggle" aria-label="Toggle menu" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div></header>
 <div class="layout">
 <aside class="sidebar"><nav class="sidebar-nav">    <div class="sec">Getting Started</div>
-    <a href="https://hbx12.github.io/aura-work/docs/overview.html">Overview</a>
-    <a href="https://hbx12.github.io/aura-work/docs/quickstart.html">Quickstart</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/overview.html">Overview</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/quickstart.html">Quickstart</a>
     <div class="sec">Core</div>
-    <a href="https://hbx12.github.io/aura-work/docs/architecture.html">Architecture</a>
-    <a href="https://hbx12.github.io/aura-work/docs/providers.html">Providers</a>
-    <a href="https://hbx12.github.io/aura-work/docs/cli.html">CLI</a>
-    <a href="https://hbx12.github.io/aura-work/docs/permissions.html">Permissions</a>
-    <a href="https://hbx12.github.io/aura-work/docs/routing.html">Routing</a>
-    <a href="https://hbx12.github.io/aura-work/docs/skills.html">Skills</a>
-    <a href="https://hbx12.github.io/aura-work/docs/mcp.html">MCP</a>
-    <a href="https://hbx12.github.io/aura-work/docs/sidecars.html">Sidecars</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/architecture.html">Architecture</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/providers.html">Providers</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/cli.html">CLI</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/permissions.html">Permissions</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/routing.html">Routing</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/skills.html">Skills</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/mcp.html">MCP</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/sidecars.html">Sidecars</a>
     <div class="sec">Customize</div>
-    <a href="https://hbx12.github.io/aura-work/docs/languages.html">Languages</a>
-    <a href="https://hbx12.github.io/aura-work/docs/themes.html">Themes</a></nav></aside>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/languages.html">Languages</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/themes.html">Themes</a></nav></aside>
 <main class="content">
 <h1>Skills</h1><p class="sub">24 pre-built agent skills in the registry — ready to use, fully sandboxed.</p>
   <section class="section">
@@ -382,6 +380,150 @@ header nav a.active{color:var(--accent)}
       <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">Tools:</strong> <code>scan_file</code> <code>scan_directory</code></div>
     </div>
   </section>
+
+ <section class="section">
+  <div class="section-label">Configuration</div>
+  <h2>Creating custom skills with .agents files</h2>
+  <p>Aura Work discovers skills from the <code>registry/skills/</code> directory. Each skill is defined by a JSON manifest file with the extension <code>.agents</code>. The manifest describes the skill identity, available tools, permissions, and risk level.</p>
+
+  <div class="detail-card">
+   <h3>Manifest structure</h3>
+   <p>Every <code>.agents</code> file follows this schema:</p>
+   <pre><code>{
+ "name": "my-custom-skill",
+ "version": "1.0.0",
+ "description": "What this skill does",
+ "author": "Your Name",
+ "publisher": "publisher-id",
+ "risk": "low",
+ "permissions": ["files:read", "network:connect"],
+ "tools": [
+   {
+     "name": "my_tool",
+     "description": "What the tool does",
+     "input_schema": {
+       "type": "object",
+       "properties": {
+         "param1": {
+           "type": "string",
+           "description": "Description of param1"
+         }
+       },
+       "required": ["param1"]
+     }
+   }
+ ]
+}</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Step-by-step guide</h3>
+   <p><strong>1.</strong> Create a new file in <code>registry/skills/my-skill.agents</code><br>
+   <strong>2.</strong> Define the manifest with name, version, tools, and permissions<br>
+   <strong>3.</strong> Restart Aura Work or reload skills from Settings &rarr; Skills &rarr; Reload<br>
+   <strong>4.</strong> Your skill appears in the skills registry and is available to agents<br>
+   <strong>5.</strong> Configure permission profiles per skill in Settings &rarr; Skills &rarr; Permissions</p>
+  </div>
+
+  <div class="detail-card">
+   <h3>Example: web-scraper.agents</h3>
+   <p>A complete custom skill for web scraping:</p>
+   <pre><code>{
+ "name": "web-scraper",
+ "version": "1.0.0",
+ "description": "Extract and process content from web pages",
+ "author": "community",
+ "publisher": "aura-community",
+ "risk": "medium",
+ "permissions": ["network:connect", "files:write"],
+ "tools": [
+   {
+     "name": "scrape_page",
+     "description": "Fetch and extract content from a URL",
+     "input_schema": {
+       "type": "object",
+       "properties": {
+         "url": {
+           "type": "string",
+           "description": "The URL to scrape"
+         },
+         "selector": {
+           "type": "string",
+           "description": "CSS selector to extract specific elements"
+         }
+       },
+       "required": ["url"]
+     }
+   },
+   {
+     "name": "scrape_export",
+     "description": "Export scraped data to a file",
+     "input_schema": {
+       "type": "object",
+       "properties": {
+         "format": {
+           "type": "string",
+           "enum": ["json", "csv", "markdown"],
+           "description": "Export format"
+         },
+         "data": {
+           "type": "object",
+           "description": "The data to export"
+         }
+       },
+       "required": ["format", "data"]
+     }
+   }
+ ]
+}</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Sharing skills</h3>
+   <p>Skills can be shared via the community registry. Submit a pull request to the <code>registry/skills/</code> directory in the main repository. The community reviews the manifest for security and correctness before merging. Published skills are versioned and can be installed with <code>aura skill install &lt;name&gt;</code>.</p>
+  </div>
+ </section>
+
+ <section class="section">
+  <div class="section-label">Registry</div>
+  <h2>Skill registry</h2>
+  <p>The skill registry at <code>registry/skills/</code> is a directory of JSON manifest files. On startup, Aura Work scans this directory, validates each manifest against the schema, and registers all tools into the agent tool system.</p>
+
+  <div class="detail-card">
+   <h3>Versioning</h3>
+   <p>Skills follow semantic versioning (<code>MAJOR.MINOR.PATCH</code>). Breaking changes to tool schemas increment the major version. Adding new tools increments the minor version. Bug fixes and documentation changes increment the patch version.</p>
+  </div>
+  <div class="detail-card">
+   <h3>Risk levels</h3>
+   <p>Each skill declares a risk level that determines its permission boundary:<br>
+   <strong>low</strong> &mdash; Read-only operations, no network access. Suitable for code review, documentation, and analysis skills.<br>
+   <strong>medium</strong> &mdash; Network access, file read/write. Suitable for web scraping, data processing, and integration skills.<br>
+   <strong>high</strong> &mdash; Full system access. Suitable for automation, deployment, and system administration skills. Requires explicit user approval.</p>
+  </div>
+  <div class="detail-card">
+   <h3>Discovery</h3>
+   <p>The registry is scanned on startup. Skills can be reloaded without restarting via Settings &rarr; Skills &rarr; Reload. Invalid manifests are logged and skipped with a warning. The system caches validated manifests for performance.</p>
+  </div>
+ </section>
+
+ <section class="section">
+  <div class="section-label">Usage</div>
+  <h2>Using skills</h2>
+
+  <div class="detail-card">
+   <h3>Enabling and disabling</h3>
+   <p>Skills can be enabled or disabled individually from Settings &rarr; Skills. Disabled skills are not loaded into the agent's tool set and do not appear in the registry. This allows you to curate which capabilities are available to agents.</p>
+  </div>
+  <div class="detail-card">
+   <h3>Permission profiles</h3>
+   <p>Each skill is assigned a permission profile: <strong>read-only</strong> permits only safe, non-destructive operations; <strong>safe-automation</strong> permits controlled file and network operations; <strong>research</strong> permits broad access with user confirmation for sensitive operations. Profiles are configured per skill in Settings &rarr; Skills &rarr; Permissions.</p>
+  </div>
+  <div class="detail-card">
+   <h3>Chaining skills</h3>
+   <p>Skills can be chained by passing tool outputs as inputs to subsequent skill tools. The agent automatically plans multi-skill workflows when a task requires capabilities from multiple skills. The routing engine determines the optimal execution order.</p>
+  </div>
+ </section>
+
 </main>
 </div>
 <footer class="doc-footer">

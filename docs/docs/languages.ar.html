@@ -9,12 +9,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-sans:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#faf9f5;--bg-weak:#f5f3ec;--bg-card:#fff;--bg-strong:#1e1b16;--text:#5c5544;--text-weak:#938a76;--text-strong:#28241d;--text-inverted:#faf9f5;--border:#e7e1d3;--border-weak:rgba(40,36,29,0.08);--accent:#c2683f;--accent-subtle:rgba(194,104,63,0.11);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
-@media(prefers-color-scheme:dark){:root{--bg:#161310;--bg-weak:#1e1b16;--bg-card:#25221c;--bg-strong:#ece7dc;--text:#a89e8b;--text-weak:#756c5b;--text-strong:#ece7dc;--text-inverted:#161310;--border:#322d25;--border-weak:rgba(236,231,220,0.08);--accent:#cf7a52;--accent-subtle:rgba(207,122,82,0.16);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#fcfbfa;--bg-weak:#f5f3ed;--bg-card:#ffffff;--bg-strong:#1d1a15;--text:#675e4b;--text-weak:#948c74;--text-strong:#1d1a15;--text-inverted:#fcfbfa;--border:#d8d0bd;--border-weak:rgba(74,66,55,0.10);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.12);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
+@media(prefers-color-scheme:dark){:root{--bg:#12100c;--bg-weak:#1a1713;--bg-card:#1f1c16;--bg-strong:#e8e3d9;--text:#a89f89;--text-weak:#7d7560;--text-strong:#e8e3d9;--text-inverted:#12100c;--border:#3f3c2b;--border-weak:rgba(232,227,217,0.08);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.15);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
+body{font-family:var(--font-mono),system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 
 /* Header */
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
+header{position:sticky;top:0;z-index:100;background:hsla(40,20%,99%,0.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
 @media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--text-strong);font-size:1rem}
@@ -72,9 +72,9 @@ header nav a.active{color:var(--accent)}
 .card{border:1px solid var(--border-weak);border-radius:8px;padding:1.25rem;background:var(--bg-card);transition:all .2s}
 .card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .card h3{font-size:.875rem;font-weight:600;color:var(--text-strong);margin-bottom:.375rem}
-.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6}
+.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6;overflow-wrap:break-word}
 .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border-weak);border-radius:8px;overflow:hidden;margin-bottom:2rem;border:1px solid var(--border-weak)}
-.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center}
+.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center;overflow-wrap:break-word;word-break:break-word}
 .stat-card .num{font-size:1.5rem;font-weight:700;color:var(--text-strong);font-family:var(--font-mono);letter-spacing:-.02em}
 .stat-card .lbl{font-size:.625rem;color:var(--text-weak);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:var(--font-mono)}
 
@@ -111,7 +111,7 @@ header nav a.active{color:var(--accent)}
             AR
           </a>
           <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/languages.html">English</a>
+            <a href="https://hbx12.github.io/aura-work/docs/docs/languages.html">English</a>
             <a href="https://hbx12.github.io/aura-work/docs/languages.ar.html">العربية</a>
           </div>
         </li>
