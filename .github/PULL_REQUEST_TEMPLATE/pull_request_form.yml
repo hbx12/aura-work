@@ -1,0 +1,117 @@
+name: Pull Request
+description: Contribute to Aura Work — describe your change and how you tested it
+title: "type: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Thanks for contributing to Aura Work!
+
+        Please fill out the form below. Required fields must be completed before submission.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 🏷️ Change type
+      description: What kind of change is this?
+      options:
+        - 🐛 Bug fix
+        - ✨ Feature
+        - 📖 Documentation
+        - 🌐 Translation / i18n
+        - 🧪 Tests
+        - 🔧 CI / Tooling
+        - 🛡 Security hardening
+        - 💥 Breaking change
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 📝 Summary
+      description: Describe what you changed and why. Include the problem before and your approach after.
+      placeholder: |
+        Added dark mode toggle to Settings page.
+        - Toggle switch between dark/light themes
+        - Preference saved to localStorage
+        - Respects system color scheme preference
+    validations:
+      required: true
+
+  - type: input
+    id: related-issue
+    attributes:
+      label: 🔗 Related issue
+      description: Link the issue this PR addresses, if any
+      placeholder: "Closes #123"
+    validations:
+      required: false
+
+  - type: textarea
+    id: how-i-tested
+    attributes:
+      label: 🧪 How you tested this
+      description: Step-by-step of what you ran to verify your changes work
+      placeholder: |
+        1. Ran `npm run build:sidecars` — ✅ passed
+        2. Ran `npm run test:sidecars` — ✅ all tests passed
+        3. Launched the app and manually tested the feature — ✅ works
+      validations:
+        required: true
+
+  - type: checkboxes
+    id: tests-run
+    attributes:
+      label: ✅ Tests you ran
+      description: Check the ones you ran locally
+      options:
+        - label: npm run build:sidecars
+        - label: npm run test:sidecars
+        - label: npm run test:acceptance
+        - label: npm run test:rust
+        - label: npm run audit:licenses
+        - label: npm run qa
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 📋 Checklist
+      description: Confirm before submitting
+      options:
+        - label: No secrets, API keys, tokens, or private files are committed
+          required: true
+        - label: The project builds without errors
+          required: true
+        - label: Tests pass without failures
+        - label: Documentation is updated if needed
+        - label: UI changes follow existing Aura Work design patterns
+        - label: Change is linked to an issue when applicable
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 Screenshots
+      description: If you changed the UI, add before/after screenshots (drag & drop images here)
+      placeholder: Drag images here or write "No UI changes"
+
+  - type: textarea
+    id: security-impact
+    attributes:
+      label: 🔐 Security impact
+      description: Does this change affect permissions, local services, credentials, packaging, browser access, or Computer Use?
+      placeholder: No security impact — this change is UI-only
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: marketplace
+    attributes:
+      label: 🏪 Marketplace Submissions (optional)
+      description: Only fill if this PR adds or modifies a marketplace item
+      options:
+        - label: Manifest file placed under `registry/skills/`, `registry/mcp/`, or `registry/plugins/`
+        - label: Manifest matches `registry/schema/marketplace-item.schema.json` and passes local validation
+        - label: Added matching SVG icon and cover art under `registry/assets/<item_id>/`
+        - label: Checked security implications (sandboxed path validation, credential storage in Vault)
