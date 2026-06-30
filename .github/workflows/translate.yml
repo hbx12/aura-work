@@ -14,11 +14,11 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - uses: dephraiim/translate-issues-action@v1
+      - uses: lizheming/github-translate-action@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          translate-title: true
-          translate-body: true
-          translate-comment: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          translate_title: true
+          translate_body: true
+          translate_comment: true
           languages: ar,en
-          default-languages: ar,en
+          default_language: en
