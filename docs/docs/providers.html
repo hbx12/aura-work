@@ -180,7 +180,8 @@ footer .links{display:flex;gap:1.25rem}
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
   .local-badge.no { background: rgba(184,72,47,0.10); color: var(--color-danger); }
 </style>
-</head>
+<style>.nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--color-text-weak);flex-shrink:0}.nav-toggle:hover{color:var(--color-text-strong)}@media(max-width:48rem){.nav-toggle{display:flex}header nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--color-bg);border-bottom:1px solid var(--color-border-weak);padding:1rem 2rem;backdrop-filter:blur(16px);box-shadow:var(--shadow-lg);z-index:100}header nav.open{display:block}header nav ul{flex-direction:column;gap:.75rem;align-items:flex-start;width:100%}}</style>
+
 <body>
 <div class="page">
 <header>
@@ -223,6 +224,7 @@ footer .links{display:flex;gap:1.25rem}
         </li>
       </ul>
     </nav>
+    <button class="nav-toggle" aria-label="Toggle menu" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>
   </div>
 </header>
 <main>
@@ -350,6 +352,7 @@ document.addEventListener('DOMContentLoaded',function(){var o=new IntersectionOb
 document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
 
 function switchLang(code,name){var p=window.location.pathname.replace('/aura-work/','').replace(/^\//,'');var base='https://hbx12.github.io/aura-work';if(code==='en'){window.location.href=base+'/'+p;return false}if(code==='ar'){var ap=p.replace(/\.html$/,'.ar.html');if(!ap.includes('.ar.'))ap=p.replace(/\/?$/,'/index.ar.html');if(!ap)ap='index.ar.html';window.location.href=base+'/'+ap;return false}var t=document.createElement('div');t.textContent='🌍 '+name+' translation coming soon!';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#28241d;color:#faf9f5;padding:12px 24px;border-radius:8px;font-family:Inter,system-ui,sans-serif;font-size:.875rem;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.25);opacity:0;transition:opacity .3s ease';document.body.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1'});setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},2800);return false}
-</script>
+document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('header nav').classList.toggle('open')});
+
 </body>
 </html>

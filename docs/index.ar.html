@@ -141,6 +141,16 @@
     .nav-toggle:hover { color: var(--color-text-strong); }
     @media (max-width: 40rem) { .nav-toggle { display: flex; } }
 
+    @media (max-width: 40rem) {
+      .nav-desktop.open {
+        display: flex; position: absolute; top: 100%; left: 0; right: 0;
+        background: var(--color-bg); border-bottom: 1px solid var(--color-border-weak);
+        padding: 1rem 2rem; flex-direction: column; gap: 0.75rem;
+        box-shadow: 0 16px 40px rgba(0,0,0,.13); z-index: 100;
+      }
+      .nav-desktop.open ul { flex-direction: column; gap: 0.75rem; width: 100%; }
+    }
+
     .hero { padding: 5rem 5rem 3rem; border-bottom: 1px solid var(--color-border-weak); }
     @media (max-width: 60rem) { .hero { padding: 3rem 1.5rem 2rem; } }
 
@@ -470,6 +480,7 @@
       var trigger = e.target.closest('[onclick*="toggleLang"]');
       if (!trigger && m) m.classList.remove('open');
     });
+    document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('.nav-desktop')?.classList.toggle('open')});
   </script>
 </body>
 </html>
