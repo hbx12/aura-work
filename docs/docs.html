@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-page="aura-work">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs — Aura Work</title>
+  <meta name="description" content="Documentation for Aura Work — the open source AI agent platform.">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hbx12/aura-work/main/apps/desktop/public/aura-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      --color-bg: hsl(0, 20%, 99%);
+      --color-bg-weak: hsl(0, 8%, 97%);
+      --color-bg-weak-hover: hsl(0, 8%, 94%);
+      --color-bg-strong: hsl(0, 5%, 12%);
+      --color-bg-strong-hover: hsl(0, 5%, 18%);
+      --color-bg-interactive: hsl(62, 84%, 88%);
+      --color-text: hsl(0, 1%, 39%);
+      --color-text-weak: hsl(0, 1%, 60%);
+      --color-text-weaker: hsl(30, 2%, 81%);
+      --color-text-strong: hsl(0, 5%, 12%);
+      --color-text-inverted: hsl(0, 20%, 99%);
+      --color-border: hsl(30, 2%, 81%);
+      --color-border-weak: hsla(0, 100%, 3%, 0.08);
+      --color-icon: hsl(0, 1%, 55%);
+      --color-accent: hsl(0, 5%, 12%);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: hsl(0, 9%, 7%);
+        --color-bg-weak: hsl(0, 6%, 10%);
+        --color-bg-weak-hover: hsl(0, 6%, 15%);
+        --color-bg-strong: hsl(0, 15%, 94%);
+        --color-bg-strong-hover: hsl(0, 15%, 97%);
+        --color-bg-interactive: hsl(62, 100%, 90%);
+        --color-text: hsl(0, 4%, 71%);
+        --color-text-weak: hsl(0, 2%, 49%);
+        --color-text-weaker: hsl(0, 3%, 28%);
+        --color-text-strong: hsl(0, 15%, 94%);
+        --color-text-inverted: hsl(0, 9%, 7%);
+        --color-border: hsl(0, 3%, 28%);
+        --color-border-weak: hsl(0, 4%, 23%);
+        --color-icon: hsl(10, 3%, 43%);
+        --color-accent: hsl(0, 15%, 94%);
+      }
+    }
+    body {
+      font-family: var(--font-mono);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    a { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; transition: color 0.15s; }
+    a:hover { color: var(--color-text); }
+    ::selection { background: var(--color-bg-interactive); color: var(--color-text-strong); }
+    @media (prefers-color-scheme: dark) { ::selection { background: var(--color-bg-interactive); color: var(--color-text-inverted); } }
+
+    .page { max-width: 72rem; margin: 0 auto; border-left: 1px solid var(--color-border-weak); border-right: 1px solid var(--color-border-weak); min-height: 100vh; }
+    @media (max-width: 65rem) { .page { border: none; } }
+
+    header {
+      position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+      height: 64px; padding: 0 5rem; background: var(--color-bg); border-bottom: 1px solid var(--color-border-weak);
+    }
+    @media (max-width: 60rem) { header { padding: 0 1.5rem; } }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--color-text-strong); font-weight: 500; font-size: 0.9375rem; }
+    .logo:hover { color: var(--color-text-strong); }
+    .logo-mark { width: 26px; height: 26px; border-radius: 4px; background: var(--color-bg-strong); display: flex; align-items: center; justify-content: center; color: var(--color-text-inverted); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    nav ul { display: flex; list-style: none; gap: 1.5rem; align-items: center; }
+    nav ul li a { text-decoration: none; font-size: 0.8125rem; color: var(--color-text-weak); transition: color 0.15s; }
+    nav ul li a:hover { color: var(--color-text-strong); text-decoration: underline; }
+    nav ul li a.active { color: var(--color-text-strong); }
+
+    .layout { display: flex; }
+    .sidebar {
+      width: 18rem; flex-shrink: 0; border-right: 1px solid var(--color-border-weak);
+      padding: 2rem 0; position: sticky; top: 64px; align-self: flex-start; max-height: calc(100vh - 64px); overflow-y: auto;
+    }
+    @media (max-width: 55rem) { .sidebar { display: none; } }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0; }
+    .sidebar-label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-weaker); padding: 0.75rem 1.5rem 0.5rem; }
+    .sidebar a {
+      display: block; padding: 0.4rem 1.5rem; font-size: 0.8125rem; color: var(--color-text-weak);
+      text-decoration: none; transition: all 0.1s;
+    }
+    .sidebar a:hover { color: var(--color-text-strong); background: var(--color-bg-weak); }
+    .sidebar a.active { color: var(--color-text-strong); background: var(--color-bg-weak); font-weight: 500; }
+
+    .content { flex: 1; min-width: 0; padding: 3rem 4rem 6rem; }
+    @media (max-width: 60rem) { .content { padding: 2rem 1.5rem 4rem; } }
+    .content h1 { font-size: 2rem; font-weight: 700; color: var(--color-text-strong); letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .content h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin: 2.5rem 0 0.75rem; letter-spacing: -0.01em; }
+    .content h3 { font-size: 1.0625rem; font-weight: 600; color: var(--color-text-strong); margin: 2rem 0 0.5rem; }
+    .content p { margin-bottom: 1rem; max-width: 45rem; }
+    .content ul, .content ol { margin: 0.75rem 0 1.25rem 1.25rem; max-width: 45rem; }
+    .content li { margin-bottom: 0.4rem; }
+    .content hr { border: none; border-top: 1px solid var(--color-border-weak); margin: 2rem 0; }
+
+    .doc-card {
+      background: var(--color-bg); border: 1px solid var(--color-border-weak); border-radius: 4px;
+      padding: 1.25rem 1.5rem; margin: 1.25rem 0; transition: border-color 0.15s;
+    }
+    .doc-card:hover { border-color: var(--color-text-weaker); }
+    .doc-card h3 { margin: 0 0 0.25rem; font-size: 0.9375rem; }
+    .doc-card p { font-size: 0.8125rem; color: var(--color-text-weak); margin: 0; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--color-border-weak); border: 1px solid var(--color-border-weak); margin: 1.5rem 0; }
+    @media (max-width: 45rem) { .grid-2 { grid-template-columns: 1fr; } }
+    .grid-2 > * { background: var(--color-bg); padding: 1rem 1.25rem; }
+    .grid-2 h4 { font-size: 0.8125rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.25rem; }
+    .grid-2 p { font-size: 0.75rem; color: var(--color-text-weak); margin: 0; }
+
+    .tag {
+      display: inline-block; font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 2px 8px; border: 1px solid var(--color-border); border-radius: 3px; color: var(--color-text-weak); margin-right: 4px;
+    }
+    .tag-local { border-color: hsl(142, 30%, 60%); color: hsl(142, 30%, 40%); }
+    @media (prefers-color-scheme: dark) { .tag-local { border-color: hsl(142, 30%, 40%); color: hsl(142, 30%, 60%); } }
+
+    .lang-bar {
+      display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+      padding: 0.75rem 0; border-bottom: 1px solid var(--color-border-weak); margin-bottom: 1.5rem;
+    }
+    .lang-bar a {
+      font-size: 0.75rem; text-decoration: none; color: var(--color-text-weak);
+      padding: 2px 8px; border: 1px solid var(--color-border-weak); border-radius: 3px;
+    }
+    .lang-bar a:hover { border-color: var(--color-text-weak); }
+    .lang-bar a.active { color: var(--color-text-strong); border-color: var(--color-text-strong); }
+
+    footer { padding: 2rem 5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.6875rem; color: var(--color-text-weak); border-top: 1px solid var(--color-border-weak); }
+    @media (max-width: 60rem) { footer { padding: 2rem 1.5rem; flex-direction: column; gap: 0.75rem; text-align: center; } }
+    footer a { color: var(--color-text-weak); text-decoration: underline; }
+    footer a:hover { color: var(--color-text-strong); }
+    footer .links { display: flex; gap: 1.25rem; }
+
+    @media (max-width: 55rem) { .layout { flex-direction: column; } }
+
+    .lang-dropdown { display: none; position: absolute; right: 0; top: 100%; background: var(--color-bg); border: 1px solid var(--color-border-weak); border-radius: 4px; padding: 8px 0; min-width: 180px; z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .lang-dropdown.open { display: block; }
+    .lang-dropdown a { display: flex; padding: 6px 16px; font-size: 0.8125rem; text-decoration: none; color: var(--color-text-weak); transition: background 0.12s; }
+    .lang-dropdown a:hover { background: var(--color-bg-weak); color: var(--color-text-strong); }
+    .lang-dropdown a.active { color: var(--color-text-strong); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a href="https://hbx12.github.io/aura-work/" class="logo">
+        <span class="logo-mark">A</span>
+        Aura Work
+      </a>
+      <nav>
+        <ul>
+          <li><a href="https://hbx12.github.io/aura-work/">Home</a></li>
+          <li><a href="#" class="active">Docs</a></li>
+          <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
+          <li style="position:relative;">
+            <a href="#" onclick="event.preventDefault();toggleLang(event)" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              EN
+            </a>
+            <div id="lang-menu" class="lang-dropdown">
+              <a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">English</a>
+              <a href="https://hbx12.github.io/aura-work/docs/docs.ar.html">العربية</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <span class="sidebar-label">Getting started</span>
+          <a href="#overview" class="active">Overview</a>
+          <a href="#installation">Installation</a>
+          <a href="#configuration">Configuration</a>
+
+          <span class="sidebar-label" style="margin-top:0.75rem;">Core features</span>
+          <a href="#providers">AI Providers</a>
+          <a href="#routing">Smart Routing</a>
+          <a href="#permissions">Permissions</a>
+          <a href="#vault">Encrypted Vault</a>
+          <a href="#scheduling">Scheduling</a>
+
+          <span class="sidebar-label" style="margin-top:0.75rem;">Skills</span>
+          <a href="#skills">Overview</a>
+          <a href="#skills-list">Skill directory</a>
+
+          <span class="sidebar-label" style="margin-top:0.75rem;">Tools & plugins</span>
+          <a href="#tools">Custom tools</a>
+          <a href="#mcp">MCP servers</a>
+          <a href="#plugins">Plugin system</a>
+
+          <span class="sidebar-label" style="margin-top:0.75rem;">Sidecars</span>
+          <a href="#sidecars">Architecture</a>
+
+          <span class="sidebar-label" style="margin-top:0.75rem;">More</span>
+          <a href="#i18n">Languages</a>
+          <a href="#themes">Themes</a>
+          <a href="#cli">CLI</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="lang-bar">
+          <a href="#" class="active">English</a>
+          <a href="https://hbx12.github.io/aura-work/docs/docs.ar.html">العربية</a>
+          <a href="https://github.com/hbx12/aura-work/tree/main/docs/features">More languages →</a>
+        </div>
+
+        <h1>Documentation</h1>
+        <p style="margin-bottom:2rem;">Everything you need to know about Aura Work — the open source, multi-provider desktop AI agent platform.</p>
+
+        <!-- Overview -->
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>Aura Work is a free, open-source desktop AI agent platform built with <strong>Tauri 2 + React 19</strong> and a <strong>Rust</strong> backend. It runs locally on your machine — no cloud dependency, no telemetry, no sign-up required.</p>
+          <p>The platform uses a <em>multi-sidecar architecture</em>: each major capability runs in its own lightweight sidecar process (agent, browser, VM, cloud sync, etc.), communicating over HTTP. This makes the system modular, crash-isolated, and easy to extend.</p>
+          <p>Key philosophy: <strong>local-first, permission-gated, extensible</strong>. You own your data, your keys stay on your machine, and the AI acts within boundaries you define.</p>
+        </section>
+
+        <!-- Installation -->
+        <section id="installation">
+          <h2>Installation</h2>
+          <p>Aura Work is in early alpha. Pre-built binaries for Windows, macOS, and Linux are available on the <a href="https://github.com/hbx12/aura-work/releases/latest">GitHub Releases</a> page.</p>
+          <p>To build from source:</p>
+          <div class="doc-card">
+            <p style="font-family:var(--font-mono);font-size:0.8125rem;">
+              git clone https://github.com/hbx12/aura-work.git<br>
+              cd aura-work<br>
+              npm install<br>
+              npm run tauri dev
+            </p>
+          </div>
+          <p>Prerequisites: <a href="https://nodejs.org/">Node.js 20+</a>, <a href="https://www.rust-lang.org/">Rust</a>, and <a href="https://v2.tauri.app/start/prerequisites/">Tauri 2 system deps</a>.</p>
+        </section>
+
+        <!-- Configuration -->
+        <section id="configuration">
+          <h2>Configuration</h2>
+          <p>Configure providers, routing policies, and themes through the desktop app's Settings page or via the <code>aura.jsonc</code> file in your project root.</p>
+          <p>Supported configuration options include AI provider keys, default models, routing policies, theme choice, and scheduled task definitions.</p>
+        </section>
+
+        <hr>
+
+        <!-- Providers -->
+        <section id="providers">
+          <h2>AI Providers</h2>
+          <p>Aura Work supports <strong>10 AI providers</strong>. Bring your own API keys — the app stores them in an encrypted OS-backed vault.</p>
+          <div class="grid-2">
+            <div><h4>Aura Cloud</h4><p>Managed cloud models via opencode.ai auth.</p></div>
+            <div><h4>OpenAI</h4><p>GPT-4o, GPT-4, o1, o3, and more.</p></div>
+            <div><h4>Anthropic</h4><p>Claude 3.5 Sonnet, Claude Opus, Haiku.</p></div>
+            <div><h4>Google Gemini</h4><p>Gemini 2.0 Flash, Gemini Pro.</p></div>
+            <div><h4>DeepSeek</h4><p>DeepSeek V3, DeepSeek R1.</p></div>
+            <div><h4>Ollama <span class="tag tag-local">local</span></h4><p>Llama 3, Mistral, Qwen, and any local model.</p></div>
+            <div><h4>LM Studio <span class="tag tag-local">local</span></h4><p>Run local models via LM Studio server.</p></div>
+            <div><h4>Minimax</h4><p>MiniMax text and reasoning models.</p></div>
+            <div><h4>Qwen</h4><p>Qwen 2.5 series from Alibaba Cloud.</p></div>
+            <div><h4>Custom endpoint</h4><p>Any OpenAI-compatible API endpoint.</p></div>
+          </div>
+        </section>
+
+        <!-- Routing -->
+        <section id="routing">
+          <h2>Smart Routing</h2>
+          <p>Route each task to the best model automatically based on your policy:</p>
+          <div class="grid-2">
+            <div><h4>Quality-first</h4><p>Best model for the job. Default policy.</p></div>
+            <div><h4>Cost-first</h4><p>Cheapest model that can handle the task.</p></div>
+            <div><h4>Privacy-first</h4><p>Prefer local models; redact secrets before sending to cloud.</p></div>
+            <div><h4>Local-only</h4><p>Ollama only. No cloud requests ever.</p></div>
+            <div><h4>Manual</h4><p>Use the specific model you pick per provider.</p></div>
+          </div>
+          <p>Routing can be set globally or per-project. Each decision is logged in the audit trail.</p>
+        </section>
+
+        <!-- Permissions -->
+        <section id="permissions">
+          <h2>Permission System</h2>
+          <p>High-impact actions require explicit approval. The permission engine categorises actions by risk and prompts the user before execution.</p>
+          <p>Built-in permission profiles:</p>
+          <div class="grid-2">
+            <div><h4>Read-only files</h4><p>Grant file read access to all paths.</p></div>
+            <div><h4>Safe automation</h4><p>Read + write files, shell read commands.</p></div>
+            <div><h4>Research</h4><p>Read files and browse the web.</p></div>
+          </div>
+          <p>Every permission request is recorded in the <strong>audit log</strong> with timestamps, actor info, and decision outcomes.</p>
+        </section>
+
+        <!-- Vault -->
+        <section id="vault">
+          <h2>Encrypted Vault</h2>
+          <p>API keys and secrets are stored in an encrypted vault backed by the operating system's secure storage (Keychain on macOS, Credential Manager on Windows, Secret Service on Linux).</p>
+          <p>The vault is <strong>device-bound</strong> and supports zero-trust recovery keys when cloud sync is enabled.</p>
+        </section>
+
+        <!-- Scheduling -->
+        <section id="scheduling">
+          <h2>Scheduling</h2>
+          <p>Schedule recurring AI tasks — daily stand-ups, weekly reports, hourly monitoring. Each task runs with its own permission profile and routing policy.</p>
+          <p>Supported cadences: manual, hourly, daily, weekly, weekdays, or custom cron expressions.</p>
+        </section>
+
+        <hr>
+
+        <!-- Skills -->
+        <section id="skills">
+          <h2>Skills</h2>
+          <p>Skills are reusable AI agent configurations — each one defines a role, guidelines, and output format for specific tasks. You can install skills from the marketplace or create your own with the built-in Visual Skill Creator.</p>
+          <p>The skill creator provides templates for common roles:</p>
+          <div class="grid-2">
+            <div><h4>Code Reviewer</h4><p>Analyzes code for bugs, security risks, and optimisations.</p></div>
+            <div><h4>Unit Test Writer</h4><p>Generates robust unit tests with edge-case coverage.</p></div>
+            <div><h4>Security Auditor</h4><p>Audits code for OWASP hazards, injections, and auth flaws.</p></div>
+          </div>
+        </section>
+
+        <section id="skills-list">
+          <h3>Skill Directory — 24 Skills</h3>
+          <p>Available from the Aura Work marketplace:</p>
+          <div class="grid-2">
+            <div><h4>Bug Finder</h4><p>Finds bugs in your code.</p></div>
+            <div><h4>Code Reviewer</h4><p>Reviews project quality.</p></div>
+            <div><h4>Security Auditor</h4><p>Audits project security.</p></div>
+            <div><h4>Docs Writer</h4><p>Writes project documentation.</p></div>
+            <div><h4>Database Analyst</h4><p>Analyzes database schemas and queries.</p></div>
+            <div><h4>MCP Builder</h4><p>Builds MCP server configurations.</p></div>
+            <div><h4>PRD Writer</h4><p>Writes product requirement documents.</p></div>
+            <div><h4>Open-Source Maintainer</h4><p>Helps maintain open source projects.</p></div>
+            <div><h4>Aura Automation</h4><p>Automates repetitive tasks.</p></div>
+            <div><h4>Aura Browser Assistant</h4><p>Browser automation helper.</p></div>
+            <div><h4>Aura Business Kit</h4><p>Business plans, policies, proposals.</p></div>
+            <div><h4>Aura Dashboard Builder</h4><p>Builds analytics dashboards.</p></div>
+            <div><h4>Aura Data Analyst</h4><p>Analyzes data and generates insights.</p></div>
+            <div><h4>Aura Design Studio</h4><p>Designs layouts and mockups.</p></div>
+            <div><h4>Aura Documents</h4><p>Creates and edits documents.</p></div>
+            <div><h4>Aura File Converter</h4><p>Converts between file formats.</p></div>
+            <div><h4>Aura Forms</h4><p>Creates and processes forms.</p></div>
+            <div><h4>Aura Image Studio</h4><p>Generates and edits images.</p></div>
+            <div><h4>Aura PDF</h4><p>Reads, creates, and edits PDFs.</p></div>
+            <div><h4>Aura Presentations</h4><p>Creates presentations.</p></div>
+            <div><h4>Aura Research</h4><p>Deep research on any topic.</p></div>
+            <div><h4>Aura Spreadsheets</h4><p>Works with spreadsheets.</p></div>
+            <div><h4>Aura Study Kit</h4><p>Study assistant and flashcard creator.</p></div>
+          </div>
+        </section>
+
+        <hr>
+
+        <!-- Tools & Plugins -->
+        <section id="tools">
+          <h2>Custom Tools</h2>
+          <p>Write your own TypeScript tools and run them inside the agent. Tools are sandboxed, can be tested live, and support JSON-schema argument validation.</p>
+          <p>Templates available: <strong>API Fetch</strong> (fetch external APIs) and <strong>File Utils</strong> (read/write/check files). You can install tools globally or per-project.</p>
+          <div class="doc-card">
+            <p style="font-size:0.8125rem;">Example: a weather fetch tool in ~20 lines of TypeScript.</p>
+          </div>
+        </section>
+
+        <section id="mcp">
+          <h2>MCP Servers</h2>
+          <p>Aura Work fully supports the <strong>Model Context Protocol (MCP)</strong>. Connect any MCP-compatible server via stdio or SSE transport. Servers can be installed from the marketplace or configured manually.</p>
+          <p>MCP servers appear as tools the agent can call — extending the agent's capabilities with databases, APIs, file systems, and more.</p>
+        </section>
+
+        <section id="plugins">
+          <h2>Plugin System</h2>
+          <p>Plugins are packaged extensions that can add tools, sidecars, and UI components. Installed via the Plugins page in the desktop app. The Chrome extension (<code>aura-chrome</code>) is an example that bridges the browser with the agent.</p>
+        </section>
+
+        <hr>
+
+        <!-- Sidecars -->
+        <section id="sidecars">
+          <h2>Sidecar Architecture</h2>
+          <p>Aura Work runs <strong>8 sidecar processes</strong>, each responsible for a specific capability. Sidecars are independent processes that communicate via HTTP — if one crashes, the rest keep running.</p>
+          <div class="grid-2">
+            <div><h4>Agent</h4><p>Core AI agent orchestration and task execution.</p></div>
+            <div><h4>Bridge</h4><p>Connects browser extension (Chrome) and Office add-ins (Word, Excel, PowerPoint).</p></div>
+            <div><h4>Browser Helper</h4><p>Manages browser automation profiles and sessions.</p></div>
+            <div><h4>Cloud Sync</h4><p>End-to-end encrypted sync across devices.</p></div>
+            <div><h4>Computer Use</h4><p>Lets the agent control desktop applications (experimental).</p></div>
+            <div><h4>Plugins Helper</h4><p>Manages plugin installation, MCP servers, and custom tools.</p></div>
+            <div><h4>VM Helper</h4><p>Provides isolated virtual machine execution.</p></div>
+          </div>
+        </section>
+
+        <hr>
+
+        <!-- i18n -->
+        <section id="i18n">
+          <h2>Languages & i18n</h2>
+          <p>Aura Work supports <strong>20 languages</strong> with full RTL support for Arabic and Persian. The translation system is powered by <strong>Weblate</strong> and the community.</p>
+          <div class="grid-2">
+            <div><h4>العربية (Arabic)</h4><p>Full RTL</p></div>
+            <div><h4>Deutsch (German)</h4><p></p></div>
+            <div><h4>English</h4><p>Primary language</p></div>
+            <div><h4>Español (Spanish)</h4><p></p></div>
+            <div><h4>Français (French)</h4><p></p></div>
+            <div><h4>हिन्दी (Hindi)</h4><p></p></div>
+            <div><h4>Bahasa Indonesia</h4><p></p></div>
+            <div><h4>Italiano (Italian)</h4><p></p></div>
+            <div><h4>日本語 (Japanese)</h4><p></p></div>
+            <div><h4>한국어 (Korean)</h4><p></p></div>
+            <div><h4>Nederlands (Dutch)</h4><p></p></div>
+            <div><h4>Polski (Polish)</h4><p></p></div>
+            <div><h4>Português (Portuguese)</h4><p></p></div>
+            <div><h4>Русский (Russian)</h4><p></p></div>
+            <div><h4>ภาษาไทย (Thai)</h4><p></p></div>
+            <div><h4>Türkçe (Turkish)</h4><p></p></div>
+            <div><h4>Tiếng Việt (Vietnamese)</h4><p></p></div>
+            <div><h4>简体中文 (Chinese Simplified)</h4><p></p></div>
+            <div><h4>繁體中文 (Chinese Traditional)</h4><p></p></div>
+            <div><h4>فارسی (Persian)</h4><p>Full RTL</p></div>
+          </div>
+          <p style="margin-top:1rem;">Translations are community-maintained. <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/WEBLATE.md">Learn how to contribute</a> a new language.</p>
+        </section>
+
+        <!-- Themes -->
+        <section id="themes">
+          <h2>Themes</h2>
+          <p>Aura Work ships with <strong>17 hand-crafted themes</strong> covering light, dark, and AMOLED modes. Switch between Nord, Dracula, Cyberpunk, Sakura, Monokai, Tokyo Night, Catppuccin, Solarized, Gruvbox, and more.</p>
+          <p>Custom theme creation is supported through the theme configuration file.</p>
+        </section>
+
+        <!-- CLI -->
+        <section id="cli">
+          <h2>CLI</h2>
+          <p>Aura Work includes a <strong>command-line interface</strong> (<code>aura-cli</code>) for headless operation — run tasks from the terminal, integrate with CI/CD pipelines, or script your workflows.</p>
+          <div class="doc-card">
+            <p style="font-family:var(--font-mono);font-size:0.8125rem;">
+              aura run "Review this PR for security issues"<br>
+              aura schedule --daily "Summarise my GitHub notifications"
+            </p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer>
+      <div>
+        <span>&copy; 2026 Aura Work contributors</span>
+        &nbsp;&middot;&nbsp;
+        <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
+      </div>
+      <div class="links">
+        <a href="https://github.com/hbx12/aura-work">GitHub</a>
+        <a href="https://github.com/hbx12/aura-work/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        <a href="https://github.com/hbx12/aura-work/security/policy">Security</a>
+      </div>
+    </footer>
+  </div>
+  <script>
+    function toggleLang(e) {
+      var m = document.getElementById('lang-menu');
+      m.classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+      var m = document.getElementById('lang-menu');
+      var trigger = e.target.closest('[onclick*="toggleLang"]');
+      if (!trigger && m) m.classList.remove('open');
+    });
+  </script>
+</body>
+</html>
