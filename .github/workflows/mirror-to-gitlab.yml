@@ -49,6 +49,13 @@ jobs:
           git config user.email "mirror@aura-work.local"
           git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
 
-          # Mirror all branches and tags to GitLab
-          git push -o ci.skip --all --force gitlab
-          git push -o ci.skip --tags --force gitlab
+          # Push each local branch individually, skip rejected ones
+          git branch | while IFS= read -r branch; do
+            branch="${branch#\* }"
+            echo "Pushing $branch..."
+            git push -o ci.skip --force gitlab "refs/heads/${branch}:refs/heads/${branch}" || echo "⚠️ Skipped $branch (rejected by GitLab)"
+          done
+
+          # Push all tags
+          echo "Pushing tags..."
+          git push -o ci.skip --tags --force gitlab || echo "⚠️ Some tags were skipped"
