@@ -33,6 +33,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "m13v",
+      "name": "Matthew Diakonov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104702220?v=4",
+      "profile": "https://m13v.com",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
