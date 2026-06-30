@@ -6,7 +6,17 @@
   "commit": false,
   "commitType": "docs",
   "commitConvention": "angular",
-  "contributors": [],
+  "contributors": [
+    {
+      "login": "ded-furby",
+      "name": "ded-furby",
+      "avatar_url": "https://avatars.githubusercontent.com/u/190979964?v=4",
+      "profile": "http://arjunavtani.com",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
   "contributorsPerLine": 7,
   "skipCi": true,
   "repoType": "github",
