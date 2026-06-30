@@ -1,574 +1,318 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-page="aura-work">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aura Work — The open source AI agent platform</title>
-  <meta name="description" content="Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable.">
-  <meta property="og:title" content="Aura Work">
-  <meta property="og:description" content="Open-source, multi-provider desktop AI agent platform">
-  <meta property="og:url" content="https://hbx12.github.io/aura-work/">
-  <meta property="og:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/social-preview.svg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/social-preview.svg">
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hbx12/aura-work/main/apps/desktop/public/aura-logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-
-      --color-bg: hsl(0, 20%, 99%);
-      --color-bg-weak: hsl(0, 8%, 97%);
-      --color-bg-weak-hover: hsl(0, 8%, 94%);
-      --color-bg-strong: hsl(0, 5%, 12%);
-      --color-bg-strong-hover: hsl(0, 5%, 18%);
-      --color-bg-interactive: hsl(62, 84%, 88%);
-
-      --color-text: hsl(0, 1%, 39%);
-      --color-text-weak: hsl(0, 1%, 60%);
-      --color-text-weaker: hsl(30, 2%, 81%);
-      --color-text-strong: hsl(0, 5%, 12%);
-      --color-text-inverted: hsl(0, 20%, 99%);
-
-      --color-border: hsl(30, 2%, 81%);
-      --color-border-weak: hsla(0, 100%, 3%, 0.08);
-      --color-icon: hsl(0, 1%, 55%);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --color-bg: hsl(0, 9%, 7%);
-        --color-bg-weak: hsl(0, 6%, 10%);
-        --color-bg-weak-hover: hsl(0, 6%, 15%);
-        --color-bg-strong: hsl(0, 15%, 94%);
-        --color-bg-strong-hover: hsl(0, 15%, 97%);
-        --color-bg-interactive: hsl(62, 100%, 90%);
-
-        --color-text: hsl(0, 4%, 71%);
-        --color-text-weak: hsl(0, 2%, 49%);
-        --color-text-weaker: hsl(0, 3%, 28%);
-        --color-text-strong: hsl(0, 15%, 94%);
-        --color-text-inverted: hsl(0, 9%, 7%);
-
-        --color-border: hsl(0, 3%, 28%);
-        --color-border-weak: hsl(0, 4%, 23%);
-        --color-icon: hsl(10, 3%, 43%);
-      }
-    }
-
-    body {
-      font-family: var(--font-mono);
-      background: var(--color-bg);
-      color: var(--color-text);
-      line-height: 1.7;
-      font-size: 15px;
-    }
-    a { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; transition: color 0.15s; }
-    a:hover { color: var(--color-text); }
-    ::selection { background: var(--color-bg-interactive); color: var(--color-text-strong); }
-    @media (prefers-color-scheme: dark) { ::selection { background: var(--color-bg-interactive); color: var(--color-text-inverted); } }
-
-    .page {
-      max-width: 67.5rem;
-      margin: 0 auto;
-      border-left: 1px solid var(--color-border-weak);
-      border-right: 1px solid var(--color-border-weak);
-      min-height: 100vh;
-    }
-    @media (max-width: 65rem) { .page { border: none; } }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 72px;
-      padding: 0 5rem;
-      background: var(--color-bg);
-      border-bottom: 1px solid var(--color-border-weak);
-    }
-    @media (max-width: 60rem) { header { padding: 0 1.5rem; } }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--color-text-strong);
-      font-weight: 500;
-      font-size: 1rem;
-    }
-    .logo:hover { color: var(--color-text-strong); }
-    .logo-mark {
-      width: 28px; height: 28px; border-radius: 4px;
-      background: var(--color-bg-strong);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--color-text-inverted);
-      font-size: 14px; font-weight: 700; flex-shrink: 0;
-    }
-
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 2rem;
-      align-items: center;
-    }
-    nav ul li a {
-      text-decoration: none;
-      font-size: 0.875rem;
-      color: var(--color-text-weak);
-      transition: color 0.15s;
-    }
-    nav ul li a:hover { color: var(--color-text-strong); text-decoration: underline; }
-    nav ul li a.cta {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--color-bg-strong); color: var(--color-text-inverted);
-      padding: 8px 16px 8px 10px; border: none; border-radius: 4px;
-      font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500;
-      text-decoration: none; cursor: pointer; transition: background 0.15s;
-    }
-    nav ul li a.cta:hover { background: var(--color-bg-strong-hover); color: var(--color-text-inverted); text-decoration: none; }
-    .nav-desktop { display: flex; }
-    @media (max-width: 40rem) { .nav-desktop { display: none; } }
-
-    .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 8px; color: var(--color-icon); }
-    .nav-toggle:hover { color: var(--color-text-strong); }
-    @media (max-width: 40rem) { .nav-toggle { display: flex; } }
-
-    @media (max-width: 40rem) {
-      .nav-desktop.open {
-        display: flex; position: absolute; top: 100%; left: 0; right: 0;
-        background: var(--color-bg); border-bottom: 1px solid var(--color-border-weak);
-        padding: 1rem 2rem; flex-direction: column; gap: 0.75rem;
-        box-shadow: 0 16px 40px rgba(0,0,0,.13); z-index: 100;
-      }
-      .nav-desktop.open ul { flex-direction: column; gap: 0.75rem; width: 100%; }
-    }
-
-    .hero { padding: 5rem 5rem 3rem; border-bottom: 1px solid var(--color-border-weak); }
-    @media (max-width: 60rem) { .hero { padding: 3rem 1.5rem 2rem; } }
-
-    .hero h1 {
-      font-size: 3rem; font-weight: 700; color: var(--color-text-strong);
-      letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1.25rem; max-width: 42rem;
-    }
-    @media (max-width: 50rem) { .hero h1 { font-size: 2rem; } }
-    .hero p {
-      font-size: 1.0625rem; line-height: 1.8; color: var(--color-text);
-      max-width: 36rem; margin-bottom: 2rem;
-    }
-    .hero-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .hero-btns a {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 20px; border-radius: 4px; font-size: 0.8125rem;
-      font-weight: 500; text-decoration: none; font-family: var(--font-mono);
-      transition: all 0.15s;
-    }
-    .hero-btns a.primary { background: var(--color-bg-strong); color: var(--color-text-inverted); }
-    .hero-btns a.primary:hover { background: var(--color-bg-strong-hover); }
-    .hero-btns a.secondary { border: 1px solid var(--color-border); color: var(--color-text-strong); }
-    .hero-btns a.secondary:hover { border-color: var(--color-text-strong); }
-
-    .demo { padding: 3rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
-    @media (max-width: 60rem) { .demo { padding: 2rem 1.5rem; } }
-    .demo img { width: 100%; border-radius: 4px; border: 1px solid var(--color-border-weak); }
-
-    .features-section { padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
-    @media (max-width: 60rem) { .features-section { padding: 3rem 1.5rem; } }
-
-    .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-weak); margin-bottom: 0.75rem; }
-    .features-section h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.75rem; }
-    .features-section > p { max-width: 36rem; margin-bottom: 2.5rem; }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--color-border-weak);
-      border: 1px solid var(--color-border-weak);
-    }
-    @media (max-width: 50rem) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 35rem) { .features-grid { grid-template-columns: 1fr; } }
-
-    .feature-card {
-      background: var(--color-bg);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .feature-card-icon { width: 32px; height: 32px; color: var(--color-icon); flex-shrink: 0; }
-    .feature-card h3 { font-size: 0.875rem; font-weight: 600; color: var(--color-text-strong); }
-    .feature-card p { font-size: 0.8125rem; line-height: 1.6; color: var(--color-text-weak); }
-
-    .stats {
-      padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak);
-      display: flex; gap: 4rem;
-    }
-    @media (max-width: 60rem) { .stats { padding: 3rem 1.5rem; gap: 2rem; flex-wrap: wrap; } }
-    .stat { display: flex; flex-direction: column; gap: 4px; }
-    .stat-value { font-size: 2rem; font-weight: 700; color: var(--color-text-strong); letter-spacing: -0.02em; }
-    .stat-label { font-size: 0.75rem; color: var(--color-text-weak); text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .contribute { padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
-    @media (max-width: 60rem) { .contribute { padding: 3rem 1.5rem; } }
-    .contribute h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.75rem; }
-    .contribute > p { max-width: 36rem; margin-bottom: 2rem; }
-
-    .contribute-links {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--color-border-weak);
-      border: 1px solid var(--color-border-weak);
-    }
-    @media (max-width: 50rem) { .contribute-links { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 30rem) { .contribute-links { grid-template-columns: 1fr; } }
-
-    .contribute-link {
-      background: var(--color-bg); padding: 1.25rem 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      text-decoration: none; color: var(--color-text-strong);
-      font-size: 0.875rem; font-weight: 500; transition: background 0.15s;
-    }
-    .contribute-link:hover { background: var(--color-bg-weak); }
-    .contribute-link span { display: flex; align-items: center; gap: 10px; }
-    .contribute-link svg { width: 16px; height: 16px; color: var(--color-icon); flex-shrink: 0; }
-    .contribute-link .arrow { color: var(--color-text-weaker); }
-
-    footer {
-      padding: 2rem 5rem; display: flex; justify-content: space-between;
-      align-items: center; font-size: 0.75rem; color: var(--color-text-weak);
-    }
-    @media (max-width: 60rem) { footer { padding: 2rem 1.5rem; flex-direction: column; gap: 1rem; text-align: center; } }
-    footer a { color: var(--color-text-weak); text-decoration: underline; }
-    footer a:hover { color: var(--color-text-strong); }
-    footer .links { display: flex; gap: 1.5rem; }
-    .lang-dropdown {
-      display: none; position: absolute; right: 0; top: 100%;
-      background: var(--color-bg); border: 1px solid var(--color-border-weak);
-      border-radius: 4px; padding: 8px 0; min-width: 200px;
-      z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-    .lang-dropdown.open { display: block; }
-    .lang-dropdown a {
-      display: flex; padding: 6px 16px; font-size: 0.8125rem;
-      text-decoration: none; color: var(--color-text-weak);
-      transition: background 0.12s;
-    }
-    .lang-dropdown a:hover { background: var(--color-bg-weak); color: var(--color-text-strong); }
-    .lang-dropdown a.active { color: var(--color-text-strong); font-weight: 600; }
-
-    .faq-section { padding: 4rem 5rem; border-bottom: 1px solid var(--color-border-weak); }
-    @media (max-width: 60rem) { .faq-section { padding: 3rem 1.5rem; } }
-    .faq-section h2 { font-size: 1.375rem; font-weight: 600; color: var(--color-text-strong); margin-bottom: 0.75rem; }
-    .faq-section > p { max-width: 36rem; margin-bottom: 2rem; }
-    .faq-list { max-width: 48rem; }
-    .faq-item { border-bottom: 1px solid var(--color-border-weak); padding: 0; }
-    .faq-question {
-      width: 100%; display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 0; background: none; border: none; cursor: pointer;
-      font-family: var(--font-mono); font-size: 0.875rem; font-weight: 500;
-      color: var(--color-text-strong); text-align: left; gap: 1rem;
-      transition: color 0.15s;
-    }
-    .faq-question:hover { color: var(--color-text); }
-    .faq-question svg { width: 16px; height: 16px; color: var(--color-icon); flex-shrink: 0; transition: transform 0.2s; }
-    .faq-item.open .faq-question svg { transform: rotate(180deg); }
-    .faq-answer {
-      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
-      font-size: 0.8125rem; line-height: 1.7; color: var(--color-text-weak);
-    }
-    .faq-answer-inner { padding-bottom: 1.25rem; }
-    .faq-item.open .faq-answer { max-height: 300px; }
-  </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Aura Work — The open source AI agent platform</title>
+ <meta name="description" content="Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable. 10 providers, 24 skills, 35 themes, 20 languages.">
+ <meta property="og:title" content="Aura Work">
+ <meta property="og:description" content="Open-source, multi-provider desktop AI agent platform — 10 providers, 24 skills, 35 themes">
+ <meta property="og:url" content="https://hbx12.github.io/aura-work/">
+ <meta property="og:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/social-preview.svg">
+ <meta name="twitter:card" content="summary_large_image">
+ <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hbx12/aura-work/main/apps/desktop/public/aura-logo.png">
+ <link rel="stylesheet" href="https://hbx12.github.io/aura-work/docs/assets/css/main.css">
 </head>
 <body>
-  <div class="page">
+ <div class="page">
 
-    <header>
-      <a href="/aura-work/" class="logo">
-        <span class="logo-mark">A</span>
-        Aura Work
+  <header>
+   <div class="header-inner">
+   <a href="/aura-work/" class="logo">
+    <span class="logo-mark">A</span>
+    Aura Work
+   </a>
+   <nav class="nav-desktop">
+    <ul>
+     <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
+     <li><a href="https://hbx12.github.io/aura-work/docs/docs/docs.html" class="active">Docs</a></li>
+     <li><a href="https://github.com/hbx12/aura-work/releases/latest">Releases</a></li>
+     <li class="lang-wrapper">
+      <a href="#" class="lang-trigger" onclick="event.preventDefault();toggleLang(event)">
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+       EN
       </a>
-      <nav class="nav-desktop">
-        <ul>
-          <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
-          <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
-          <li><a href="https://github.com/hbx12/aura-work/releases/latest">Releases</a></li>
-          <li style="position:relative;">
-            <a href="#" onclick="event.preventDefault();toggleLang(event)" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              EN
-            </a>
-            <div id="lang-menu" class="lang-dropdown">
-              <a href="https://hbx12.github.io/aura-work/" class="active">English</a>
-              <a href="https://hbx12.github.io/aura-work/index.ar.html">العربية</a>
-              <a href="#" onclick="return switchLang('fr','Français')">Français</a>
-              <a href="#" onclick="return switchLang('es','Español')">Español</a>
-              <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
-              <a href="#" onclick="return switchLang('ja','日本語')">日本語</a>
-              <a href="#" onclick="return switchLang('zh','简体中文')">简体中文</a>
-              <a href="#" onclick="return switchLang('ko','한국어')">한국어</a>
-              <a href="#" onclick="return switchLang('ru','Русский')">Русский</a>
-              <a href="#" onclick="return switchLang('fa','فارسی')">فارسی</a>
-              <a href="#" onclick="return switchLang('pt','Português')">Português</a>
-              <a href="#" onclick="return switchLang('tr','Türkçe')">Türkçe</a>
-              <a href="#" onclick="return switchLang('uk','Українська')">Українська</a>
-              <a href="#" onclick="return switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
-              <a href="#" onclick="return switchLang('th','ไทย')">ไทย</a>
-              <a href="#" onclick="return switchLang('pl','Polski')">Polski</a>
-              <a href="#" onclick="return switchLang('nl','Nederlands')">Nederlands</a>
-              <a href="#" onclick="return switchLang('it','Italiano')">Italiano</a>
-              <a href="#" onclick="return switchLang('hi','हिन्दी')">हिन्दी</a>
-            </div>
-          </li>
-          <li><a href="https://github.com/hbx12/aura-work/releases/latest" class="cta">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M12.1875 9.75L9.00001 12.9375L5.8125 9.75M9.00001 2.0625L9 12.375M14.4375 15.9375H3.5625"/></svg>
-            Download
-          </a></li>
-        </ul>
-      </nav>
-      <button class="nav-toggle" aria-label="Open menu" type="button">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
-      </button>
-    </header>
-
-    <section class="hero">
-      <h1>The open source AI agent platform</h1>
-      <p>Free, local-first, multi-provider desktop AI agent. Use OpenAI, Anthropic, Gemini, DeepSeek, Ollama — or any provider — with full privacy and permission controls.</p>
-      <div class="hero-btns">
-        <a href="https://github.com/hbx12/aura-work" class="primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          GitHub
-        </a>
-        <a href="https://github.com/hbx12/aura-work/releases/latest" class="secondary">
-          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M12.1875 9.75L9.00001 12.9375L5.8125 9.75M9.00001 2.0625L9 12.375M14.4375 15.9375H3.5625"/></svg>
-          Download
-        </a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" class="secondary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Contribute
-        </a>
+      <div id="lang-menu" class="lang-dropdown">
+       <a href="https://hbx12.github.io/aura-work/" class="active">English</a>
+       <a href="https://hbx12.github.io/aura-work/index.ar.html">العربية</a>
+       <a href="#" onclick="return switchLang('fr','Français')">Français</a>
+       <a href="#" onclick="return switchLang('es','Español')">Español</a>
+       <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
+       <a href="#" onclick="return switchLang('ja','日本語')">日本語</a>
+       <a href="#" onclick="return switchLang('zh','简体中文')">简体中文</a>
+       <a href="#" onclick="return switchLang('ko','한국어')">한국어</a>
+       <a href="#" onclick="return switchLang('ru','Русский')">Русский</a>
+       <a href="#" onclick="return switchLang('fa','فارسی')">فارسی</a>
+       <a href="#" onclick="return switchLang('pt','Português')">Português</a>
+       <a href="#" onclick="return switchLang('tr','Türkçe')">Türkçe</a>
+       <a href="#" onclick="return switchLang('uk','Українська')">Українська</a>
+       <a href="#" onclick="return switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
+       <a href="#" onclick="return switchLang('th','ไทย')">ไทย</a>
+       <a href="#" onclick="return switchLang('pl','Polski')">Polski</a>
+       <a href="#" onclick="return switchLang('nl','Nederlands')">Nederlands</a>
+       <a href="#" onclick="return switchLang('it','Italiano')">Italiano</a>
+       <a href="#" onclick="return switchLang('hi','हिन्दी')">हिन्दी</a>
       </div>
-    </section>
+     </li>
+     <li><a href="https://github.com/hbx12/aura-work/releases/latest" class="cta">
+      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M12.1875 9.75L9.00001 12.9375L5.8125 9.75M9.00001 2.0625L9 12.375M14.4375 15.9375H3.5625"/></svg>
+      Download
+     </a></li>
+    </ul>
+   </nav>
+   <button class="nav-toggle" aria-label="Open menu" type="button">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+   </button>
+   </div>
+  </header>
 
-    <section class="demo">
-      <img src="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/demo.gif" alt="Aura Work demo">
-    </section>
+  <section class="hero">
+   <h1>The open source AI agent platform</h1>
+   <p>Free, local-first, multi-provider desktop AI agent. Use OpenAI, Anthropic, Gemini, DeepSeek, Ollama — or any provider — with full privacy and permission controls.</p>
+   <div class="hero-btns">
+    <a href="https://github.com/hbx12/aura-work" class="primary">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+     GitHub
+    </a>
+    <a href="https://github.com/hbx12/aura-work/releases/latest" class="secondary">
+     <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M12.1875 9.75L9.00001 12.9375L5.8125 9.75M9.00001 2.0625L9 12.375M14.4375 15.9375H3.5625"/></svg>
+     Download
+    </a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" class="secondary">
+     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+     Contribute
+    </a>
+   </div>
+  </section>
 
-    <section class="features-section">
-      <p class="section-label">Features</p>
-      <h2>Everything you need, nothing you don't</h2>
-      <p>Local-first, permission-gated, and extensible. Aura Work puts you in control.</p>
-      <div class="features-grid">
+  <section class="demo">
+   <img src="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/demo.gif" alt="Aura Work demo">
+  </section>
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="16" cy="16" r="12"/><path d="M16 4a18 18 0 0 1 4 12 18 18 0 0 1-4 12 18 18 0 0 1-4-12 18 18 0 0 1 4-12z"/><path d="M4 16h24"/>
-          </svg>
-          <h3>Multi-Provider</h3>
-          <p>OpenAI, Anthropic, Gemini, DeepSeek, Ollama — bring your own keys or use local models. Route tasks to the best model.</p>
-        </div>
+  <section class="features-section">
+   <p class="section-label">Features</p>
+   <h2>Everything you need, nothing you don't</h2>
+   <p>Local-first, permission-gated, and extensible. Aura Work puts you in control.</p>
+   <div class="features-grid">
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="6" y="10" width="20" height="18" rx="2"/><path d="M10 10V7a6 6 0 0 1 12 0v3"/><circle cx="16" cy="20" r="2"/>
-          </svg>
-          <h3>Local-First</h3>
-          <p>Encrypted vault with OS-backed secure storage. No telemetry. Your keys never leave your machine.</p>
-        </div>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M16 4a18 18 0 0 1 4 12 18 18 0 0 1-4 12 18 18 0 0 1-4-12 18 18 0 0 1 4-12z"/><path d="M4 16h24"/>
+     </svg>
+     <h3>Multi-Provider</h3>
+     <p>OpenAI, Anthropic, Gemini, DeepSeek, Ollama — bring your own keys or use local models. Route tasks to the best model.</p>
+    </div>
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22V8l8-4v14"/><path d="M12 18l8 4"/><circle cx="12" cy="22" r="3"/><circle cx="20" cy="18" r="3"/>
-          </svg>
-          <h3>Permission-Gated</h3>
-          <p>High-impact actions require explicit approval. Full audit log of every operation.</p>
-        </div>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="10" width="20" height="18" rx="2"/><path d="M10 10V7a6 6 0 0 1 12 0v3"/><circle cx="16" cy="20" r="2"/>
+     </svg>
+     <h3>Local-First</h3>
+     <p>Encrypted vault with OS-backed secure storage. No telemetry. Your keys never leave your machine.</p>
+    </div>
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="16" cy="16" r="12"/><path d="M6 10h20"/><path d="M6 22h20"/><path d="M10 6v20"/><path d="M22 6v20"/>
-          </svg>
-          <h3>20 Languages</h3>
-          <p>Full RTL support for Arabic and Persian. Weblate-powered community translations.</p>
-        </div>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22V8l8-4v14"/><path d="M12 18l8 4"/><circle cx="12" cy="22" r="3"/><circle cx="20" cy="18" r="3"/>
+     </svg>
+     <h3>Permission-Gated</h3>
+     <p>High-impact actions require explicit approval. Full audit log of every operation.</p>
+    </div>
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="4" width="10" height="10" rx="1"/><rect x="18" y="4" width="10" height="10" rx="1"/><rect x="4" y="18" width="10" height="10" rx="1"/><rect x="18" y="18" width="10" height="10" rx="1"/>
-          </svg>
-          <h3>Extensible</h3>
-          <p>Plugin system, MCP support, and official Marketplace. Build and share your own extensions.</p>
-        </div>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M6 10h20"/><path d="M6 22h20"/><path d="M10 6v20"/><path d="M22 6v20"/>
+     </svg>
+     <h3>20 Languages</h3>
+     <p>Full RTL support for Arabic and Persian. Weblate-powered community translations.</p>
+    </div>
 
-        <div class="feature-card">
-          <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="16" cy="12" r="5"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="24" r="3"/><circle cx="16" cy="12" r="2" fill="currentColor"/>
-          </svg>
-          <h3>17 Themes</h3>
-          <p>Nord, Dracula, Cyberpunk, Sakura, and more. Light, dark, and AMOLED modes.</p>
-        </div>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="10" height="10" rx="1"/><rect x="18" y="4" width="10" height="10" rx="1"/><rect x="4" y="18" width="10" height="10" rx="1"/><rect x="18" y="18" width="10" height="10" rx="1"/>
+     </svg>
+     <h3>Extensible</h3>
+     <p>Plugin system, MCP support, and official Marketplace. Build and share your own extensions.</p>
+    </div>
 
-      </div>
-    </section>
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="12" r="5"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="24" r="3"/><circle cx="16" cy="12" r="2" fill="currentColor"/>
+     </svg>
+     <h3>17 Themes</h3>
+     <p>Nord, Dracula, Cyberpunk, Sakura, and more. Light, dark, and AMOLED modes.</p>
+    </div>
 
-    <section class="stats">
-      <div class="stat"><span class="stat-value">20+</span><span class="stat-label">Languages</span></div>
-      <div class="stat"><span class="stat-value">17</span><span class="stat-label">Themes</span></div>
-      <div class="stat"><span class="stat-value">8</span><span class="stat-label">Sidecars</span></div>
-      <div class="stat"><span class="stat-value">7</span><span class="stat-label">Providers</span></div>
-      <div class="stat"><span class="stat-value">0.1</span><span class="stat-label">Alpha</span></div>
-    </section>
+   </div>
+  </section>
 
-    <section class="contribute">
-      <p class="section-label">Get involved</p>
-      <h2>Built in the open</h2>
-      <p>Aura Work is open source and community-driven. Contributions of all kinds are welcome — code, docs, translations, design, and ideas.</p>
-      <div class="contribute-links">
-        <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>New contributor guide</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Good first issues</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contributing guide</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://github.com/hbx12/aura-work/discussions" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Discussions</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTORS.md" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contributors</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://github.com/hbx12/aura-work/blob/main/ROADMAP.md" class="contribute-link">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Roadmap</span>
-          <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-    </section>
+  <section class="landing-stats">
+   <div class="landing-stat"><span class="value">20+</span><span class="label">Languages</span></div>
+   <div class="landing-stat"><span class="value">17</span><span class="label">Themes</span></div>
+   <div class="landing-stat"><span class="value">8</span><span class="label">Sidecars</span></div>
+   <div class="landing-stat"><span class="value">7</span><span class="label">Providers</span></div>
+   <div class="landing-stat"><span class="value">0.1</span><span class="label">Alpha</span></div>
+  </section>
 
-    <section class="faq-section">
-      <p class="section-label">FAQ</p>
-      <h2>Common questions</h2>
-      <p>Everything you need to know about Aura Work.</p>
-      <div class="faq-list">
+  <section class="features-section">
+   <p class="section-label">Supported Providers</p>
+   <h2>Connect to any AI provider</h2>
+   <p>Aura Work supports 10 AI providers with automatic model discovery, key rotation, and intelligent routing.</p>
+   <div class="provider-grid">
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>OpenAI</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M12 22V12"/></svg>Anthropic</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>Gemini</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>DeepSeek</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>Ollama</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/></svg>OpenRouter</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Groq</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v3M7 17l2-2M17 17l-2-2"/></svg>Together AI</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>Mistral</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1010 10"/><path d="M12 6a6 6 0 106 6"/><circle cx="12" cy="12" r="2"/></svg>GitHub Copilot</div>
+   </div>
+  </section>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            How do I install Aura Work?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Download the latest release from GitHub for Windows, macOS, or Linux. Run the installer and launch the app — no account or API key required to get started. Configure your first provider via Settings &gt; Providers.</div></div>
-        </div>
+  <section class="contribute">
+   <p class="section-label">Get involved</p>
+   <h2>Built in the open</h2>
+   <p>Aura Work is open source and community-driven. Contributions of all kinds are welcome — code, docs, translations, design, and ideas.</p>
+   <div class="contribute-links">
+    <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>New contributor guide</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Good first issues</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contributing guide</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/discussions" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Discussions</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTORS.md" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contributors</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/ROADMAP.md" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>Roadmap</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+   </div>
+  </section>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            Which AI providers are supported?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">OpenAI, Anthropic (Claude), Google Gemini, DeepSeek, Ollama (local models), OpenRouter, Groq, Together AI, Mistral, and GitHub Copilot. The routing engine auto-discovers available providers and picks the best model per task.</div></div>
-        </div>
+  <section class="faq-section">
+   <p class="section-label">FAQ</p>
+   <h2>Common questions</h2>
+   <p>Everything you need to know about Aura Work.</p>
+   <div class="faq-list">
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            Is my data private?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Yes. Aura Work is local-first — your API keys are stored in an encrypted OS-backed vault, no telemetry is collected, and all agent execution happens on your machine. Use local models via Ollama for fully offline operation.</div></div>
-        </div>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I install Aura Work?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Download the latest release from GitHub for Windows, macOS, or Linux. Run the installer and launch the app — no account or API key required to get started. Configure your first provider via Settings &gt; Providers.</div></div>
+    </div>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            Is Aura Work free?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free and open source under the Apache 2.0 license. You only pay for API usage if you use cloud providers like OpenAI or Anthropic. Local models via Ollama cost nothing.</div></div>
-        </div>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Which AI providers are supported?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">OpenAI, Anthropic (Claude), Google Gemini, DeepSeek, Ollama (local models), OpenRouter, Groq, Together AI, Mistral, and GitHub Copilot. The routing engine auto-discovers available providers and picks the best model per task.</div></div>
+    </div>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            What are sidecars?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Sidecars are 8 modular background daemons that extend Aura Work's capabilities — agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each runs independently and can be enabled or disabled from the Settings panel.</div></div>
-        </div>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Is my data private?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Yes. Aura Work is local-first — your API keys are stored in an encrypted OS-backed vault, no telemetry is collected, and all agent execution happens on your machine. Use local models via Ollama for fully offline operation.</div></div>
+    </div>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            How do I contribute?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Check the new-contributor guide and good first issues on GitHub. We welcome code, documentation, translations via Weblate, design, and ideas. Join the Discussions to connect with the community.</div></div>
-        </div>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Is Aura Work free?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free and open source under the Apache 2.0 license. You only pay for API usage if you use cloud providers like OpenAI or Anthropic. Local models via Ollama cost nothing.</div></div>
+    </div>
 
-        <div class="faq-item">
-          <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
-            Can I use Aura Work offline?
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer"><div class="faq-answer-inner">Yes — with Ollama you can run fully local models without any internet connection. The core platform, routing engine, and sidecars all work offline. Only cloud provider APIs require connectivity.</div></div>
-        </div>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What are sidecars?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Sidecars are 8 modular background daemons that extend Aura Work's capabilities — agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each runs independently and can be enabled or disabled from the Settings panel.</div></div>
+    </div>
 
-      </div>
-    </section>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I contribute?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Check the new-contributor guide and good first issues on GitHub. We welcome code, documentation, translations via Weblate, design, and ideas. Join the Discussions to connect with the community.</div></div>
+    </div>
 
-    <footer>
-      <div>
-        <span>novir studio — Habeb bader 2026</span>
-        &nbsp;&middot;&nbsp;
-        <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
-      </div>
-      <div class="links">
-        <a href="https://github.com/hbx12/aura-work">GitHub</a>
-        <a href="https://github.com/hbx12/aura-work/discussions">Discussions</a>
-        <a href="https://github.com/hbx12/aura-work/security/policy">Security</a>
-      </div>
-    </footer>
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Can I use Aura Work offline?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Yes — with Ollama you can run fully local models without any internet connection. The core platform, routing engine, and sidecars all work offline. Only cloud provider APIs require connectivity.</div></div>
+    </div>
 
-  </div>
-  <script>
-    function toggleLang(e) {
-      var m = document.getElementById('lang-menu');
-      m.classList.toggle('open');
-    }
-    function switchLang(code, name) {
-      var p = window.location.pathname.replace('/aura-work/','').replace(/^\//,'');
-      var base = 'https://hbx12.github.io/aura-work';
-      if (code === 'en') { window.location.href = base + '/' + p; return false; }
-      if (code === 'ar') {
-        var ap = p.replace(/\.html$/, '.ar.html');
-        if (!ap.includes('.ar.')) ap = p.replace(/\/?$/, '/index.ar.html');
-        if (!ap) ap = 'index.ar.html';
-        window.location.href = base + '/' + ap;
-        return false;
-      }
-      var t = document.createElement('div');
-      t.textContent = '🌍 ' + name + ' translation coming soon!';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#28241d;color:#faf9f5;padding:12px 24px;border-radius:8px;font-family:Inter,system-ui,sans-serif;font-size:.875rem;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.25);opacity:0;transition:opacity .3s ease';
-      document.body.appendChild(t);
-      requestAnimationFrame(function(){t.style.opacity='1'});
-      setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},2800);
-      return false;
-    }
-    document.addEventListener('click', function(e) {
-      var m = document.getElementById('lang-menu');
-      var trigger = e.target.closest('[onclick*="toggleLang"]');
-      if (!trigger && m) m.classList.remove('open');
-    });
-    document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('.nav-desktop')?.classList.toggle('open')});
-  </script>
+   </div>
+  </section>
+
+  <footer>
+   <div>
+    <span>novir studio — Habeb bader 2026</span>
+    &nbsp;&middot;&nbsp;
+    <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
+   </div>
+   <div class="links">
+    <a href="https://github.com/hbx12/aura-work">GitHub</a>
+    <a href="https://github.com/hbx12/aura-work/discussions">Discussions</a>
+    <a href="https://github.com/hbx12/aura-work/security/policy">Security</a>
+   </div>
+  </footer>
+
+ </div>
+ <script>
+  function toggleLang(e) {
+   var m = document.getElementById('lang-menu');
+   m.classList.toggle('open');
+  }
+  function switchLang(code, name) {
+   var p = window.location.pathname.replace('/aura-work/','').replace(/^\//,'');
+   var base = 'https://hbx12.github.io/aura-work';
+   if (code === 'en') { window.location.href = base + '/' + p; return false; }
+   if (code === 'ar') {
+    var ap = p.replace(/\.html$/, '.ar.html');
+    if (!ap.includes('.ar.')) ap = p.replace(/\/?$/, '/index.ar.html');
+    if (!ap) ap = 'index.ar.html';
+    window.location.href = base + '/' + ap;
+    return false;
+   }
+   var t = document.createElement('div');
+   t.textContent = '' + name + ' translation coming soon!';
+   t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#28241d;color:#faf9f5;padding:12px 24px;border-radius:8px;font-family:Inter,system-ui,sans-serif;font-size:.875rem;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.25);opacity:0;transition:opacity .3s ease';
+   document.body.appendChild(t);
+   requestAnimationFrame(function(){t.style.opacity='1'});
+   setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove()},300)},2800);
+   return false;
+  }
+  document.addEventListener('click', function(e) {
+   var m = document.getElementById('lang-menu');
+   var trigger = e.target.closest('[onclick*="toggleLang"]');
+   if (!trigger && m) m.classList.remove('open');
+  });
+  document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('.nav-desktop')?.classList.toggle('open')});
+ </script>
 </body>
 </html>

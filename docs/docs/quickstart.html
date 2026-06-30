@@ -5,16 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quickstart — Aura Work</title>
 <meta name="description" content="Aura Work documentation">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-sans:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#faf9f5;--bg-weak:#f5f3ec;--bg-card:#fff;--bg-strong:#1e1b16;--text:#5c5544;--text-weak:#938a76;--text-strong:#28241d;--text-inverted:#faf9f5;--border:#e7e1d3;--border-weak:rgba(40,36,29,0.08);--accent:#c2683f;--accent-subtle:rgba(194,104,63,0.11);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
-@media(prefers-color-scheme:dark){:root{--bg:#161310;--bg-weak:#1e1b16;--bg-card:#25221c;--bg-strong:#ece7dc;--text:#a89e8b;--text-weak:#756c5b;--text-strong:#ece7dc;--text-inverted:#161310;--border:#322d25;--border-weak:rgba(236,231,220,0.08);--accent:#cf7a52;--accent-subtle:rgba(207,122,82,0.16);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#fcfbfa;--bg-weak:#f5f3ed;--bg-card:#ffffff;--bg-strong:#1d1a15;--text:#675e4b;--text-weak:#948c74;--text-strong:#1d1a15;--text-inverted:#fcfbfa;--border:#d8d0bd;--border-weak:rgba(74,66,55,0.10);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.12);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
+@media(prefers-color-scheme:dark){:root{--bg:#12100c;--bg-weak:#1a1713;--bg-card:#1f1c16;--bg-strong:#e8e3d9;--text:#a89f89;--text-weak:#7d7560;--text-strong:#e8e3d9;--text-inverted:#12100c;--border:#3f3c2b;--border-weak:rgba(232,227,217,0.08);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.15);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
+body{font-family:var(--font-mono),system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 
 /* Header */
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
+header{position:sticky;top:0;z-index:100;background:hsla(40,20%,99%,0.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
 @media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--text-strong);font-size:1rem}
@@ -72,9 +70,9 @@ header nav a.active{color:var(--accent)}
 .card{border:1px solid var(--border-weak);border-radius:8px;padding:1.25rem;background:var(--bg-card);transition:all .2s}
 .card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .card h3{font-size:.875rem;font-weight:600;color:var(--text-strong);margin-bottom:.375rem}
-.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6}
+.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6;overflow-wrap:break-word}
 .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border-weak);border-radius:8px;overflow:hidden;margin-bottom:2rem;border:1px solid var(--border-weak)}
-.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center}
+.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center;overflow-wrap:break-word;word-break:break-word}
 .stat-card .num{font-size:1.5rem;font-weight:700;color:var(--text-strong);font-family:var(--font-mono);letter-spacing:-.02em}
 .stat-card .lbl{font-size:.625rem;color:var(--text-weak);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:var(--font-mono)}
 
@@ -101,7 +99,7 @@ header nav a.active{color:var(--accent)}
 <header><div class="header-inner"><a href="https://hbx12.github.io/aura-work/" class="logo"><span class="logo-mark">A</span>Aura Work</a>    <nav>
       <ul>
         <li><a href="https://hbx12.github.io/aura-work/">Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://hbx12.github.io/aura-work/docs/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative">
           <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
@@ -109,7 +107,7 @@ header nav a.active{color:var(--accent)}
             EN
           </a>
           <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/quickstart.html">English</a>
+            <a href="https://hbx12.github.io/aura-work/docs/docs/quickstart.html">English</a>
             <a href="https://hbx12.github.io/aura-work/docs/quickstart.ar.html">العربية</a>
           </div>
         </li>
@@ -117,20 +115,20 @@ header nav a.active{color:var(--accent)}
     </nav><button class="nav-toggle" aria-label="Toggle menu" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div></header>
 <div class="layout">
 <aside class="sidebar"><nav class="sidebar-nav">    <div class="sec">Getting Started</div>
-    <a href="https://hbx12.github.io/aura-work/docs/overview.html">Overview</a>
-    <a href="https://hbx12.github.io/aura-work/docs/quickstart.html">Quickstart</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/overview.html">Overview</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/quickstart.html">Quickstart</a>
     <div class="sec">Core</div>
-    <a href="https://hbx12.github.io/aura-work/docs/architecture.html">Architecture</a>
-    <a href="https://hbx12.github.io/aura-work/docs/providers.html">Providers</a>
-    <a href="https://hbx12.github.io/aura-work/docs/cli.html">CLI</a>
-    <a href="https://hbx12.github.io/aura-work/docs/permissions.html">Permissions</a>
-    <a href="https://hbx12.github.io/aura-work/docs/routing.html">Routing</a>
-    <a href="https://hbx12.github.io/aura-work/docs/skills.html">Skills</a>
-    <a href="https://hbx12.github.io/aura-work/docs/mcp.html">MCP</a>
-    <a href="https://hbx12.github.io/aura-work/docs/sidecars.html">Sidecars</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/architecture.html">Architecture</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/providers.html">Providers</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/cli.html">CLI</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/permissions.html">Permissions</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/routing.html">Routing</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/skills.html">Skills</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/mcp.html">MCP</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/sidecars.html">Sidecars</a>
     <div class="sec">Customize</div>
-    <a href="https://hbx12.github.io/aura-work/docs/languages.html">Languages</a>
-    <a href="https://hbx12.github.io/aura-work/docs/themes.html">Themes</a></nav></aside>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/languages.html">Languages</a>
+    <a href="https://hbx12.github.io/aura-work/docs/docs/themes.html">Themes</a></nav></aside>
 <main class="content">
 <h1>Quick Start</h1><p class="sub">From zero to running your first AI agent task.</p>
   <section class="section">
@@ -159,6 +157,136 @@ header nav a.active{color:var(--accent)}
     <div class="section-label">Next Steps</div>
     <h2>Going deeper</h2>
     <p>Read about <a href="providers">Providers</a>, <a href="routing">Routing</a>, <a href="skills">Skills</a>, or <a href="architecture">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">New Contributor Guide</a>.</p>
+  </section>
+  <section class="section">
+   <div class="section-label">System Requirements</div>
+   <h2>Installation details</h2>
+   <p>Aura Work runs on all major desktop platforms. Below are the specific requirements and install methods for each operating system.</p>
+
+   <div class="detail-card">
+    <h3>System requirements</h3>
+    <table>
+     <thead><tr><th>Platform</th><th>Minimum Version</th><th>Architecture</th></tr></thead>
+     <tbody>
+      <tr><td>Windows</td><td>Windows 10 22H2+</td><td>x86_64, arm64</td></tr>
+      <tr><td>macOS</td><td>macOS 13 Ventura+</td><td>Apple Silicon, Intel</td></tr>
+      <tr><td>Linux</td><td>glibc 2.28+, kernel 5.4+</td><td>x86_64, aarch64</td></tr>
+     </tbody>
+    </table>
+   </div>
+
+   <div class="detail-card">
+    <h3>Download options</h3>
+    <p><strong>GitHub Releases:</strong> Download the latest installer from <a href="https://github.com/hbx12/aura-work/releases/latest">github.com/hbx12/aura-work/releases</a><br>
+    <strong>Windows (winget):</strong> <code>winget install aura-work</code><br>
+    <strong>macOS (Homebrew):</strong> <code>brew install aura-work</code><br>
+    <strong>Linux (AppImage):</strong> Download <code>Aura-Work-x86_64.AppImage</code> and run <code>chmod +x Aura-Work-x86_64.AppImage && ./Aura-Work-x86_64.AppImage</code></p>
+   </div>
+
+   <div class="detail-card">
+    <h3>Verifying installation</h3>
+    <p>Open a terminal and run:</p>
+    <pre><code>aura version
+# Output: Aura Work 0.1.0-alpha.1 (build abc1234)</code></pre>
+   </div>
+
+   <div class="detail-card">
+    <h3>Directory structure</h3>
+    <p>After installation, Aura Work creates the following directory structure:</p>
+    <pre><code>~/.aura/                  # Configuration directory
+ config.json              # Main configuration file
+ vault/                   # Encrypted credential storage
+ logs/                    # Application logs
+ projects/                # User projects
+ registry/                # Skills and sidecar registry
+   skills/                # Skill manifest files (.agents)
+   sidecars/              # Sidecar configuration</code></pre>
+   </div>
+  </section>
+
+  <section class="section">
+   <div class="section-label">Configuration</div>
+   <h2>Provider configuration</h2>
+   <p>Aura Work requires at least one AI provider configured. Set your API keys as environment variables or configure them through Settings &rarr; Providers in the desktop app.</p>
+
+   <div class="detail-card">
+    <h3>Environment variables</h3>
+    <table>
+     <thead><tr><th>Provider</th><th>Variable</th><th>Source</th></tr></thead>
+     <tbody>
+      <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td>platform.openai.com</td></tr>
+      <tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td>console.anthropic.com</td></tr>
+      <tr><td>Gemini</td><td><code>GEMINI_API_KEY</code></td><td>aistudio.google.com</td></tr>
+      <tr><td>DeepSeek</td><td><code>DEEPSEEK_API_KEY</code></td><td>platform.deepseek.com</td></tr>
+      <tr><td>Ollama (local)</td><td><code>OLLAMA_HOST</code></td><td>http://127.0.0.1:11434</td></tr>
+     </tbody>
+    </table>
+   </div>
+
+   <div class="detail-card">
+    <h3>Setting environment variables</h3>
+    <p><strong>Linux / macOS:</strong></p>
+    <pre><code>export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+aura</code></pre>
+    <p><strong>Windows PowerShell:</strong></p>
+    <pre><code>$env:OPENAI_API_KEY = "sk-..."
+$env:ANTHROPIC_API_KEY = "sk-ant-..."
+aura</code></pre>
+   </div>
+  </section>
+
+  <section class="section">
+   <div class="section-label">First Task</div>
+   <h2>Your first task in detail</h2>
+
+   <div class="detail-card">
+    <h3>Step 1: Launch the application</h3>
+    <p>Open Aura Work. The welcome screen displays the agent chat panel. Select your preferred provider from the dropdown in the top bar. If you set environment variables, the provider is automatically detected and configured.</p>
+   </div>
+
+   <div class="detail-card">
+    <h3>Step 2: Type your first prompt</h3>
+    <p>In the chat input, type a task such as:</p>
+    <pre><code>"Create a new React component that fetches user data from an API and displays it in a table"</code></pre>
+   </div>
+
+   <div class="detail-card">
+    <h3>Step 3: Agent execution cycle</h3>
+    <p>The agent processes your request in three phases:<br>
+    <strong>Plan</strong> &mdash; The agent analyzes your request and creates a step-by-step execution plan. Tools and skills are selected based on the task requirements.<br>
+    <strong>Execute</strong> &mdash; Each step is executed sequentially. The agent calls tools, reads files, writes code, and verifies results at each stage.<br>
+    <strong>Deliver</strong> &mdash; The final result is presented in the chat panel with file contents, explanations, and next-step suggestions.</p>
+   </div>
+
+   <div class="detail-card">
+    <h3>Step 4: Review results</h3>
+    <p>The agent displays the created component code, explains the structure, and offers to refine it based on your feedback. You can iterate by typing follow-up instructions such as <code>"Add loading states and error handling"</code> or <code>"Convert to TypeScript"</code>.</p>
+   </div>
+  </section>
+
+  <section class="section">
+   <div class="section-label">Troubleshooting</div>
+   <h2>Common issues</h2>
+
+   <div class="detail-card">
+    <h3>No provider configured</h3>
+    <p><strong>Symptom:</strong> The agent responds with "No provider available."<br>
+    <strong>Fix:</strong> Set at least one API key as an environment variable or configure a provider in Settings &rarr; Providers. For local models, start Ollama with <code>ollama serve</code>.</p>
+   </div>
+   <div class="detail-card">
+    <h3>Bridge connection refused</h3>
+    <p><strong>Symptom:</strong> The CLI reports "Bridge not reachable."<br>
+    <strong>Fix:</strong> Ensure the desktop app is running. Check that the Bridge sidecar is enabled in Settings &rarr; Sidecars. Restart the application if the issue persists.</p>
+   </div>
+   <div class="detail-card">
+    <h3>Application logs</h3>
+    <p>Logs are located at <code>~/.aura/logs/</code>. The most recent log file is <code>aura.log</code>. Enable debug logging by setting <code>AURA_LOG_LEVEL=debug</code> as an environment variable.</p>
+   </div>
+   <div class="detail-card">
+    <h3>Resetting configuration</h3>
+    <p>To reset Aura Work to its default state, quit the application and delete <code>~/.aura/config.json</code>. Restart the app to generate a fresh configuration. Your projects and skills registry are preserved.</p>
+   </div>
   </section>
 </main>
 </div>

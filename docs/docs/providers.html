@@ -5,16 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Providers — Aura Work</title>
 <meta name="description" content="Aura Work documentation">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-sans:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#faf9f5;--bg-weak:#f5f3ec;--bg-card:#fff;--bg-strong:#1e1b16;--text:#5c5544;--text-weak:#938a76;--text-strong:#28241d;--text-inverted:#faf9f5;--border:#e7e1d3;--border-weak:rgba(40,36,29,0.08);--accent:#c2683f;--accent-subtle:rgba(194,104,63,0.11);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
-@media(prefers-color-scheme:dark){:root{--bg:#161310;--bg-weak:#1e1b16;--bg-card:#25221c;--bg-strong:#ece7dc;--text:#a89e8b;--text-weak:#756c5b;--text-strong:#ece7dc;--text-inverted:#161310;--border:#322d25;--border-weak:rgba(236,231,220,0.08);--accent:#cf7a52;--accent-subtle:rgba(207,122,82,0.16);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
-body{font-family:var(--font-sans);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--bg:#fcfbfa;--bg-weak:#f5f3ed;--bg-card:#ffffff;--bg-strong:#1d1a15;--text:#675e4b;--text-weak:#948c74;--text-strong:#1d1a15;--text-inverted:#fcfbfa;--border:#d8d0bd;--border-weak:rgba(74,66,55,0.10);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.12);--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13)}
+@media(prefers-color-scheme:dark){:root{--bg:#12100c;--bg-weak:#1a1713;--bg-card:#1f1c16;--bg-strong:#e8e3d9;--text:#a89f89;--text-weak:#7d7560;--text-strong:#e8e3d9;--text-inverted:#12100c;--border:#3f3c2b;--border-weak:rgba(232,227,217,0.08);--accent:#bf6b3e;--accent-subtle:rgba(191,107,62,0.15);--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60)}}
+body{font-family:var(--font-mono),system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 
 /* Header */
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
+header{position:sticky;top:0;z-index:100;background:hsla(40,20%,99%,0.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border-weak);padding:0 2rem}
 @media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
 .logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--text-strong);font-size:1rem}
@@ -72,9 +70,9 @@ header nav a.active{color:var(--accent)}
 .card{border:1px solid var(--border-weak);border-radius:8px;padding:1.25rem;background:var(--bg-card);transition:all .2s}
 .card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .card h3{font-size:.875rem;font-weight:600;color:var(--text-strong);margin-bottom:.375rem}
-.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6}
+.card p{font-size:.8125rem;color:var(--text-weak);line-height:1.6;overflow-wrap:break-word}
 .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border-weak);border-radius:8px;overflow:hidden;margin-bottom:2rem;border:1px solid var(--border-weak)}
-.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center}
+.stat-card{background:var(--bg-card);padding:1.25rem;text-align:center;overflow-wrap:break-word;word-break:break-word}
 .stat-card .num{font-size:1.5rem;font-weight:700;color:var(--text-strong);font-family:var(--font-mono);letter-spacing:-.02em}
 .stat-card .lbl{font-size:.625rem;color:var(--text-weak);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:var(--font-mono)}
 
@@ -98,151 +96,337 @@ header nav a.active{color:var(--accent)}
 </style>
 </head>
 <body>
-<header><div class="header-inner"><a href="https://hbx12.github.io/aura-work/" class="logo"><span class="logo-mark">A</span>Aura Work</a>    <nav>
-      <ul>
-        <li><a href="https://hbx12.github.io/aura-work/">Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
-        <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
-        <li style="position:relative">
-          <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            EN
-          </a>
-          <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/providers.html">English</a>
-            <a href="https://hbx12.github.io/aura-work/docs/providers.ar.html">العربية</a>
-          </div>
-        </li>
-      </ul>
-    </nav><button class="nav-toggle" aria-label="Toggle menu" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div></header>
+<header><div class="header-inner"><a href="https://hbx12.github.io/aura-work/" class="logo"><span class="logo-mark">A</span>Aura Work</a>  <nav>
+   <ul>
+    <li><a href="https://hbx12.github.io/aura-work/">Home</a></li>
+    <li><a href="https://hbx12.github.io/aura-work/docs/docs/docs.html" class="active">Docs</a></li>
+    <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
+    <li style="position:relative">
+     <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      EN
+     </a>
+     <div id="lm" class="lang-dropdown">
+      <a href="https://hbx12.github.io/aura-work/docs/docs/providers.html">English</a>
+      <a href="https://hbx12.github.io/aura-work/docs/providers.ar.html">العربية</a>
+     </div>
+    </li>
+   </ul>
+  </nav><button class="nav-toggle" aria-label="Toggle menu" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div></header>
 <div class="layout">
-<aside class="sidebar"><nav class="sidebar-nav">    <div class="sec">Getting Started</div>
-    <a href="https://hbx12.github.io/aura-work/docs/overview.html">Overview</a>
-    <a href="https://hbx12.github.io/aura-work/docs/quickstart.html">Quickstart</a>
-    <div class="sec">Core</div>
-    <a href="https://hbx12.github.io/aura-work/docs/architecture.html">Architecture</a>
-    <a href="https://hbx12.github.io/aura-work/docs/providers.html">Providers</a>
-    <a href="https://hbx12.github.io/aura-work/docs/cli.html">CLI</a>
-    <a href="https://hbx12.github.io/aura-work/docs/permissions.html">Permissions</a>
-    <a href="https://hbx12.github.io/aura-work/docs/routing.html">Routing</a>
-    <a href="https://hbx12.github.io/aura-work/docs/skills.html">Skills</a>
-    <a href="https://hbx12.github.io/aura-work/docs/mcp.html">MCP</a>
-    <a href="https://hbx12.github.io/aura-work/docs/sidecars.html">Sidecars</a>
-    <div class="sec">Customize</div>
-    <a href="https://hbx12.github.io/aura-work/docs/languages.html">Languages</a>
-    <a href="https://hbx12.github.io/aura-work/docs/themes.html">Themes</a></nav></aside>
+<aside class="sidebar"><nav class="sidebar-nav">  <div class="sec">Getting Started</div>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/overview.html">Overview</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/quickstart.html">Quickstart</a>
+  <div class="sec">Core</div>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/architecture.html">Architecture</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/providers.html">Providers</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/cli.html">CLI</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/permissions.html">Permissions</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/routing.html">Routing</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/skills.html">Skills</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/mcp.html">MCP</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/sidecars.html">Sidecars</a>
+  <div class="sec">Customize</div>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/languages.html">Languages</a>
+  <a href="https://hbx12.github.io/aura-work/docs/docs/themes.html">Themes</a></nav></aside>
 <main class="content">
 <h1>AI Providers</h1><p class="sub">Connect to 10 different AI providers — cloud-hosted models or fully local.</p>
-  <section class="section">
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">10</div><div class="lbl">Total Providers</div></div>
-      <div class="stat-card fade-in delay-2"><div class="num">7</div><div class="lbl">Cloud Providers</div></div>
-      <div class="stat-card fade-in delay-3"><div class="num">3</div><div class="lbl">Local Providers</div></div>
-    </div>
-    <p>Aura Work supports <strong>10 AI providers</strong> covering both cloud-hosted and local (Ollama, LM Studio, Custom Endpoint) models. Each provider has its own adapter that handles authentication, model discovery, and chat completions. Providers marked as <strong>local</strong> never send data off your machine.</p>
-    <div class="detail-card fade-in delay-1">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c48b5c;flex-shrink:0"></span> Aura Cloud Models</h3>
-      <div class="meta">
-        <span>3 models: aura-fast, aura-coder, aura-premium</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>Hosted models via aura.work API. Includes Aura Fast (text+tools), Aura Coder (reasoning), and Aura Premium (vision+reasoning). Requires Aura Cloud sign-in.</p>
-    </div>
+ <section class="section">
+  <div class="stats-bar">
+   <div class="stat-card fade-in delay-1"><div class="num">10</div><div class="lbl">Total Providers</div></div>
+   <div class="stat-card fade-in delay-2"><div class="num">7</div><div class="lbl">Cloud Providers</div></div>
+   <div class="stat-card fade-in delay-3"><div class="num">3</div><div class="lbl">Local Providers</div></div>
+  </div>
+  <p>Aura Work supports <strong>10 AI providers</strong> covering both cloud-hosted and local (Ollama, LM Studio, Custom Endpoint) models. Each provider has its own adapter that handles authentication, model discovery, and chat completions. Providers marked as <strong>local</strong> never send data off your machine.</p>
+  <div class="detail-card fade-in delay-1">
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c48b5c;flex-shrink:0"></span> Aura Cloud Models</h3>
+   <div class="meta">
+    <span>3 models: aura-fast, aura-coder, aura-premium</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>Hosted models via aura.work API. Includes Aura Fast (text+tools), Aura Coder (reasoning), and Aura Premium (vision+reasoning). Requires Aura Cloud sign-in.</p>
+  </div>
 <div class="detail-card fade-in delay-2">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> Anthropic</h3>
-      <div class="meta">
-        <span>2 models: claude-sonnet-4-20250514, claude-3-5-haiku-20241022</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>Claude Sonnet 4 and Claude 3.5 Haiku. Best-in-class reasoning, code generation, and vision capabilities. API key required.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> Anthropic</h3>
+   <div class="meta">
+    <span>2 models: claude-sonnet-4-20250514, claude-3-5-haiku-20241022</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>Claude Sonnet 4 and Claude 3.5 Haiku. Best-in-class reasoning, code generation, and vision capabilities. API key required.</p>
+  </div>
 <div class="detail-card fade-in delay-3">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1a7f64;flex-shrink:0"></span> OpenAI</h3>
-      <div class="meta">
-        <span>2 models: gpt-4o, gpt-4o-mini</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>GPT-4o and GPT-4o mini. Industry-standard language models with broad tool-calling support. Also supports GitHub Copilot Codex accounts.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1a7f64;flex-shrink:0"></span> OpenAI</h3>
+   <div class="meta">
+    <span>2 models: gpt-4o, gpt-4o-mini</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>GPT-4o and GPT-4o mini. Industry-standard language models with broad tool-calling support. Also supports GitHub Copilot Codex accounts.</p>
+  </div>
 <div class="detail-card fade-in delay-4">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#3a6fc4;flex-shrink:0"></span> Google Gemini</h3>
-      <div class="meta">
-        <span>1 model: gemini-2.0-flash</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>Gemini 2.0 Flash. Google's fast, multimodal model with native vision capabilities. Free tier available via API key.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#3a6fc4;flex-shrink:0"></span> Google Gemini</h3>
+   <div class="meta">
+    <span>1 model: gemini-2.0-flash</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>Gemini 2.0 Flash. Google's fast, multimodal model with native vision capabilities. Free tier available via API key.</p>
+  </div>
 <div class="detail-card fade-in delay-1">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> DeepSeek</h3>
-      <div class="meta">
-        <span>1 model: deepseek-chat</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>DeepSeek V3. Cost-effective open-weight model with strong reasoning and code generation. API key required.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> DeepSeek</h3>
+   <div class="meta">
+    <span>1 model: deepseek-chat</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>DeepSeek V3. Cost-effective open-weight model with strong reasoning and code generation. API key required.</p>
+  </div>
 <div class="detail-card fade-in delay-2">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#7a5c8e;flex-shrink:0"></span> Ollama</h3>
-      <div class="meta">
-        <span>1 model: llama3.2+</span>
-        <span class="local-badge yes">Local</span>
-      </div>
-      <p>Fully local model runner. Run Llama 3.2, Mistral, CodeLlama, and hundreds of other models on your own hardware. Zero cloud dependency.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#7a5c8e;flex-shrink:0"></span> Ollama</h3>
+   <div class="meta">
+    <span>1 model: llama3.2+</span>
+    <span class="local-badge yes">Local</span>
+   </div>
+   <p>Fully local model runner. Run Llama 3.2, Mistral, CodeLlama, and hundreds of other models on your own hardware. Zero cloud dependency.</p>
+  </div>
 <div class="detail-card fade-in delay-3">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#645d4e;flex-shrink:0"></span> Custom Endpoint</h3>
-      <div class="meta">
-        <span>1 model: Dynamic</span>
-        <span class="local-badge yes">Local</span>
-      </div>
-      <p>Any OpenAI-compatible API endpoint. Connect to local inference servers, self-hosted proxies, or any provider with an OpenAI-compatible chat completions API.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#645d4e;flex-shrink:0"></span> Custom Endpoint</h3>
+   <div class="meta">
+    <span>1 model: Dynamic</span>
+    <span class="local-badge yes">Local</span>
+   </div>
+   <p>Any OpenAI-compatible API endpoint. Connect to local inference servers, self-hosted proxies, or any provider with an OpenAI-compatible chat completions API.</p>
+  </div>
 <div class="detail-card fade-in delay-4">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#e05c2b;flex-shrink:0"></span> Minimax</h3>
-      <div class="meta">
-        <span>1 model: abab6.5s-chat</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>Minimax abab6.5s. Chinese AI provider with competitive language model performance. API key required.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#e05c2b;flex-shrink:0"></span> Minimax</h3>
+   <div class="meta">
+    <span>1 model: abab6.5s-chat</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>Minimax abab6.5s. Chinese AI provider with competitive language model performance. API key required.</p>
+  </div>
 <div class="detail-card fade-in delay-1">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4f35b3;flex-shrink:0"></span> Qwen</h3>
-      <div class="meta">
-        <span>1 model: qwen-plus</span>
-        <span class="local-badge no">Cloud</span>
-      </div>
-      <p>Qwen Plus (DashScope). Alibaba's flagship LLM with strong multilingual capabilities including Chinese and English.</p>
-    </div>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4f35b3;flex-shrink:0"></span> Qwen</h3>
+   <div class="meta">
+    <span>1 model: qwen-plus</span>
+    <span class="local-badge no">Cloud</span>
+   </div>
+   <p>Qwen Plus (DashScope). Alibaba's flagship LLM with strong multilingual capabilities including Chinese and English.</p>
+  </div>
 <div class="detail-card fade-in delay-2">
-      <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1988a2;flex-shrink:0"></span> LM Studio</h3>
-      <div class="meta">
-        <span>1 model: Dynamic</span>
-        <span class="local-badge yes">Local</span>
-      </div>
-      <p>Local model server (http://127.0.0.1:1234). Run any GGUF model from Hugging Face with OpenAI-compatible API. Zero configuration needed.</p>
-    </div>
-  </section>
-  <section class="section">
-    <div class="section-label">Architecture</div>
-    <h2>How providers work</h2>
-    <p>Each provider implements a <code>ProviderAdapter</code> interface with <code>listModels()</code>, <code>validateCredentials()</code>, and <code>chat()</code> methods. The system auto-discovers available models on connection and caches them. OpenAI-compatible providers share a single adapter implementation.</p>
-    <div class="detail-card">
-      <h3>🔑 Credential security</h3>
-      <p>API keys are encrypted using the device-bound vault before storage. The vault supports biometric unlock on supported platforms. Credentials are never logged or exposed to the agent.</p>
-    </div>
-    <div class="detail-card">
-      <h3>📊 Usage tracking</h3>
-      <p>Every task records input/output token counts and estimated cost per model. The audit log maintains a permanent record of all provider interactions for accountability.</p>
-    </div>
-  </section>
+   <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1988a2;flex-shrink:0"></span> LM Studio</h3>
+   <div class="meta">
+    <span>1 model: Dynamic</span>
+    <span class="local-badge yes">Local</span>
+   </div>
+   <p>Local model server (http://127.0.0.1:1234). Run any GGUF model from Hugging Face with OpenAI-compatible API. Zero configuration needed.</p>
+  </div>
+ </section>
+ <section class="section">
+  <div class="section-label">Architecture</div>
+  <h2>How providers work</h2>
+  <p>Each provider implements a <code>ProviderAdapter</code> interface with <code>listModels()</code>, <code>validateCredentials()</code>, and <code>chat()</code> methods. The system auto-discovers available models on connection and caches them. OpenAI-compatible providers share a single adapter implementation.</p>
+  <div class="detail-card">
+   <h3>Credential security</h3>
+   <p>API keys are encrypted using the device-bound vault before storage. The vault supports biometric unlock on supported platforms. Credentials are never logged or exposed to the agent.</p>
+  </div>
+  <div class="detail-card">
+   <h3>Usage tracking</h3>
+   <p>Every task records input/output token counts and estimated cost per model. The audit log maintains a permanent record of all provider interactions for accountability.</p>
+  </div>
+ </section>
+
+ <section class="section">
+  <div class="section-label">Setup</div>
+  <h2>Setting up providers</h2>
+  <p>Each provider requires an API key or host configuration. Configure them via environment variables or through Settings &rarr; Providers in the desktop app.</p>
+
+  <div class="detail-card">
+   <h3>OpenAI</h3>
+   <p>Obtain an API key from <a href="https://platform.openai.com">platform.openai.com</a>.</p>
+   <pre><code># Environment variable
+export OPENAI_API_KEY="sk-proj-xxxxxxxxxxxx"
+
+# Verify connectivity
+curl -s https://api.openai.com/v1/models \
+ -H "Authorization: Bearer $OPENAI_API_KEY" | head -5</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Anthropic</h3>
+   <p>Obtain an API key from <a href="https://console.anthropic.com">console.anthropic.com</a>.</p>
+   <pre><code>export ANTHROPIC_API_KEY="sk-ant-xxxxxxxxxxxx"
+
+# Verify connectivity
+curl -s https://api.anthropic.com/v1/messages \
+ -H "x-api-key: $ANTHROPIC_API_KEY" \
+ -H "anthropic-version: 2023-06-01" \
+ -d '{"model":"claude-sonnet-4-20250514","max_tokens":10,"messages":[{"role":"user","content":"hi"}]}'</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Google Gemini</h3>
+   <p>Obtain an API key from <a href="https://aistudio.google.com">aistudio.google.com</a>. Free tier available.</p>
+   <pre><code>export GEMINI_API_KEY="AIzaxxxxxxxxxxxx"
+
+# Verify connectivity
+curl -s "https://generativelanguage.googleapis.com/v1/models?key=$GEMINI_API_KEY"</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>DeepSeek</h3>
+   <p>Obtain an API key from <a href="https://platform.deepseek.com">platform.deepseek.com</a>.</p>
+   <pre><code>export DEEPSEEK_API_KEY="sk-xxxxxxxxxxxx"
+
+# Verify connectivity
+curl -s https://api.deepseek.com/v1/models \
+ -H "Authorization: Bearer $DEEPSEEK_API_KEY"</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Ollama (local)</h3>
+   <p>Download Ollama from <a href="https://ollama.ai">ollama.ai</a> and run a model locally. No API key required.</p>
+   <pre><code># Start Ollama server
+ollama serve
+
+# Pull a model
+ollama pull llama3.2
+
+# Verify
+curl -s http://127.0.0.1:11434/api/tags</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>OpenRouter</h3>
+   <p>Obtain an API key from <a href="https://openrouter.ai">openrouter.ai</a>.</p>
+   <pre><code>export OPENROUTER_API_KEY="sk-or-xxxxxxxxxxxx"
+
+# Verify
+curl -s https://openrouter.ai/api/v1/models \
+ -H "Authorization: Bearer $OPENROUTER_API_KEY" | head -5</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Groq</h3>
+   <p>Obtain an API key from <a href="https://console.groq.com">console.groq.com</a>.</p>
+   <pre><code>export GROQ_API_KEY="gsk_xxxxxxxxxxxx"
+
+# Verify
+curl -s https://api.groq.com/openai/v1/models \
+ -H "Authorization: Bearer $GROQ_API_KEY" | head -5</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Together AI</h3>
+   <p>Obtain an API key from <a href="https://together.ai">together.ai</a>.</p>
+   <pre><code>export TOGETHER_API_KEY="xxxxxxxxxxxx"
+
+# Verify
+curl -s https://api.together.xyz/v1/models \
+ -H "Authorization: Bearer $TOGETHER_API_KEY" | head -5</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Mistral AI</h3>
+   <p>Obtain an API key from <a href="https://console.mistral.ai">console.mistral.ai</a>.</p>
+   <pre><code>export MISTRAL_API_KEY="xxxxxxxxxxxx"
+
+# Verify
+curl -s https://api.mistral.ai/v1/models \
+ -H "Authorization: Bearer $MISTRAL_API_KEY" | head -5</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>GitHub Copilot</h3>
+   <p>Use your GitHub personal access token with Copilot API access. Obtain from <a href="https://github.com/settings/tokens">github.com/settings/tokens</a> with <code>copilot</code> scope.</p>
+   <pre><code>export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
+
+# Verify
+curl -s -L https://api.github.com/copilot/access \
+ -H "Authorization: Bearer $GITHUB_TOKEN" \
+ -H "Accept: application/vnd.github.copilot-preview+json"</code></pre>
+  </div>
+ </section>
+
+ <section class="section">
+  <div class="section-label">Adapter API</div>
+  <h2>Provider adapter interface</h2>
+
+  <div class="detail-card">
+   <h3>ProviderAdapter protocol</h3>
+   <p>Each provider implements the following interface:</p>
+   <pre><code>interface ProviderAdapter {
+ listModels(): Promise&lt;ModelDescriptor[]&gt;
+ validateCredentials(): Promise&lt;boolean&gt;
+ chat(request: ChatRequest): AsyncIterable&lt;ChatChunk&gt;
+}</code></pre>
+   <p><strong>listModels</strong> &mdash; Returns available models from the provider, cached for 5 minutes after first fetch. Used to validate model names in configuration.</p>
+   <p><strong>validateCredentials</strong> &mdash; Tests the API key or connection by making a lightweight request. Returns false if credentials are invalid or expired.</p>
+   <p><strong>chat</strong> &mdash; Sends a chat completion request and streams the response. Supports tool calls and structured output when the provider supports them.</p>
+  </div>
+
+  <div class="detail-card">
+   <h3>OpenAI-compatible adapter</h3>
+   <p>Providers that use the OpenAI chat completions API format share a single adapter implementation. Configure the base URL and API key:</p>
+   <pre><code>{
+ "type": "openai-compatible",
+ "base_url": "https://api.custom-provider.com/v1",
+ "api_key_env": "CUSTOM_PROVIDER_KEY",
+ "models": ["custom-model-1", "custom-model-2"]
+}</code></pre>
+  </div>
+
+  <div class="detail-card">
+   <h3>Custom adapter example</h3>
+   <p>To add a new provider, implement the adapter and register it in the provider registry:</p>
+   <pre><code>import { ProviderAdapter, ChatRequest, ChatChunk } from '@aura/providers';
+
+class MyCustomProvider implements ProviderAdapter {
+ async listModels() { return [{ id: 'my-model', name: 'My Model' }]; }
+ async validateCredentials() { return this.apiKey.startsWith('sk-'); }
+ async *chat(request: ChatRequest) {
+   const response = await fetch(this.baseUrl, { /* ... */ });
+   for await (const chunk of response.body) yield chunk;
+ }
+}
+
+registerProvider('my-provider', MyCustomProvider);</code></pre>
+  </div>
+ </section>
+
+ <section class="section">
+  <div class="section-label">Reference</div>
+  <h2>Environment variables reference</h2>
+  <table>
+   <thead><tr><th>Provider</th><th>Variable</th><th>Required</th><th>Default</th></tr></thead>
+   <tbody>
+    <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Anthropic</td><td><code>ANTHROPIC_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Gemini</td><td><code>GEMINI_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>DeepSeek</td><td><code>DEEPSEEK_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Ollama</td><td><code>OLLAMA_HOST</code></td><td>No</td><td>http://127.0.0.1:11434</td></tr>
+    <tr><td>OpenRouter</td><td><code>OPENROUTER_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Groq</td><td><code>GROQ_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Together AI</td><td><code>TOGETHER_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Mistral</td><td><code>MISTRAL_API_KEY</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>GitHub Copilot</td><td><code>GITHUB_TOKEN</code></td><td>Yes</td><td>—</td></tr>
+    <tr><td>Custom Endpoint</td><td><code>AURA_CUSTOM_ENDPOINT</code></td><td>No</td><td>http://127.0.0.1:8080</td></tr>
+   </tbody>
+  </table>
+
+  <div class="detail-card" style="margin-top:1.5rem">
+   <h3>Local providers</h3>
+   <p><strong>Ollama:</strong> Install from <a href="https://ollama.ai">ollama.ai</a>, run <code>ollama serve</code>, then <code>ollama pull llama3.2</code>. Aura Work auto-discovers Ollama when the service is running on the default port.</p>
+   <p><strong>LM Studio:</strong> Download from <a href="https://lmstudio.ai">lmstudio.ai</a>, start the local inference server (defaults to <code>http://127.0.0.1:1234</code>). Aura Work detects it automatically.</p>
+   <p><strong>Custom Endpoint:</strong> Point to any OpenAI-compatible API endpoint. Set the URL in Settings &rarr; Providers &rarr; Custom Endpoint, or via <code>AURA_CUSTOM_ENDPOINT</code> environment variable.</p>
+  </div>
+ </section>
 </main>
 </div>
 <footer class="doc-footer">
-  &copy; 2026 <strong>novir studio — Habeb bader</strong> &nbsp;&middot;&nbsp;
-  <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
-  &nbsp;&middot;&nbsp;
-  <a href="https://github.com/hbx12/aura-work">GitHub</a>
-  &nbsp;&middot;&nbsp;
-  <a href="https://github.com/hbx12/aura-work/discussions">Discussions</a>
+ &copy; 2026 <strong>novir studio — Habeb bader</strong> &nbsp;&middot;&nbsp;
+ <a href="https://github.com/hbx12/aura-work/blob/main/LICENSE">Apache 2.0</a>
+ &nbsp;&middot;&nbsp;
+ <a href="https://github.com/hbx12/aura-work">GitHub</a>
+ &nbsp;&middot;&nbsp;
+ <a href="https://github.com/hbx12/aura-work/discussions">Discussions</a>
 </footer><script>
 document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('header nav').classList.toggle('open')});
 document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
