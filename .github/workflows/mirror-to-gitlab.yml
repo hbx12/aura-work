@@ -40,8 +40,6 @@ jobs:
           git config user.email "mirror@aura-work.local"
           git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
 
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            git push -o ci.skip gitlab "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
-          else
-            git push -o ci.skip gitlab "HEAD:refs/heads/${GITHUB_REF_NAME}"
-          fi
+          # Mirror all branches and tags to GitLab
+          git push -o ci.skip --all --force gitlab
+          git push -o ci.skip --tags --force gitlab
