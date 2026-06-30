@@ -93,6 +93,26 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-vm-helper/package.json
 
+@babel/helper-string-parser@7.29.7
+  License: MIT
+  Source: node_modules/@babel/helper-string-parser
+
+@babel/helper-validator-identifier@7.29.7
+  License: MIT
+  Source: node_modules/@babel/helper-validator-identifier
+
+@babel/parser@7.29.7
+  License: MIT
+  Source: node_modules/@babel/parser
+
+@babel/types@7.29.7
+  License: MIT
+  Source: node_modules/@babel/types
+
+@bcoe/v8-coverage@1.0.2
+  License: MIT
+  Source: node_modules/@bcoe/v8-coverage
+
 @emnapi/core@1.10.0
   License: MIT
   Source: node_modules/@emnapi/core
@@ -213,9 +233,17 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@hono/node-server
 
+@jridgewell/resolve-uri@3.1.2
+  License: MIT
+  Source: node_modules/@jridgewell/resolve-uri
+
 @jridgewell/sourcemap-codec@1.5.5
   License: MIT
   Source: node_modules/@jridgewell/sourcemap-codec
+
+@jridgewell/trace-mapping@0.3.31
+  License: MIT
+  Source: node_modules/@jridgewell/trace-mapping
 
 @modelcontextprotocol/sdk@1.29.0
   License: MIT
@@ -240,10 +268,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @puppeteer/browsers@2.13.2
   License: Apache-2.0
   Source: node_modules/@puppeteer/browsers
-
-@puppeteer/browsers/node_modules/semver@7.8.1
-  License: ISC
-  Source: node_modules/@puppeteer/browsers/node_modules/semver
 
 @rolldown/binding-android-arm64@1.0.3
   License: MIT
@@ -421,31 +445,35 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@types/yauzl
 
-@vitest/expect@4.1.8
+@vitest/coverage-v8@4.1.9
+  License: MIT
+  Source: node_modules/@vitest/coverage-v8
+
+@vitest/expect@4.1.9
   License: MIT
   Source: node_modules/@vitest/expect
 
-@vitest/mocker@4.1.8
+@vitest/mocker@4.1.9
   License: MIT
   Source: node_modules/@vitest/mocker
 
-@vitest/pretty-format@4.1.8
+@vitest/pretty-format@4.1.9
   License: MIT
   Source: node_modules/@vitest/pretty-format
 
-@vitest/runner@4.1.8
+@vitest/runner@4.1.9
   License: MIT
   Source: node_modules/@vitest/runner
 
-@vitest/snapshot@4.1.8
+@vitest/snapshot@4.1.9
   License: MIT
   Source: node_modules/@vitest/snapshot
 
-@vitest/spy@4.1.8
+@vitest/spy@4.1.9
   License: MIT
   Source: node_modules/@vitest/spy
 
-@vitest/utils@4.1.8
+@vitest/utils@4.1.9
   License: MIT
   Source: node_modules/@vitest/utils
 
@@ -480,6 +508,10 @@ assertion-error@2.0.1
 ast-types@0.13.4
   License: MIT
   Source: node_modules/ast-types
+
+ast-v8-to-istanbul@1.0.4
+  License: MIT
+  Source: node_modules/ast-v8-to-istanbul
 
 asynckit@0.4.0
   License: MIT
@@ -829,6 +861,10 @@ graceful-fs@4.2.11
   License: ISC
   Source: node_modules/graceful-fs
 
+has-flag@4.0.0
+  License: MIT
+  Source: node_modules/has-flag
+
 has-symbols@1.1.0
   License: MIT
   Source: node_modules/has-symbols
@@ -844,6 +880,10 @@ hasown@2.0.4
 hono@4.12.23
   License: MIT
   Source: node_modules/hono
+
+html-escaper@2.0.2
+  License: MIT
+  Source: node_modules/html-escaper
 
 http-errors@2.0.1
   License: MIT
@@ -885,9 +925,25 @@ isexe@2.0.0
   License: ISC
   Source: node_modules/isexe
 
+istanbul-lib-coverage@3.2.2
+  License: BSD-3-Clause
+  Source: node_modules/istanbul-lib-coverage
+
+istanbul-lib-report@3.0.1
+  License: BSD-3-Clause
+  Source: node_modules/istanbul-lib-report
+
+istanbul-reports@3.2.0
+  License: BSD-3-Clause
+  Source: node_modules/istanbul-reports
+
 jose@6.2.3
   License: MIT
   Source: node_modules/jose
+
+js-tokens@10.0.0
+  License: MIT
+  Source: node_modules/js-tokens
 
 json-schema-traverse@1.0.0
   License: MIT
@@ -952,6 +1008,14 @@ lightningcss-win32-x64-msvc@1.32.0
 magic-string@0.30.21
   License: MIT
   Source: node_modules/magic-string
+
+magicast@0.5.3
+  License: MIT
+  Source: node_modules/magicast
+
+make-dir@4.0.0
+  License: MIT
+  Source: node_modules/make-dir
 
 math-intrinsics@1.1.0
   License: MIT
@@ -1137,6 +1201,10 @@ scheduler@0.27.0
   License: MIT
   Source: node_modules/scheduler
 
+semver@7.8.5
+  License: ISC
+  Source: node_modules/semver
+
 send@1.2.1
   License: MIT
   Source: node_modules/send
@@ -1225,6 +1293,10 @@ strip-ansi@6.0.1
   License: MIT
   Source: node_modules/strip-ansi
 
+supports-color@7.2.0
+  License: MIT
+  Source: node_modules/supports-color
+
 tar-fs@3.1.2
   License: MIT
   Source: node_modules/tar-fs
@@ -1301,7 +1373,7 @@ vite@8.0.16
   License: MIT
   Source: node_modules/vite
 
-vitest@4.1.8
+vitest@4.1.9
   License: MIT
   Source: node_modules/vitest
 
