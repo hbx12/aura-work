@@ -1523,7 +1523,14 @@
       ],
       "homepage": "https://github.com/hbx12/aura-work",
       "license": "MIT",
-      "repository": "https://github.com/hbx12/aura-work"
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "مدقق الأمان",
+          "summary": "يفحص الكود والاعتماديات بحثاً عن الثغرات الأمنية والممارسات غير الآمنة.",
+          "description": "مهارة مدقق الأمان لفحص الكود والاعتماديات. تبحث عن الثغرات المعروفة والممارسات غير الآمنة وتقدم توصيات للإصلاح."
+        }
+      }
     },
     {
       "id": "mcp.github",
@@ -1595,7 +1602,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "GitHub MCP",
+          "summary": "التفاعل مع مستودعات GitHub — القضايا، طلبات السحب، الملفات، والمزيد.",
+          "description": "موصل MCP للتفاعل مع GitHub. يتيح إدارة القضايا وطلبات السحب والملفات والتعليقات عبر واجهة GitHub API."
+        }
+      }
     },
     {
       "id": "mcp.filesystem",
@@ -1662,7 +1676,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "نظام الملفات MCP",
+          "summary": "الوصول الآمن إلى نظام الملفات المحلي — قراءة وكتابة وبحث في الملفات.",
+          "description": "موصل MCP للوصول إلى نظام الملفات المحلي. يتيح قراءة الملفات وكتابتها والبحث فيها مع ضوابط أمان."
+        }
+      }
     },
     {
       "id": "mcp.postgres",
@@ -1728,7 +1749,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "PostgreSQL MCP",
+          "summary": "الاستعلام وإدارة قواعد بيانات PostgreSQL مباشرة من Aura.",
+          "description": "موصل MCP للتفاعل مع قواعد بيانات PostgreSQL. يتيح تنفيذ الاستعلامات وإدارة الجداول والبيانات."
+        }
+      }
     },
     {
       "id": "mcp.sqlite",
@@ -1789,7 +1817,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "SQLite MCP",
+          "summary": "الاستعلام وإدارة قواعد بيانات SQLite المحلية.",
+          "description": "موصل MCP للتفاعل مع قواعد بيانات SQLite. يتيح تنفيذ الاستعلامات وإدارة الجداول والبيانات المحلية."
+        }
+      }
     },
     {
       "id": "mcp.browser",
@@ -1846,7 +1881,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "متصفح الويب MCP",
+          "summary": "أتمتة المتصفح — التنقل والنقر وملء النماذج واستخراج البيانات.",
+          "description": "موصل MCP لأتمتة المتصفح. يتيح التنقل في صفحات الويب والنقر على العناصر وملء النماذج واستخراج البيانات."
+        }
+      }
     },
     {
       "id": "mcp.playwright",
@@ -1899,7 +1941,14 @@
           "description": "Execute a web automation workflow."
         }
       ],
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "Playwright MCP",
+          "summary": "أتمتة المتصفح المتقدمة باستخدام Playwright — اختبارات وتجربة مستخدم.",
+          "description": "موصل MCP لأتمتة المتصفح باستخدام Playwright. يتيح تشغيل اختبارات UI وأتمتة سير العمل المعقدة."
+        }
+      }
     },
     {
       "id": "mcp.docker",
@@ -1956,7 +2005,14 @@
           "description": "Fetch container logs."
         }
       ],
-      "license": "Apache-2.0"
+      "license": "Apache-2.0",
+      "localized": {
+        "ar": {
+          "name": "Docker MCP",
+          "summary": "إدارة الحاويات والصور والشبكات في Docker.",
+          "description": "موصل MCP لإدارة Docker. يتيح تشغيل الحاويات وإدارتها وبناء الصور وإدارة الشبكات."
+        }
+      }
     },
     {
       "id": "mcp.memory",
@@ -2013,7 +2069,14 @@
         }
       ],
       "homepage": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "الذاكرة MCP",
+          "summary": "ذاكرة طويلة المدى للوكيل — تخزين واسترجاع المعلومات عبر الجلسات.",
+          "description": "موصل MCP للذاكرة طويلة المدى. يتيح للوكيل تخزين المعلومات المهمة واسترجاعها عبر جلسات العمل المختلفة."
+        }
+      }
     },
     {
       "id": "plugin.sample-local",
@@ -2062,7 +2125,14 @@
           "description": "A simple dummy tool returning greeting messages."
         }
       ],
-      "license": "MIT"
+      "license": "MIT",
+      "localized": {
+        "ar": {
+          "name": "إضافة Aura للمطورين",
+          "summary": "إضافة نموذجية لإنشاء إضافات Aura المحلية.",
+          "description": "إضافة نموذجية توضح كيفية إنشاء إضافات Aura المحلية. يمكن استخدامها كمرجع لتطوير إضافات مخصصة."
+        }
+      }
     },
     {
       "id": "skill.git-master",
