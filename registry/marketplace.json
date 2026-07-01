@@ -2219,6 +2219,468 @@
           ]
         }
       }
+    },
+    {
+      "id": "skill.aura-a11y-auditor",
+      "type": "skill",
+      "name": "Accessibility Auditor",
+      "version": "1.0.0",
+      "summary": "Audit HTML/web content for WCAG 2.1 AA compliance and generate remediation reports.",
+      "description": "An accessibility auditing skill that checks web content against WCAG 2.1 AA standards. It identifies violations, provides code snippets for fixes, and generates comprehensive accessibility reports.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-a11y-auditor/icon.svg",
+      "cover": "aura-a11y-auditor/cover.svg",
+      "categories": [
+        "Accessibility",
+        "Quality",
+        "Web"
+      ],
+      "tags": [
+        "a11y",
+        "wcag",
+        "audit",
+        "accessibility",
+        "html"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Accessibility Auditor. Audit web content for WCAG 2.1 AA compliance. Check color contrast, alt text, ARIA labels, keyboard navigation, and semantic HTML. Generate detailed reports with specific code fixes."
+      },
+      "permissions": [
+        "read_file",
+        "browse_url"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Provide HTML files or URLs to audit.",
+        "Review the generated accessibility report."
+      ],
+      "tools": [
+        {
+          "name": "audit_html",
+          "description": "Audit HTML content for WCAG 2.1 AA violations."
+        },
+        {
+          "name": "generate_report",
+          "description": "Generate a comprehensive accessibility report."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "مدقق إمكانية الوصول",
+          "summary": "يفحص محتوى الويب للامتثال لمعايير WCAG 2.1 AA ويقدم تقارير إصلاح.",
+          "description": "مهارة مدقق إمكانية الوصول التي تتحقق من محتوى الويب وفقاً لمعايير WCAG 2.1 AA. تحدد المخالفات وتوفر مقتطفات كود للإصلاح وتولد تقارير شاملة.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "قدم ملفات HTML أو روابط URL للفحص.",
+            "راجع تقرير إمكانية الوصول المُنشأ."
+          ],
+          "tools": [
+            {
+              "name": "فحص HTML",
+              "description": "فحص محتوى HTML لانتهاكات WCAG 2.1 AA."
+            },
+            {
+              "name": "إنشاء تقرير",
+              "description": "إنشاء تقرير شامل لإمكانية الوصول."
+            }
+          ],
+          "categories": [
+            "إمكانية الوصول",
+            "جودة",
+            "ويب"
+          ]
+        }
+      }
+    },
+    {
+      "id": "skill.aura-devops",
+      "type": "skill",
+      "name": "DevOps & CI/CD",
+      "version": "1.0.0",
+      "summary": "Write CI/CD configs, Dockerfiles, Kubernetes manifests, and infrastructure-as-code.",
+      "description": "A DevOps skill for writing CI/CD configurations (GitHub Actions, GitLab CI, Jenkins), Docker/Docker Compose files, Kubernetes manifests, and Terraform configurations. Includes templates for common patterns.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-devops/icon.svg",
+      "cover": "aura-devops/cover.svg",
+      "categories": [
+        "DevOps",
+        "Infrastructure",
+        "Automation"
+      ],
+      "tags": [
+        "ci-cd",
+        "docker",
+        "kubernetes",
+        "terraform",
+        "github-actions"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura DevOps. Write CI/CD configurations, Dockerfiles, Kubernetes manifests, and infrastructure-as-code. Follow best practices for security, efficiency, and maintainability."
+      },
+      "permissions": [
+        "read_file",
+        "write_file"
+      ],
+      "setup": [
+        "Install the skill from Aura Marketplace.",
+        "Describe the infrastructure or CI/CD pipeline you need.",
+        "Review and apply the generated configuration files."
+      ],
+      "tools": [
+        {
+          "name": "create_pipeline",
+          "description": "Create CI/CD pipeline configuration."
+        },
+        {
+          "name": "create_dockerfile",
+          "description": "Generate Dockerfile with best practices."
+        },
+        {
+          "name": "create_k8s_manifest",
+          "description": "Create Kubernetes deployment manifests."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "DevOps و CI/CD",
+          "summary": "يكتب إعدادات CI/CD وملفات Docker و Kubernetes و البنية التحتية ككود.",
+          "description": "مهارة DevOps لكتابة إعدادات CI/CD (GitHub Actions, GitLab CI, Jenkins) وملفات Docker/Docker Compose و Kubernetes و Terraform. تتضمن قوالب للأنماط الشائعة.",
+          "setup": [
+            "ثبّت المهارة من متجر Aura.",
+            "صف خط أنابيب CI/CD أو البنية التحتية المطلوبة.",
+            "راجع وطبق ملفات الإعداد المُنشأة."
+          ],
+          "tools": [
+            {
+              "name": "إنشاء خط أنابيب",
+              "description": "إنشاء إعداد خط أنابيب CI/CD."
+            },
+            {
+              "name": "إنشاء Dockerfile",
+              "description": "إنشاء Dockerfile مع أفضل الممارسات."
+            },
+            {
+              "name": "إنشاء K8s",
+              "description": "إنشاء ت manifests Kubernetes."
+            }
+          ],
+          "categories": [
+            "DevOps",
+            "بنية تحتية",
+            "أتمتة"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mcp.slack",
+      "type": "mcp",
+      "name": "Slack MCP",
+      "version": "1.0.0",
+      "summary": "Interact with Slack channels, messages, threads, and reactions.",
+      "description": "MCP connector for Slack API. Enables managing channels, sending messages, searching conversations, and handling threads using a bot token.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "mcp-slack/icon.svg",
+      "cover": "mcp-slack/cover.svg",
+      "categories": [
+        "Communication",
+        "Productivity",
+        "Integration"
+      ],
+      "tags": [
+        "slack",
+        "messaging",
+        "team",
+        "communication"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "token",
+        "description": "Slack Bot Token (xoxb-...)"
+      },
+      "install": {
+        "kind": "mcp",
+        "command": [
+          "npx",
+          "-y",
+          "@aura-os/mcp-slack"
+        ]
+      },
+      "permissions": [
+        "network"
+      ],
+      "setup": [
+        "Create a Slack App at api.slack.com.",
+        "Install the app to your workspace.",
+        "Copy the Bot Token to Aura vault."
+      ],
+      "tools": [
+        {
+          "name": "list_channels",
+          "description": "List all channels in the workspace."
+        },
+        {
+          "name": "send_message",
+          "description": "Send a message to a channel."
+        },
+        {
+          "name": "search_messages",
+          "description": "Search messages across channels."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Slack MCP",
+          "summary": "التفاعل مع قنوات Slack والرسائل والThreads.",
+          "description": "موصل MCP لـ Slack API. يتيح إدارة القنوات وإرسال الرسائل والبحث في المحادثات.",
+          "setup": [
+            "أنشئ تطبيق Slack على api.slack.com.",
+            "ثبّت التطبيق في مساحة عملك.",
+            "انسخ Bot Token إلى خزنة Aura."
+          ],
+          "tools": [
+            {
+              "name": "قائمة القنوات",
+              "description": "عرض جميع القنوات في مساحة العمل."
+            },
+            {
+              "name": "إرسال رسالة",
+              "description": "إرسال رسالة إلى قناة."
+            },
+            {
+              "name": "بحث",
+              "description": "البحث في الرسائل عبر القنوات."
+            }
+          ],
+          "categories": [
+            "تواصل",
+            "إنتاجية",
+            "تكامل"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mcp.notion",
+      "type": "mcp",
+      "name": "Notion MCP",
+      "version": "1.0.0",
+      "summary": "Interact with Notion databases, pages, and blocks.",
+      "description": "MCP connector for Notion API. Enables querying databases, creating pages, updating blocks, and searching content using an integration token.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "mcp-notion/icon.svg",
+      "cover": "mcp-notion/cover.svg",
+      "categories": [
+        "Productivity",
+        "Knowledge",
+        "Integration"
+      ],
+      "tags": [
+        "notion",
+        "database",
+        "notes",
+        "knowledge-base"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "token",
+        "description": "Notion Integration Token"
+      },
+      "install": {
+        "kind": "mcp",
+        "command": [
+          "npx",
+          "-y",
+          "@aura-os/mcp-notion"
+        ]
+      },
+      "permissions": [
+        "network"
+      ],
+      "setup": [
+        "Create a Notion integration at notion.so/my-integrations.",
+        "Share databases/pages with the integration.",
+        "Copy the Integration Token to Aura vault."
+      ],
+      "tools": [
+        {
+          "name": "query_database",
+          "description": "Query a Notion database."
+        },
+        {
+          "name": "create_page",
+          "description": "Create a new page in Notion."
+        },
+        {
+          "name": "search_pages",
+          "description": "Search across all accessible pages."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Notion MCP",
+          "summary": "التفاعل مع قواعد بيانات Notion والصفحات والكتل.",
+          "description": "موصل MCP لـ Notion API. يتيح استعلام قواعد البيانات وإنشاء الصفحات وتحديث الكتل والبحث.",
+          "setup": [
+            "أنشئ تكامل Notion على notion.so/my-integrations.",
+            "شارك قواعد البيانات/الصفحات مع التكامل.",
+            "انسخ Integration Token إلى خزنة Aura."
+          ],
+          "tools": [
+            {
+              "name": "استعلام قاعدة بيانات",
+              "description": "استعلام قاعدة بيانات Notion."
+            },
+            {
+              "name": "إنشاء صفحة",
+              "description": "إنشاء صفحة جديدة في Notion."
+            },
+            {
+              "name": "بحث",
+              "description": "البحث في جميع الصفحات المتاحة."
+            }
+          ],
+          "categories": [
+            "إنتاجية",
+            "معرفة",
+            "تكامل"
+          ]
+        }
+      }
+    },
+    {
+      "id": "mcp.supabase",
+      "type": "mcp",
+      "name": "Supabase MCP",
+      "version": "1.0.0",
+      "summary": "Interact with Supabase database, auth, storage, and edge functions.",
+      "description": "MCP connector for Supabase. Enables querying tables, managing authentication, handling storage buckets, and invoking edge functions using a service role key.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "mcp-supabase/icon.svg",
+      "cover": "mcp-supabase/cover.svg",
+      "categories": [
+        "Database",
+        "Backend",
+        "Integration"
+      ],
+      "tags": [
+        "supabase",
+        "postgres",
+        "auth",
+        "storage",
+        "backend"
+      ],
+      "risk": "medium",
+      "auth": {
+        "type": "token",
+        "description": "Supabase Service Role Key"
+      },
+      "install": {
+        "kind": "mcp",
+        "command": [
+          "npx",
+          "-y",
+          "@aura-os/mcp-supabase"
+        ]
+      },
+      "permissions": [
+        "network"
+      ],
+      "setup": [
+        "Get your Supabase project URL and service role key.",
+        "Copy credentials to Aura vault.",
+        "Configure RLS policies as needed."
+      ],
+      "tools": [
+        {
+          "name": "query_table",
+          "description": "Query a Supabase table."
+        },
+        {
+          "name": "invoke_function",
+          "description": "Invoke a Supabase edge function."
+        },
+        {
+          "name": "list_buckets",
+          "description": "List storage buckets."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "Supabase MCP",
+          "summary": "التفاعل مع قاعدة بيانات Supabase والمصادقة والتخزين والدوال.",
+          "description": "موصل MCP لـ Supabase. يتيح استعلام الجداول وإدارة المصادقة والتعامل مع التخزين واستدعاء الدوال.",
+          "setup": [
+            "احصل على رابط مشروع Supabase ومفتاح الخدمة.",
+            "انسخ الاعتماديات إلى خزنة Aura.",
+            "Configure سياسات RLS حسب الحاجة."
+          ],
+          "tools": [
+            {
+              "name": "استعلام جدول",
+              "description": "استعلام جدول Supabase."
+            },
+            {
+              "name": "استدعاء دالة",
+              "description": "استدعاء دالة Supabase edge."
+            },
+            {
+              "name": "قائمة التخزين",
+              "description": "عرض حاويات التخزين."
+            }
+          ],
+          "categories": [
+            "قاعدة بيانات",
+            "backend",
+            "تكامل"
+          ]
+        }
+      }
     }
   ]
 }
