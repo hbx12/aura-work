@@ -1598,7 +1598,6 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.send": "שלח",
     "common.save": "שמור",
     "common.cancel": "ביטול",
-    "common.delete": "מחק",
     "common.loading": "טוען...",
   },
   uk: {
@@ -1621,7 +1620,6 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.send": "Надіслати",
     "common.save": "Зберегти",
     "common.cancel": "Скасувати",
-    "common.delete": "Видалити",
     "common.loading": "Завантаження...",
   },
   bn: {
@@ -1644,7 +1642,6 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.send": "পাঠান",
     "common.save": "সংরক্ষণ",
     "common.cancel": "বাতিল",
-    "common.delete": "মুছুন",
     "common.loading": "লোড হচ্ছে...",
   },
   sw: {
@@ -1667,7 +1664,6 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.send": "Tuma",
     "common.save": "Hifadhi",
     "common.cancel": "Ghairi",
-    "common.delete": "Futa",
     "common.loading": "Inapakia...",
   },
   el: {
@@ -1690,7 +1686,6 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "chat.send": "Αποστολή",
     "common.save": "Αποθήκευση",
     "common.cancel": "Ακύρωση",
-    "common.delete": "Διαγραφή",
     "common.loading": "Φόρτωση...",
   },
 };
