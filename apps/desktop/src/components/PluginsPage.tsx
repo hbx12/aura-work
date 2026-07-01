@@ -773,7 +773,7 @@ export function PluginsPage({
                             }}
                             onKeyDown={(e) => {
                               if (s.id.startsWith("aura_config_")) return;
-                              e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled);
+                              if (e.key === "Enter") void onSetMcpEnabled(s.id, !s.enabled);
                             }}
                             role="button"
                             tabIndex={s.id.startsWith("aura_config_") ? -1 : 0}

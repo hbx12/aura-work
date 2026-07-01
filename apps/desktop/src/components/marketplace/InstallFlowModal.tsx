@@ -77,8 +77,8 @@ export default function InstallFlowModal({
         }
 
         // 2. Build final arguments list. Replace non-sensitive placeholders
-        let rawArgs = item.install?.args || [];
-        let finalArgs: string[] = [];
+        const rawArgs = item.install?.args || [];
+        const finalArgs: string[] = [];
 
         for (const arg of rawArgs) {
           // If the argument is a secret placeholder like [DATABASE_URL] or [GITHUB_PERSONAL_ACCESS_TOKEN], 

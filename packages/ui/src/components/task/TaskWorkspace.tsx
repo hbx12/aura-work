@@ -1301,7 +1301,7 @@ export function Summary({
 
     // Clean markdown text for reading
     const textToSpeak = data.points
-      .map((p) => p.replace(/[*_`#\-]/g, "")) // strip common md chars
+      .map((p) => p.replace(/[*_`#-]/g, "")) // strip common md chars
       .join(". ");
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);

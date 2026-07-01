@@ -212,7 +212,7 @@ export function VisualBuilder({
 
       // Replace variables syntax {{nodeId.property}} to JavaScript template variable
       const replaceVars = (str: string) => {
-        return str.replace(/\{\{([a-zA-Z0-9_\.]+)\}\}/g, (_, path) => {
+        return str.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (_, path) => {
           const parts = path.split(".");
           const refNodeId = parts[0];
           const field = parts[1] || "value";
@@ -298,7 +298,7 @@ export function VisualBuilder({
 
     const outputNode = nodes.find((n) => n.id === "output");
     const rawTemplate = outputNode?.config.template || "";
-    const compiledOutput = rawTemplate.replace(/\{\{([a-zA-Z0-9_\.]+)\}\}/g, (_, path) => {
+    const compiledOutput = rawTemplate.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (_, path) => {
       const parts = path.split(".");
       const refNodeId = parts[0];
       const field = parts[1] || "value";
