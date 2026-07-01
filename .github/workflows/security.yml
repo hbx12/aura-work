@@ -33,8 +33,10 @@ jobs:
       - uses: github/codeql-action/init@v3
         with:
           languages: rust
-          build-mode: autobuild
-      - uses: github/codeql-action/autobuild@v3
+          source-root: apps/desktop/src-tauri
+      - name: Build Rust for CodeQL
+        run: cargo build
+        working-directory: apps/desktop/src-tauri
       - uses: github/codeql-action/analyze@v3
 
   codeql-javascript:
@@ -53,7 +55,7 @@ jobs:
       - uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
-      - uses: github/codeql-action/autobuild@v3
+          build-mode: none
       - uses: github/codeql-action/analyze@v3
 
   dependency-review:
