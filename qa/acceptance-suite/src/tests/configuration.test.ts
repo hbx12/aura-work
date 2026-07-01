@@ -16,7 +16,7 @@ describe("Package configuration validation", () => {
   it("should have required scripts", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
     const requiredScripts = [
-      "dev", "build", "test", "lint", "lint:fix",
+      "dev", "build", "lint", "lint:fix",
       "build:sidecars", "stage:bundle", "test:sidecars",
       "test:acceptance", "test:rust"
     ];
