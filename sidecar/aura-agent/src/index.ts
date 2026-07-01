@@ -38,14 +38,6 @@ function json(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
-function redactForLog(obj: unknown): unknown {
-  if (!obj || typeof obj !== "object") return obj;
-  const copy = { ...(obj as Record<string, unknown>) };
-  if ("credentials" in copy) copy.credentials = { redacted: true };
-  if ("apiKey" in copy) copy.apiKey = "[redacted]";
-  return copy;
-}
-
 const server = createServer(async (req, res) => {
   if (!requireSidecarAuth(req, res, AUTH_TOKEN)) return;
   const url = req.url ?? "/";
@@ -63,7 +55,6 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/providers/validate") {
       const body = await readJsonBody<ValidateRequestBody>(req);
-      console.log("[aura-agent] validate", body.providerId);
       const adapter = getAdapter(body.providerId);
       const result = await adapter.validateCredentials(body.credentials);
       const updatedCredentials =
@@ -89,14 +80,12 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/route") {
       const body = await readJsonBody<RouteRequestBody>(req);
-      console.log("[aura-agent] route", body.policy, body.context.allowedProviders);
       const decision = routeRequest(body);
       return json(res, 200, decision);
     }
 
     if (method === "POST" && url === "/chat") {
       const body = await readJsonBody<ChatRequestBody>(req);
-      console.log("[aura-agent] chat", body.providerId, body.modelId, redactForLog(body));
       const adapter = getAdapter(body.providerId as ProviderId);
       const result = await adapter.chat(
         { model: body.modelId, messages: body.messages },
@@ -133,7 +122,6 @@ const server = createServer(async (req, res) => {
 
     if (method === "POST" && url === "/task/plan") {
       const body = await readJsonBody<Parameters<typeof generatePlan>[0]>(req);
-      console.log("[aura-agent] task/plan", body.projectId);
       const plan = await generatePlan(body);
       return json(res, 200, plan);
     }
@@ -174,7 +162,6 @@ const server = createServer(async (req, res) => {
         projectPath?: string;
         taskId?: string;
       }>(req);
-      console.log("[aura-agent] executing custom tool", body.name);
       const { executeCustomTool } = await import("./task/custom-tools.js");
       
       const context = {
@@ -200,7 +187,6 @@ const server = createServer(async (req, res) => {
         projectPath?: string;
       }>(req);
       
-      console.log("[aura-agent] testing custom tool at path", body.filePath);
       const { loadCustomTools } = await import("./task/custom-tools.js");
       const tools = await loadCustomTools(body.projectPath);
       const tool = tools.find(t => t.filePath === body.filePath);
@@ -235,7 +221,6 @@ const server = createServer(async (req, res) => {
     if (method === "POST" && url === "/task/iterate") {
       const body = await readJsonBody<Parameters<typeof iterateTask>[0]>(req);
       const streamKey = body.taskId ?? body.projectId;
-      console.log("[aura-agent] task/iterate", body.projectId, "iter", body.iteration);
       taskStreamBuffers.set(streamKey, "");
       try {
         const result = await iterateTask({
