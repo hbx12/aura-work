@@ -1,0 +1,47 @@
+# Deploys the docs site + marketplace registry to GitHub Pages
+# so new skills appear in the app automatically on merge.
+name: Deploy Site + Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "registry/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          # Docs site
+          cp -r docs/* _site/
+          # Marketplace registry (under /registry so no conflicts)
+          mkdir -p _site/registry
+          cp -r registry/* _site/registry/
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

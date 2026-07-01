@@ -3,7 +3,7 @@ name: Mirror to GitLab
 on:
   push:
     branches:
-      - main
+      - "*"
     tags:
       - "v*"
   workflow_dispatch:
@@ -24,7 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror GitHub ref to GitLab
+      - name: Fetch all branches
+        run: |
+          git fetch --all --tags
+          # Create local branches from all remote branches
+          git branch -r | grep -v '\\->' | sed 's|origin/||' | while read branch; do
+            [ -z "$branch" ] && continue
+            git branch -f "$branch" "origin/$branch" 2>/dev/null || true
+          done
+
+      - name: Mirror all branches and tags to GitLab
         env:
           GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
           GITLAB_REPOSITORY: gitlab.com/hbybbdr558/aura-work.git
@@ -40,8 +49,8 @@ jobs:
           git config user.email "mirror@aura-work.local"
           git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
 
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            git push -o ci.skip gitlab "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
-          else
-            git push -o ci.skip gitlab "HEAD:refs/heads/${GITHUB_REF_NAME}"
-          fi
+          # Push all local branches and tags
+          echo "Pushing all branches..."
+          git push gitlab --all --force 2>&1 || true
+          echo "Pushing all tags..."
+          git push gitlab --tags --force 2>&1 || true
