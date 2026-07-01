@@ -468,6 +468,48 @@ footer .links{display:flex;gap:1.25rem}
 .lang-dropdown a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
 .lang-dropdown a.active{color:var(--color-text-strong);font-weight:600}
 
+/* Theme Toggle */
+.theme-toggle{background:none;border:none;color:var(--color-text-weak);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
+.theme-toggle:hover{color:var(--color-text-strong);background:var(--color-bg-weak)}
+.theme-toggle .sun{display:none}
+.theme-toggle .moon{display:block}
+:root.dark .theme-toggle .sun{display:block}
+:root.dark .theme-toggle .moon{display:none}
+@media(prefers-color-scheme:dark){
+  :root:not(.light) .theme-toggle .sun{display:block}
+  :root:not(.light) .theme-toggle .moon{display:none}
+}
+
+/* Sidebar Layout */
+.layout{display:flex;max-width:1200px;margin:0 auto;padding:2rem 0 4rem;gap:3rem}
+@media(max-width:48rem){.layout{flex-direction:column;padding:1rem 0;gap:1.5rem}}
+.sidebar{width:240px;flex-shrink:0}
+@media(max-width:48rem){.sidebar{width:100%}}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;position:sticky;top:5.5rem}
+@media(max-width:48rem){.sidebar-nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}}
+.sidebar-nav a{display:block;padding:6px 12px;border-radius:6px;font-size:.8125rem;font-weight:500;color:var(--color-text);text-decoration:none;transition:all .12s;font-family:var(--font-mono)}
+.sidebar-nav a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+.sidebar-nav a.active{background:var(--color-accent-subtle);color:var(--color-accent);font-weight:600}
+.sidebar-nav .sec{padding:14px 12px 4px;font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);font-family:var(--font-mono);font-weight:600}
+@media(max-width:48rem){.sidebar-nav .sec{display:none}.sidebar-nav a{display:inline-block;padding:4px 10px;font-size:.75rem}}
+.content{flex:1;min-width:0}
+
+/* Sidebar Search */
+.sidebar-search{padding:0 12px 12px}
+.sidebar-search input{width:100%;padding:8px 12px;border:1px solid var(--color-border-weak);border-radius:6px;background:var(--color-bg-card);color:var(--color-text-strong);font-family:var(--font-mono);font-size:.75rem;outline:none;transition:border-color .15s}
+.sidebar-search input:focus{border-color:var(--color-accent)}
+
+/* Copy Code Snippets Button */
+.copy-code-btn{position:absolute;top:8px;right:8px;padding:4px 8px;font-size:.6875rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:4px;color:var(--color-text-weak);cursor:pointer;opacity:0;transition:opacity .2s,background .15s}
+pre:hover .copy-code-btn{opacity:1}
+.copy-code-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+
+/* Interactive Skills Filtering */
+.skills-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.filter-btn{padding:6px 12px;font-size:.75rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;color:var(--color-text-weak);cursor:pointer;transition:all .15s;border:1px solid var(--color-border-weak)}
+.filter-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+.filter-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+
 /* Responsive table toggle for mobile */
 @media(max-width:48rem){.card-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(3,1fr)}}
 `;
@@ -475,27 +517,70 @@ footer .links{display:flex;gap:1.25rem}
 
 // ─── Layout Template ────────────────────────────────────────────────────────────
 
-function pageHeader(title, activePage) {
+function getSidebarHTML(currentPage) {
+  const items = [
+    { type: "section", title: "Getting Started" },
+    { type: "link", href: "overview.html", id: "overview", title: "Overview" },
+    { type: "link", href: "quickstart.html", id: "quickstart", title: "Quick Start" },
+    { type: "section", title: "Core" },
+    { type: "link", href: "architecture.html", id: "architecture", title: "Architecture" },
+    { type: "link", href: "providers.html", id: "providers", title: "Providers" },
+    { type: "link", href: "cli.html", id: "cli", title: "CLI" },
+    { type: "link", href: "permissions.html", id: "permissions", title: "Permissions" },
+    { type: "link", href: "routing.html", id: "routing", title: "Routing" },
+    { type: "link", href: "skills.html", id: "skills", title: "Skills" },
+    { type: "link", href: "mcp.html", id: "mcp", title: "MCP" },
+    { type: "link", href: "sidecars.html", id: "sidecars", title: "Sidecars" },
+    { type: "section", title: "Customize" },
+    { type: "link", href: "languages.html", id: "languages", title: "Languages" },
+    { type: "link", href: "themes.html", id: "themes", title: "Themes" }
+  ];
+
+  return `<aside class="sidebar">
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search docs..." oninput="filterSidebar(this.value)">
+    </div>
+    <nav class="sidebar-nav">
+      ${items.map(item => {
+        if (item.type === "section") {
+          return `<div class="sec">${item.title}</div>`;
+        }
+        const isActive = currentPage === item.id;
+        return `<a href="${item.href}" ${isActive ? 'class="active"' : ''}>${item.title}</a>`;
+      }).join("\n")}
+    </nav>
+  </aside>`;
+}
+
+function pageHeader(title, activePage, pageId = "docs") {
   const isDocs = activePage === "docs";
+  const enHref = pageId === "hub" ? "docs.html" : `${pageId}.html`;
+  const arHref = pageId === "hub" ? "docs.ar.html" : `${pageId}.ar.html`;
   return `<header>
   <div class="header-inner">
-    <a href="https://hbx12.github.io/aura-work/" class="logo">
+    <a href="../index.html" class="logo">
       <span class="logo-mark">A</span>
       Aura Work
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/${isDocs ? '' : ''}" ${!isDocs ? 'class="active"' : ''}>Home</a></li>
+        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
         <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" ${isDocs ? 'class="active"' : ''}>Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
-        <li style="position:relative">
-          <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            EN
-          </a>
-          <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/docs.html">English</a>
-            <a href="https://hbx12.github.io/aura-work/docs/docs/docs.ar.html">العربية</a>
+        <li style="position:relative;display:flex;align-items:center;gap:1rem">
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
+            <svg class="sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg class="moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div style="position:relative">
+            <a href="#" class="lang-trigger" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              EN
+            </a>
+            <div id="lm" class="lang-dropdown">
+              <a href="${enHref}">English</a>
+              <a href="${arHref}">العربية</a>
+            </div>
           </div>
         </li>
       </ul>
@@ -515,10 +600,17 @@ function pageFooter() {
 </footer>`;
 }
 
-function wrapPage(titleHTML, bodyContent, activePage = "docs") {
-  const heroMatch = bodyContent.match(/<div class="hero">([\s\S]*?)<\/div>/);
-  const heroContent = heroMatch ? heroMatch[1] : "";
-  const restContent = heroMatch ? bodyContent.replace(heroMatch[0], "") : bodyContent;
+function wrapPage(titleHTML, bodyContent, pageId = "docs") {
+  const isHub = pageId === "hub";
+  const mainContent = isHub
+    ? bodyContent
+    : `<div class="layout">
+        ${getSidebarHTML(pageId)}
+        <main class="content">
+          ${bodyContent}
+        </main>
+       </div>`;
+
   return `<!DOCTYPE html>
 <html lang="en" data-page="aura-work">
 <head>
@@ -585,22 +677,105 @@ function wrapPage(titleHTML, bodyContent, activePage = "docs") {
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
   .local-badge.no { background: rgba(184,72,47,0.10); color: var(--color-danger); }
 </style>
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else if (saved === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  })();
+</script>
 </head>
 <body>
 <div class="page">
-${pageHeader("Docs", "docs")}
-<main>
-<a href="https://hbx12.github.io/aura-work/docs/docs.html" class="back-link">
+${pageHeader("Docs", "docs", pageId)}
+${isHub ? '<main>' : ''}
+${isHub ? '' : `<a href="docs.html" class="back-link">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
   Back to Docs Hub
-</a>
-${bodyContent}
-</main>
+</a>`}
+${mainContent}
+${isHub ? '</main>' : ''}
 ${pageFooter()}
 </div>
 <script>
-document.addEventListener('DOMContentLoaded',function(){var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(function(e){o.observe(e)})});
-document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
+  document.addEventListener('DOMContentLoaded', function() {
+    // Intersection observer for fade-in animations
+    var o = new IntersectionObserver(function(e) {
+      e.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          o.unobserve(e.target);
+        }
+      });
+    }, { threshold: .1 });
+    document.querySelectorAll('.fade-in').forEach(function(e) { o.observe(e); });
+
+    // Copy code button injection
+    document.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-code-btn';
+      btn.textContent = 'Copy';
+      btn.onclick = function() {
+        navigator.clipboard.writeText(pre.querySelector('code').textContent).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy', 2000);
+        });
+      };
+      pre.style.position = 'relative';
+      pre.appendChild(btn);
+    });
+  });
+
+  // Dropdown dismissal
+  document.addEventListener('click', function(e) {
+    var m = document.getElementById('lm');
+    if (m && !e.target.closest('.lang-trigger') && !e.target.closest('#lm')) {
+      m.classList.remove('open');
+    }
+  });
+
+  // Theme toggle handler
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.remove('light');
+    if (!isDark) document.documentElement.classList.add('light');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+
+  // Sidebar search filter
+  function filterSidebar(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+      const text = a.textContent.toLowerCase();
+      if (text.includes(q)) {
+        a.style.display = '';
+      } else {
+        a.style.display = 'none';
+      }
+    });
+  }
+
+  // Skills filter helper
+  function filterSkills(cat) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    document.querySelectorAll('.detail-card').forEach(card => {
+      if (cat === 'all') {
+        card.style.display = '';
+      } else {
+        const cats = card.getAttribute('data-category').split(',');
+        if (cats.includes(cat)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>`;
@@ -618,18 +793,18 @@ function generateDocsHub() {
   const routes = getRoutingPolicies();
 
   const sections = [
-    { href: "overview", title: "Overview", desc: "What is Aura Work and why it exists", icon: "◆", color: "#c2683f" },
-    { href: "quickstart", title: "Quick Start", desc: "Install, configure, run your first task", icon: "▶", color: "#1a7f64" },
-    { href: "providers", title: `Providers (${providers.length})`, desc: `${providers.length} AI model providers with auto-discovery`, icon: "◆", color: "#c48b5c" },
-    { href: "routing", title: `Routing (${routes.length} policies)`, desc: `Intelligent ${routes.length}-policy model routing engine`, icon: "↗", color: "#4b5bb0" },
-    { href: "skills", title: `Skills (${skills.length})`, desc: `${skills.length} pre-built agent skills in the registry`, icon: "⚡", color: "#7a5c8e" },
-    { href: "sidecars", title: `Sidecars (${sidecars.length})`, desc: `${sidecars.length} modular background service daemons`, icon: "▤", color: "#1988a2" },
-    { href: "languages", title: `Languages (${languages.length})`, desc: `${languages.length} human languages with RTL support`, icon: "🌐", color: "#3a6fc4" },
-    { href: "themes", title: `Themes (${themes.length})`, desc: `${themes.length} hand-crafted visual themes`, icon: "◐", color: "#a855f7" },
-    { href: "permissions", title: "Permissions", desc: "3 permission profiles: read-only, safe-automation, research", icon: "🔒", color: "#e05c2b" },
-    { href: "architecture", title: "Architecture", desc: "Tauri 2 + React 19 + Rust multi-process architecture", icon: "◈", color: "#645d4e" },
-    { href: "cli", title: "CLI", desc: "Command-line bridge client for remote control", icon: "⌘", color: "#1a7f64" },
-    { href: "mcp", title: "MCP", desc: "Model Context Protocol for third-party tool integration", icon: "⇌", color: "#c2683f" },
+    { href: "overview.html", title: "Overview", desc: "What is Aura Work and why it exists", icon: "◆", color: "#c2683f" },
+    { href: "quickstart.html", title: "Quick Start", desc: "Install, configure, run your first task", icon: "▶", color: "#1a7f64" },
+    { href: "providers.html", title: `Providers (${providers.length})`, desc: `${providers.length} AI model providers with auto-discovery`, icon: "◆", color: "#c48b5c" },
+    { href: "routing.html", title: `Routing (${routes.length} policies)`, desc: `Intelligent ${routes.length}-policy model routing engine`, icon: "↗", color: "#4b5bb0" },
+    { href: "skills.html", title: `Skills (${skills.length})`, desc: `${skills.length} pre-built agent skills in the registry`, icon: "⚡", color: "#7a5c8e" },
+    { href: "sidecars.html", title: `Sidecars (${sidecars.length})`, desc: `${sidecars.length} modular background service daemons`, icon: "▤", color: "#1988a2" },
+    { href: "languages.html", title: `Languages (${languages.length})`, desc: `${languages.length} human languages with RTL support`, icon: "🌐", color: "#3a6fc4" },
+    { href: "themes.html", title: `Themes (${themes.length})`, desc: `${themes.length} hand-crafted visual themes`, icon: "◐", color: "#a855f7" },
+    { href: "permissions.html", title: "Permissions", desc: "3 permission profiles: read-only, safe-automation, research", icon: "🔒", color: "#e05c2b" },
+    { href: "architecture.html", title: "Architecture", desc: "Tauri 2 + React 19 + Rust multi-process architecture", icon: "◈", color: "#645d4e" },
+    { href: "cli.html", title: "CLI", desc: "Command-line bridge client for remote control", icon: "⌘", color: "#1a7f64" },
+    { href: "mcp.html", title: "MCP", desc: "Model Context Protocol for third-party tool integration", icon: "⇌", color: "#c2683f" },
   ];
 
   const hero = `<div class="hero">
@@ -656,7 +831,7 @@ function generateDocsHub() {
     </div>
   </a>`).join("\n");
 
-  return wrapPage("Documentation Hub", hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`, "docs");
+  return wrapPage("Documentation Hub", hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`, "hub");
 }
 
 // ─── Overview Page ──────────────────────────────────────────────────────────────
@@ -698,7 +873,7 @@ function generateOverview() {
       <p>Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.</p>
     </div>
   </section>`;
-  return wrapPage("Overview", body);
+  return wrapPage("Overview", body, "overview");
 }
 
 // ─── Providers Page ─────────────────────────────────────────────────────────────
@@ -740,7 +915,7 @@ function generateProviders() {
       <p>Every task records input/output token counts and estimated cost per model. The audit log maintains a permanent record of all provider interactions for accountability.</p>
     </div>
   </section>`;
-  return wrapPage("Providers", body);
+  return wrapPage("Providers", body, "providers");
 }
 
 // ─── Routing Page ────────────────────────────────────────────────────────────────
@@ -775,7 +950,7 @@ function generateRouting() {
     </ul>
     <p>Each routing decision includes an estimated cost class (low / medium / high / unknown) and may require user approval for high-cost or sensitive operations.</p>
   </section>`;
-  return wrapPage("Routing", body);
+  return wrapPage("Routing", body, "routing");
 }
 
 // ─── Skills Page ─────────────────────────────────────────────────────────────────
@@ -794,8 +969,15 @@ function generateSkills() {
       <div class="stat-card fade-in delay-3"><div class="num">${skills.filter(s=>s.risk==='low').length}</div><div class="lbl">Low Risk</div></div>
     </div>
     <p>Skills are versioned JSON-manifest agent capabilities published to the registry at <code>registry/skills/</code>. Each skill defines its identity, publisher, authentication requirements, permissions, tools, and install instructions.</p>
+    
+    <div class="section-label">Filter by Category</div>
+    <div class="skills-filter">
+      <button class="filter-btn active" onclick="filterSkills('all')">All</button>
+      ${categories.map(c => `<button class="filter-btn" onclick="filterSkills('${c}')">${c}</button>`).join(" ")}
+    </div>
+
     <div class="section-label">All Skills</div>
-    ${skills.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}">
+    ${skills.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}" data-category="${s.categories.join(',')}">
       <h3>${s.name}</h3>
       <div class="meta">
         <span>${s.categories.join(" / ")}</span>
@@ -806,7 +988,7 @@ function generateSkills() {
       ${s.tools.length ? `<div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">Tools:</strong> ${s.tools.map(t => `<code>${t.name}</code>`).join(" ")}</div>` : ""}
     </div>`).join("\n")}
   </section>`;
-  return wrapPage("Skills", body);
+  return wrapPage("Skills", body, "skills");
 }
 
 // ─── Sidecars Page ───────────────────────────────────────────────────────────────
@@ -834,7 +1016,7 @@ function generateSidecars() {
     <h2>Sidecar authentication</h2>
     <p>All sidecars use a shared authentication system (<code>sidecar-auth.ts</code>) with token-based authorization. Each inter-process request is validated against a runtime-loaded sidecar token. Failed authentications are rejected with <code>401 Unauthorized</code>.</p>
   </section>`;
-  return wrapPage("Sidecars", body);
+  return wrapPage("Sidecars", body, "sidecars");
 }
 
 // ─── Languages Page ──────────────────────────────────────────────────────────────
@@ -876,7 +1058,7 @@ function generateLanguages() {
       <p>Arabic and Persian use <code>dir="rtl"</code> layout. The design system includes IBM Plex Sans Arabic and Tajawal fonts for proper Arabic typography with built-in font substitution.</p>
     </div>
   </section>`;
-  return wrapPage("Languages", body);
+  return wrapPage("Languages", body, "languages");
 }
 
 // ─── Themes Page ─────────────────────────────────────────────────────────────────
@@ -926,7 +1108,7 @@ function generateThemes() {
       <p>The system includes a high-contrast theme for accessibility, full RTL support for Arabic/Persian, and system-preference auto-detection via <code>prefers-color-scheme</code>.</p>
     </div>
   </section>`;
-  return wrapPage("Themes", body);
+  return wrapPage("Themes", body, "themes");
 }
 
 // ─── Permissions Page ────────────────────────────────────────────────────────────
@@ -961,7 +1143,7 @@ function generatePermissions() {
       <p>Secrets, API keys, and session tokens are stored in a device-bound encrypted vault (<code>VaultStatus</code>) with biometric unlock support. The vault supports versioned secrets and secure deletion.</p>
     </div>
   </section>`;
-  return wrapPage("Permissions", body);
+  return wrapPage("Permissions", body, "permissions");
 }
 
 // ─── Architecture Page ───────────────────────────────────────────────────────────
@@ -1013,7 +1195,7 @@ function generateArchitecture() {
       </tbody>
     </table>
   </section>`;
-  return wrapPage("Architecture", body);
+  return wrapPage("Architecture", body, "architecture");
 }
 
 // ─── CLI Page ────────────────────────────────────────────────────────────────────
@@ -1052,7 +1234,7 @@ function generateCLI() {
       <p>The CLI connects through the local Bridge sidecar (port 47826). All requests must carry a valid session token. The CLI cannot bypass any permission — it respects the same permission profiles as the desktop UI.</p>
     </div>
   </section>`;
-  return wrapPage("CLI", body);
+  return wrapPage("CLI", body, "cli");
 }
 
 // ─── MCP Page ───────────────────────────────────────────────────────────────────
@@ -1084,7 +1266,7 @@ function generateMCP() {
       <p>The <code>MarketplaceEntry</code> system supports skills, MCP servers, and plugins with versioning, publisher verification, risk assessment, and localized descriptions.</p>
     </div>
   </section>`;
-  return wrapPage("MCP", body);
+  return wrapPage("MCP", body, "mcp");
 }
 
 // ─── Quick Start Page ───────────────────────────────────────────────────────────
@@ -1121,7 +1303,7 @@ function generateQuickStart() {
     <h2>Going deeper</h2>
     <p>Read about <a href="providers">Providers</a>, <a href="routing">Routing</a>, <a href="skills">Skills</a>, or <a href="architecture">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">New Contributor Guide</a>.</p>
   </section>`;
-  return wrapPage("Quick Start", body);
+  return wrapPage("Quick Start", body, "quickstart");
 }
 
 // ─── Main Generation ─────────────────────────────────────────────────────────────
