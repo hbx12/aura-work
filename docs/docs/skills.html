@@ -297,20 +297,20 @@ pre:hover .copy-code-btn{opacity:1}
         <main class="content">
           <div class="hero">
     <h1><span>Skills</span></h1>
-    <p class="subtitle">24 pre-built agent skills in the registry — ready to use, fully sandboxed.</p>
+    <p class="subtitle">18 pre-built agent skills in the registry — ready to use, fully sandboxed.</p>
   </div>
   <section class="section">
     <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">24</div><div class="lbl">Skills</div></div>
-      <div class="stat-card fade-in delay-2"><div class="num">27</div><div class="lbl">Categories</div></div>
-      <div class="stat-card fade-in delay-3"><div class="num">8</div><div class="lbl">Low Risk</div></div>
+      <div class="stat-card fade-in delay-1"><div class="num">18</div><div class="lbl">Skills</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">26</div><div class="lbl">Categories</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">2</div><div class="lbl">Low Risk</div></div>
     </div>
     <p>Skills are versioned JSON-manifest agent capabilities published to the registry at <code>registry/skills/</code>. Each skill defines its identity, publisher, authentication requirements, permissions, tools, and install instructions.</p>
     
     <div class="section-label">Filter by Category</div>
     <div class="skills-filter">
       <button class="filter-btn active" onclick="filterSkills('all')">All</button>
-      <button class="filter-btn" onclick="filterSkills('Analytics')">Analytics</button> <button class="filter-btn" onclick="filterSkills('Automation')">Automation</button> <button class="filter-btn" onclick="filterSkills('Browser')">Browser</button> <button class="filter-btn" onclick="filterSkills('Business')">Business</button> <button class="filter-btn" onclick="filterSkills('Collaboration')">Collaboration</button> <button class="filter-btn" onclick="filterSkills('Conversion')">Conversion</button> <button class="filter-btn" onclick="filterSkills('Dashboards')">Dashboards</button> <button class="filter-btn" onclick="filterSkills('Data')">Data</button> <button class="filter-btn" onclick="filterSkills('Database')">Database</button> <button class="filter-btn" onclick="filterSkills('Design')">Design</button> <button class="filter-btn" onclick="filterSkills('Developer Tools')">Developer Tools</button> <button class="filter-btn" onclick="filterSkills('Documentation')">Documentation</button> <button class="filter-btn" onclick="filterSkills('Documents')">Documents</button> <button class="filter-btn" onclick="filterSkills('Files')">Files</button> <button class="filter-btn" onclick="filterSkills('Forms')">Forms</button> <button class="filter-btn" onclick="filterSkills('Images')">Images</button> <button class="filter-btn" onclick="filterSkills('Marketing')">Marketing</button> <button class="filter-btn" onclick="filterSkills('PDF')">PDF</button> <button class="filter-btn" onclick="filterSkills('Presentations')">Presentations</button> <button class="filter-btn" onclick="filterSkills('Productivity')">Productivity</button> <button class="filter-btn" onclick="filterSkills('Quality')">Quality</button> <button class="filter-btn" onclick="filterSkills('Research')">Research</button> <button class="filter-btn" onclick="filterSkills('Security')">Security</button> <button class="filter-btn" onclick="filterSkills('Spreadsheets')">Spreadsheets</button> <button class="filter-btn" onclick="filterSkills('Study')">Study</button> <button class="filter-btn" onclick="filterSkills('Web')">Web</button> <button class="filter-btn" onclick="filterSkills('Workflow')">Workflow</button>
+      <button class="filter-btn" onclick="filterSkills('Analytics')">Analytics</button> <button class="filter-btn" onclick="filterSkills('Automation')">Automation</button> <button class="filter-btn" onclick="filterSkills('Browser')">Browser</button> <button class="filter-btn" onclick="filterSkills('Business')">Business</button> <button class="filter-btn" onclick="filterSkills('Conversion')">Conversion</button> <button class="filter-btn" onclick="filterSkills('Dashboards')">Dashboards</button> <button class="filter-btn" onclick="filterSkills('Data')">Data</button> <button class="filter-btn" onclick="filterSkills('Database')">Database</button> <button class="filter-btn" onclick="filterSkills('Design')">Design</button> <button class="filter-btn" onclick="filterSkills('Development')">Development</button> <button class="filter-btn" onclick="filterSkills('Documents')">Documents</button> <button class="filter-btn" onclick="filterSkills('Files')">Files</button> <button class="filter-btn" onclick="filterSkills('Forms')">Forms</button> <button class="filter-btn" onclick="filterSkills('Images')">Images</button> <button class="filter-btn" onclick="filterSkills('Marketing')">Marketing</button> <button class="filter-btn" onclick="filterSkills('PDF')">PDF</button> <button class="filter-btn" onclick="filterSkills('Presentations')">Presentations</button> <button class="filter-btn" onclick="filterSkills('Productivity')">Productivity</button> <button class="filter-btn" onclick="filterSkills('Quality')">Quality</button> <button class="filter-btn" onclick="filterSkills('Research')">Research</button> <button class="filter-btn" onclick="filterSkills('Security')">Security</button> <button class="filter-btn" onclick="filterSkills('Spreadsheets')">Spreadsheets</button> <button class="filter-btn" onclick="filterSkills('Study')">Study</button> <button class="filter-btn" onclick="filterSkills('Utility')">Utility</button> <button class="filter-btn" onclick="filterSkills('Web')">Web</button> <button class="filter-btn" onclick="filterSkills('Workflow')">Workflow</button>
     </div>
 
     <div class="section-label">All Skills</div>
@@ -474,77 +474,17 @@ pre:hover .copy-code-btn{opacity:1}
       <p>Create study notes, lesson plans, quizzes, flashcards, and learning reports.</p>
       <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">Tools:</strong> <code>study_notes</code> <code>quiz_create</code> <code>study_verify</code></div>
     </div>
-<div class="detail-card fade-in delay-1" data-category="Quality">
-      <h3>Bug Finder</h3>
+<div class="detail-card fade-in delay-1" data-category="Development,Utility">
+      <h3>Git Master</h3>
       <div class="meta">
-        <span>Quality</span>
+        <span>Development / Utility</span>
         <span>Risk: low</span>
         <span>HBX</span>
       </div>
-      <p>Reviews project code.</p>
-      
+      <p>AI Git expert to write structured commit messages, review diffs, and manage releases.</p>
+      <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">Tools:</strong> <code>analyze_diff</code> <code>audit_pre_commit</code> <code>generate_changelog</code></div>
     </div>
-<div class="detail-card fade-in delay-2" data-category="Quality">
-      <h3>Code Reviewer</h3>
-      <div class="meta">
-        <span>Quality</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Reviews project quality.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-3" data-category="Database,Quality">
-      <h3>Database Analyst</h3>
-      <div class="meta">
-        <span>Database / Quality</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Writes optimized SQL queries and database schemas.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-4" data-category="Documentation">
-      <h3>Docs Writer</h3>
-      <div class="meta">
-        <span>Documentation</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Writes project documentation.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-1" data-category="Developer Tools,Automation">
-      <h3>MCP Builder</h3>
-      <div class="meta">
-        <span>Developer Tools / Automation</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Generates Model Context Protocol servers.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-2" data-category="Collaboration,Automation">
-      <h3>OS Maintainer</h3>
-      <div class="meta">
-        <span>Collaboration / Automation</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Assists in triaging issues and preparing releases.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-3" data-category="Documentation">
-      <h3>PRD Writer</h3>
-      <div class="meta">
-        <span>Documentation</span>
-        <span>Risk: low</span>
-        <span>HBX</span>
-      </div>
-      <p>Drafts docs.</p>
-      
-    </div>
-<div class="detail-card fade-in delay-4" data-category="Security,Quality">
+<div class="detail-card fade-in delay-2" data-category="Security,Quality">
       <h3>Security Auditor</h3>
       <div class="meta">
         <span>Security / Quality</span>
