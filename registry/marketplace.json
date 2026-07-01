@@ -2063,6 +2063,92 @@
         }
       ],
       "license": "MIT"
+    },
+    {
+      "id": "skill.git-master",
+      "type": "skill",
+      "name": "Git Master",
+      "version": "1.0.0",
+      "summary": "AI Git expert to write structured commit messages, review diffs, and manage releases.",
+      "description": "A specialized Git workspace assistant. Analyzes staged and unstaged changes, writes clean semantic commits (Conventional Commits), audits files for left-over debugger code or secrets before commit, and generates release change logs.",
+      "publisher": {
+        "name": "HBX",
+        "github": "hbx12",
+        "verified": true
+      },
+      "icon": "aura-git-master/icon.svg",
+      "cover": "aura-git-master/cover.jpg",
+      "categories": [
+        "Development",
+        "Utility"
+      ],
+      "tags": [
+        "git",
+        "commit",
+        "diff",
+        "changelog",
+        "release"
+      ],
+      "risk": "low",
+      "auth": {
+        "type": "none"
+      },
+      "install": {
+        "kind": "skill",
+        "prompt": "You are Aura Git Master, an expert assistant for version control and workspace management. Analyze the staged and unstaged file modifications. Propose formatted commit messages adhering to the Conventional Commits standard (feat, fix, docs, refactor, style, test, chore). Provide a clear explanation in Arabic of why the changes were made in the commit body. Perform a pre-commit review of code diffs to warn the user about accidentally staged secrets, temporary test code (like console.log, print, or debuggers). Generate beautiful release notes and changelogs summarizing commits between tags when requested. Keep all destructive or remote operations approval-gated."
+      },
+      "permissions": [
+        "read_file",
+        "command"
+      ],
+      "setup": [
+        "No extra setup required. Fully integrated with local Git repository."
+      ],
+      "tools": [
+        {
+          "name": "analyze_diff",
+          "description": "Analyze code changes (staged and unstaged) to generate structured commit messages."
+        },
+        {
+          "name": "audit_pre_commit",
+          "description": "Scan staged files for leftover console.logs, debuggers, or exposed API credentials."
+        },
+        {
+          "name": "generate_changelog",
+          "description": "Review commit logs and generate a formatted release summary."
+        }
+      ],
+      "homepage": "https://github.com/hbx12/aura-work",
+      "license": "MIT",
+      "repository": "https://github.com/hbx12/aura-work",
+      "localized": {
+        "ar": {
+          "name": "خبير الـ Git (Git Master)",
+          "summary": "خبير ذكاء اصطناعي لكتابة رسائل الالتزام ومراجعة التعديلات وإدارة الإصدارات.",
+          "description": "مهارة متخصصة بمستودعات Git. تحلل التغييرات الجاهزة وغير الجاهزة، وتكتب رسائل التزام قياسية (Conventional Commits)، وتفحص الملفات للتأكد من خلوها من الأكواد المؤقتة والأسرار قبل الالتزام، وتولد سجل التغييرات وملخصات التحديثات.",
+          "setup": [
+            "لا تتطلب أي إعداد إضافي. متكاملة تلقائياً مع مستودع Git المحلي."
+          ],
+          "tools": [
+            {
+              "name": "تحليل التغييرات",
+              "description": "تحليل تعديلات الكود لتوليد رسائل التزام قياسية ومنظمة."
+            },
+            {
+              "name": "فحص ما قبل الالتزام",
+              "description": "فحص الملفات الجاهزة للتأكد من خلوها من كلمات المرور أو طباعات التجربة الزائدة."
+            },
+            {
+              "name": "توليد سجل التحديثات",
+              "description": "مراجعة الالتزامات السابقة وتوليد ملخص منسق باللغة العربية للإصدار الجديد."
+            }
+          ],
+          "categories": [
+            "تطوير",
+            "الأدوات المساعدة"
+          ]
+        }
+      }
     }
   ]
 }
