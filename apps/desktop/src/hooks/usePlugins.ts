@@ -10,7 +10,7 @@ import { universalWorkspaceEntries } from "../marketplace/universalWorkspaceEntr
 import { mergeMarketplaceEntries } from "../marketplace/localizeMarketplace";
 
 /** URL to the live marketplace registry on GitHub Pages. */
-const REGISTRY_URL = "https://hbx12.github.io/aura-work/marketplace.json";
+const REGISTRY_URL = "https://hbx12.github.io/aura-work/registry/marketplace.json";
 
 export interface SkillInfo {
   pluginId: string;

@@ -1,9 +1,12 @@
-name: Deploy Marketplace Registry
+# Deploys the docs site + marketplace registry to GitHub Pages
+# so new skills appear in the app automatically on merge.
+name: Deploy Site + Registry
 
 on:
   push:
     branches: [main]
     paths:
+      - "docs/**"
       - "registry/**"
   workflow_dispatch:
 
@@ -25,10 +28,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare registry for Pages
+      - name: Assemble site
         run: |
           mkdir -p _site
-          cp -r registry/* _site/
+          # Docs site
+          cp -r docs/* _site/
+          # Marketplace registry (under /registry so no conflicts)
+          mkdir -p _site/registry
+          cp -r registry/* _site/registry/
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
