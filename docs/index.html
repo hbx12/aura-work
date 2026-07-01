@@ -147,11 +147,12 @@
   </section>
 
   <section class="landing-stats">
-   <div class="landing-stat"><span class="value">20+</span><span class="label">Languages</span></div>
-   <div class="landing-stat"><span class="value">17</span><span class="label">Themes</span></div>
-   <div class="landing-stat"><span class="value">8</span><span class="label">Sidecars</span></div>
-   <div class="landing-stat"><span class="value">7</span><span class="label">Providers</span></div>
-   <div class="landing-stat"><span class="value">0.1</span><span class="label">Alpha</span></div>
+   <div class="landing-stat"><span class="value" id="lang-count">20+</span><span class="label">Languages</span></div>
+   <div class="landing-stat"><span class="value" id="theme-count">17</span><span class="label">Themes</span></div>
+   <div class="landing-stat"><span class="value" id="plugins-count">—</span><span class="label">Extensions</span></div>
+   <div class="landing-stat"><span class="value" id="sidecar-count">8</span><span class="label">Sidecars</span></div>
+   <div class="landing-stat"><span class="value" id="provider-count">7</span><span class="label">Providers</span></div>
+   <div class="landing-stat"><span class="value" id="version-label">0.1</span><span class="label">Alpha</span></div>
   </section>
 
   <section class="features-section">
@@ -311,6 +312,12 @@
    if (!trigger && m) m.classList.remove('open');
   });
   document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('.nav-desktop')?.classList.toggle('open')});
+
+  // Live marketplace count — updates automatically when registry changes
+  fetch('registry/marketplace.json').then(function(r){return r.json()}).then(function(d){
+   var count = (d.plugins || d.entries || []).length;
+   document.getElementById('plugins-count').textContent = count;
+  }).catch(function(){ document.getElementById('plugins-count').textContent = '26'; });
  </script>
 </body>
 </html>

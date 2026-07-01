@@ -425,11 +425,12 @@
   </section>
 
   <section class="stats">
-   <div class="stat"><span class="stat-value">20+</span><span class="stat-label">لغة</span></div>
-   <div class="stat"><span class="stat-value">17</span><span class="stat-label">سمة</span></div>
-   <div class="stat"><span class="stat-value">8</span><span class="stat-label">سايدكار</span></div>
-   <div class="stat"><span class="stat-value">7</span><span class="stat-label">مزود</span></div>
-   <div class="stat"><span class="stat-value">0.1</span><span class="stat-label">ألفا</span></div>
+   <div class="stat"><span class="stat-value" id="lang-count">20+</span><span class="stat-label">لغة</span></div>
+   <div class="stat"><span class="stat-value" id="theme-count">17</span><span class="stat-label">سمة</span></div>
+   <div class="stat"><span class="stat-value" id="plugins-count">—</span><span class="stat-label">إضافة</span></div>
+   <div class="stat"><span class="stat-value" id="sidecar-count">8</span><span class="stat-label">سايدكار</span></div>
+   <div class="stat"><span class="stat-value" id="provider-count">7</span><span class="stat-label">مزود</span></div>
+   <div class="stat"><span class="stat-value" id="version-label">0.1</span><span class="stat-label">ألفا</span></div>
   </section>
 
   <section class="features-section">
@@ -589,6 +590,12 @@
    if (!trigger && m) m.classList.remove('open');
   });
   document.querySelector('.nav-toggle')?.addEventListener('click',function(){document.querySelector('.nav-desktop')?.classList.toggle('open')});
+
+  // عدد الإضافات المباشر من السوق
+  fetch('registry/marketplace.json').then(function(r){return r.json()}).then(function(d){
+   var count = (d.plugins || d.entries || []).length;
+   document.getElementById('plugins-count').textContent = count;
+  }).catch(function(){ document.getElementById('plugins-count').textContent = '٢٦'; });
  </script>
 </body>
 </html>
