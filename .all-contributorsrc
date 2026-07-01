@@ -51,6 +51,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "TWEAKLABX",
+      "name": "MUTAZ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/293136550?v=4",
+      "profile": "https://github.com/TWEAKLABX",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
