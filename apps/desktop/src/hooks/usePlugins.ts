@@ -9,6 +9,9 @@ import type {
 import { universalWorkspaceEntries } from "../marketplace/universalWorkspaceEntries";
 import { mergeMarketplaceEntries } from "../marketplace/localizeMarketplace";
 
+/** URL to the live marketplace registry on GitHub Pages. */
+const REGISTRY_URL = "https://hbx12.github.io/aura-work/marketplace.json";
+
 export interface SkillInfo {
   pluginId: string;
   name: string;
@@ -183,7 +186,7 @@ export function usePlugins(projectId: string | null) {
     setLoading(true);
     try {
       const entries = withMarketplaceFallback(await invoke<MarketplaceEntry[]>("sync_marketplace", {
-        registryUrl: null,
+        registryUrl: REGISTRY_URL,
       }));
       setMarketplace(entries);
       return entries;
@@ -199,9 +202,15 @@ export function usePlugins(projectId: string | null) {
 
   useEffect(() => {
     void refresh();
-    const id = window.setInterval(() => void refresh(), 10000);
-    return () => window.clearInterval(id);
-  }, [refresh]);
+    // Sync from remote on mount, then every 5 minutes
+    void syncMarketplace();
+    const localId = window.setInterval(() => void refresh(), 10000);
+    const remoteId = window.setInterval(() => void syncMarketplace(), 300000);
+    return () => {
+      window.clearInterval(localId);
+      window.clearInterval(remoteId);
+    };
+  }, [refresh, syncMarketplace]);
 
   return {
     status,
