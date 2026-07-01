@@ -39,8 +39,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: cargo-audit
       - name: Install cargo-audit
         run: cargo install cargo-audit
       - name: Run cargo audit
