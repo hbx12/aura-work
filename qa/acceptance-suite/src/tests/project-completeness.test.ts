@@ -2,8 +2,9 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const DOCS_DIR = join(__dirname, "../../docs");
-const SCRIPTS_DIR = join(__dirname, "../../scripts");
+const ROOT = join(__dirname, "../../../../");
+const DOCS_DIR = join(ROOT, "docs");
+const SCRIPTS_DIR = join(ROOT, "scripts");
 
 describe("Documentation completeness", () => {
   it("should have troubleshooting guide", () => {
@@ -71,41 +72,41 @@ describe("Scripts completeness", () => {
 
 describe("Configuration files", () => {
   it("should have .env.example", () => {
-    const files = readdirSync(join(__dirname, "../.."));
+    const files = readdirSync(ROOT);
     expect(files).toContain(".env.example");
   });
 
   it("should have eslint config", () => {
-    const files = readdirSync(join(__dirname, "../.."));
+    const files = readdirSync(ROOT);
     expect(files).toContain("eslint.config.mjs");
   });
 
   it("should have tsconfig.json", () => {
-    const files = readdirSync(join(__dirname, "../.."));
+    const files = readdirSync(ROOT);
     expect(files).toContain("tsconfig.json");
   });
 
   it("should have .prettierrc.json", () => {
-    const files = readdirSync(join(__dirname, "../.."));
+    const files = readdirSync(ROOT);
     expect(files).toContain(".prettierrc.json");
   });
 });
 
 describe("CI/CD configuration", () => {
   it("should have CI workflow", () => {
-    const workflowsDir = join(__dirname, "../../.github/workflows");
+    const workflowsDir = join(ROOT, ".github/workflows");
     const files = readdirSync(workflowsDir);
     expect(files).toContain("ci.yml");
   });
 
   it("should have security workflow", () => {
-    const workflowsDir = join(__dirname, "../../.github/workflows");
+    const workflowsDir = join(ROOT, ".github/workflows");
     const files = readdirSync(workflowsDir);
     expect(files).toContain("security.yml");
   });
 
   it("should have labeler workflow", () => {
-    const workflowsDir = join(__dirname, "../../.github/workflows");
+    const workflowsDir = join(ROOT, ".github/workflows");
     const files = readdirSync(workflowsDir);
     expect(files).toContain("labeler.yml");
   });

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const MARKETPLACE_PATH = join(__dirname, "../../registry/marketplace.json");
+const MARKETPLACE_PATH = join(__dirname, "marketplace.json");
 
 function loadMarketplace() {
   return JSON.parse(readFileSync(MARKETPLACE_PATH, "utf8"));
