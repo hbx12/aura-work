@@ -14,7 +14,7 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - uses: lizheming/github-translate-action@v1
+      - uses: dromara/issues-translate-action@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           translate_title: true

@@ -2,7 +2,7 @@
 # Docs: https://github.com/actions/labeler
 
 Rust:
-  - src-tauri/**/*
+  - apps/desktop/src-tauri/**/*
   - '**/*.rs'
 
 TypeScript:
