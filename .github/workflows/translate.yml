@@ -14,11 +14,8 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - uses: dromara/issues-translate-action@v1
+      - uses: dromara/issues-translate-action@v2.7
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          translate_title: true
-          translate_body: true
-          translate_comment: true
-          languages: ar,en
-          default_language: en
+          BOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_MODIFY_TITLE: true
+          CUSTOM_BOT_NOTE: "🤖 Translated automatically"
