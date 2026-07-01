@@ -33,7 +33,7 @@ jobs:
             git branch -f "$local_name" "$branch" 2>/dev/null || true
           done
 
-      - name: Mirror all branches and tags to GitLab
+      - name: Mirror all to GitLab
         env:
           GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
           GITLAB_REPOSITORY: gitlab.com/hbybbdr558/aura-work.git
@@ -47,15 +47,8 @@ jobs:
 
           git config user.name "aura-work mirror"
           git config user.email "mirror@aura-work.local"
-          git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
 
-          # Push each local branch individually, skip rejected ones
-          git branch | while IFS= read -r branch; do
-            branch="${branch#\* }"
-            echo "Pushing $branch..."
-            git push -o ci.skip --force gitlab "refs/heads/${branch}:refs/heads/${branch}" || echo "⚠️ Skipped $branch (rejected by GitLab)"
-          done
-
-          # Push all tags
-          echo "Pushing tags..."
-          git push -o ci.skip --tags --force gitlab || echo "⚠️ Some tags were skipped"
+          # Mirror: push all refs including all branches + tags
+          git push --prune "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}" \
+            "+refs/remotes/origin/*:refs/heads/*" \
+            "+refs/tags/*:refs/tags/*" 2>&1 || echo "⚠️ Some refs were rejected"
