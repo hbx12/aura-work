@@ -319,6 +319,49 @@ pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-
 .lang-dropdown a{display:flex;padding:6px 16px;font-size:.8125rem;text-decoration:none;color:var(--color-text);transition:background .12s}
 .lang-dropdown a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
 .lang-dropdown a.active{color:var(--color-text-strong);font-weight:600}
+
+/* Theme Toggle */
+.theme-toggle{background:none;border:none;color:var(--color-text-weak);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
+.theme-toggle:hover{color:var(--color-text-strong);background:var(--color-bg-weak)}
+.theme-toggle .sun{display:none}
+.theme-toggle .moon{display:block}
+:root.dark .theme-toggle .sun{display:block}
+:root.dark .theme-toggle .moon{display:none}
+@media(prefers-color-scheme:dark){
+  :root:not(.light) .theme-toggle .sun{display:block}
+  :root:not(.light) .theme-toggle .moon{display:none}
+}
+
+/* Sidebar Layout */
+.layout{display:flex;max-width:1200px;margin:0 auto;padding:2rem 0 4rem;gap:3rem}
+@media(max-width:48rem){.layout{flex-direction:column;padding:1rem 0;gap:1.5rem}}
+.sidebar{width:240px;flex-shrink:0}
+@media(max-width:48rem){.sidebar{width:100%}}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;position:sticky;top:5.5rem}
+@media(max-width:48rem){.sidebar-nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}}
+.sidebar-nav a{display:block;padding:6px 12px;border-radius:6px;font-size:.8125rem;font-weight:500;color:var(--color-text);text-decoration:none;transition:all .12s;font-family:var(--font-mono)}
+.sidebar-nav a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+.sidebar-nav a.active{background:var(--color-accent-subtle);color:var(--color-accent);font-weight:600}
+.sidebar-nav .sec{padding:14px 12px 4px;font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);font-family:var(--font-mono);font-weight:600}
+@media(max-width:48rem){.sidebar-nav .sec{display:none}.sidebar-nav a{display:inline-block;padding:4px 10px;font-size:.75rem}}
+.content{flex:1;min-width:0}
+
+/* Sidebar Search */
+.sidebar-search{padding:0 12px 12px}
+.sidebar-search input{width:100%;padding:8px 12px;border:1px solid var(--color-border-weak);border-radius:6px;background:var(--color-bg-card);color:var(--color-text-strong);font-family:var(--font-mono);font-size:.75rem;outline:none;transition:border-color .15s}
+.sidebar-search input:focus{border-color:var(--color-accent)}
+
+/* Copy Code Snippets Button */
+.copy-code-btn{position:absolute;top:8px;left:8px;padding:4px 8px;font-size:.6875rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:4px;color:var(--color-text-weak);cursor:pointer;opacity:0;transition:opacity .2s,background .15s}
+pre:hover .copy-code-btn{opacity:1}
+.copy-code-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+
+/* Interactive Skills Filtering */
+.skills-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.filter-btn{padding:6px 12px;font-size:.75rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;color:var(--color-text-weak);cursor:pointer;transition:all .15s;border:1px solid var(--color-border-weak)}
+.filter-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
+.filter-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+
 @media(max-width:48rem){.card-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(3,1fr)}}`;
 }
 
@@ -395,10 +438,47 @@ function getSidecars() {
 
 // ─── Page Layout ────────────────────────────────────────────────────────────────
 
-function pageHeaderAr() {
+function getSidebarArHTML(currentPage) {
+  const items = [
+    { type: "section", title: "البداية" },
+    { type: "link", href: "overview.ar.html", id: "overview", title: "نظرة عامة" },
+    { type: "link", href: "quickstart.ar.html", id: "quickstart", title: "بداية سريعة" },
+    { type: "section", title: "النواة" },
+    { type: "link", href: "architecture.ar.html", id: "architecture", title: "الهندسة المعمارية" },
+    { type: "link", href: "providers.ar.html", id: "providers", title: "المزودون" },
+    { type: "link", href: "cli.ar.html", id: "cli", title: "واجهة الأوامر" },
+    { type: "link", href: "permissions.ar.html", id: "permissions", title: "الأذونات" },
+    { type: "link", href: "routing.ar.html", id: "routing", title: "التوجيه" },
+    { type: "link", href: "skills.ar.html", id: "skills", title: "المهارات" },
+    { type: "link", href: "mcp.ar.html", id: "mcp", title: "بروتوكول السياق (MCP)" },
+    { type: "link", href: "sidecars.ar.html", id: "sidecars", title: "الخدمات المساعدة" },
+    { type: "section", title: "التخصيص" },
+    { type: "link", href: "languages.ar.html", id: "languages", title: "اللغات" },
+    { type: "link", href: "themes.ar.html", id: "themes", title: "الثيمات" }
+  ];
+
+  return `<aside class="sidebar">
+    <div class="sidebar-search">
+      <input type="text" placeholder="بحث في الوثائق..." oninput="filterSidebar(this.value)">
+    </div>
+    <nav class="sidebar-nav">
+      ${items.map(item => {
+        if (item.type === "section") {
+          return `<div class="sec">${item.title}</div>`;
+        }
+        const isActive = currentPage === item.id;
+        return `<a href="${item.href}" ${isActive ? 'class="active"' : ''}>${item.title}</a>`;
+      }).join("\n")}
+    </nav>
+  </aside>`;
+}
+
+function pageHeaderAr(pageId = "docs") {
+  const enHref = pageId === "hub" ? "docs.html" : `${pageId}.html`;
+  const arHref = pageId === "hub" ? "docs.ar.html" : `${pageId}.ar.html`;
   return `<header>
   <div class="header-inner">
-    <a href="https://hbx12.github.io/aura-work/" class="logo">
+    <a href="../index.ar.html" class="logo">
       <span class="logo-mark">A</span>
       Aura Work
     </a>
@@ -407,14 +487,20 @@ function pageHeaderAr() {
         <li><a href="https://hbx12.github.io/aura-work/" >${tr("Home")}</a></li>
         <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">${tr("Docs")}</a></li>
         <li><a href="https://github.com/hbx12/aura-work">${tr("GitHub")}</a></li>
-        <li style="position:relative">
-          <a href="#" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')" style="display:flex;align-items:center;gap:4px;cursor:pointer">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            AR
-          </a>
-          <div id="lm" class="lang-dropdown">
-            <a href="https://hbx12.github.io/aura-work/docs/docs.html">English</a>
-            <a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">العربية</a>
+        <li style="position:relative;display:flex;align-items:center;gap:1rem">
+          <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
+            <svg class="sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg class="moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div style="position:relative">
+            <a href="#" class="lang-trigger" onclick="event.preventDefault();document.getElementById('lm').classList.toggle('open')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              AR
+            </a>
+            <div id="lm" class="lang-dropdown">
+              <a href="${enHref}">English</a>
+              <a href="${arHref}">العربية</a>
+            </div>
           </div>
         </li>
       </ul>
@@ -434,7 +520,17 @@ function pageFooterAr() {
 </footer>`;
 }
 
-function wrapPageAr(title, bodyContent) {
+function wrapPageAr(title, bodyContent, pageId = "docs") {
+  const isHub = pageId === "hub";
+  const mainContent = isHub
+    ? bodyContent
+    : `<div class="layout">
+        ${getSidebarArHTML(pageId)}
+        <main class="content">
+          ${bodyContent}
+        </main>
+       </div>`;
+
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl" data-page="aura-work">
 <head>
@@ -462,22 +558,105 @@ function wrapPageAr(title, bodyContent) {
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
   .local-badge.no { background: rgba(184,72,47,0.10); color: var(--color-danger); }
 </style>
+<script>
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else if (saved === 'light') {
+      document.documentElement.classList.add('light');
+    }
+  })();
+</script>
 </head>
 <body>
 <div class="page">
-${pageHeaderAr()}
-<main>
-<a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="back-link" style="flex-direction:row-reverse">
+${pageHeaderAr(pageId)}
+${isHub ? '<main>' : ''}
+${isHub ? '' : `<a href="docs.ar.html" class="back-link" style="flex-direction:row-reverse">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   ${tr("Back to Docs Hub")}
-</a>
-${bodyContent}
-</main>
+</a>`}
+${mainContent}
+${isHub ? '</main>' : ''}
 ${pageFooterAr()}
 </div>
 <script>
-document.addEventListener('DOMContentLoaded',function(){var o=new IntersectionObserver(function(e){e.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');o.unobserve(e.target)}})},{threshold:.1});document.querySelectorAll('.fade-in').forEach(function(e){o.observe(e)})});
-document.addEventListener('click',function(e){var m=document.getElementById('lm');if(m&&!e.target.closest('[onclick*="toggleLang"]')&&!e.target.closest('#lm'))m.classList.remove('open')});
+  document.addEventListener('DOMContentLoaded', function() {
+    // Intersection observer for fade-in animations
+    var o = new IntersectionObserver(function(e) {
+      e.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          o.unobserve(e.target);
+        }
+      });
+    }, { threshold: .1 });
+    document.querySelectorAll('.fade-in').forEach(function(e) { o.observe(e); });
+
+    // Copy code button injection (adjusted left offset for RTL)
+    document.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-code-btn';
+      btn.textContent = 'نسخ';
+      btn.onclick = function() {
+        navigator.clipboard.writeText(pre.querySelector('code').textContent).then(() => {
+          btn.textContent = 'تم النسخ!';
+          setTimeout(() => btn.textContent = 'نسخ', 2000);
+        });
+      };
+      pre.style.position = 'relative';
+      pre.appendChild(btn);
+    });
+  });
+
+  // Dropdown dismissal
+  document.addEventListener('click', function(e) {
+    var m = document.getElementById('lm');
+    if (m && !e.target.closest('.lang-trigger') && !e.target.closest('#lm')) {
+      m.classList.remove('open');
+    }
+  });
+
+  // Theme toggle handler
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.remove('light');
+    if (!isDark) document.documentElement.classList.add('light');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+
+  // Sidebar search filter
+  function filterSidebar(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+      const text = a.textContent.toLowerCase();
+      if (text.includes(q)) {
+        a.style.display = '';
+      } else {
+        a.style.display = 'none';
+      }
+    });
+  }
+
+  // Skills filter helper
+  function filterSkills(cat) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    document.querySelectorAll('.detail-card').forEach(card => {
+      if (cat === 'all') {
+        card.style.display = '';
+      } else {
+        const cats = card.getAttribute('data-category').split(',');
+        if (cats.includes(cat)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>`;
@@ -495,18 +674,18 @@ function generateDocsHubAr() {
   const routes = getRoutingPolicies();
 
   const sections = [
-    { href: "overview.ar", title: tr("Overview"), desc: tr("What is Aura Work and why it exists"), icon: "◆", color: "#c2683f" },
-    { href: "quickstart.ar", title: tr("Quick Start"), desc: tr("Install, configure, run your first task"), icon: "▶", color: "#1a7f64" },
-    { href: "providers.ar", title: `${tr("Providers")} (${providers.length})`, desc: tr("AI model providers with auto-discovery"), icon: "◆", color: "#c48b5c" },
-    { href: "routing.ar", title: `${tr("Routing")} (${routes.length})`, desc: tr("Intelligent 5-policy model routing engine"), icon: "↗", color: "#4b5bb0" },
-    { href: "skills.ar", title: `${tr("Skills")} (${skills.length})`, desc: `${skills.length} ${tr("pre-built agent skills in the registry")}`, icon: "⚡", color: "#7a5c8e" },
-    { href: "sidecars.ar", title: `${tr("Sidecars")} (${sidecars.length})`, desc: `${sidecars.length} ${tr("modular background service daemons")}`, icon: "▤", color: "#1988a2" },
-    { href: "languages.ar", title: `${tr("Languages")} (${languages.length})`, desc: `${languages.length} ${tr("human languages with RTL support")}`, icon: "🌐", color: "#3a6fc4" },
-    { href: "themes.ar", title: `${tr("Themes")} (${themes.length})`, desc: `${themes.length} ${tr("hand-crafted visual themes")}`, icon: "◐", color: "#a855f7" },
-    { href: "permissions.ar", title: tr("Permissions"), desc: tr("3 permission profiles: read-only, safe-automation, research"), icon: "🔒", color: "#e05c2b" },
-    { href: "architecture.ar", title: tr("Architecture"), desc: tr("Tauri 2 + React 19 + Rust multi-process architecture"), icon: "◈", color: "#645d4e" },
-    { href: "cli.ar", title: tr("CLI"), desc: tr("Command-line bridge client for remote control"), icon: "⌘", color: "#1a7f64" },
-    { href: "mcp.ar", title: tr("MCP"), desc: tr("Model Context Protocol for third-party tool integration"), icon: "⇌", color: "#c2683f" },
+    { href: "overview.ar.html", title: tr("Overview"), desc: tr("What is Aura Work and why it exists"), icon: "◆", color: "#c2683f" },
+    { href: "quickstart.ar.html", title: tr("Quick Start"), desc: tr("Install, configure, run your first task"), icon: "▶", color: "#1a7f64" },
+    { href: "providers.ar.html", title: `${tr("Providers")} (${providers.length})`, desc: tr("AI model providers with auto-discovery"), icon: "◆", color: "#c48b5c" },
+    { href: "routing.ar.html", title: `${tr("Routing")} (${routes.length})`, desc: tr("Intelligent 5-policy model routing engine"), icon: "↗", color: "#4b5bb0" },
+    { href: "skills.ar.html", title: `${tr("Skills")} (${skills.length})`, desc: `${skills.length} ${tr("pre-built agent skills in the registry")}`, icon: "⚡", color: "#7a5c8e" },
+    { href: "sidecars.ar.html", title: `${tr("Sidecars")} (${sidecars.length})`, desc: `${sidecars.length} ${tr("modular background service daemons")}`, icon: "▤", color: "#1988a2" },
+    { href: "languages.ar.html", title: `${tr("Languages")} (${languages.length})`, desc: `${languages.length} ${tr("human languages with RTL support")}`, icon: "🌐", color: "#3a6fc4" },
+    { href: "themes.ar.html", title: `${tr("Themes")} (${themes.length})`, desc: `${themes.length} ${tr("hand-crafted visual themes")}`, icon: "◐", color: "#a855f7" },
+    { href: "permissions.ar.html", title: tr("Permissions"), desc: tr("3 permission profiles: read-only, safe-automation, research"), icon: "🔒", color: "#e05c2b" },
+    { href: "architecture.ar.html", title: tr("Architecture"), desc: tr("Tauri 2 + React 19 + Rust multi-process architecture"), icon: "◈", color: "#645d4e" },
+    { href: "cli.ar.html", title: tr("CLI"), desc: tr("Command-line bridge client for remote control"), icon: "⌘", color: "#1a7f64" },
+    { href: "mcp.ar.html", title: tr("MCP"), desc: tr("Model Context Protocol for third-party tool integration"), icon: "⇌", color: "#c2683f" },
   ];
 
   const hero = `<div class="hero">
@@ -526,7 +705,7 @@ function generateDocsHubAr() {
     </div>
   </a>`).join("\n");
 
-  return wrapPageAr(tr("Documentation Hub"), hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`);
+  return wrapPageAr(tr("Documentation Hub"), hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`, "hub");
 }
 
 function generateOverviewAr() {
@@ -553,7 +732,7 @@ function generateOverviewAr() {
     <div class="detail-card"><h3>${tr("Agent Engine")}</h3><p>${tr("Multi-agent orchestration with planner, executor, reviewer, and safety roles. Supports custom tools and MCP servers.")}</p></div>
     <div class="detail-card"><h3>${tr("Routing Engine")}</h3><p>${tr("Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.")}</p></div>
   </section>`;
-  return wrapPageAr(tr("Overview"), body);
+  return wrapPageAr(tr("Overview"), body, "overview");
 }
 
 function generateQuickStartAr() {
@@ -579,9 +758,9 @@ function generateQuickStartAr() {
   <section class="section">
     <div class="section-label">${tr("Next Steps")}</div>
     <h2>${tr("Going deeper")}</h2>
-    <p>${tr("Read about")} <a href="providers.ar">${tr("Providers")}</a>, <a href="routing.ar">${tr("Routing")}</a>, <a href="skills.ar">${tr("Skills")}</a>, ${tr("or")} <a href="architecture.ar">${tr("Architecture")}</a>. ${tr("For contributors, see the")} <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
+    <p>${tr("Read about")} <a href="providers.ar.html">${tr("Providers")}</a>, <a href="routing.ar.html">${tr("Routing")}</a>, <a href="skills.ar.html">${tr("Skills")}</a>, ${tr("or")} <a href="architecture.ar.html">${tr("Architecture")}</a>. ${tr("For contributors, see the")} <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
   </section>`;
-  return wrapPageAr(tr("Quick Start"), body);
+  return wrapPageAr(tr("Quick Start"), body, "quickstart");
 }
 
 function generateProvidersAr() {
@@ -629,7 +808,7 @@ function generateProvidersAr() {
       </div>`;
     }).join("\n")}
   </section>`;
-  return wrapPageAr(tr("Providers"), body);
+  return wrapPageAr(tr("Providers"), body, "providers");
 }
 
 function generateRoutingAr() {
@@ -656,11 +835,26 @@ function generateRoutingAr() {
       </div>`;
     }).join("\n")}
   </section>`;
-  return wrapPageAr(tr("Routing"), body);
+  return wrapPageAr(tr("Routing"), body, "routing");
 }
 
 function generateSkillsAr() {
   const skills = getSkills();
+  const categories = [...new Set(skills.flatMap(s => s.categories || []))].sort();
+  const catMapping = {
+    "Development": "تطوير",
+    "Research": "البحث الاستقصائي",
+    "Data": "البيانات",
+    "Utility": "الأدوات المساعدة",
+    "System": "النظام",
+    "Design": "التصميم",
+    "Marketing": "التسويق",
+    "Writing": "الكتابة",
+    "Security": "الأمان",
+    "Automation": "الأتمتة"
+  };
+  const trCat = (cat) => catMapping[cat] || cat;
+
   const body = `<div class="hero">
     <h1><span>${tr("Skills")}</span></h1>
     <p class="subtitle">${skills.length} ${tr("pre-built agent skills from the registry")}</p>
@@ -670,20 +864,27 @@ function generateSkillsAr() {
       <div class="stat-card fade-in delay-1"><div class="num">${skills.length}</div><div class="lbl">${tr("Total Skills")}</div></div>
     </div>
     <p>${tr("Agent skills are reusable capabilities registered as JSON definitions in the registry/skills/ directory. Each skill declares its tools, risk level, and allowed categories. Skills can be invoked by the agent at runtime and are sandboxed by the permission system.")}</p>
+    
+    <div class="section-label">تصفية حسب الفئة</div>
+    <div class="skills-filter">
+      <button class="filter-btn active" onclick="filterSkills('all')">الكل</button>
+      ${categories.map(c => `<button class="filter-btn" onclick="filterSkills('${c}')">${trCat(c)}</button>`).join(" ")}
+    </div>
+
     <div class="section-label">${tr("Skills")}</div>
     <div class="card-grid">
-      ${skills.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}">
+      ${skills.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}" data-category="${(s.categories || []).join(',')}">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">${(s.name || s.id || "?").charAt(0).toUpperCase()}</span> ${s.name || s.id}</h3>
         <div class="meta">
           <span>v${s.version || "?"}</span>
           <span>${tr("Risk Level")}: ${tr(s.risk || "low")}</span>
-          <span>${s.categories ? s.categories.join("، ") : ""}</span>
+          <span>${s.categories ? s.categories.map(trCat).join("، ") : ""}</span>
         </div>
         <p>${s.summary || s.description || ""}</p>
       </div>`).join("\n")}
     </div>
   </section>`;
-  return wrapPageAr(tr("Skills"), body);
+  return wrapPageAr(tr("Skills"), body, "skills");
 }
 
 function generateLanguagesAr() {
@@ -723,7 +924,7 @@ function generateLanguagesAr() {
       <li>${tr("Submit a pull request")}</li>
     </ul>
   </section>`;
-  return wrapPageAr(tr("Languages"), body);
+  return wrapPageAr(tr("Languages"), body, "languages");
 }
 
 function generateThemesAr() {
@@ -763,7 +964,7 @@ function generateThemesAr() {
     <h2 style="margin-top:2rem">${tr("Theme Switching")}</h2>
     <p>${tr("Themes are applied dynamically via CSS custom properties. Switching between light, dark, amoled, or any of the 35+ themes is instantaneous — no page reload needed.")}</p>
   </section>`;
-  return wrapPageAr(tr("Themes"), body);
+  return wrapPageAr(tr("Themes"), body, "themes");
 }
 
 function generatePermissionsAr() {
@@ -792,7 +993,7 @@ function generatePermissionsAr() {
   ]
 }</code></pre>
   </section>`;
-  return wrapPageAr(tr("Permissions"), body);
+  return wrapPageAr(tr("Permissions"), body, "permissions");
 }
 
 function generateArchitectureAr() {
@@ -840,7 +1041,7 @@ function generateArchitectureAr() {
     <h2>${tr("Security Model")}</h2>
     <p>${tr("All sidecar processes run with minimal permissions. The credential store uses OS-level encryption (Keytar). Code execution is sandboxed in isolated VMs.")}</p>
   </section>`;
-  return wrapPageAr(tr("Architecture"), body);
+  return wrapPageAr(tr("Architecture"), body, "architecture");
 }
 
 function generateCLIAr() {
@@ -870,7 +1071,7 @@ aura run "حلل هذا الكود" --json</code></pre>
     <div class="detail-card"><h3>${tr("Multiple session management")}</h3></div>
     <div class="detail-card"><h3>${tr("JSON output for tooling")}</h3></div>
   </section>`;
-  return wrapPageAr(tr("CLI"), body);
+  return wrapPageAr(tr("CLI"), body, "cli");
 }
 
 function generateMCPAr() {
@@ -889,7 +1090,7 @@ function generateMCPAr() {
     <div class="detail-card"><h3>${tr("Sandboxed execution with permission gating")}</h3></div>
     <div class="detail-card"><h3>${tr("Community MCP server marketplace")}</h3></div>
   </section>`;
-  return wrapPageAr(tr("MCP"), body);
+  return wrapPageAr(tr("MCP"), body, "mcp");
 }
 
 function generateSidecarsAr() {
@@ -926,7 +1127,7 @@ function generateSidecarsAr() {
       </div>`).join("\n")}
     </div>
   </section>`;
-  return wrapPageAr(tr("Sidecars"), body);
+  return wrapPageAr(tr("Sidecars"), body, "sidecars");
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────────
