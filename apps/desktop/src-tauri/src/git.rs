@@ -13,6 +13,7 @@ use tauri::State;
 pub struct GitFileStatus {
     pub path: String,
     pub status: String,
+    pub is_staged: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -159,7 +160,8 @@ pub fn git_status_inner(db: &DbState, project_id: &str) -> Result<GitStatusResul
         if line.len() < 4 {
             continue;
         }
-        let code = line[..2].trim();
+        let index_char = line.chars().nth(0).unwrap_or(' ');
+        let worktree_char = line.chars().nth(1).unwrap_or(' ');
         let mut path = line[3..].trim().to_string().replace('\\', "/");
         
         if !prefix.is_empty() {
@@ -170,17 +172,35 @@ pub fn git_status_inner(db: &DbState, project_id: &str) -> Result<GitStatusResul
             }
         }
 
-        let status = match code {
-            "M" | "MM" => "modified",
-            "A" | "AM" => "added",
-            "D" => "deleted",
-            "??" => "untracked",
-            _ => "changed",
-        };
-        files.push(GitFileStatus {
-            path,
-            status: status.into(),
-        });
+        // If changes exist in the index (staged)
+        if index_char != ' ' && index_char != '?' {
+            let status = match index_char {
+                'M' => "modified",
+                'A' => "added",
+                'D' => "deleted",
+                _ => "changed",
+            };
+            files.push(GitFileStatus {
+                path: path.clone(),
+                status: status.into(),
+                is_staged: true,
+            });
+        }
+
+        // If changes exist in the worktree/untracked (unstaged)
+        if worktree_char != ' ' {
+            let status = match worktree_char {
+                'M' => "modified",
+                'D' => "deleted",
+                '?' => "untracked",
+                _ => "changed",
+            };
+            files.push(GitFileStatus {
+                path,
+                status: status.into(),
+                is_staged: false,
+            });
+        }
     }
     Ok(GitStatusResult {
         is_repo: true,
@@ -495,6 +515,120 @@ fn full_worktree_diff(root: &str) -> Result<String, String> {
     }
 
     Ok(diff.trim_end().to_string())
+}
+
+#[tauri::command]
+pub fn git_stage_file(
+    db: State<'_, DbState>,
+    project_id: String,
+    path: String,
+) -> Result<GitStatusResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    let rel = validate_git_rel_path(&path)?;
+    git_cmd(&root, &["add", &rel])?;
+    git_status_inner(&db, &project_id)
+}
+
+#[tauri::command]
+pub fn git_unstage_file(
+    db: State<'_, DbState>,
+    project_id: String,
+    path: String,
+) -> Result<GitStatusResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    let rel = validate_git_rel_path(&path)?;
+    git_cmd(&root, &["reset", "HEAD", &rel])?;
+    git_status_inner(&db, &project_id)
+}
+
+#[tauri::command]
+pub fn git_commit(
+    db: State<'_, DbState>,
+    project_id: String,
+    message: String,
+) -> Result<GitStatusResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    if message.trim().is_empty() {
+        return Err("Commit message cannot be empty.".into());
+    }
+    let has_user = git_cmd(&root, &["config", "user.name"]).is_ok();
+    if has_user {
+        git_cmd(&root, &["commit", "-m", &message])?;
+    } else {
+        let git_path = "git".to_string();
+        #[cfg(target_os = "macos")]
+        let git_path = {
+            let mut path = git_path;
+            if Command::new("git").arg("--version").output().is_err() {
+                if std::path::Path::new("/opt/homebrew/bin/git").exists() {
+                    path = "/opt/homebrew/bin/git".to_string();
+                } else if std::path::Path::new("/usr/local/bin/git").exists() {
+                    path = "/usr/local/bin/git".to_string();
+                }
+            }
+            path
+        };
+        let output = Command::new(&git_path)
+            .args(&["commit", "-m", &message])
+            .current_dir(&root)
+            .env("GIT_AUTHOR_NAME", "Aura OS")
+            .env("GIT_AUTHOR_EMAIL", "aura@aura-os.org")
+            .env("GIT_COMMITTER_NAME", "Aura OS")
+            .env("GIT_COMMITTER_EMAIL", "aura@aura-os.org")
+            .output()
+            .map_err(|e| format!("Failed to run fallback git commit: {e}"))?;
+        if !output.status.success() {
+            let err = String::from_utf8_lossy(&output.stderr);
+            return Err(err.trim().to_string());
+        }
+    }
+    git_status_inner(&db, &project_id)
+}
+
+#[tauri::command]
+pub async fn git_push(db: State<'_, DbState>, project_id: String) -> Result<String, String> {
+    let root = project_folder(&db, &project_id)?;
+    git_cmd(&root, &["push"])
+}
+
+#[tauri::command]
+pub async fn git_pull(db: State<'_, DbState>, project_id: String) -> Result<String, String> {
+    let root = project_folder(&db, &project_id)?;
+    git_cmd(&root, &["pull"])
+}
+
+#[tauri::command]
+pub fn git_list_branches(db: State<'_, DbState>, project_id: String) -> Result<Vec<String>, String> {
+    let root = project_folder(&db, &project_id)?;
+    let output = git_cmd(&root, &["branch", "--list"])?;
+    let branches = output
+        .lines()
+        .map(|line| line.replace('*', "").trim().to_string())
+        .filter(|line| !line.is_empty())
+        .collect();
+    Ok(branches)
+}
+
+#[tauri::command]
+pub fn git_checkout_branch(
+    db: State<'_, DbState>,
+    project_id: String,
+    branch_name: String,
+) -> Result<GitStatusResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    git_cmd(&root, &["checkout", &branch_name])?;
+    git_status_inner(&db, &project_id)
+}
+
+#[tauri::command]
+pub fn git_create_branch(
+    db: State<'_, DbState>,
+    project_id: String,
+    branch_name: String,
+) -> Result<GitStatusResult, String> {
+    let root = project_folder(&db, &project_id)?;
+    git_cmd(&root, &["checkout", "-b", &branch_name])?;
+    git_status_inner(&db, &project_id)
 }
 
 #[cfg(test)]

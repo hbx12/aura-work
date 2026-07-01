@@ -15,6 +15,14 @@ interface GitPageProps {
   onSelectFile?: (path: string) => void;
   onInitRepo?: () => void;
   selectedFile?: string | null;
+  onStageFile?: (path: string) => Promise<void>;
+  onUnstageFile?: (path: string) => Promise<void>;
+  onCommitDirect?: (message: string) => Promise<void>;
+  onPush?: () => Promise<void>;
+  onPull?: () => Promise<void>;
+  branches?: string[];
+  onCheckoutBranch?: (branchName: string) => Promise<void>;
+  onCreateBranch?: (branchName: string) => Promise<void>;
   t: (key: string, params?: Record<string, string>) => string;
 }
 
@@ -38,10 +46,78 @@ export function GitPage({
   onSelectFile,
   onInitRepo,
   selectedFile,
+  onStageFile,
+  onUnstageFile,
+  onCommitDirect,
+  onPush,
+  onPull,
+  branches = [],
+  onCheckoutBranch,
+  onCreateBranch,
   t,
 }: GitPageProps) {
   const activeFile = selectedFile ?? status?.files[0]?.path ?? null;
   const changeCount = status?.files.length ?? 0;
+
+  const stagedFiles = status?.files.filter((f) => f.isStaged) ?? [];
+  const unstagedFiles = status?.files.filter((f) => !f.isStaged) ?? [];
+
+  const handleCreateBranch = () => {
+    if (!onCreateBranch) return;
+    const name = prompt(t("git.enterBranchName") || "Enter new branch name:");
+    if (name && name.trim()) {
+      onCreateBranch(name.trim()).catch((err) => alert(String(err)));
+    }
+  };
+
+  const renderFileRow = (f: NonNullable<GitStatusResult["files"]>[0], isStaged: boolean) => {
+    const g = statusGlyph(f.status);
+    const dir = f.path.includes("/") ? f.path.slice(0, f.path.lastIndexOf("/") + 1) : "";
+    const base = f.path.split("/").pop() ?? f.path;
+    return (
+      <div
+        key={`${f.path}-${isStaged ? "staged" : "unstaged"}`}
+        className={`gitfile${activeFile === f.path ? " sel" : ""}`}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 8 }}
+        onClick={() => onSelectFile?.(f.path)}
+        onKeyDown={(e) => e.key === "Enter" && onSelectFile?.(f.path)}
+        role="button"
+        tabIndex={0}
+      >
+        <div style={{ display: "flex", alignItems: "center", minWidth: 0, flex: 1 }}>
+          <span className={`gs ${g.cls}`}>{g.label}</span>
+          <span className="gp" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {dir && <span className="dir">{dir}</span>}
+            {base}
+          </span>
+        </div>
+        <button
+          type="button"
+          className="btn sm"
+          style={{
+            padding: "2px 6px",
+            minWidth: 20,
+            height: 20,
+            fontSize: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          title={isStaged ? "Unstage file" : "Stage file"}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isStaged) {
+              void onUnstageFile?.(f.path);
+            } else {
+              void onStageFile?.(f.path);
+            }
+          }}
+        >
+          {isStaged ? "−" : "+"}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="page">
@@ -52,13 +128,65 @@ export function GitPage({
             <p>{t("git.subtitle")}</p>
           </div>
           {status?.isRepo && (
-            <div className="ph-actions">
-              <span className="statpill">
-                <Icon name="git-branch" size={13} />
-                {status.branch ?? "HEAD"}
-                <span className="dotsep">·</span>
-                {status.clean ? t("git.clean") : t("git.dirty")}
-              </span>
+            <div className="ph-actions" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {branches.length > 0 && onCheckoutBranch && (
+                <select
+                  value={status.branch ?? ""}
+                  onChange={(e) => onCheckoutBranch(e.target.value)}
+                  style={{
+                    background: "var(--bg-2)",
+                    color: "var(--fg-1)",
+                    border: "1px solid var(--border-1)",
+                    borderRadius: "var(--r-sm)",
+                    padding: "4px 8px",
+                    fontSize: "12px",
+                    outline: "none",
+                    height: 28,
+                    cursor: "pointer",
+                  }}
+                >
+                  {branches.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {onCreateBranch && (
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ height: 28 }}
+                  title="Create New Branch"
+                  onClick={handleCreateBranch}
+                >
+                  <Icon name="plus" size={13} />
+                </button>
+              )}
+              {onPull && (
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ height: 28, display: "flex", alignItems: "center", gap: 4 }}
+                  title="Pull Changes"
+                  onClick={() => onPull().catch((err) => alert(String(err)))}
+                >
+                  <Icon name="download" size={13} />
+                  Pull
+                </button>
+              )}
+              {onPush && (
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ height: 28, display: "flex", alignItems: "center", gap: 4 }}
+                  title="Push Changes"
+                  onClick={() => onPush().catch((err) => alert(String(err)))}
+                >
+                  <Icon name="arrow-up" size={13} />
+                  Push
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -106,37 +234,42 @@ export function GitPage({
                 )}
               </div>
             )}
-            {status?.isRepo &&
-              (status.files.length === 0 ? (
-                <div className="panel-row muted">{t("git.noChanges")}</div>
-              ) : (
-                status.files.map((f) => {
-                  const g = statusGlyph(f.status);
-                  const dir = f.path.includes("/") ? f.path.slice(0, f.path.lastIndexOf("/") + 1) : "";
-                  const base = f.path.split("/").pop() ?? f.path;
-                  return (
+            {status?.isRepo && (
+              <div style={{ width: "100%" }}>
+                {stagedFiles.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
                     <div
-                      key={f.path}
-                      className={`gitfile${activeFile === f.path ? " sel" : ""}`}
-                      onClick={() => onSelectFile?.(f.path)}
-                      onKeyDown={(e) => e.key === "Enter" && onSelectFile?.(f.path)}
-                      role="button"
-                      tabIndex={0}
+                      className="sec-label"
+                      style={{ padding: "8px 12px 4px 12px", fontSize: "10px", textTransform: "uppercase" }}
                     >
-                      <span className={`gs ${g.cls}`}>{g.label}</span>
-                      <span className="gp">
-                        {dir && <span className="dir">{dir}</span>}
-                        {base}
-                      </span>
+                      Staged Changes ({stagedFiles.length})
                     </div>
-                  );
-                })
-              ))}
+                    {stagedFiles.map((f) => renderFileRow(f, true))}
+                  </div>
+                )}
+                <div>
+                  {stagedFiles.length > 0 && unstagedFiles.length > 0 && (
+                    <div
+                      className="sec-label"
+                      style={{ padding: "8px 12px 4px 12px", fontSize: "10px", textTransform: "uppercase" }}
+                    >
+                      Changes ({unstagedFiles.length})
+                    </div>
+                  )}
+                  {unstagedFiles.map((f) => renderFileRow(f, false))}
+                </div>
+                {status.files.length === 0 && (
+                  <div className="panel-row muted" style={{ padding: "12px 16px" }}>
+                    {t("git.noChanges")}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {status?.isRepo && (
             <div className="commit-box">
               <div className="cb-row">
-                <span className="lbl">{t("git.proposeCommit")}</span>
+                <span className="lbl">{t("git.commitMessage")}</span>
               </div>
               <textarea
                 className="commit-msg"
@@ -145,8 +278,25 @@ export function GitPage({
                 value={commitMessage}
                 onChange={(e) => onCommitMessageChange(e.target.value)}
               />
-              <div className="commit-actions">
-                <button type="button" className="btn primary sm" disabled={loading} onClick={onProposeCommit}>
+              <div className="commit-actions" style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                {onCommitDirect && (
+                  <button
+                    type="button"
+                    className="btn primary sm"
+                    style={{ flex: 1 }}
+                    disabled={loading || !commitMessage.trim()}
+                    onClick={() => onCommitDirect(commitMessage)}
+                  >
+                    {t("git.commit") || "Commit"}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ flex: 1 }}
+                  disabled={loading || !commitMessage.trim()}
+                  onClick={onProposeCommit}
+                >
                   {t("git.proposeCommit")}
                 </button>
               </div>

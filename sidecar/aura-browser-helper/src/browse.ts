@@ -103,6 +103,19 @@ export async function browsePage(backend: BackendInfo, req: BrowseRequest): Prom
 
   const fetchedAt = new Date().toISOString();
   const links = extractLinks(html, req.url);
+  if (extract === "html") {
+    return {
+      source: { url: req.url, title, fetchedAt },
+      text: html,
+      links,
+      backend: usedBackend,
+      durationMs: Date.now() - started,
+      truncated: false,
+      injectionWarnings: [],
+      citation: formatCitation(req.url, title),
+    };
+  }
+
   let rawText =
     extract === "links"
       ? links.map((l) => `${l.text}: ${l.href}`).join("\n")

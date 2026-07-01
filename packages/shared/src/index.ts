@@ -377,7 +377,7 @@ export interface GitStatusResult {
   isRepo: boolean;
   branch?: string | null;
   clean: boolean;
-  files: { path: string; status: string }[];
+  files: { path: string; status: string; isStaged: boolean }[];
 }
 
 export interface PendingCommit {

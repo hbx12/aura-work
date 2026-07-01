@@ -4,6 +4,7 @@ use crate::db::DbState;
 use crate::permissions::check_task_permission;
 use crate::web::{always_requires_approval, risk_label, scan_prompt_injection, validate_url};
 use serde::{Deserialize, Serialize};
+use tauri::Emitter;
 
 const BROWSER_HELPER_URL: &str = "http://127.0.0.1:47823";
 
@@ -161,6 +162,66 @@ pub async fn stop_browser() -> Result<BrowserStatus, String> {
     Ok(enrich_status(status))
 }
 
+const INTERCEPTOR_SCRIPT: &str = r#"
+<script>
+document.addEventListener('click', function(e) {
+    var target = e.target.closest('a');
+    if (target && target.href) {
+        if (target.href.startsWith('http://') || target.href.startsWith('https://')) {
+            e.preventDefault();
+            window.parent.postMessage({ type: 'iframe-navigation', url: target.href }, '*');
+        }
+    }
+});
+document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (form && form.action && (form.action.startsWith('http://') || form.action.startsWith('https://'))) {
+        e.preventDefault();
+        window.parent.postMessage({ type: 'iframe-navigation', url: form.action }, '*');
+    }
+});
+</script>
+"#;
+
+#[tauri::command]
+pub async fn gui_browse_url(url: String, project_id: String) -> Result<String, String> {
+    let (normalized_url, _risk) = validate_url(&url)?;
+    ensure_browser_ready().await?;
+
+    browser_post::<serde_json::Value>(
+        "/profile",
+        &serde_json::json!({ "projectId": project_id }),
+    )
+    .await?;
+
+    let result = browser_post::<BrowseResult>(
+        "/browse",
+        &serde_json::json!({
+            "projectId": project_id,
+            "url": normalized_url,
+            "extract": "html",
+            "timeoutMs": 45000,
+        }),
+    )
+    .await?;
+
+    let base_tag = format!("<base href=\"{}\">", normalized_url);
+    let mut html = result.text;
+    
+    if let Some(pos) = html.find("<head>") {
+        html.insert_str(pos + 6, &base_tag);
+        html.insert_str(pos + 6 + base_tag.len(), INTERCEPTOR_SCRIPT);
+    } else if let Some(pos) = html.find("<html>") {
+        html.insert_str(pos + 6, &base_tag);
+        html.insert_str(pos + 6 + base_tag.len(), INTERCEPTOR_SCRIPT);
+    } else {
+        html.insert_str(0, &base_tag);
+        html.insert_str(base_tag.len(), INTERCEPTOR_SCRIPT);
+    }
+
+    Ok(html)
+}
+
 pub async fn ensure_browser_ready() -> Result<BrowserStatus, String> {
     if let Ok(health) = browser_get::<BrowserHealth>("/health").await {
         if health.status == "ok" || health.status == "idle" {
@@ -183,6 +244,7 @@ pub async fn tool_browse_url(
     url: &str,
     extract: Option<&str>,
     tool_payload: Option<serde_json::Value>,
+    app: Option<&tauri::AppHandle>,
 ) -> Result<String, String> {
     let (normalized_url, risk) = validate_url(url)?;
 
@@ -236,6 +298,10 @@ pub async fn tool_browse_url(
         }),
     )
     .await?;
+
+    if let Some(app) = app {
+        let _ = app.emit("aura://browser-navigate", serde_json::json!({ "url": normalized_url }));
+    }
 
     let mut warnings = result.injection_warnings.clone();
     warnings.extend(scan_prompt_injection(&result.text));

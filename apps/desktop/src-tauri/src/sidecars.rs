@@ -177,6 +177,7 @@ fn spawn_sidecar(app: &AppHandle, def: &SidecarDef, token: &str) -> Option<Child
         .current_dir(&workdir)
         .env(def.env_key, def.port.to_string())
         .env(def.auth_env_key, token)
+        .env("AURA_ALLOW_UNSAFE_HOST_EXECUTION", "1")
         .stdin(Stdio::null())
         .stdout(stdout)
         .stderr(stderr);

@@ -368,7 +368,7 @@ export default function App() {
   const git = useGit(activeProjectId);
   const audit = useAudit(activeProjectId);
   const vm = useVm();
-  const browser = useBrowser();
+  const browser = useBrowser(activeProjectId);
   const pluginsApi = usePlugins(activeProjectId);
   const cloudApi = useCloud();
   const scheduledApi = useScheduledTasks(activeProjectId);
@@ -1890,6 +1890,9 @@ You can open and customize it to instruct the agent on workspace rules.`;
           browserLoading={browser.loading}
           onStartBrowser={browser.start}
           onStopBrowser={browser.stop}
+          activeUrl={browser.activeUrl}
+          frameHtml={browser.frameHtml}
+          onNavigate={browser.guiBrowse}
           t={t}
         />
       );
@@ -1930,6 +1933,14 @@ You can open and customize it to instruct the agent on workspace rules.`;
           onApproveCommit={(id) => void git.approveCommit(id)}
           onSelectFile={(path) => void git.selectFile(path)}
           onInitRepo={() => void git.initRepo()}
+          onStageFile={git.stageFile}
+          onUnstageFile={git.unstageFile}
+          onCommitDirect={git.commitDirect}
+          onPush={git.push}
+          onPull={git.pull}
+          branches={git.branches}
+          onCheckoutBranch={git.checkoutBranch}
+          onCreateBranch={git.createBranch}
           t={t}
         />
       );

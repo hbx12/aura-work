@@ -553,6 +553,7 @@ pub async fn get_agents_list(project_path: Option<String>) -> Result<serde_json:
 pub async fn run_chat(
     db: State<'_, DbState>,
     vault: State<'_, VaultHandle>,
+    app: tauri::AppHandle,
     input: RunChatInput,
 ) -> Result<ChatResult, String> {
     if input.message.trim().is_empty() {
@@ -563,7 +564,7 @@ pub async fn run_chat(
         .as_deref()
         .is_some_and(|project_id| !project_id.trim().is_empty())
     {
-        return crate::tasks::run_workspace_chat_agent(&db, &vault, &input).await;
+        return crate::tasks::run_workspace_chat_agent(&db, &vault, &input, Some(&app)).await;
     }
 
     let routing_policy = {

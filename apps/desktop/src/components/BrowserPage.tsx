@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@aura-os/ui";
 import type { BrowserStatus } from "@aura-os/shared";
 
@@ -8,6 +8,9 @@ interface BrowserPageProps {
   browserLoading?: boolean;
   onStartBrowser: () => Promise<BrowserStatus>;
   onStopBrowser: () => Promise<BrowserStatus>;
+  activeUrl: string;
+  frameHtml: string | null;
+  onNavigate: (url: string) => Promise<void>;
   t: (key: string, params?: Record<string, string>) => string;
 }
 
@@ -17,12 +20,36 @@ export function BrowserPage({
   browserLoading,
   onStartBrowser,
   onStopBrowser,
+  activeUrl,
+  frameHtml,
+  onNavigate,
   t,
 }: BrowserPageProps) {
-  const [url, setUrl] = useState("https://example.com");
-  const [frameUrl, setFrameUrl] = useState<string | null>(null);
+  const [url, setUrl] = useState(activeUrl);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  // Sync address bar input with external activeUrl changes (e.g. from agent activity)
+  useEffect(() => {
+    setUrl(activeUrl);
+  }, [activeUrl]);
+
+  // Intercept inner iframe link clicks and forms
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === "iframe-navigation") {
+        const targetUrl = event.data.url;
+        if (targetUrl) {
+          setBusy(true);
+          onNavigate(targetUrl)
+            .catch((err) => setMessage(String(err)))
+            .finally(() => setBusy(false));
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [onNavigate]);
 
   const navigate = () => {
     const trimmed = url.trim();
@@ -31,10 +58,13 @@ export function BrowserPage({
       return;
     }
     setMessage(null);
-    setFrameUrl(trimmed);
+    setBusy(true);
+    onNavigate(trimmed)
+      .catch((err) => setMessage(String(err)))
+      .finally(() => setBusy(false));
   };
 
-  const displayUrl = frameUrl ?? url;
+  const displayUrl = activeUrl;
   const schMatch = displayUrl.match(/^(https?:\/\/)(.*)/);
 
   return (
@@ -61,7 +91,7 @@ export function BrowserPage({
       <div className="browser">
         <div className="br-toolbar">
           <div className="br-nav">
-            <button type="button" className="br-iconbtn" title={t("browser.go")} onClick={navigate}>
+            <button type="button" className="br-iconbtn" title={t("browser.go")} onClick={navigate} disabled={busy}>
               <Icon name="rotate-cw" size={15} />
             </button>
           </div>
@@ -75,9 +105,14 @@ export function BrowserPage({
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && navigate()}
               placeholder={t("browser.urlPlaceholder")}
+              disabled={busy}
             />
             <button type="button" className="btn sm primary" onClick={navigate} disabled={busy}>
-              {t("browser.go")}
+              {busy ? (
+                <Icon name="loader" size={12} style={{ animation: "spin 1s linear infinite" }} />
+              ) : (
+                t("browser.go")
+              )}
             </button>
           </div>
           {projectName && (
@@ -118,13 +153,13 @@ export function BrowserPage({
         )}
         <div className="br-stage">
           <div className="br-viewport">
-            {frameUrl ? (
+            {frameHtml ? (
               <iframe
                 className="webshot"
-                src={frameUrl}
+                srcDoc={frameHtml}
                 title={t("browser.frameTitle")}
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                style={{ border: "none", width: "100%", height: "100%" }}
+                style={{ border: "none", width: "100%", height: "100%", background: "#ffffff" }}
               />
             ) : (
               <div className="webshot">

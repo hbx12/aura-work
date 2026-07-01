@@ -23,7 +23,7 @@ export interface BrowserStatus {
 export interface BrowseRequest {
   projectId: string;
   url: string;
-  extract?: "text" | "links" | "title";
+  extract?: "text" | "links" | "title" | "html";
   timeoutMs?: number;
 }
 

@@ -1259,7 +1259,7 @@ async fn execute_tool_inner(
                 .ok_or("Missing url")?;
             let extract = tc.arguments.get("extract").and_then(|v| v.as_str());
             let payload = serde_json::to_value(tc).ok();
-            tool_browse_url(db, project_id, task_id, url, extract, payload).await
+            tool_browse_url(db, project_id, task_id, url, extract, payload, app).await
         }
         "plugin_tool" => {
             let plugin_id = tc
@@ -1658,7 +1658,7 @@ async fn execute_universal_workspace_tool(
         if let Some(url) = arg_str(&tc.arguments, &["url"]) {
             let extract = tc.arguments.get("extract").and_then(|v| v.as_str());
             let payload = serde_json::to_value(tc).ok();
-            return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload).await?));
+            return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload, app).await?));
         }
         let query = arg_str(&tc.arguments, &["query", "pattern", "text", "searchText"])
             .ok_or("Missing query")?;
@@ -1675,7 +1675,7 @@ async fn execute_universal_workspace_tool(
             .and_then(|v| v.as_str())
             .or(Some(if name == "browser_extract_table" { "text" } else { "text" }));
         let payload = serde_json::to_value(tc).ok();
-        return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload).await?));
+        return Ok(Some(tool_browse_url(db, project_id, task_id, url, extract, payload, app).await?));
     }
 
     if let Some(output) = execute_connector_alias_tool(db, project_id, task_id, tc, name).await? {
@@ -2300,6 +2300,7 @@ pub async fn run_workspace_chat_agent(
     db: &DbState,
     vault: &VaultHandle,
     input: &RunChatInput,
+    app: Option<&AppHandle>,
 ) -> Result<ChatResult, String> {
     let Some(project_id) = input.project_id.as_deref().filter(|v| !v.trim().is_empty()) else {
         return Err("Project is required for workspace chat.".into());
@@ -2459,7 +2460,7 @@ pub async fn run_workspace_chat_agent(
                 tool_ok: None,
                 output: None,
             };
-            match execute_tool(db, project_id, None, &tc, None).await {
+            match execute_tool(db, project_id, None, &tc, app).await {
                 Ok(output) => {
                     step.status = "done".into();
                     step.tool_ok = Some(true);

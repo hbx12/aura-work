@@ -61,6 +61,9 @@ export async function detectBackend(): Promise<BackendInfo> {
   }
 
   if (process.platform === "darwin") {
+    if (allowUnsafeHostExecution) {
+      return unsafeFallback("Apple Virtualization backend not configured.");
+    }
     return {
       id: "apple-vz",
       label: "Apple Virtualization backend not configured",
