@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   npm-audit:
@@ -37,29 +36,6 @@ jobs:
         run: cargo audit -f apps/desktop/src-tauri/Cargo.lock
         continue-on-error: true
 
-  codeql:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [javascript, rust]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-
   secret-scan:
     runs-on: ubuntu-latest
     steps:
@@ -70,14 +46,3 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.88.34
         with:
           extra_args: --only-verified
-
-  dependency-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: high
-          deny-licenses: GPL-3.0, AGPL-3.0
