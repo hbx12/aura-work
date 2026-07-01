@@ -19,9 +19,14 @@ export type LocaleId =
   | "pl"
   | "vi"
   | "th"
-  | "fa";
+  | "fa"
+  | "he"
+  | "uk"
+  | "bn"
+  | "sw"
+  | "el";
 
-export const RTL_LOCALES: LocaleId[] = ["ar", "fa"];
+export const RTL_LOCALES: LocaleId[] = ["ar", "fa", "he"];
 
 export const SUPPORTED_LOCALES: { id: LocaleId; labelKey: string; nativeName: string }[] = [
   { id: "en", labelKey: "lang.en", nativeName: "English" },
@@ -44,6 +49,11 @@ export const SUPPORTED_LOCALES: { id: LocaleId; labelKey: string; nativeName: st
   { id: "vi", labelKey: "lang.vi", nativeName: "Tiếng Việt" },
   { id: "th", labelKey: "lang.th", nativeName: "ไทย" },
   { id: "fa", labelKey: "lang.fa", nativeName: "فارسی" },
+  { id: "he", labelKey: "lang.he", nativeName: "עברית" },
+  { id: "uk", labelKey: "lang.uk", nativeName: "Українська" },
+  { id: "bn", labelKey: "lang.bn", nativeName: "বাংলা" },
+  { id: "sw", labelKey: "lang.sw", nativeName: "Kiswahili" },
+  { id: "el", labelKey: "lang.el", nativeName: "Ελληνικά" },
 ];
 
 export type MessageKey =
