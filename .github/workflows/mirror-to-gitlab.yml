@@ -28,12 +28,12 @@ jobs:
         run: |
           git fetch --all --tags
           # Create local branches from all remote branches
-          for branch in $(git branch -r | grep -v HEAD | grep -v '\->'); do
-            local_name="${branch#origin/}"
-            git branch -f "$local_name" "$branch" 2>/dev/null || true
+          git branch -r | grep -v '\\->' | sed 's|origin/||' | while read branch; do
+            [ -z "$branch" ] && continue
+            git branch -f "$branch" "origin/$branch" 2>/dev/null || true
           done
 
-      - name: Mirror all to GitLab
+      - name: Mirror all branches and tags to GitLab
         env:
           GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
           GITLAB_REPOSITORY: gitlab.com/hbybbdr558/aura-work.git
@@ -47,8 +47,10 @@ jobs:
 
           git config user.name "aura-work mirror"
           git config user.email "mirror@aura-work.local"
+          git remote add gitlab "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}"
 
-          # Mirror: push all refs including all branches + tags
-          git push --prune "https://oauth2:${GITLAB_MIRROR_TOKEN}@${GITLAB_REPOSITORY}" \
-            "+refs/remotes/origin/*:refs/heads/*" \
-            "+refs/tags/*:refs/tags/*" 2>&1 || echo "⚠️ Some refs were rejected"
+          # Push all local branches and tags
+          echo "Pushing all branches..."
+          git push gitlab --all --force 2>&1 || true
+          echo "Pushing all tags..."
+          git push gitlab --tags --force 2>&1 || true
