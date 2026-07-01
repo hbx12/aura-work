@@ -82,7 +82,9 @@ jobs:
         env:
           AURA_RELEASE_BUILD: "1"
           AURA_RELEASE_VERSION: ${{ inputs.version }}
-          AURA_ALLOW_VM_PLACEHOLDER_RELEASE: ${{ contains(inputs.version, '-alpha') && '1' || '0' }}
+          AURA_VM_MINISIGN_PUBLIC_KEY: ${{ vars.AURA_VM_MINISIGN_PUBLIC_KEY }}
+          AURA_VM_IMAGE_ARTIFACT_PATH: ${{ vars.AURA_VM_IMAGE_ARTIFACT_PATH }}
+          AURA_VM_IMAGE_SIGNATURE_PATH: ${{ vars.AURA_VM_IMAGE_SIGNATURE_PATH }}
       - run: npm run test:sidecar-bundle
       - name: Build Tauri app and signed updater artifacts
         run: npm run tauri build -w @aura-os/desktop -- --target ${{ matrix.target }} ${{ matrix.bundle_args }}
@@ -90,7 +92,7 @@ jobs:
           CI: true
           AURA_RELEASE_BUILD: "1"
           AURA_RELEASE_VERSION: ${{ inputs.version }}
-          AURA_ALLOW_VM_PLACEHOLDER_RELEASE: ${{ contains(inputs.version, '-alpha') && '1' || '0' }}
+          AURA_VM_MINISIGN_PUBLIC_KEY: ${{ vars.AURA_VM_MINISIGN_PUBLIC_KEY }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       - name: Upload installer artifacts only
