@@ -23,11 +23,12 @@ export function MessageRow({ message }: MessageRowProps) {
   }
 
   if (role === 'tool') {
+    const preview = content.length > 80 ? content.slice(0, 80) + '...' : content;
     return (
       <Box paddingX={2}>
         <Text color="gray">  tool </Text>
         <Text color="cyan">{toolName || 'unknown'}</Text>
-        <Text color="gray"> {content.length > 80 ? content.slice(0, 80) + '...' : content}</Text>
+        <Text color="gray"> {preview}</Text>
       </Box>
     );
   }
@@ -41,7 +42,6 @@ export function MessageRow({ message }: MessageRowProps) {
     );
   }
 
-  // Assistant
   return (
     <Box paddingX={2} flexDirection="column">
       <Box>

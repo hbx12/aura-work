@@ -13,8 +13,8 @@ export function OnboardingPanel({ model }: OnboardingPanelProps) {
       {model.state === 'env_detected' ? (
         <>
           <Text color="green"> API key detected from environment</Text>
-          <Text color="gray">   Provider: {model.provider} (from {model.detectedEnvKey})</Text>
-          <Text color="gray">   Model: {model.model}</Text>
+          <Text color="gray">   Provider: {model.provider} (from {model.detectedEnvKey || 'unknown'})</Text>
+          <Text color="gray">   Model: {model.model || 'not set'}</Text>
           <Text> </Text>
           <Text color="cyan">   Tip: Set a default model with /model</Text>
         </>
