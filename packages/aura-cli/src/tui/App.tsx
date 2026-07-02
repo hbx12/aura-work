@@ -1,20 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Box, Text, useApp, useInput, useStdin } from 'ink';
-import { InputArea } from './components/InputArea.js';
-import { MessageBubble } from './components/MessageBubble.js';
-import { StatusLine } from './components/StatusLine.js';
-import { useSession } from './hooks/useSession.js';
+import { useState, useCallback } from 'react';
+import { Box, Text, useApp, useInput } from 'ink';
+import { StatusBar } from './components/StatusBar.js';
+import { OnboardingPanel } from './components/OnboardingPanel.js';
+import { MessageRow, type Message } from './components/MessageRow.js';
+import { InputBox } from './components/InputBox.js';
+import { FooterBar } from './components/FooterBar.js';
+import { CommandPalette } from './components/CommandPalette.js';
 import { useConfig } from './hooks/useConfig.js';
+import { useSession } from './hooks/useSession.js';
 import { useStream } from './hooks/useStream.js';
-import { getCommandSuggestions, executeCommand, isSlashCommand } from '../commands/slash/index.js';
-
-interface Message {
-  role: 'user' | 'assistant' | 'system' | 'tool';
-  content: string;
-  toolName?: string;
-  streaming?: boolean;
-  timestamp?: string;
-}
+import { isSlashCommand, executeCommand } from '../commands/slash/index.js';
 
 interface AppProps {
   sessionId?: string;
@@ -24,88 +19,71 @@ interface AppProps {
 
 export function App({ sessionId: initialSessionId, model: initialModel }: AppProps) {
   const { exit } = useApp();
-  const { config, loading: configLoading } = useConfig();
-  const { activeSession, createSession } = useSession();
+  const configInfo = useConfig();
+  const { session } = useSession(configInfo.projectPath);
+  const { streaming, cancel, send } = useStream();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [sessionId, setSessionId] = useState<string | null>(initialSessionId || null);
-  const [currentModel, setCurrentModel] = useState<string>(initialModel || '');
-  const [agent, setAgent] = useState<string>('build');
-  const [mode, setMode] = useState<string>('build');
-  const { streaming, cancel, send } = useStream();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [inputTokens, setInputTokens] = useState(0);
+  const [outputTokens, setOutputTokens] = useState(0);
+  const [cost, setCost] = useState(0);
 
-  const projectPath = process.cwd();
-  const projectName = projectPath.split(/[\\/]/).pop() || 'project';
-
-  useEffect(() => {
-    if (config?.defaultModel && !currentModel) setCurrentModel(config.defaultModel);
-    if (config?.defaultAgent) setAgent(config.defaultAgent);
-    if (config?.defaultMode) setMode(config.defaultMode);
-  }, [config]);
-
-  // Check for API key
-  useEffect(() => {
-    if (!configLoading && config) {
-      const hasKey = config.apiKeys && Object.keys(config.apiKeys).length > 0;
-      const hasEnvKey = process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || 
-                        process.env.GROQ_API_KEY || process.env.DEEPSEEK_API_KEY;
-      if (!hasKey && !hasEnvKey) {
-        setMessages([{
-          role: 'system',
-          content: '⚠ No API key configured. Set one of:\n  • aura config set apiKeys.openai YOUR_KEY\n  • set OPENAI_API_KEY=your-key\n  • set ANTHROPIC_API_KEY=your-key',
-          timestamp: new Date().toISOString(),
-        }]);
-      }
-    }
-  }, [config, configLoading]);
+  const modelDisplay = initialModel || configInfo.model.display;
 
   const handleSubmit = useCallback(async (text: string) => {
     if (!text.trim()) return;
 
-    // Slash command
+    // Handle slash commands
     if (isSlashCommand(text)) {
-      try {
-        const result = await executeCommand(text, {
-          sessionId: sessionId || undefined,
-          model: currentModel || undefined,
-          dir: projectPath,
-        });
-        if (result) {
-          setMessages(prev => [...prev, { role: 'system', content: result, timestamp: new Date().toISOString() }]);
-        }
-        setInput('');
-        return;
-      } catch (err: any) {
-        setMessages(prev => [...prev, { role: 'system', content: `Error: ${err.message}`, timestamp: new Date().toISOString() }]);
+      if (text === '/help' || text === '/h') {
+        setShowHelp(true);
         setInput('');
         return;
       }
+      if (text === '/clear') {
+        setMessages([]);
+        setInput('');
+        return;
+      }
+
+      try {
+        const result = await executeCommand(text, {
+          sessionId: session.id,
+          model: initialModel || undefined,
+          dir: configInfo.projectPath,
+        });
+        if (result) {
+          setMessages(prev => [...prev, { role: 'system', content: result }]);
+        }
+      } catch (err: any) {
+        setMessages(prev => [...prev, { role: 'system', content: `Error: ${err.message}` }]);
+      }
+      setInput('');
+      return;
     }
 
-    // Create session if needed
-    let sid = sessionId;
-    if (!sid) {
-      const session = await createSession({ projectPath });
-      sid = session?.id || `session-${Date.now()}`;
-      setSessionId(sid);
+    // Check if model is configured
+    if (configInfo.model.state === 'not_configured') {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: 'No model configured. Use /model to select a model, or set an API key (OPENAI_API_KEY, ANTHROPIC_API_KEY).',
+      }]);
+      setInput('');
+      return;
     }
 
-    // Add user message
-    const userMsg: Message = { role: 'user', content: text, timestamp: new Date().toISOString() };
+    // Send to AI
+    const userMsg: Message = { role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    // Add placeholder for AI response
-    setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true, timestamp: new Date().toISOString() }]);
+    // Add streaming placeholder
+    setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }]);
 
-    // Stream response
     await send(text, {
-      model: currentModel || undefined,
-      projectPath,
-      sessionId: sid,
-      onToken: (token: string) => {
+      onToken: (token) => {
         setMessages(prev => {
           const next = [...prev];
           const last = next[next.length - 1];
@@ -114,14 +92,6 @@ export function App({ sessionId: initialSessionId, model: initialModel }: AppPro
           }
           return next;
         });
-      },
-      onToolCall: (name: string, args: any) => {
-        setMessages(prev => [...prev, {
-          role: 'tool',
-          content: typeof args === 'string' ? args : JSON.stringify(args, null, 2),
-          toolName: name,
-          timestamp: new Date().toISOString(),
-        }]);
       },
       onComplete: () => {
         setMessages(prev => {
@@ -133,22 +103,18 @@ export function App({ sessionId: initialSessionId, model: initialModel }: AppPro
           return next;
         });
       },
-      onError: (err: string) => {
+      onError: (err) => {
         setMessages(prev => {
           const next = [...prev];
           const last = next[next.length - 1];
           if (last && last.role === 'assistant' && last.content === '') {
             next.pop();
           }
-          return [...next, {
-            role: 'system' as const,
-            content: `❌ Error: ${err}`,
-            timestamp: new Date().toISOString(),
-          }];
+          return [...next, { role: 'system', content: `Error: ${err}` }];
         });
       },
-    });
-  }, [sessionId, createSession, send, currentModel, projectPath, messages.length]);
+    }, initialModel);
+  }, [configInfo, session, send, initialModel]);
 
   // Global keyboard shortcuts
   useInput((inputChar, key) => {
@@ -159,80 +125,57 @@ export function App({ sessionId: initialSessionId, model: initialModel }: AppPro
     if (key.ctrl && inputChar === 'l') {
       setMessages([]);
     }
-    if (key.escape && streaming) {
-      cancel();
+    if (key.escape) {
+      if (showHelp) setShowHelp(false);
+      if (streaming) cancel();
     }
   });
 
-  const displayModel = currentModel || config?.defaultModel || 'No model';
-
-  if (configLoading) {
-    return (
-      <Box flexDirection="column" padding={1}>
-        <Text color="cyan">⏳ Loading config...</Text>
-      </Box>
-    );
-  }
+  const hasModel = configInfo.model.state === 'configured' || configInfo.model.state === 'env_detected';
+  const showOnboarding = !hasModel && messages.length === 0;
 
   return (
-    <Box flexDirection="column" height={process.stdout.rows - 1}>
+    <Box flexDirection="column" width="100%">
       {/* Header */}
-      <Box borderStyle="round" borderColor="cyan" paddingX={1} justifyContent="space-between">
-        <Box>
-          <Text bold color="cyan"> ✦ Aura Work </Text>
-          <Text color="gray">— </Text>
-          <Text color="white">{projectName}</Text>
-        </Box>
-        <Box>
-          <Text color="gray">{displayModel}</Text>
-          <Text color="gray"> • </Text>
-          <Text color="yellow">{agent}</Text>
-          <Text color="gray"> • </Text>
-          <Text color="magenta">{mode}</Text>
-        </Box>
-      </Box>
+      <StatusBar
+        projectName={configInfo.projectName}
+        model={modelDisplay}
+        agent={configInfo.agent}
+        mode={configInfo.mode}
+        sessionId={session.id}
+      />
 
-      {/* Messages */}
-      <Box flexDirection="column" flexGrow={1} paddingX={1} overflow="hidden">
-        {messages.length === 0 ? (
-          <Box flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1}>
-            <Text color="cyan" bold>╭─────────────────────────────────────────────╮</Text>
-            <Text color="cyan" bold>│                                             │</Text>
-            <Text color="cyan" bold>│         ✦ Welcome to Aura Work ✦            │</Text>
-            <Text color="cyan" bold>│                                             │</Text>
-            <Text color="cyan" bold>│  AI-powered coding assistant in your        │</Text>
-            <Text color="cyan" bold>│  terminal. Type a message to start.         │</Text>
-            <Text color="cyan" bold>│                                             │</Text>
-            <Text color="gray" bold>│  /help     Show available commands           │</Text>
-            <Text color="gray" bold>│  /model    Change AI model                  │</Text>
-            <Text color="gray" bold>│  /clear    Clear chat history               │</Text>
-            <Text color="gray" bold>│                                             │</Text>
-            <Text color="gray" bold>│  Ctrl+C exit • Ctrl+L clear • Esc cancel    │</Text>
-            <Text color="cyan" bold>│                                             │</Text>
-            <Text color="cyan" bold>╰─────────────────────────────────────────────╯</Text>
+      {/* Content area */}
+      <Box flexDirection="column" minHeight={8}>
+        {showHelp ? (
+          <CommandPalette onClose={() => setShowHelp(false)} />
+        ) : showOnboarding ? (
+          <OnboardingPanel model={configInfo.model} />
+        ) : messages.length === 0 ? (
+          <Box paddingX={2} paddingY={1}>
+            <Text color="gray">Ready. Type a message to start.</Text>
           </Box>
         ) : (
-          messages.map((msg, i) => <MessageBubble key={i} message={msg} />)
+          messages.map((msg, i) => <MessageRow key={i} message={msg} />)
         )}
       </Box>
 
-      {/* Status */}
-      <StatusLine
-        messageCount={messages.length}
-        streaming={streaming}
-        model={displayModel}
-        session={sessionId}
-        tokens={{ input: 0, output: 0 }}
-        cost={0}
-      />
-
       {/* Input */}
-      <InputArea
+      <InputBox
         value={input}
         onChange={setInput}
         onSubmit={handleSubmit}
         disabled={streaming}
-        placeholder={streaming ? 'AI is responding... (Esc to cancel)' : 'Type a message or / for commands...'}
+        placeholder={streaming ? 'AI responding... (Esc to cancel)' : 'Type a message or / for commands'}
+      />
+
+      {/* Footer */}
+      <FooterBar
+        streaming={streaming}
+        inputTokens={inputTokens}
+        outputTokens={outputTokens}
+        cost={cost}
+        messageCount={messages.filter(m => m.role === 'user' || m.role === 'assistant').length}
       />
     </Box>
   );
