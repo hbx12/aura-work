@@ -541,6 +541,20 @@
     <div class="detail-card">
       <h3>📝 CSS Custom Properties</h3>
       <p>Themes use CSS custom properties for all colors:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Token</th><th>Description</th><th>Example (Light)</th></tr></thead>
+        <tbody>
+          <tr><td><code>--color-bg</code></td><td>Base page background</td><td>#faf9f5</td></tr>
+          <tr><td><code>--color-bg-card</code></td><td>Card and raised element background</td><td>#ffffff</td></tr>
+          <tr><td><code>--color-text</code></td><td>Primary text color</td><td>#5c5544</td></tr>
+          <tr><td><code>--color-text-strong</code></td><td>Prominent heading text</td><td>#28241d</td></tr>
+          <tr><td><code>--color-accent</code></td><td>Accent color for links and primary buttons</td><td>#c2683f</td></tr>
+          <tr><td><code>--color-success</code></td><td>Success states</td><td>#4f7d47</td></tr>
+          <tr><td><code>--color-warning</code></td><td>Warning states</td><td>#a9761f</td></tr>
+          <tr><td><code>--color-danger</code></td><td>Error states</td><td>#b8482f</td></tr>
+          <tr><td><code>--shadow-md</code></td><td>Medium shadow for cards</td><td>0 4px 16px rgba(...)</td></tr>
+        </tbody>
+      </table>
       <pre><code>:root {
   /* Backgrounds */
   --color-bg: #faf9f5;
@@ -572,6 +586,11 @@
     </div>
 
     <div class="detail-card">
+      <h3>☀️🌙 Light and Dark Mode</h3>
+      <p>Every theme in Aura Work has a light and a dark variant (e.g. <code>ocean-light</code> and <code>ocean-dark</code>). Switching between them is instant with no page reload. The special <code>system</code> theme automatically follows your OS preference via the <code>prefers-color-scheme</code> property and switches automatically when your device's settings change (e.g. macOS sunset/sunrise).</p>
+    </div>
+
+    <div class="detail-card">
       <h3>🔧 Creating Custom Themes</h3>
       <p>Create your own theme by following these steps:</p>
       <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
@@ -597,6 +616,20 @@
       </ul>
       <p style="margin-top:.75rem">The <code>system</code> theme automatically matches your OS preference, switching between light and dark mode.</p>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Custom Themes</div>
+    <h2>Creating a Custom Theme Manually</h2>
+    <p>You can create a custom theme by defining a set of CSS variables. Place the theme file in <code>~/.config/aura/themes/</code> and it will be loaded automatically.</p>
+    <pre><code>{
+  "name": "my-theme",
+  "colors": {
+    "bg-primary": "#1a1b26",
+    "fg-primary": "#c0caf5",
+    "accent": "#7aa2f7"
+  }
+}</code></pre>
+    <p style="margin-top:1rem">You can export themes and share them with the community. Featured community themes are added to the official gallery.</p>
   </section>
         </main>
        </div>

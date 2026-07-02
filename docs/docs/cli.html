@@ -264,6 +264,48 @@ jobs:
       <p style="margin-top:.75rem">Set <code>outputFormat</code> to <code>json</code> for machine-readable output in scripts.</p>
     </div>
   </section>
+  <section class="section">
+    <div class="section-label">Advanced Commands</div>
+    <h2>Advanced CLI Management</h2>
+    <div class="card-grid">
+      <div class="detail-card">
+        <h3>📋 Session Management</h3>
+        <pre><code>aura session list          # List active sessions
+aura session resume &lt;id&gt;  # Resume a previous session
+aura session kill &lt;id&gt;    # Terminate a session</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⭐ Skill Management</h3>
+        <pre><code>aura skill list            # List installed skills
+aura skill install &lt;name&gt;  # Install a skill from the marketplace
+aura skill create          # Create a new skill</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>🔌 MCP Management</h3>
+        <pre><code>aura mcp list              # List MCP servers
+aura mcp add &lt;name&gt;        # Add an MCP server
+aura mcp remove &lt;name&gt;     # Remove an MCP server</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>☁ Sync</h3>
+        <pre><code>aura sync push             # Push changes to the cloud
+aura sync pull              # Pull changes from the cloud
+aura sync status            # Check sync status</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⚙️ Configuration</h3>
+        <pre><code>aura config list           # List all settings
+aura config set &lt;k&gt; &lt;v&gt;    # Set a configuration value
+aura config reset           # Reset to defaults</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>📦 Projects</h3>
+        <pre><code>aura projects list         # List projects
+aura projects create &lt;name&gt; # Create a new project
+aura projects delete &lt;name&gt; # Delete a project</code></pre>
+      </div>
+    </div>
+  </section>
         </main>
        </div>
 

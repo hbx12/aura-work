@@ -226,6 +226,49 @@
       <li><strong>Permission system</strong> — granular control over what the agent can access (files, shell, browser, network)</li>
     </ul>
   </section>
+  <section class="section">
+    <div class="section-label">Use Cases</div>
+    <h2>Who is Aura Work built for?</h2>
+    <div class="detail-card">
+      <h3>👨‍💻 For Developers</h3>
+      <p>Start a new feature with a single sentence: <code>"Add JWT authentication to the API interface"</code>. Aura will analyze the codebase, build a plan, write the code, run the tests, and open a pull request — all while you review every sensitive step.</p>
+    </div>
+    <div class="detail-card">
+      <h3>✍️ For Writers & Analysts</h3>
+      <p>Analyze a document: <code>"Analyze the annual report and extract the key points"</code>, then <code>"Create a presentation from these findings"</code>. Document, spreadsheet, and PDF skills are built in and ready to go.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🛠️ For System Administrators</h3>
+      <p>Monitor a server: <code>"Check disk usage and generate a report"</code>. Integrate with your monitoring tools via MCP servers, and automatically schedule recurring tasks.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🔬 For Researchers</h3>
+      <p>Gather information from multiple sources: <code>"Compare PostgreSQL and MongoDB for our use case"</code>. The research skill browses the web, summarizes, and cites its sources.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Architecture at a Glance</div>
+    <h2>System Diagram</h2>
+    <pre><code>┌─────────────────────────────────────────────┐
+│         Aura Work App (Tauri 2)              │
+│  React 19 + Rust shell + IPC + system tray   │
+└───────────────────────┬───────────────────────┘
+                         │ local IPC / HTTP
+      ┌──────────────────┼──────────────────┐
+      │                  │                  │
+┌─────▼─────┐     ┌──────▼──────┐    ┌──────▼──────┐
+│  Agent    │     │  Browser    │    │  VM Helper  │
+│  :47821   │     │  Helper     │    │  :47822     │
+│ (Planner, │     │  :47823     │    │ (isolated   │
+│ Executor, │     │ (browser    │    │  sandbox)   │
+│ Reviewer) │     │  automation)│    └─────────────┘
+└─────┬─────┘     └─────────────┘
+      │ Routing engine (5 policies)
+┌─────▼─────────────────────────────────────────┐
+│   10 AI providers (cloud + local)              │
+│   OpenAI · Anthropic · Gemini · Ollama · ...   │
+└─────────────────────────────────────────────────┘</code></pre>
+  </section>
         </main>
        </div>
 

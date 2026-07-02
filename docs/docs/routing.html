@@ -204,6 +204,54 @@
     </div>
   </section>
   <section class="section">
+    <div class="section-label">Routing Strategies</div>
+    <h2>Five Routing Strategies</h2>
+    <div class="detail-card">
+      <h3>Quality-first</h3>
+      <p>Routes the request to the best available provider. Uses quality benchmarks (HumanEval accuracy, response speed, etc.). Suited for critical tasks.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Cost-first</h3>
+      <p>Chooses the cheapest provider that meets the minimum quality bar. Suited for simple tasks or large-scale data processing.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Privacy-first</h3>
+      <p>Prefers local providers (Ollama, LM Studio). Never sends data to the cloud. Requires at least one local provider to be configured.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Local-only</h3>
+      <p>Uses local providers exclusively. Fails if no local provider is available. Meant for fully isolated environments.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Manual</h3>
+      <p>You pick the provider and model manually for each request: <code>aura --provider openai --model gpt-4o</code></p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Cost & Privacy</div>
+    <h2>Cost Optimization</h2>
+    <p>To reduce AI costs without sacrificing quality:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Use the cost-first policy</strong> for routine daily tasks (formatting, simple lookups, Q&A)</li>
+      <li><strong>Set a policy per project</strong> — production projects use quality-first, while experiments use cost-first</li>
+      <li><strong>Monitor token usage</strong> from the Dashboard to spot expensive patterns early</li>
+      <li><strong>Use Ollama locally</strong> for repeated development and testing at zero cost</li>
+      <li><strong>Set strict cost limits</strong> per task or per day to prevent unexpected bills</li>
+    </ul>
+
+    <h2 style="margin-top:2rem">Privacy-Based Routing</h2>
+    <p>When working with proprietary code, sensitive data, or personal information, the <strong>privacy-first</strong> policy ensures no data ever leaves your machine:</p>
+    <div class="detail-card">
+      <h3>🔒 How Privacy-first Works</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li>The routing engine analyzes the sensitivity of the data in every request (passwords, keys, personal data)</li>
+        <li>If high sensitivity is detected, routing is restricted to local providers only</li>
+        <li>If no local provider is available, the task fails rather than sending sensitive data to the cloud</li>
+        <li>You can always enforce this behavior with the <strong>local-only</strong> policy regardless of detected sensitivity</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Configuration</div>
     <h2>Setting up routing</h2>
     <p>Configure your routing policy in <strong>Settings → Routing</strong>:</p>

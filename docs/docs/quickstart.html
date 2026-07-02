@@ -268,9 +268,53 @@
     </div>
   </section>
   <section class="section">
+    <div class="section-label">Troubleshooting</div>
+    <h2>Common Issues and Fixes</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Issue</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>App won't start</td><td>Make sure WebView2 is up to date (Windows) or install the libwebkit2gtk requirements (Linux)</td></tr>
+        <tr><td>Cloud provider validation fails</td><td>Check that your API key is valid and that your provider account has sufficient credit</td></tr>
+        <tr><td>Ollama doesn't show up in the list</td><td>Make sure <code>ollama serve</code> is running and that you've pulled at least one model</td></tr>
+        <tr><td>A sidecar isn't responding</td><td>Check Settings → Diagnostics and manually restart the failed sidecar</td></tr>
+        <tr><td>Task stuck "waiting for approval"</td><td>Open the Approvals panel and review the requested action, or change your permission profile</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="section">
     <div class="section-label">Next Steps</div>
     <h2>Going deeper</h2>
     <p>Read about <a href="providers" style="color:var(--color-accent)">Providers</a>, <a href="routing" style="color:var(--color-accent)">Routing</a>, <a href="skills" style="color:var(--color-accent)">Skills</a>, or <a href="architecture" style="color:var(--color-accent)">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" style="color:var(--color-accent)">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" style="color:var(--color-accent)">New Contributor Guide</a>.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">Advanced Installation</div>
+    <h2>Other Installation Options</h2>
+    <div class="detail-card">
+      <h3>Using Homebrew (macOS and Linux)</h3>
+      <pre><code>brew install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>Using Winget (Windows)</h3>
+      <pre><code>winget install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>Building from Source</h3>
+      <pre><code>git clone https://github.com/hbx12/aura-work.git
+cd aura-work
+npm install
+npm run build
+npm link</code></pre>
+    </div>
+    <p style="margin-top:1rem">Requires Node.js 18+. Supports Windows, macOS, and Linux with separate packages for each platform.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">First Usage</div>
+    <h2>Your First CLI Experience</h2>
+    <p>After installing, try these commands to get familiar with Aura Work:</p>
+    <pre><code>aura --help
+aura --version
+aura config list
+aura --dry-run "Create a new Node.js project"</code></pre>
   </section>
         </main>
        </div>
