@@ -50,4 +50,4 @@ jobs:
         run: node scripts/aura-bot/pr-review.mjs
 
       - name: Log completion
-        run: echo "aura-bot PR review completed for #${{ github.event.pull_request.number }}"
+        run: echo "aura-bot PR review completed for PR ${{ github.event.pull_request.number }}"

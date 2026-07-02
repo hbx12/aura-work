@@ -6,6 +6,26 @@ import { findAuraBotComment } from "./github.mjs";
 import { loadKnowledgeBase, buildContext, listSources, detectLanguage } from "./knowledge.mjs";
 
 const MARKER = "<!-- aura-bot:comment-reply -->";
+const MAX_REPLIES_PER_ISSUE = 4;
+const OWNER = process.env.AURA_BOT_OWNER || "hbx12";
+
+function escapeRegex(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Count total aura-bot comments in an issue (any marker).
+ */
+async function countAuraBotReplies(issueNumber) {
+  const comments = await listIssueComments(issueNumber);
+  return comments.filter((c) => {
+    if (!c.user) return false;
+    const isBot = c.user.type === "Bot" || c.user.login?.includes("bot") || c.user.login === "github-actions";
+    if (!isBot) return false;
+    // Match any aura-bot marker
+    return /<!-- aura-bot:/.test(c.body || "");
+  }).length;
+}
 
 async function main() {
   const issueNumber = parseInt(process.env.ISSUE_NUMBER || "0", 10);
@@ -28,8 +48,21 @@ async function main() {
 
   // Check if @aura-bot is mentioned or if it's a clear question
   const botName = process.env.AURA_BOT_NAME || "aura-bot";
-  const isMentioned = commentBody.includes(`@${botName}`);
+  const botNamePattern = new RegExp(`(^|\\s)@?${escapeRegex(botName)}(\\b|\\s|$)`, "i");
+  const isMentioned = botNamePattern.test(commentBody);
   const looksLikeQuestion = /(?:\bhow\b|\bwhat\b|\bwhy\b|\bwhere\b|\bwhen\b|\bcan (?:you|i|we)\b|\?)/i.test(commentBody);
+
+  // Rate limit: max 4 aura-bot replies per issue, unless owner explicitly mentions the bot
+  const replyCount = await countAuraBotReplies(issueNumber);
+  const ownerMentionOverride = commentAuthor === OWNER && isMentioned;
+
+  if (replyCount >= MAX_REPLIES_PER_ISSUE) {
+    if (!ownerMentionOverride) {
+      console.log(`Rate limit reached (${replyCount}/${MAX_REPLIES_PER_ISSUE} replies), skipping comment.`);
+      process.exit(0);
+    }
+    console.log(`Rate limit reached but owner mention override detected (@${OWNER}) — allowing reply.`);
+  }
 
   if (!isMentioned && !looksLikeQuestion) {
     console.log("Not a mention or question, skipping.");
