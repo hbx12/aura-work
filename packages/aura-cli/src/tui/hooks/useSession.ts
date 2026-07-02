@@ -6,22 +6,22 @@ export interface Session {
   createdAt: string;
 }
 
+function makeSession(projectPath: string): Session {
+  return {
+    id: `session-${Date.now()}`,
+    projectPath,
+    createdAt: new Date().toISOString(),
+  };
+}
+
 export function useSession(projectPath: string) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session>(() => makeSession(projectPath));
 
   const createSession = useCallback(() => {
-    const newSession: Session = {
-      id: `session-${Date.now()}`,
-      projectPath,
-      createdAt: new Date().toISOString(),
-    };
+    const newSession = makeSession(projectPath);
     setSession(newSession);
     return newSession;
   }, [projectPath]);
 
-  if (!session) {
-    createSession();
-  }
-
-  return { session: session!, createSession };
+  return { session, createSession };
 }
