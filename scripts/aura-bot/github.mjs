@@ -4,6 +4,8 @@
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 const GITHUB_API = process.env.GITHUB_API_URL || "https://api.github.com";
+const GITHUB_GRAPHQL = process.env.GITHUB_GRAPHQL_URL || "https://api.github.com/graphql";
+const [REPO_OWNER, REPO_NAME] = (GITHUB_REPOSITORY || "/").split("/");
 
 function headers() {
   return {
@@ -25,6 +27,22 @@ async function gh(path, opts = {}) {
     throw new Error(`GitHub API ${res.status} ${url}: ${JSON.stringify(json)}`);
   }
   return json;
+}
+
+async function ghGraphQL(query, variables = {}) {
+  const res = await fetch(GITHUB_GRAPHQL, {
+    method: "POST",
+    headers: {
+      ...headers(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  const json = await res.json();
+  if (!res.ok || json.errors?.length) {
+    throw new Error(`GitHub GraphQL error: ${JSON.stringify(json.errors || json)}`);
+  }
+  return json.data;
 }
 
 /** Get a single issue. */
@@ -161,4 +179,65 @@ export async function listDirectoryFiles(dirPath, ref = "main") {
   } catch {
     return [];
   }
+}
+
+/** Get one discussion with body and metadata. */
+export async function getDiscussion(discussionNumber) {
+  const data = await ghGraphQL(
+    `
+      query($owner: String!, $name: String!, $number: Int!) {
+        repository(owner: $owner, name: $name) {
+          discussion(number: $number) {
+            id
+            number
+            title
+            body
+            createdAt
+            author { login __typename }
+          }
+        }
+      }
+    `,
+    { owner: REPO_OWNER, name: REPO_NAME, number: discussionNumber }
+  );
+  return data.repository?.discussion || null;
+}
+
+/** List comments for a discussion. */
+export async function listDiscussionComments(discussionNumber, first = 100) {
+  const data = await ghGraphQL(
+    `
+      query($owner: String!, $name: String!, $number: Int!, $first: Int!) {
+        repository(owner: $owner, name: $name) {
+          discussion(number: $number) {
+            comments(first: $first) {
+              nodes {
+                id
+                body
+                createdAt
+                author { login __typename }
+              }
+            }
+          }
+        }
+      }
+    `,
+    { owner: REPO_OWNER, name: REPO_NAME, number: discussionNumber, first }
+  );
+  return data.repository?.discussion?.comments?.nodes || [];
+}
+
+/** Create a discussion comment from a discussion node id. */
+export async function createDiscussionComment(discussionId, body) {
+  const data = await ghGraphQL(
+    `
+      mutation($discussionId: ID!, $body: String!) {
+        addDiscussionComment(input: { discussionId: $discussionId, body: $body }) {
+          comment { id }
+        }
+      }
+    `,
+    { discussionId, body }
+  );
+  return data.addDiscussionComment?.comment || null;
 }
