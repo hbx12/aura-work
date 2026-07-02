@@ -9,7 +9,7 @@ interface FooterBarProps {
 }
 
 export function FooterBar({ streaming, inputTokens, outputTokens, cost, messageCount }: FooterBarProps) {
-  const hasUsage = (inputTokens && inputTokens > 0) || (outputTokens && outputTokens > 0);
+  const hasUsage = Boolean((inputTokens && inputTokens > 0) || (outputTokens && outputTokens > 0));
 
   return (
     <Box borderStyle="single" borderColor="gray" paddingX={1} justifyContent="space-between" width="100%">
