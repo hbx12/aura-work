@@ -7,7 +7,7 @@
  <meta name="description" content="Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable. 10 providers, 18 skills, 34 themes, 20 languages, 7 sidecars.">
  <meta property="og:title" content="Aura Work">
  <meta property="og:description" content="Open-source, multi-provider desktop AI agent platform — 10 providers, 18 skills, 34 themes, 20 languages">
- <meta property="og:url" content="https://hbx12.github.io/aura-work/">
+ <meta property="og:url" content="https://aura-work.shop/">
  <meta property="og:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/social-preview.svg">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hbx12/aura-work/main/apps/desktop/public/aura-logo.png">
@@ -25,7 +25,7 @@
    <nav class="nav-desktop">
     <ul>
      <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
-     <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+     <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
      <li><a href="https://github.com/hbx12/aura-work/releases/latest">Releases</a></li>
      <li class="lang-wrapper">
       <a href="#" class="lang-trigger" onclick="event.preventDefault();toggleLang(event)">
@@ -33,8 +33,8 @@
        EN
       </a>
       <div id="lang-menu" class="lang-dropdown">
-       <a href="https://hbx12.github.io/aura-work/" class="active">English</a>
-       <a href="https://hbx12.github.io/aura-work/index.ar.html">العربية</a>
+       <a href="https://aura-work.shop/" class="active">English</a>
+       <a href="https://aura-work.shop/index.ar.html">العربية</a>
        <a href="#" onclick="return switchLang('fr','Français')">Français</a>
        <a href="#" onclick="return switchLang('es','Español')">Español</a>
        <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
@@ -505,7 +505,7 @@
   }
   function switchLang(code, name) {
    var p = window.location.pathname.replace('/aura-work/','').replace(/^\//,'');
-   var base = 'https://hbx12.github.io/aura-work';
+   var base = 'https://aura-work.shop';
    if (code === 'en') { window.location.href = base + '/' + p; return false; }
    if (code === 'ar') {
     var ap = p.replace(/\.html$/, '.ar.html');

@@ -484,8 +484,8 @@ function pageHeaderAr(pageId = "docs") {
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >${tr("Home")}</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">${tr("Docs")}</a></li>
+        <li><a href="https://aura-work.shop/" >${tr("Home")}</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">${tr("Docs")}</a></li>
         <li><a href="https://github.com/hbx12/aura-work">${tr("GitHub")}</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -540,7 +540,7 @@ function wrapPageAr(title, bodyContent, pageId = "docs") {
 <meta name="description" content="وثائق Aura Work — ${title}">
 <meta property="og:title" content="${title} — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — ${title}">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1170,7 +1170,7 @@ for (const [relPath, html] of Object.entries(pages)) {
 
 // Redirect for /docs/ (Arabic)
 const redirect = `<!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=https://hbx12.github.io/aura-work/docs/docs.ar.html"><title>تحويل</title></head><body><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html">الوثائق</a></body></html>`;
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=https://aura-work.shop/docs/docs.ar.html"><title>تحويل</title></head><body><a href="https://aura-work.shop/docs/docs.ar.html">الوثائق</a></body></html>`;
 writeFileSync(join(DOCS_DIR, "docs", "index.ar.html"), redirect, "utf-8");
 console.log("  ✓ /docs/docs/index.ar.html (redirect)");
 

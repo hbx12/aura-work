@@ -564,8 +564,8 @@ function pageHeader(title, activePage, pageId = "docs") {
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" ${isDocs ? 'class="active"' : ''}>Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" ${isDocs ? 'class="active"' : ''}>Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -620,7 +620,7 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
 <meta name="description" content="Aura Work documentation — ${titleHTML}">
 <meta property="og:title" content="${titleHTML} — Aura Work">
 <meta property="og:description" content="${titleHTML} — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1337,7 +1337,7 @@ function main() {
 
   // Create index redirect for /docs/
   const redirect = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=https://hbx12.github.io/aura-work/docs/docs.html"><title>Redirect</title></head><body><a href="https://hbx12.github.io/aura-work/docs/docs.html">Docs</a></body></html>`;
+<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=https://aura-work.shop/docs/docs.html"><title>Redirect</title></head><body><a href="https://aura-work.shop/docs/docs.html">Docs</a></body></html>`;
   writeFileSync(join(DOCS_DIR, "docs", "index.html"), redirect, "utf-8");
   console.log("  ✓ /docs/docs/index.html (redirect)");
 }
