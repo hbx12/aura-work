@@ -42,22 +42,22 @@ async function main() {
     process.exit(0);
   }
 
-  // Rate limit: max 4 aura-bot replies per issue, unless owner mentions
-  const replyCount = await countAuraBotReplies(issueNumber);
-  const isOwner = commentAuthor === OWNER;
-
-  if (replyCount >= MAX_REPLIES_PER_ISSUE) {
-    if (!isOwner) {
-      console.log(`Rate limit reached (${replyCount}/${MAX_REPLIES_PER_ISSUE} replies), skipping non-owner comment.`);
-      process.exit(0);
-    }
-    console.log(`Rate limit reached but owner (@${OWNER}) commenting — allowing reply.`);
-  }
-
   // Check if @aura-bot is mentioned or if it's a clear question
   const botName = process.env.AURA_BOT_NAME || "aura-bot";
   const isMentioned = commentBody.includes(`@${botName}`);
   const looksLikeQuestion = /(?:\bhow\b|\bwhat\b|\bwhy\b|\bwhere\b|\bwhen\b|\bcan (?:you|i|we)\b|\?)/i.test(commentBody);
+
+  // Rate limit: max 4 aura-bot replies per issue, unless owner explicitly mentions the bot
+  const replyCount = await countAuraBotReplies(issueNumber);
+  const ownerMentionOverride = commentAuthor === OWNER && isMentioned;
+
+  if (replyCount >= MAX_REPLIES_PER_ISSUE) {
+    if (!ownerMentionOverride) {
+      console.log(`Rate limit reached (${replyCount}/${MAX_REPLIES_PER_ISSUE} replies), skipping non-owner comment.`);
+      process.exit(0);
+    }
+    console.log(`Rate limit reached but owner mention override detected (@${OWNER}) — allowing reply.`);
+  }
 
   if (!isMentioned && !looksLikeQuestion) {
     console.log("Not a mention or question, skipping.");
