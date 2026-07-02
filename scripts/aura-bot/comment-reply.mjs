@@ -6,6 +6,22 @@ import { findAuraBotComment } from "./github.mjs";
 import { loadKnowledgeBase, buildContext, listSources, detectLanguage } from "./knowledge.mjs";
 
 const MARKER = "<!-- aura-bot:comment-reply -->";
+const MAX_REPLIES_PER_ISSUE = 4;
+const OWNER = process.env.AURA_BOT_OWNER || "hbx12";
+
+/**
+ * Count total aura-bot comments in an issue (any marker).
+ */
+async function countAuraBotReplies(issueNumber) {
+  const comments = await listIssueComments(issueNumber);
+  return comments.filter((c) => {
+    if (!c.user) return false;
+    const isBot = c.user.type === "Bot" || c.user.login?.includes("bot") || c.user.login === "github-actions";
+    if (!isBot) return false;
+    // Match any aura-bot marker
+    return /<!-- aura-bot:/.test(c.body || "");
+  }).length;
+}
 
 async function main() {
   const issueNumber = parseInt(process.env.ISSUE_NUMBER || "0", 10);
@@ -24,6 +40,18 @@ async function main() {
   if (commentAuthor.includes("bot") || commentAuthor === "github-actions") {
     console.log("Comment is from a bot, skipping.");
     process.exit(0);
+  }
+
+  // Rate limit: max 4 aura-bot replies per issue, unless owner mentions
+  const replyCount = await countAuraBotReplies(issueNumber);
+  const isOwner = commentAuthor === OWNER;
+
+  if (replyCount >= MAX_REPLIES_PER_ISSUE) {
+    if (!isOwner) {
+      console.log(`Rate limit reached (${replyCount}/${MAX_REPLIES_PER_ISSUE} replies), skipping non-owner comment.`);
+      process.exit(0);
+    }
+    console.log(`Rate limit reached but owner (@${OWNER}) commenting — allowing reply.`);
   }
 
   // Check if @aura-bot is mentioned or if it's a clear question
