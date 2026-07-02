@@ -1,87 +1,75 @@
 import { useState, useCallback, useRef } from 'react';
-import { loadConfig } from '../../core/config.js';
-import { chatStream, type ChatMessage } from '../../core/ai.js';
+import { chatStream } from '../../core/ai.js';
 
-interface UseStreamOptions {
-  dir?: string;
+interface StreamOptions {
+  model?: string;
+  projectPath?: string;
+  sessionId?: string;
+  onToken?: (token: string) => void;
+  onToolCall?: (name: string, args: any) => void;
+  onComplete?: () => void;
+  onError?: (error: string) => void;
 }
 
-export function useStream({ dir }: UseStreamOptions) {
+export function useStream() {
   const [streaming, setStreaming] = useState(false);
-  const [currentResponse, setCurrentResponse] = useState('');
-  const messagesRef = useRef<ChatMessage[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<Array<{ role: string; content: string }>>([]);
 
-  const streamMessage = useCallback(async (
-    content: string,
-    sessionId?: string,
-    model?: string
-  ) => {
-    setStreaming(true);
-    setCurrentResponse('');
-
-    // Add user message to history
-    messagesRef.current.push({ role: 'user', content });
-
-    try {
-      const config = loadConfig();
-      const selectedModel = model || `${config.defaultProvider || 'openai'}/${config.defaultModel || 'gpt-4o'}`;
-
-      let fullResponse = '';
-
-      await chatStream(
-        messagesRef.current,
-        {
-          onToken: (token) => {
-            fullResponse += token;
-            setCurrentResponse(fullResponse);
-          },
-          onToolCall: (toolCall) => {
-            fullResponse += `\n\n🔧 Running: ${toolCall.function.name}...`;
-            setCurrentResponse(fullResponse);
-          },
-          onToolResult: (result) => {
-            if (result.success) {
-              // Don't show full tool output to user, just confirmation
-              fullResponse += ` ✓`;
-            } else {
-              fullResponse += ` ✗ ${result.result}`;
-            }
-            setCurrentResponse(fullResponse);
-          },
-          onDone: () => {
-            // Add assistant message to history
-            if (fullResponse) {
-              messagesRef.current.push({ role: 'assistant', content: fullResponse });
-            }
-            setStreaming(false);
-          },
-          onError: (error) => {
-            const errorMsg = error.message;
-            setCurrentResponse(`⚠ ${errorMsg}`);
-            setStreaming(false);
-          },
-        },
-        { model: selectedModel }
-      );
-
-      return fullResponse;
-    } catch (err: any) {
-      setStreaming(false);
-      const errorMsg = `Error: ${err?.message || 'Unknown error'}`;
-      setCurrentResponse(errorMsg);
-      return errorMsg;
+  const cancel = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
     }
-  }, [dir]);
-
-  const clearHistory = useCallback(() => {
-    messagesRef.current = [];
-    setCurrentResponse('');
+    setStreaming(false);
   }, []);
 
-  return {
-    streaming,
-    currentResponse,
-    streamMessage,
-    clearHistory
-  };
+  const send = useCallback(async (message: string, options: StreamOptions) => {
+    const { model, projectPath, sessionId, onToken, onToolCall, onComplete, onError } = options;
+
+    setStreaming(true);
+    abortRef.current = new AbortController();
+
+    try {
+      // Add user message to history
+      messagesRef.current.push({ role: 'user', content: message });
+
+      await chatStream(messagesRef.current, {
+        model,
+        projectPath,
+        sessionId,
+        signal: abortRef.current.signal,
+        onToken: (token) => {
+          onToken?.(token);
+        },
+        onToolCall: (name, args) => {
+          onToolCall?.(name, args);
+          // Add tool call to history
+          messagesRef.current.push({
+            role: 'assistant',
+            content: `Using tool: ${name}`,
+          });
+        },
+        onComplete: (fullResponse) => {
+          // Add assistant response to history
+          messagesRef.current.push({ role: 'assistant', content: fullResponse });
+          onComplete?.();
+        },
+        onError: (err) => {
+          onError?.(err);
+        },
+      });
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        onError?.(err.message || 'Unknown error');
+      }
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }, []);
+
+  return { streaming, cancel, send };
 }
+
+

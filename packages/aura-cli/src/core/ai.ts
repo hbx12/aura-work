@@ -163,7 +163,7 @@ async function streamChat(
       headers['x-api-key'] = apiKey;
       headers['anthropic-version'] = '2023-06-01';
     } else {
-      headers['Authorization'] = `Bearer ${apiKey}`;
+      headers['Authorization'] = 'Bearer ' + apiKey;
     }
   }
 
@@ -349,7 +349,7 @@ export async function chat(
       headers['anthropic-version'] = '2023-06-01';
     } else {
       headers['Authorization'] = `Bearer ${apiKey}`;
-    }
+      headers['Authorization'] = 'Bearer ' + apiKey;
   }
 
   const allMessages: ChatMessage[] = [
@@ -402,4 +402,5 @@ export async function chat(
     content: choice?.message?.content || '',
     toolCalls: choice?.message?.tool_calls,
   };
+}
 }
