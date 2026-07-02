@@ -1,0 +1,87 @@
+name: aura-bot Discussions
+
+on:
+  discussion:
+    types: [created]
+  discussion_comment:
+    types: [created]
+
+concurrency:
+  group: aura-bot-discussion-${{ github.event.discussion.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  discussions: write
+
+jobs:
+  triage:
+    if: github.event_name == 'discussion' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            scripts/aura-bot
+            README.md
+            README.ar.md
+            CONTRIBUTING.md
+            SECURITY.md
+            LICENSE
+            NOTICE
+            ROADMAP.md
+            CHANGELOG.md
+            docs
+            registry
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Triage new discussion
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
+          AURA_BOT_NAME: ${{ vars.AURA_BOT_NAME || 'aura-bot' }}
+          AURA_BOT_OWNER: ${{ vars.AURA_BOT_OWNER || 'hbx12' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCUSSION_NUMBER: ${{ github.event.discussion.number }}
+        run: node scripts/aura-bot/discussion-triage.mjs
+
+  reply:
+    if: github.event_name == 'discussion_comment' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            scripts/aura-bot
+            README.md
+            README.ar.md
+            CONTRIBUTING.md
+            SECURITY.md
+            LICENSE
+            NOTICE
+            ROADMAP.md
+            CHANGELOG.md
+            docs
+            registry
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Reply to discussion comment
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
+          AURA_BOT_NAME: ${{ vars.AURA_BOT_NAME || 'aura-bot' }}
+          AURA_BOT_OWNER: ${{ vars.AURA_BOT_OWNER || 'hbx12' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCUSSION_NUMBER: ${{ github.event.discussion.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+          COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
+        run: node scripts/aura-bot/discussion-reply.mjs
