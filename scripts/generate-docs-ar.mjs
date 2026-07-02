@@ -542,17 +542,17 @@ function wrapPageAr(title, bodyContent, pageId = "docs") {
 <meta property="og:description" content="وثائق Aura Work — ${title}">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>${getBaseCSS()}</style>
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
+  html[dir="rtl"] .layout { direction: rtl; }
+  html[dir="rtl"] .back-link { flex-direction: row-reverse; }
+  html[dir="rtl"] .sidebar { text-align: right; }
   .hero { padding: 4rem 0 2.5rem; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%); pointer-events: none; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--bg-accent-subtle) 0%, transparent 70%); pointer-events: none; }
   .hero h1 { position: relative; z-index: 1; }
   .hero .subtitle { position: relative; z-index: 1; }
-  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--color-text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
-  .back-link:hover { color: var(--color-accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
+  .back-link:hover { color: var(--text-accent); }
   .section:first-of-type { padding-top: 2rem; }
   .local-badge { display: inline-block; padding: 1px 6px; font-size: .5625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; border-radius: 3px; font-family: var(--font-mono); }
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
@@ -573,7 +573,7 @@ function wrapPageAr(title, bodyContent, pageId = "docs") {
 <div class="page">
 ${pageHeaderAr(pageId)}
 ${isHub ? '<main>' : ''}
-${isHub ? '' : `<a href="docs.ar.html" class="back-link" style="flex-direction:row-reverse">
+${isHub ? '' : `<a href="docs.ar.html" class="back-link">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   ${tr("Back to Docs Hub")}
 </a>`}

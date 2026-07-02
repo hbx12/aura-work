@@ -622,10 +622,7 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
 <meta property="og:description" content="${titleHTML} — Aura Work documentation">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>${getBaseCSS()}</style>
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
   /* Page-specific enhancements */
   .hero {
@@ -640,7 +637,7 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
     right: -20%;
     width: 60%;
     height: 200%;
-    background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, var(--bg-accent-subtle) 0%, transparent 70%);
     pointer-events: none;
   }
   .hero h1 {
@@ -657,12 +654,12 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
     gap: 6px;
     font-family: var(--font-mono);
     font-size: .75rem;
-    color: var(--color-text-weak);
+    color: var(--text-weak);
     text-decoration: none;
     margin-bottom: 1.5rem;
     transition: color .15s;
   }
-  .back-link:hover { color: var(--color-accent); }
+  .back-link:hover { color: var(--text-accent); }
   .section:first-of-type { padding-top: 2rem; }
   .local-badge {
     display: inline-block;
