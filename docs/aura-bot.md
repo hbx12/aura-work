@@ -85,7 +85,7 @@ Every bot answer includes a "Sources checked" list.
 
 ### Test Comment Reply
 
-1. On any open issue, write a comment containing `@aura-bot` followed by a question.
+1. On any open issue, write a comment containing `@aura-bot` (or plain `aura-bot`) followed by a question.
 2. Wait for the bot to reply with `<!-- aura-bot:comment-reply -->`.
 
 ### Test Daily Scan
