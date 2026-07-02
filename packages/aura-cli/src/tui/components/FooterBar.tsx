@@ -23,8 +23,8 @@ export function FooterBar({ streaming, inputTokens, outputTokens, cost, messageC
       <Box>
         {hasUsage && (
           <>
-            <Text color="gray"> in {inputTokens} </Text>
-            <Text color="gray"> out {outputTokens} </Text>
+            <Text color="gray"> in {String(inputTokens)} </Text>
+            <Text color="gray"> out {String(outputTokens)} </Text>
           </>
         )}
         {cost !== undefined && cost > 0 && (
