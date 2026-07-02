@@ -46,12 +46,18 @@ async function main() {
           type: "string",
           describe: "Project directory (default: current)",
         }),
-      (args) => {
+      async (args) => {
         if (args.verbose) setLogLevel("debug");
         if (args.quiet) setLogLevel("error");
-        rootCommand(args.directory, {
-          dir: args.directory,
-        });
+
+        // Launch TUI by default (like Claude Code / OpenCode)
+        const { render } = await import("ink");
+        const { App } = await import("./tui/App.js");
+        render(
+          React.createElement(App, {
+            dir: args.directory as string | undefined,
+          })
+        );
       },
     )
     .command(
