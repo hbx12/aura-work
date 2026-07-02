@@ -19,14 +19,9 @@ export type LocaleId =
   | "pl"
   | "vi"
   | "th"
-  | "fa"
-  | "he"
-  | "uk"
-  | "bn"
-  | "sw"
-  | "el";
+  | "fa";
 
-export const RTL_LOCALES: LocaleId[] = ["ar", "fa", "he"];
+export const RTL_LOCALES: LocaleId[] = ["ar", "fa"];
 
 export const SUPPORTED_LOCALES: { id: LocaleId; labelKey: string; nativeName: string }[] = [
   { id: "en", labelKey: "lang.en", nativeName: "English" },
@@ -49,11 +44,6 @@ export const SUPPORTED_LOCALES: { id: LocaleId; labelKey: string; nativeName: st
   { id: "vi", labelKey: "lang.vi", nativeName: "Tiếng Việt" },
   { id: "th", labelKey: "lang.th", nativeName: "ไทย" },
   { id: "fa", labelKey: "lang.fa", nativeName: "فارسی" },
-  { id: "he", labelKey: "lang.he", nativeName: "עברית" },
-  { id: "uk", labelKey: "lang.uk", nativeName: "Українська" },
-  { id: "bn", labelKey: "lang.bn", nativeName: "বাংলা" },
-  { id: "sw", labelKey: "lang.sw", nativeName: "Kiswahili" },
-  { id: "el", labelKey: "lang.el", nativeName: "Ελληνικά" },
 ];
 
 export type MessageKey =
@@ -1578,119 +1568,9 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
     "common.save": "ذخیره",
     "common.loading": "در حال بارگذاری…",
   },
-  he: {
-    "app.name": "Aura Work",
-    "nav.tasks": "משימות",
-    "nav.files": "קבצים",
-    "nav.git": "Git",
-    "nav.browser": "דפדפן",
-    "nav.computer": "שימוש במחשב",
-    "nav.schedule": "מתוזמן",
-    "nav.providers": "ספקים",
-    "nav.plugins": "תוספים ו-MCP",
-    "nav.memory": "זיכרון",
-    "nav.audit": "יומן ביקורת",
-    "nav.settings": "הגדרות",
-    "settings.title": "הגדרות וכספת",
-    "settings.language": "שפה",
-    "settings.theme": "ערכת נושא",
-    "chat.placeholder": "הקלד הודעה...",
-    "chat.send": "שלח",
-    "common.save": "שמור",
-    "common.cancel": "ביטול",
-    "common.loading": "טוען...",
-  },
-  uk: {
-    "app.name": "Aura Work",
-    "nav.tasks": "Завдання",
-    "nav.files": "Файли",
-    "nav.git": "Git",
-    "nav.browser": "Браузер",
-    "nav.computer": "Комп'ютер",
-    "nav.schedule": "Заплановані",
-    "nav.providers": "Провайдери",
-    "nav.plugins": "Плагіни та MCP",
-    "nav.memory": "Пам'ять",
-    "nav.audit": "Журнал аудиту",
-    "nav.settings": "Налаштування",
-    "settings.title": "Налаштування та сховище",
-    "settings.language": "Мова",
-    "settings.theme": "Тема",
-    "chat.placeholder": "Введіть повідомлення...",
-    "chat.send": "Надіслати",
-    "common.save": "Зберегти",
-    "common.cancel": "Скасувати",
-    "common.loading": "Завантаження...",
-  },
-  bn: {
-    "app.name": "Aura Work",
-    "nav.tasks": "কাজ",
-    "nav.files": "ফাইল",
-    "nav.git": "Git",
-    "nav.browser": "ব্রাউজার",
-    "nav.computer": "কম্পিউটার ব্যবহার",
-    "nav.schedule": "নির্ধারিত",
-    "nav.providers": "প্রদানকারী",
-    "nav.plugins": "প্লাগইন এবং MCP",
-    "nav.memory": "স্মৃতি",
-    "nav.audit": "নিরীক্ষা লগ",
-    "nav.settings": "সেটিংস",
-    "settings.title": "সেটিংস এবং ভল্ট",
-    "settings.language": "ভাষা",
-    "settings.theme": "থিম",
-    "chat.placeholder": "একটি বার্তা লিখুন...",
-    "chat.send": "পাঠান",
-    "common.save": "সংরক্ষণ",
-    "common.cancel": "বাতিল",
-    "common.loading": "লোড হচ্ছে...",
-  },
-  sw: {
-    "app.name": "Aura Work",
-    "nav.tasks": "Kazi",
-    "nav.files": "Faili",
-    "nav.git": "Git",
-    "nav.browser": "Kivinjari",
-    "nav.computer": "Matumizi ya kompyuta",
-    "nav.schedule": "Ratiba",
-    "nav.providers": "Watoa huduma",
-    "nav.plugins": "Viongezi na MCP",
-    "nav.memory": "Kumbukumbu",
-    "nav.audit": "Kitabu cha ukaguzi",
-    "nav.settings": "Mipangilio",
-    "settings.title": "Mipangilio na hazina",
-    "settings.language": "Lugha",
-    "settings.theme": "Mandhari",
-    "chat.placeholder": "Andika ujumbe...",
-    "chat.send": "Tuma",
-    "common.save": "Hifadhi",
-    "common.cancel": "Ghairi",
-    "common.loading": "Inapakia...",
-  },
-  el: {
-    "app.name": "Aura Work",
-    "nav.tasks": "Εργασίες",
-    "nav.files": "Αρχεία",
-    "nav.git": "Git",
-    "nav.browser": "Περιηγητής",
-    "nav.computer": "Χρήση υπολογιστή",
-    "nav.schedule": "Προγραμματισμένα",
-    "nav.providers": "Πάροχοι",
-    "nav.plugins": "Πρόσθετα & MCP",
-    "nav.memory": "Μνήμη",
-    "nav.audit": "Αρχείο ελέγχου",
-    "nav.settings": "Ρυθμίσεις",
-    "settings.title": "Ρυθμίσεις & θησαυροφυλάκιο",
-    "settings.language": "Γλώσσα",
-    "settings.theme": "Θέμα",
-    "chat.placeholder": "Πληκτρολογήστε ένα μήνυμα...",
-    "chat.send": "Αποστολή",
-    "common.save": "Αποθήκευση",
-    "common.cancel": "Ακύρωση",
-    "common.loading": "Φόρτωση...",
-  },
 };
 
-export const STRICT_LOCALES: LocaleId[] = ["ar"];
+export const STRICT_LOCALES: LocaleId[] = ["ar", "fa"];
 
 export function resolveCatalog(locale: LocaleId): MessageCatalog {
   const overrides = CATALOG[locale] ?? {};

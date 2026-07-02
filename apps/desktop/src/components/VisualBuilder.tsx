@@ -45,6 +45,7 @@ export function VisualBuilder({
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [connectingFromId, setConnectingFromId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Load existing visual skills
   const loadSkills = async () => {
@@ -389,8 +390,6 @@ async function callLLM(prompt, context) {
       }
     }
   };
-
-  const [loading, setLoading] = useState(false);
 
   // Render editor SVG lines
   const renderConnections = () => {

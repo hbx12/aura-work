@@ -908,7 +908,7 @@ export function PluginsPage({
                         disabled={sandboxLoading || !sandboxInput.trim()}
                         onClick={() => void runSandboxTest()}
                       >
-                        {sandboxLoading ? (isAr ? "جاري التشغيل..." : "Running...") : (isAr ? "Run Test" : "Run Test")}
+                        {sandboxLoading ? (isAr ? "جاري التشغيل..." : "Running...") : (isAr ? "تشغيل الاختبار" : "Run Test")}
                       </button>
                       {sandboxOutput && (
                         <button

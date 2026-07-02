@@ -26,12 +26,11 @@ const DEFAULT_LOCALE: LocaleId = "en";
 export function normalizeLocaleTag(tag: string | null | undefined): LocaleId {
   if (!tag) return DEFAULT_LOCALE;
   const lower = tag.trim().toLowerCase().replace("_", "-");
-  if ((SUPPORTED_LOCALES as { id: string }[]).some((l) => l.id.toLowerCase() === lower)) {
-    return lower as LocaleId;
-  }
-  const base = lower.split("-")[0];
-  const match = SUPPORTED_LOCALES.find((l) => l.id.toLowerCase() === lower || l.id.split("-")[0] === base);
+  const match = SUPPORTED_LOCALES.find((l) => l.id.toLowerCase() === lower);
   if (match) return match.id;
+  const base = lower.split("-")[0];
+  const baseMatch = SUPPORTED_LOCALES.find((l) => l.id.split("-")[0].toLowerCase() === base);
+  if (baseMatch) return baseMatch.id;
   if (base === "zh") {
     return lower.includes("tw") || lower.includes("hk") || lower.includes("hant") ? "zh-TW" : "zh-CN";
   }

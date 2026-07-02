@@ -19,17 +19,12 @@ describe("5.1 / infrastructure — build artifacts & bundle", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("Phase 11 i18n ships 25 Weblate locale files", () => {
+  it("Phase 11 i18n ships 20 Weblate locale files", () => {
     const locales = listLocaleFiles();
-    expect(locales).toHaveLength(25);
+    expect(locales).toHaveLength(20);
     expect(locales).toContain("ar.json");
     expect(locales).toContain("en.json");
     expect(locales).toContain("fa.json");
-    expect(locales).toContain("he.json");
-    expect(locales).toContain("uk.json");
-    expect(locales).toContain("bn.json");
-    expect(locales).toContain("sw.json");
-    expect(locales).toContain("el.json");
   });
 
   it("Tauri bundle config is present for alpha builds", () => {
