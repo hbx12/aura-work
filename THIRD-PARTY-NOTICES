@@ -33,6 +33,18 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 
 --- npm / workspace packages ---
 
+@alcalzone/ansi-tokenize@0.2.5
+  License: MIT
+  Source: node_modules/@alcalzone/ansi-tokenize
+
+@alcalzone/ansi-tokenize/node_modules/ansi-styles@6.2.3
+  License: MIT
+  Source: node_modules/@alcalzone/ansi-tokenize/node_modules/ansi-styles
+
+@alcalzone/ansi-tokenize/node_modules/is-fullwidth-code-point@5.1.0
+  License: MIT
+  Source: node_modules/@alcalzone/ansi-tokenize/node_modules/is-fullwidth-code-point
+
 @aura-os/acceptance-suite@0.12.0
   License: Apache-2.0
   Source: qa/acceptance-suite/package.json
@@ -233,6 +245,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@hono/node-server
 
+@jridgewell/gen-mapping@0.3.13
+  License: MIT
+  Source: node_modules/@jridgewell/gen-mapping
+
 @jridgewell/resolve-uri@3.1.2
   License: MIT
   Source: node_modules/@jridgewell/resolve-uri
@@ -329,6 +345,106 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@rolldown/binding-win32-x64-msvc
 
+@rollup/rollup-android-arm-eabi@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-android-arm-eabi
+
+@rollup/rollup-android-arm64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-android-arm64
+
+@rollup/rollup-darwin-arm64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-darwin-arm64
+
+@rollup/rollup-darwin-x64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-darwin-x64
+
+@rollup/rollup-freebsd-arm64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-freebsd-arm64
+
+@rollup/rollup-freebsd-x64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-freebsd-x64
+
+@rollup/rollup-linux-arm-gnueabihf@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-arm-gnueabihf
+
+@rollup/rollup-linux-arm-musleabihf@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-arm-musleabihf
+
+@rollup/rollup-linux-arm64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-arm64-gnu
+
+@rollup/rollup-linux-arm64-musl@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-arm64-musl
+
+@rollup/rollup-linux-loong64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-loong64-gnu
+
+@rollup/rollup-linux-loong64-musl@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-loong64-musl
+
+@rollup/rollup-linux-ppc64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-ppc64-gnu
+
+@rollup/rollup-linux-ppc64-musl@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-ppc64-musl
+
+@rollup/rollup-linux-riscv64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-riscv64-gnu
+
+@rollup/rollup-linux-riscv64-musl@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-riscv64-musl
+
+@rollup/rollup-linux-s390x-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-s390x-gnu
+
+@rollup/rollup-linux-x64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-x64-gnu
+
+@rollup/rollup-linux-x64-musl@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-linux-x64-musl
+
+@rollup/rollup-openbsd-x64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-openbsd-x64
+
+@rollup/rollup-openharmony-arm64@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-openharmony-arm64
+
+@rollup/rollup-win32-arm64-msvc@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-win32-arm64-msvc
+
+@rollup/rollup-win32-ia32-msvc@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-win32-ia32-msvc
+
+@rollup/rollup-win32-x64-gnu@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-win32-x64-gnu
+
+@rollup/rollup-win32-x64-msvc@4.62.2
+  License: MIT
+  Source: node_modules/@rollup/rollup-win32-x64-msvc
+
 @standard-schema/spec@1.1.0
   License: MIT
   Source: node_modules/@standard-schema/spec
@@ -413,6 +529,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@types/deep-eql
 
+@types/diff@7.0.2
+  License: MIT
+  Source: node_modules/@types/diff
+
 @types/estree@1.0.9
   License: MIT
   Source: node_modules/@types/estree
@@ -440,6 +560,14 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @types/trusted-types@1.0.6
   License: MIT
   Source: node_modules/@types/trusted-types
+
+@types/yargs@17.0.35
+  License: MIT
+  Source: node_modules/@types/yargs
+
+@types/yargs-parser@21.0.3
+  License: MIT
+  Source: node_modules/@types/yargs-parser
 
 @types/yauzl@2.10.3
   License: MIT
@@ -481,6 +609,10 @@ accepts@2.0.0
   License: MIT
   Source: node_modules/accepts
 
+acorn@8.17.0
+  License: MIT
+  Source: node_modules/acorn
+
 agent-base@7.1.4
   License: MIT
   Source: node_modules/agent-base
@@ -493,6 +625,10 @@ ajv-formats@3.0.1
   License: MIT
   Source: node_modules/ajv-formats
 
+ansi-escapes@7.3.0
+  License: MIT
+  Source: node_modules/ansi-escapes
+
 ansi-regex@5.0.1
   License: MIT
   Source: node_modules/ansi-regex
@@ -500,6 +636,10 @@ ansi-regex@5.0.1
 ansi-styles@4.3.0
   License: MIT
   Source: node_modules/ansi-styles
+
+any-promise@1.3.0
+  License: MIT
+  Source: node_modules/any-promise
 
 assertion-error@2.0.1
   License: MIT
@@ -516,6 +656,14 @@ ast-v8-to-istanbul@1.0.4
 asynckit@0.4.0
   License: MIT
   Source: node_modules/asynckit
+
+aura-work@0.1.0-alpha.1
+  License: Apache-2.0
+  Source: packages/aura-cli/package.json
+
+auto-bind@5.0.1
+  License: MIT
+  Source: node_modules/auto-bind
 
 axios@1.18.1
   License: MIT
@@ -573,9 +721,21 @@ buffer-crc32@0.2.13
   License: MIT
   Source: node_modules/buffer-crc32
 
+bundle-name@4.1.0
+  License: MIT
+  Source: node_modules/bundle-name
+
+bundle-require@5.1.0
+  License: MIT
+  Source: node_modules/bundle-require
+
 bytes@3.1.2
   License: MIT
   Source: node_modules/bytes
+
+cac@6.7.14
+  License: MIT
+  Source: node_modules/cac
 
 call-bind-apply-helpers@1.0.2
   License: MIT
@@ -589,13 +749,73 @@ chai@6.2.2
   License: MIT
   Source: node_modules/chai
 
+chalk@5.6.2
+  License: MIT
+  Source: node_modules/chalk
+
+chokidar@4.0.3
+  License: MIT
+  Source: node_modules/chokidar
+
 chromium-bidi@14.0.0
   License: Apache-2.0
   Source: node_modules/chromium-bidi
 
+cli-boxes@3.0.0
+  License: MIT
+  Source: node_modules/cli-boxes
+
+cli-cursor@5.0.0
+  License: MIT
+  Source: node_modules/cli-cursor
+
+cli-highlight@2.1.11
+  License: ISC
+  Source: node_modules/cli-highlight
+
+cli-highlight/node_modules/chalk@4.1.2
+  License: MIT
+  Source: node_modules/cli-highlight/node_modules/chalk
+
+cli-highlight/node_modules/cliui@7.0.4
+  License: ISC
+  Source: node_modules/cli-highlight/node_modules/cliui
+
+cli-highlight/node_modules/yargs@16.2.2
+  License: MIT
+  Source: node_modules/cli-highlight/node_modules/yargs
+
+cli-highlight/node_modules/yargs-parser@20.2.9
+  License: ISC
+  Source: node_modules/cli-highlight/node_modules/yargs-parser
+
+cli-spinners@2.9.2
+  License: MIT
+  Source: node_modules/cli-spinners
+
+cli-truncate@5.2.0
+  License: MIT
+  Source: node_modules/cli-truncate
+
+cli-truncate/node_modules/ansi-regex@6.2.2
+  License: MIT
+  Source: node_modules/cli-truncate/node_modules/ansi-regex
+
+cli-truncate/node_modules/string-width@8.2.1
+  License: MIT
+  Source: node_modules/cli-truncate/node_modules/string-width
+
+cli-truncate/node_modules/strip-ansi@7.2.0
+  License: MIT
+  Source: node_modules/cli-truncate/node_modules/strip-ansi
+
 cliui@8.0.1
   License: ISC
   Source: node_modules/cliui
+
+code-excerpt@4.0.0
+  License: MIT
+  Source: node_modules/code-excerpt
 
 color-convert@2.0.1
   License: MIT
@@ -609,6 +829,18 @@ combined-stream@1.0.8
   License: MIT
   Source: node_modules/combined-stream
 
+commander@4.1.1
+  License: MIT
+  Source: node_modules/commander
+
+confbox@0.1.8
+  License: MIT
+  Source: node_modules/confbox
+
+consola@3.4.2
+  License: MIT
+  Source: node_modules/consola
+
 content-disposition@1.1.0
   License: MIT
   Source: node_modules/content-disposition
@@ -620,6 +852,10 @@ content-type@1.0.5
 convert-source-map@2.0.0
   License: MIT
   Source: node_modules/convert-source-map
+
+convert-to-spaces@2.0.1
+  License: MIT
+  Source: node_modules/convert-to-spaces
 
 cookie@0.7.2
   License: MIT
@@ -649,6 +885,18 @@ debug@4.4.3
   License: MIT
   Source: node_modules/debug
 
+default-browser@5.5.0
+  License: MIT
+  Source: node_modules/default-browser
+
+default-browser-id@5.0.1
+  License: MIT
+  Source: node_modules/default-browser-id
+
+define-lazy-prop@3.0.0
+  License: MIT
+  Source: node_modules/define-lazy-prop
+
 degenerator@5.0.1
   License: MIT
   Source: node_modules/degenerator
@@ -668,6 +916,10 @@ detect-libc@2.1.2
 devtools-protocol@0.0.1608973
   License: BSD-3-Clause
   Source: node_modules/devtools-protocol
+
+diff@7.0.0
+  License: BSD-3-Clause
+  Source: node_modules/diff
 
 dunder-proto@1.0.1
   License: MIT
@@ -689,6 +941,10 @@ end-of-stream@1.4.5
   License: MIT
   Source: node_modules/end-of-stream
 
+environment@1.1.0
+  License: MIT
+  Source: node_modules/environment
+
 es-define-property@1.0.1
   License: MIT
   Source: node_modules/es-define-property
@@ -709,6 +965,10 @@ es-set-tostringtag@2.1.0
   License: MIT
   Source: node_modules/es-set-tostringtag
 
+es-toolkit@1.49.0
+  License: MIT
+  Source: node_modules/es-toolkit
+
 esbuild@0.28.1
   License: MIT
   Source: node_modules/esbuild
@@ -720,6 +980,10 @@ escalade@3.2.0
 escape-html@1.0.3
   License: MIT
   Source: node_modules/escape-html
+
+escape-string-regexp@2.0.0
+  License: MIT
+  Source: node_modules/escape-string-regexp
 
 escodegen@2.1.0
   License: BSD-2-Clause
@@ -793,9 +1057,21 @@ fdir@6.5.0
   License: MIT
   Source: node_modules/fdir
 
+fetch-blob@3.2.0
+  License: MIT
+  Source: node_modules/fetch-blob
+
+figures@6.1.0
+  License: MIT
+  Source: node_modules/figures
+
 finalhandler@2.1.1
   License: MIT
   Source: node_modules/finalhandler
+
+fix-dts-default-cjs-exports@1.0.1
+  License: MIT
+  Source: node_modules/fix-dts-default-cjs-exports
 
 follow-redirects@1.16.0
   License: MIT
@@ -812,6 +1088,10 @@ form-data/node_modules/mime-db@1.52.0
 form-data/node_modules/mime-types@2.1.35
   License: MIT
   Source: node_modules/form-data/node_modules/mime-types
+
+formdata-polyfill@4.0.10
+  License: MIT
+  Source: node_modules/formdata-polyfill
 
 forwarded@0.2.0
   License: MIT
@@ -836,6 +1116,10 @@ function-bind@1.1.2
 get-caller-file@2.0.5
   License: ISC
   Source: node_modules/get-caller-file
+
+get-east-asian-width@1.6.0
+  License: MIT
+  Source: node_modules/get-east-asian-width
 
 get-intrinsic@1.3.0
   License: MIT
@@ -877,6 +1161,10 @@ hasown@2.0.4
   License: MIT
   Source: node_modules/hasown
 
+highlight.js@10.7.3
+  License: BSD-3-Clause
+  Source: node_modules/highlight.js
+
 hono@4.12.27
   License: MIT
   Source: node_modules/hono
@@ -901,9 +1189,77 @@ iconv-lite@0.7.2
   License: MIT
   Source: node_modules/iconv-lite
 
+indent-string@5.0.0
+  License: MIT
+  Source: node_modules/indent-string
+
 inherits@2.0.4
   License: ISC
   Source: node_modules/inherits
+
+ink@6.8.0
+  License: MIT
+  Source: node_modules/ink
+
+ink-select-input@6.2.0
+  License: MIT
+  Source: node_modules/ink-select-input
+
+ink-spinner@5.0.0
+  License: MIT
+  Source: node_modules/ink-spinner
+
+ink-text-input@6.0.0
+  License: MIT
+  Source: node_modules/ink-text-input
+
+ink-text-input/node_modules/type-fest@4.41.0
+  License: MIT
+  Source: node_modules/ink-text-input/node_modules/type-fest
+
+ink/node_modules/ansi-regex@6.2.2
+  License: MIT
+  Source: node_modules/ink/node_modules/ansi-regex
+
+ink/node_modules/ansi-styles@6.2.3
+  License: MIT
+  Source: node_modules/ink/node_modules/ansi-styles
+
+ink/node_modules/cli-cursor@4.0.0
+  License: MIT
+  Source: node_modules/ink/node_modules/cli-cursor
+
+ink/node_modules/emoji-regex@10.6.0
+  License: MIT
+  Source: node_modules/ink/node_modules/emoji-regex
+
+ink/node_modules/onetime@5.1.2
+  License: MIT
+  Source: node_modules/ink/node_modules/onetime
+
+ink/node_modules/restore-cursor@4.0.0
+  License: MIT
+  Source: node_modules/ink/node_modules/restore-cursor
+
+ink/node_modules/signal-exit@3.0.7
+  License: ISC
+  Source: node_modules/ink/node_modules/signal-exit
+
+ink/node_modules/string-width@8.2.1
+  License: MIT
+  Source: node_modules/ink/node_modules/string-width
+
+ink/node_modules/strip-ansi@7.2.0
+  License: MIT
+  Source: node_modules/ink/node_modules/strip-ansi
+
+ink/node_modules/wrap-ansi@9.0.2
+  License: MIT
+  Source: node_modules/ink/node_modules/wrap-ansi
+
+ink/node_modules/wrap-ansi/node_modules/string-width@7.2.0
+  License: MIT
+  Source: node_modules/ink/node_modules/wrap-ansi/node_modules/string-width
 
 ip-address@10.2.0
   License: MIT
@@ -913,13 +1269,37 @@ ipaddr.js@1.9.1
   License: MIT
   Source: node_modules/ipaddr.js
 
+is-docker@3.0.0
+  License: MIT
+  Source: node_modules/is-docker
+
 is-fullwidth-code-point@3.0.0
   License: MIT
   Source: node_modules/is-fullwidth-code-point
 
+is-in-ci@2.0.0
+  License: MIT
+  Source: node_modules/is-in-ci
+
+is-inside-container@1.0.0
+  License: MIT
+  Source: node_modules/is-inside-container
+
+is-interactive@2.0.0
+  License: MIT
+  Source: node_modules/is-interactive
+
 is-promise@4.0.0
   License: MIT
   Source: node_modules/is-promise
+
+is-unicode-supported@2.1.0
+  License: MIT
+  Source: node_modules/is-unicode-supported
+
+is-wsl@3.1.1
+  License: MIT
+  Source: node_modules/is-wsl
 
 isexe@2.0.0
   License: ISC
@@ -940,6 +1320,10 @@ istanbul-reports@3.2.0
 jose@6.2.3
   License: MIT
   Source: node_modules/jose
+
+joycon@3.1.1
+  License: MIT
+  Source: node_modules/joycon
 
 js-tokens@10.0.0
   License: MIT
@@ -1005,6 +1389,26 @@ lightningcss-win32-x64-msvc@1.32.0
   License: MPL-2.0
   Source: node_modules/lightningcss-win32-x64-msvc
 
+lilconfig@3.1.3
+  License: MIT
+  Source: node_modules/lilconfig
+
+lines-and-columns@1.2.4
+  License: MIT
+  Source: node_modules/lines-and-columns
+
+load-tsconfig@0.2.5
+  License: MIT
+  Source: node_modules/load-tsconfig
+
+log-symbols@6.0.0
+  License: MIT
+  Source: node_modules/log-symbols
+
+log-symbols/node_modules/is-unicode-supported@1.3.0
+  License: MIT
+  Source: node_modules/log-symbols/node_modules/is-unicode-supported
+
 magic-string@0.30.21
   License: MIT
   Source: node_modules/magic-string
@@ -1037,9 +1441,21 @@ mime-types@3.0.2
   License: MIT
   Source: node_modules/mime-types
 
+mimic-fn@2.1.0
+  License: MIT
+  Source: node_modules/mimic-fn
+
+mimic-function@5.0.1
+  License: MIT
+  Source: node_modules/mimic-function
+
 mitt@3.0.1
   License: MIT
   Source: node_modules/mitt
+
+mlly@1.8.2
+  License: MIT
+  Source: node_modules/mlly
 
 monaco-editor@0.53.0
   License: MIT
@@ -1048,6 +1464,10 @@ monaco-editor@0.53.0
 ms@2.1.3
   License: MIT
   Source: node_modules/ms
+
+mz@2.7.0
+  License: MIT
+  Source: node_modules/mz
 
 nanoid@3.3.12
   License: MIT
@@ -1060,6 +1480,18 @@ negotiator@1.0.0
 netmask@2.1.1
   License: MIT
   Source: node_modules/netmask
+
+node-domexception@1.0.0
+  License: MIT
+  Source: node_modules/node-domexception
+
+node-fetch@3.3.2
+  License: MIT
+  Source: node_modules/node-fetch
+
+node-fetch/node_modules/data-uri-to-buffer@4.0.1
+  License: MIT
+  Source: node_modules/node-fetch/node_modules/data-uri-to-buffer
 
 object-assign@4.1.1
   License: MIT
@@ -1081,6 +1513,34 @@ once@1.4.0
   License: ISC
   Source: node_modules/once
 
+onetime@7.0.0
+  License: MIT
+  Source: node_modules/onetime
+
+open@10.2.0
+  License: MIT
+  Source: node_modules/open
+
+ora@8.2.0
+  License: MIT
+  Source: node_modules/ora
+
+ora/node_modules/ansi-regex@6.2.2
+  License: MIT
+  Source: node_modules/ora/node_modules/ansi-regex
+
+ora/node_modules/emoji-regex@10.6.0
+  License: MIT
+  Source: node_modules/ora/node_modules/emoji-regex
+
+ora/node_modules/string-width@7.2.0
+  License: MIT
+  Source: node_modules/ora/node_modules/string-width
+
+ora/node_modules/strip-ansi@7.2.0
+  License: MIT
+  Source: node_modules/ora/node_modules/strip-ansi
+
 pac-proxy-agent@7.2.0
   License: MIT
   Source: node_modules/pac-proxy-agent
@@ -1089,9 +1549,25 @@ pac-resolver@7.0.1
   License: MIT
   Source: node_modules/pac-resolver
 
+parse5@5.1.1
+  License: MIT
+  Source: node_modules/parse5
+
+parse5-htmlparser2-tree-adapter@6.0.1
+  License: MIT
+  Source: node_modules/parse5-htmlparser2-tree-adapter
+
+parse5-htmlparser2-tree-adapter/node_modules/parse5@6.0.1
+  License: MIT
+  Source: node_modules/parse5-htmlparser2-tree-adapter/node_modules/parse5
+
 parseurl@1.3.3
   License: MIT
   Source: node_modules/parseurl
+
+patch-console@2.0.0
+  License: MIT
+  Source: node_modules/patch-console
 
 path-key@3.1.1
   License: MIT
@@ -1117,13 +1593,25 @@ picomatch@4.0.4
   License: MIT
   Source: node_modules/picomatch
 
+pirates@4.0.7
+  License: MIT
+  Source: node_modules/pirates
+
 pkce-challenge@5.0.1
   License: MIT
   Source: node_modules/pkce-challenge
 
+pkg-types@1.3.1
+  License: MIT
+  Source: node_modules/pkg-types
+
 postcss@8.5.15
   License: MIT
   Source: node_modules/postcss
+
+postcss-load-config@6.0.1
+  License: MIT
+  Source: node_modules/postcss-load-config
 
 progress@2.0.3
   License: MIT
@@ -1173,6 +1661,14 @@ react-dom@19.2.6
   License: MIT
   Source: node_modules/react-dom
 
+react-reconciler@0.33.0
+  License: MIT
+  Source: node_modules/react-reconciler
+
+readdirp@4.1.2
+  License: MIT
+  Source: node_modules/readdirp
+
 require-directory@2.1.1
   License: MIT
   Source: node_modules/require-directory
@@ -1180,6 +1676,14 @@ require-directory@2.1.1
 require-from-string@2.0.2
   License: MIT
   Source: node_modules/require-from-string
+
+resolve-from@5.0.0
+  License: MIT
+  Source: node_modules/resolve-from
+
+restore-cursor@5.1.0
+  License: MIT
+  Source: node_modules/restore-cursor
 
 rolldown@1.0.3
   License: MIT
@@ -1189,9 +1693,17 @@ rolldown/node_modules/@rolldown/pluginutils@1.0.1
   License: MIT
   Source: node_modules/rolldown/node_modules/@rolldown/pluginutils
 
+rollup@4.62.2
+  License: MIT
+  Source: node_modules/rollup
+
 router@2.2.0
   License: MIT
   Source: node_modules/router
+
+run-applescript@7.1.0
+  License: MIT
+  Source: node_modules/run-applescript
 
 safer-buffer@2.1.2
   License: MIT
@@ -1245,6 +1757,22 @@ siginfo@2.0.0
   License: ISC
   Source: node_modules/siginfo
 
+signal-exit@4.1.0
+  License: ISC
+  Source: node_modules/signal-exit
+
+slice-ansi@8.0.0
+  License: MIT
+  Source: node_modules/slice-ansi
+
+slice-ansi/node_modules/ansi-styles@6.2.3
+  License: MIT
+  Source: node_modules/slice-ansi/node_modules/ansi-styles
+
+slice-ansi/node_modules/is-fullwidth-code-point@5.1.0
+  License: MIT
+  Source: node_modules/slice-ansi/node_modules/is-fullwidth-code-point
+
 smart-buffer@4.2.0
   License: MIT
   Source: node_modules/smart-buffer
@@ -1265,6 +1793,10 @@ source-map-js@1.2.1
   License: BSD-3-Clause
   Source: node_modules/source-map-js
 
+stack-utils@2.0.6
+  License: MIT
+  Source: node_modules/stack-utils
+
 stackback@0.0.2
   License: MIT
   Source: node_modules/stackback
@@ -1281,6 +1813,10 @@ std-env@4.1.0
   License: MIT
   Source: node_modules/std-env
 
+stdin-discarder@0.2.2
+  License: MIT
+  Source: node_modules/stdin-discarder
+
 streamx@2.26.0
   License: MIT
   Source: node_modules/streamx
@@ -1293,9 +1829,17 @@ strip-ansi@6.0.1
   License: MIT
   Source: node_modules/strip-ansi
 
+sucrase@3.35.1
+  License: MIT
+  Source: node_modules/sucrase
+
 supports-color@7.2.0
   License: MIT
   Source: node_modules/supports-color
+
+tagged-tag@1.0.0
+  License: MIT
+  Source: node_modules/tagged-tag
 
 tar-fs@3.1.2
   License: MIT
@@ -1309,9 +1853,21 @@ teex@1.0.1
   License: MIT
   Source: node_modules/teex
 
+terminal-size@4.0.1
+  License: MIT
+  Source: node_modules/terminal-size
+
 text-decoder@1.2.7
   License: Apache-2.0
   Source: node_modules/text-decoder
+
+thenify@3.3.1
+  License: MIT
+  Source: node_modules/thenify
+
+thenify-all@1.6.0
+  License: MIT
+  Source: node_modules/thenify-all
 
 tinybench@2.9.0
   License: MIT
@@ -1329,13 +1885,153 @@ tinyrainbow@3.1.0
   License: MIT
   Source: node_modules/tinyrainbow
 
+to-rotated@1.0.0
+  License: MIT
+  Source: node_modules/to-rotated
+
 toidentifier@1.0.1
   License: MIT
   Source: node_modules/toidentifier
 
+tree-kill@1.2.2
+  License: MIT
+  Source: node_modules/tree-kill
+
+ts-interface-checker@0.1.13
+  License: Apache-2.0
+  Source: node_modules/ts-interface-checker
+
 tslib@2.8.1
   License: 0BSD
   Source: node_modules/tslib
+
+tsup@8.5.1
+  License: MIT
+  Source: node_modules/tsup
+
+tsup/node_modules/@esbuild/aix-ppc64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/aix-ppc64
+
+tsup/node_modules/@esbuild/android-arm@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/android-arm
+
+tsup/node_modules/@esbuild/android-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/android-arm64
+
+tsup/node_modules/@esbuild/android-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/android-x64
+
+tsup/node_modules/@esbuild/darwin-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/darwin-arm64
+
+tsup/node_modules/@esbuild/darwin-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/darwin-x64
+
+tsup/node_modules/@esbuild/freebsd-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/freebsd-arm64
+
+tsup/node_modules/@esbuild/freebsd-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/freebsd-x64
+
+tsup/node_modules/@esbuild/linux-arm@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-arm
+
+tsup/node_modules/@esbuild/linux-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-arm64
+
+tsup/node_modules/@esbuild/linux-ia32@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-ia32
+
+tsup/node_modules/@esbuild/linux-loong64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-loong64
+
+tsup/node_modules/@esbuild/linux-mips64el@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-mips64el
+
+tsup/node_modules/@esbuild/linux-ppc64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-ppc64
+
+tsup/node_modules/@esbuild/linux-riscv64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-riscv64
+
+tsup/node_modules/@esbuild/linux-s390x@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-s390x
+
+tsup/node_modules/@esbuild/linux-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/linux-x64
+
+tsup/node_modules/@esbuild/netbsd-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/netbsd-arm64
+
+tsup/node_modules/@esbuild/netbsd-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/netbsd-x64
+
+tsup/node_modules/@esbuild/openbsd-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/openbsd-arm64
+
+tsup/node_modules/@esbuild/openbsd-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/openbsd-x64
+
+tsup/node_modules/@esbuild/openharmony-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/openharmony-arm64
+
+tsup/node_modules/@esbuild/sunos-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/sunos-x64
+
+tsup/node_modules/@esbuild/win32-arm64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/win32-arm64
+
+tsup/node_modules/@esbuild/win32-ia32@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/win32-ia32
+
+tsup/node_modules/@esbuild/win32-x64@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/@esbuild/win32-x64
+
+tsup/node_modules/esbuild@0.27.7
+  License: MIT
+  Source: node_modules/tsup/node_modules/esbuild
+
+tsup/node_modules/source-map@0.7.6
+  License: BSD-3-Clause
+  Source: node_modules/tsup/node_modules/source-map
+
+tsup/node_modules/tinyexec@0.3.2
+  License: MIT
+  Source: node_modules/tsup/node_modules/tinyexec
+
+tsx@4.22.4
+  License: MIT
+  Source: node_modules/tsx
+
+type-fest@5.7.0
+  License: MIT
+  Source: node_modules/type-fest
 
 type-is@2.1.0
   License: MIT
@@ -1352,6 +2048,10 @@ typed-query-selector@2.12.2
 typescript@5.8.3
   License: Apache-2.0
   Source: node_modules/typescript
+
+ufo@1.6.4
+  License: MIT
+  Source: node_modules/ufo
 
 undici-types@6.21.0
   License: MIT
@@ -1377,6 +2077,10 @@ vitest@4.1.9
   License: MIT
   Source: node_modules/vitest
 
+web-streams-polyfill@3.3.3
+  License: MIT
+  Source: node_modules/web-streams-polyfill
+
 webdriver-bidi-protocol@0.4.1
   License: Apache-2.0
   Source: node_modules/webdriver-bidi-protocol
@@ -1389,6 +2093,22 @@ why-is-node-running@2.3.0
   License: MIT
   Source: node_modules/why-is-node-running
 
+widest-line@6.0.0
+  License: MIT
+  Source: node_modules/widest-line
+
+widest-line/node_modules/ansi-regex@6.2.2
+  License: MIT
+  Source: node_modules/widest-line/node_modules/ansi-regex
+
+widest-line/node_modules/string-width@8.2.1
+  License: MIT
+  Source: node_modules/widest-line/node_modules/string-width
+
+widest-line/node_modules/strip-ansi@7.2.0
+  License: MIT
+  Source: node_modules/widest-line/node_modules/strip-ansi
+
 wrap-ansi@7.0.0
   License: MIT
   Source: node_modules/wrap-ansi
@@ -1400,6 +2120,10 @@ wrappy@1.0.2
 ws@8.21.0
   License: MIT
   Source: node_modules/ws
+
+wsl-utils@0.1.0
+  License: MIT
+  Source: node_modules/wsl-utils
 
 y18n@5.0.8
   License: ISC
@@ -1416,6 +2140,10 @@ yargs-parser@21.1.1
 yauzl@2.10.0
   License: MIT
   Source: node_modules/yauzl
+
+yoga-layout@3.2.1
+  License: MIT
+  Source: node_modules/yoga-layout
 
 zod@3.25.76
   License: MIT

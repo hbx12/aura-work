@@ -31,6 +31,7 @@
     "build:bridge": "npm run build -w @aura-os/bridge",
     "build:computer-use": "npm run build -w @aura-os/computer-use",
     "build:cli": "npm run build -w @aura-os/cli",
+    "build:aura-cli": "npm run build -w aura-work",
     "build:cloud": "npm run build -w @aura-os/cloud",
     "build:sidecars": "npm run build:sidecar && npm run build:vm && npm run build:browser && npm run build:plugins && npm run build:cloud-sync && npm run build:bridge && npm run build:computer-use",
     "stage:bundle": "node scripts/stage-bundle.mjs",
