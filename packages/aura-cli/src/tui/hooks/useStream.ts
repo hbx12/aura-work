@@ -1,75 +1,61 @@
 import { useState, useCallback, useRef } from 'react';
-import { chatStream } from '../../core/ai.js';
+import { chatStream, type ChatMessage } from '../../core/ai.js';
+
+interface StreamCallbacks {
+  onToken: (token: string) => void;
+  onToolCall?: (name: string, args: any) => void;
+  onComplete: () => void;
+  onError: (error: string) => void;
+}
 
 interface StreamOptions {
   model?: string;
   projectPath?: string;
   sessionId?: string;
-  onToken?: (token: string) => void;
-  onToolCall?: (name: string, args: any) => void;
-  onComplete?: () => void;
-  onError?: (error: string) => void;
 }
 
 export function useStream() {
   const [streaming, setStreaming] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-  const messagesRef = useRef<Array<{ role: string; content: string }>>([]);
+  const messagesRef = useRef<ChatMessage[]>([]);
 
   const cancel = useCallback(() => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-      abortRef.current = null;
-    }
     setStreaming(false);
   }, []);
 
-  const send = useCallback(async (message: string, options: StreamOptions) => {
-    const { model, projectPath, sessionId, onToken, onToolCall, onComplete, onError } = options;
-
+  const send = useCallback(async (message: string, callbacks: StreamCallbacks, options?: StreamOptions) => {
     setStreaming(true);
-    abortRef.current = new AbortController();
 
     try {
       // Add user message to history
       messagesRef.current.push({ role: 'user', content: message });
 
+      // Stream the response using the ai module
+      let fullResponse = '';
       await chatStream(messagesRef.current, {
-        model,
-        projectPath,
-        sessionId,
-        signal: abortRef.current.signal,
         onToken: (token) => {
-          onToken?.(token);
+          fullResponse += token;
+          callbacks.onToken(token);
         },
-        onToolCall: (name, args) => {
-          onToolCall?.(name, args);
-          // Add tool call to history
-          messagesRef.current.push({
-            role: 'assistant',
-            content: `Using tool: ${name}`,
-          });
-        },
-        onComplete: (fullResponse) => {
+        onToolCall: callbacks.onToolCall ? async (toolCall) => {
+          callbacks.onToolCall!(toolCall.function?.name || 'unknown', toolCall.function?.arguments || '');
+          return { id: toolCall.id, result: 'Tool executed' };
+        } : undefined,
+        onDone: () => {
           // Add assistant response to history
           messagesRef.current.push({ role: 'assistant', content: fullResponse });
-          onComplete?.();
+          callbacks.onComplete();
+          setStreaming(false);
         },
         onError: (err) => {
-          onError?.(err);
+          callbacks.onError(err.message || String(err));
+          setStreaming(false);
         },
-      });
+      }, { model: options?.model });
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        onError?.(err.message || 'Unknown error');
-      }
-    } finally {
+      callbacks.onError(err.message || String(err));
       setStreaming(false);
-      abortRef.current = null;
     }
   }, []);
 
   return { streaming, cancel, send };
 }
-
-

@@ -13,57 +13,57 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
-  const time = message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : '';
+  const { role, content, toolName, streaming } = message;
 
-  if (message.role === 'user') {
+  if (role === 'system') {
     return (
-      <Box flexDirection="column" paddingX={1} marginY={0}>
+      <Box flexDirection="column" marginY={0} paddingX={1}>
+        <Box borderStyle="round" borderColor="yellow" paddingX={1} flexDirection="column">
+          <Text color="yellow">⚠ System</Text>
+          <Text>{content}</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (role === 'tool') {
+    return (
+      <Box flexDirection="column" marginY={0} paddingX={1}>
+        <Box borderStyle="round" borderColor="gray" paddingX={1} flexDirection="column">
+          <Text color="gray">🔧 {toolName || 'Tool'}</Text>
+          <Text dimColor>{content.length > 200 ? content.slice(0, 200) + '...' : content}</Text>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (role === 'user') {
+    return (
+      <Box flexDirection="column" marginY={0} paddingX={1}>
+        <Box justifyContent="flex-end">
+          <Box borderStyle="round" borderColor="blue" paddingX={1} flexDirection="column">
+            <Text color="blue" bold>👤 You</Text>
+            <Text>{content}</Text>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Assistant
+  return (
+    <Box flexDirection="column" marginY={0} paddingX={1}>
+      <Box borderStyle="round" borderColor={streaming ? 'cyan' : 'green'} paddingX={1} flexDirection="column">
         <Box>
-          <Text bold color="green">╭── You</Text>
-          {time && <Text dimColor> {time}</Text>}
+          <Text color={streaming ? 'cyan' : 'green'} bold>✦ Aura</Text>
+          {streaming && <Text color="cyan"> ⚡</Text>}
         </Box>
-        <Box paddingLeft={2}>
-          <Text color="white">{message.content}</Text>
-        </Box>
+        {content ? (
+          <Text>{content}</Text>
+        ) : streaming ? (
+          <Text color="cyan">Thinking...</Text>
+        ) : null}
       </Box>
-    );
-  }
-
-  if (message.role === 'assistant') {
-    return (
-      <Box flexDirection="column" paddingX={1} marginY={0}>
-        <Box>
-          <Text bold color="cyan">╭── Aura</Text>
-          {time && <Text dimColor> {time}</Text>}
-        </Box>
-        <Box paddingLeft={2} flexDirection="column">
-          <Text color="white">{message.content}</Text>
-          {message.streaming && <Text color="cyan">█</Text>}
-        </Box>
-      </Box>
-    );
-  }
-
-  if (message.role === 'tool') {
-    return (
-      <Box flexDirection="column" paddingX={1} marginY={0}>
-        <Text color="gray">
-          {'  ⚙ '}
-          <Text bold>{message.toolName || 'tool'}</Text>
-          {' • '}
-          {message.content.split('\n')[0]}
-        </Text>
-      </Box>
-    );
-  }
-
-  if (message.role === 'system') {
-    return (
-      <Box paddingX={1} marginY={0}>
-        <Text dimColor>• {message.content}</Text>
-      </Box>
-    );
-  }
-
-  return null;
+    </Box>
+  );
 }

@@ -1,31 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
-import { randomUUID } from 'crypto';
+import { useState, useCallback } from 'react';
 
 interface Session {
   id: string;
   name?: string;
-  model?: string;
-  projectId?: string;
-}
-
-interface CreateSessionOptions {
   projectPath?: string;
+  model?: string;
 }
 
 export function useSession() {
   const [activeSession, setActiveSession] = useState<Session | null>(null);
 
-  const createSession = useCallback(async (options?: CreateSessionOptions) => {
-    const newSession: Session = {
-      id: randomUUID(),
-      name: `session-${Date.now()}`
+  const createSession = useCallback(async (options?: { projectPath?: string; model?: string }) => {
+    const session: Session = {
+      id: `session-${Date.now()}`,
+      projectPath: options?.projectPath,
+      model: options?.model,
     };
-    setActiveSession(newSession);
-    return newSession;
+    setActiveSession(session);
+    return session;
   }, []);
 
-  return {
-    activeSession,
-    createSession,
-  };
+  return { activeSession, createSession };
 }

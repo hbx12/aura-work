@@ -1,6 +1,6 @@
 {
   "name": "aura-work",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "description": "Aura CLI — standalone OpenCode-style terminal interface for Aura Work",
   "author": "hbx12",
