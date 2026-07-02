@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — الخدمات المساعدة">
 <meta property="og:title" content="الخدمات المساعدة — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — الخدمات المساعدة">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -247,6 +247,34 @@ pre:hover .copy-code-btn{opacity:1}
         <p>إدارة أوامر النظام والقوالب</p>
       </div>
     </div>
+  <section class="section">
+    <div class="section-label">تفاصيل Sidecars</div>
+    <h2>كيف تعمل Sidecars</h2>
+    <div class="detail-card">
+      <h3>Sandbox</h3>
+      <p>ينشئ بيئة معزولة لتشغيل الاكواد. يدعم Docker و WSL2 و VMs الخفيفة. يمنع الوصول غير المصرح للنظام.</p>
+    </div>
+    <div class="detail-card">
+      <h3>FileWatcher</h3>
+      <p>يراقب تغييرات الملفات في الوقت الفعلي باستخدام fs.watch. يخطر المحرك بالتغييرات الخارجية لتجنب التعارضات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Search</h3>
+      <p>يفهرس الملفات باستخدام قاعدة بيانات مدمجة. يدعم البحث النصي الكامل (FTS5) والبحث بالتعبيرات النمطية.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Browser</h3>
+      <p>يوفر Playwright headless browser للتفاعل مع المواقع. يدعم التقاط الشاشة، ملء النماذج، واستخراج البيانات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Sync</h3>
+      <p>يدير مزامنة E2EE بين الاجهزة. يستخدم WebSocket مع تشفير لكل جهاز على حدة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Shell</h3>
+      <p>واجهة Shell تفاعلية مع دعم PTY كامل. تسمح بتشغيل اوامر مركبة والحفاظ على حالة الجلسة.</p>
+    </div>
+  </section>
   </section>
         </main>
        </div>

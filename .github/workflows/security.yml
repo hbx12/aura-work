@@ -12,6 +12,17 @@ permissions:
   contents: read
 
 jobs:
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: AGPL-1.0, AGPL-3.0
+          allow-ghsas: ''
+
   npm-audit:
     runs-on: ubuntu-latest
     steps:

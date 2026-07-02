@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — الهندسة">
 <meta property="og:title" content="الهندسة — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — الهندسة">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -247,6 +247,34 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="section-label">نموذج الأمان</div>
     <h2>نموذج الأمان</h2>
     <p>جميع العمليات المساعدة تعمل بأقل الصلاحيات. مخزن بيانات الاعتماد يستخدم تشفير نظام التشغيل. تنفيذ الكود معزول في آلات افتراضية.</p>
+  <section class="section">
+    <div class="section-label">هندسة النظام</div>
+    <h2>تفاصيل الهندسة المعمارية</h2>
+    <div class="detail-card">
+      <h3>طبقة CLI (واجهة سطر الأوامر)</h3>
+      <p>نقطة الدخول الرئيسية. تحلل الأوامر، تدير الجلسات، وتنسق بين الطبقات. مبنية على Commander.js مع دعم كامل للـ subcommands والإضافات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة TUI (واجهة المستخدم الطرفية)</h3>
+      <p>واجهة تفاعلية مبنية على Ink (React للطرفية). تدعم النوافذ المتعددة، التمرير، الموضوعات، وإدخال الفأرة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المحرك (Engine)</h3>
+      <p>قلب النظام. تدير حلقة Agent: التخطيط والتنفيذ والملاحظة والمراجعة. تستخدم نموذج ReAct مع تحسينات مخصصة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المزودين (Providers)</h3>
+      <p>طبقة تجريد موحدة لجميع مزودي LLM. تترجم الطلبات الداخلية إلى صيغ API الخاصة بكل مزود.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة Sidecars</h3>
+      <p>عمليات خلفية متخصصة: Sandbox (عزل التنفيذ)، FileWatcher (مراقبة التغييرات)، Search (فهرسة الملفات)، Browser (أتمتة المتصفح).</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المزامنة (Sync)</h3>
+      <p>مزامنة مشفرة من طرف إلى طرف (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال و SQLite للتخزين المحلي.</p>
+    </div>
+  </section>
   </section>
         </main>
        </div>

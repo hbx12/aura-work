@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — الثيمات">
 <meta property="og:title" content="الثيمات — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — الثيمات">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -269,6 +269,20 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="detail-card"><h3>رموز المكونات</h3><p>تجاوزات دقيقة لكل مكون (زر، بطاقة، إدخال)</p></div>
     <h2 style="margin-top:2rem">تبديل الثيمات</h2>
     <p>تُطبق الثيمات ديناميكياً عبر خصائص CSS المخصصة. التبديل بين الثيمات فوري — لا حاجة لإعادة تحميل الصفحة.</p>
+  <section class="section">
+    <div class="section-label">السمات المخصصة</div>
+    <h2>انشاء سمة مخصصة</h2>
+    <p>يمكنك انشاء سمة مخصصة بتعريف مجموعة من متغيرات CSS. ضع ملف السمة في <code>~/.config/aura/themes/</code> وسيتم تحميله تلقائيا.</p>
+    <pre><code>{
+  "name": "my-theme",
+  "colors": {
+    "bg-primary": "#1a1b26",
+    "fg-primary": "#c0caf5",
+    "accent": "#7aa2f7"
+  }
+}</code></pre>
+    <p style="margin-top:1rem">يمكنك تصدير السمات ومشاركتها مع المجتمع. السمات المميزة من المجتمع تضاف إلى المعرض الرسمي.</p>
+  </section>
   </section>
         </main>
        </div>

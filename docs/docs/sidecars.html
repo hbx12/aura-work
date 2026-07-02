@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — Sidecars">
 <meta property="og:title" content="Sidecars — Aura Work">
 <meta property="og:description" content="Sidecars — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -304,7 +304,32 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-1"><div class="num">8</div><div class="lbl">Sidecars</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">TypeScript</div><div class="lbl">Language</div></div>
     </div>
-    <p>Sidecars are independent Node.js daemon processes managed by the Tauri shell. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP. They provide sandboxed, isolated capabilities that the agent orchestrator can invoke.</p>
+    <p>Sidecars are <strong>independent Node.js daemon processes</strong> managed by the Tauri shell. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP. They provide sandboxed, isolated capabilities that the agent orchestrator can invoke.</p>
+    
+    <h2 style="margin-top:2rem">Why Sidecars?</h2>
+    <p>The sidecar architecture provides several benefits:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Isolation</strong> — each sidecar runs in its own process, so crashes don't affect the main app</li>
+      <li><strong>Security</strong> — sidecars are sandboxed and authenticated, limiting their access</li>
+      <li><strong>Extensibility</strong> — new capabilities can be added as new sidecars without modifying the core</li>
+      <li><strong>Resource management</strong> — each sidecar can be started/stopped independently</li>
+      <li><strong>Language flexibility</strong> — sidecars can be written in any language (currently all TypeScript)</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🔌 Communication</h3>
+      <p>Sidecars communicate with the main app via:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Method</th><th>Port</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP API</strong></td><td>47821-47830</td><td>REST endpoints for task management, health checks</td></tr>
+          <tr><td><strong>IPC</strong></td><td>N/A</td><td>Direct inter-process communication for fast operations</td></tr>
+          <tr><td><strong>WebSocket</strong></td><td>47826</td><td>Real-time streaming for logs and events</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">All sidecars expose a <code>GET /health</code> endpoint that returns status, version, and phase information.</p>
+    </div>
+
     <div class="detail-card fade-in delay-1">
       <h3>Agent Core</h3>
       <div class="meta"><span>sidecar/aura-agent/</span><span>TypeScript</span></div>
@@ -347,9 +372,91 @@ pre:hover .copy-code-btn{opacity:1}
     </div>
   </section>
   <section class="section">
+    <div class="section-label">Health Monitoring</div>
+    <h2>Checking sidecar status</h2>
+    <p>Each sidecar exposes a health endpoint. Check all sidecars at once:</p>
+    <pre><code># Check Agent sidecar health
+curl http://localhost:47821/health
+
+# Response:
+{
+  "phase": 7,
+  "version": "0.1.0-alpha",
+  "status": "ready",
+  "uptime": 3600
+}</code></pre>
+    <p style="margin-top:.75rem">The desktop app monitors sidecar health automatically and will restart failed sidecars. You can also check status in <strong>Settings → Diagnostics</strong>.</p>
+
+    <div class="detail-card">
+      <h3>📊 Sidecar Ports</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Sidecar</th><th>Port</th><th>Health Endpoint</th></tr></thead>
+        <tbody>
+          <tr><td>Agent</td><td>47821</td><td>GET /health</td></tr>
+          <tr><td>VM Helper</td><td>47822</td><td>GET /health</td></tr>
+          <tr><td>Browser Helper</td><td>47823</td><td>GET /health</td></tr>
+          <tr><td>Plugins Helper</td><td>47824</td><td>GET /health</td></tr>
+          <tr><td>Cloud Sync</td><td>47825</td><td>GET /health</td></tr>
+          <tr><td>Bridge</td><td>47826</td><td>GET /health</td></tr>
+          <tr><td>Computer Use</td><td>47828</td><td>GET /health</td></tr>
+          <tr><td>Cloud Server</td><td>47830</td><td>GET /health</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Security Model</div>
     <h2>Sidecar authentication</h2>
-    <p>All sidecars use a shared authentication system (<code>sidecar-auth.ts</code>) with token-based authorization. Each inter-process request is validated against a runtime-loaded sidecar token. Failed authentications are rejected with <code>401 Unauthorized</code>.</p>
+    <p>All sidecars use a shared authentication system with token-based authorization:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Token-based auth</strong> — each inter-process request must include a valid sidecar token</li>
+      <li><strong>Runtime-loaded</strong> — tokens are generated at app startup and loaded into each sidecar</li>
+      <li><strong>Request validation</strong> — every request is validated against the token</li>
+      <li><strong>401 rejection</strong> — failed authentications are rejected with <code>401 Unauthorized</code></li>
+    </ul>
+    <p style="margin-top:.75rem">The token is stored in memory only and never persisted to disk. It's regenerated on each app launch for security.</p>
+
+    <div class="detail-card">
+      <h3>🛡️ Isolation</h3>
+      <p>Each sidecar runs in its own process space with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Separate Node.js process</strong> — no shared memory or state</li>
+        <li><strong>Limited filesystem access</strong> — only the directories it needs</li>
+        <li><strong>No network access by default</strong> — must be explicitly granted</li>
+        <li><strong>Resource limits</strong> — CPU and memory usage is monitored</li>
+      </ul>
+      <p style="margin-top:.75rem">If a sidecar crashes, the main app detects it via health checks and can restart it automatically.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Development</div>
+    <h2>Building sidecars</h2>
+    <p>Sidecars are built with TypeScript and bundled with esbuild:</p>
+    <pre><code># Build all sidecars
+npm run build:sidecars
+
+# Build a specific sidecar
+npm run build:sidecar -w sidecar/aura-agent
+
+# Run a sidecar in development mode
+npm run sidecar  # Agent sidecar
+npm run vm-helper  # VM Helper
+npm run browser-helper  # Browser Helper</code></pre>
+    <p style="margin-top:.75rem">Each sidecar has its own <code>package.json</code> and can have its own dependencies. They share common types from <code>packages/shared/</code>.</p>
+
+    <div class="detail-card">
+      <h3>📝 Creating a New Sidecar</h3>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Create a new directory in <code>sidecar/</code></li>
+        <li><strong>2.</strong> Add <code>package.json</code> with dependencies</li>
+        <li><strong>3.</strong> Implement the health endpoint: <code>GET /health</code></li>
+        <li><strong>4.</strong> Implement your business logic endpoints</li>
+        <li><strong>5.</strong> Add authentication using <code>sidecar-auth.ts</code></li>
+        <li><strong>6.</strong> Register the sidecar in the main app's process manager</li>
+        <li><strong>7.</strong> Add build script to <code>package.json</code> root</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>sidecar/aura-agent/</code> for a complete example.</p>
+    </div>
   </section>
         </main>
        </div>

@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — التوجيه">
 <meta property="og:title" content="التوجيه — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — التوجيه">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -232,6 +232,30 @@ pre:hover .copy-code-btn{opacity:1}
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;background:#4b5bb0;color:#fff;font-size:.625rem;font-family:var(--font-mono);flex-shrink:0">5</span> يدوي</h3>
         <p>يختار المستخدم المزوّد والنموذج يدوياً لكل جلسة. لا توجيه تلقائي.</p>
       </div>
+  <section class="section">
+    <div class="section-label">استراتيجيات التوجيه</div>
+    <h2>خمس استراتيجيات توجيه</h2>
+    <div class="detail-card">
+      <h3>الجودة أولا (quality-first)</h3>
+      <p>يوجه الطلب إلى أفضل مزود متاح. يستخدم مقاييس الجودة (دقة HumanEval، سرعة الاستجابة، إلخ). مناسب للمهام الحرجة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>التكلفة أولا (cost-first)</h3>
+      <p>يختار أرخص مزود يلبي الحد الأدنى من الجودة. مناسب للمهام البسيطة أو معالجة البيانات الكبيرة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>الخصوصية أولا (privacy-first)</h3>
+      <p>يفضل المزودين المحليين (Ollama، LM Studio). لا يرسل بيانات إلى السحابة. يتطلب مزودا محليا واحدا على الأقل.</p>
+    </div>
+    <div class="detail-card">
+      <h3>محلي فقط (local-only)</h3>
+      <p>يستخدم المزودين المحليين حصرا. يفشل إذا لم يتوفر أي مزود محلي. للبيئات المعزولة تماما.</p>
+    </div>
+    <div class="detail-card">
+      <h3>يدوي (manual)</h3>
+      <p>تحدد المزود والنموذج يدويا لكل طلب: <code>aura --provider openai --model gpt-4o</code></p>
+    </div>
+  </section>
   </section>
         </main>
        </div>

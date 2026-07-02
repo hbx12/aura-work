@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — Languages">
 <meta property="og:title" content="Languages — Aura Work">
 <meta property="og:description" content="Languages — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -304,7 +304,17 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-1"><div class="num">20</div><div class="lbl">Languages</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">2</div><div class="lbl">RTL Languages</div></div>
     </div>
-    <p>Aura Work is built for a global audience. The i18n system uses TypeScript source catalogs that emit Weblate-compatible JSON files. Adding a new language is a single PR away.</p>
+    <p>Aura Work is built for a <strong>global audience</strong>. The i18n system uses TypeScript source catalogs that emit Weblate-compatible JSON files. Adding a new language is a single PR away.</p>
+    
+    <h2 style="margin-top:2rem">Why i18n Matters</h2>
+    <p>Aura Work is used by developers worldwide. By supporting 20 languages, we ensure that:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Accessibility</strong> — developers can use the tool in their native language</li>
+      <li><strong>Inclusivity</strong> — RTL languages (Arabic, Persian) are fully supported</li>
+      <li><strong>Community</strong> — contributors can add translations for their language</li>
+      <li><strong>Global reach</strong> — the tool can be used in any country</li>
+    </ul>
+
     <div class="section-label">Supported Languages</div>
     <div class="lang-grid"><a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/ar.json" class="lang-badge fade-in" style="animation: fadeIn .4s ease forwards">العربية <span class="rtl-mark">RTL</span></a>
 <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/de.json" class="lang-badge fade-in" style="animation: fadeIn .4s ease forwards">Deutsch </a>
@@ -330,14 +340,77 @@ pre:hover .copy-code-btn{opacity:1}
   <section class="section">
     <div class="section-label">Architecture</div>
     <h2>How i18n works</h2>
-    <p>Translation source files live in <code>packages/i18n/src/catalog.ts</code> as a typed TypeScript object. Running <code>npm run build:locales</code> emits JSON files to <code>packages/i18n/locales/</code>. The system automatically detects the system language on first launch and falls back to English.</p>
+    <p>The i18n system is built with TypeScript and follows a layered architecture:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Source Catalog</strong> — Translation strings are defined in <code>packages/i18n/src/catalog.ts</code> as a typed TypeScript object</li>
+      <li><strong>2. Build Step</strong> — Running <code>npm run build:locales</code> emits JSON files to <code>packages/i18n/locales/</code></li>
+      <li><strong>3. Runtime Loading</strong> — The app detects the system language on first launch and loads the appropriate JSON</li>
+      <li><strong>4. Fallback</strong> — If a translation is missing, it falls back to English</li>
+    </ol>
+
     <div class="detail-card">
-      <h3>🌐 Adding a new language</h3>
-      <p>Add your locale to <code>SUPPORTED_LOCALES</code> in <code>packages/i18n/src/catalog.ts</code>, translate the strings, run the build script, and submit a PR. The project uses Weblate for community translations.</p>
+      <h3>🌐 Adding a New Language</h3>
+      <p>Contributing a new language is straightforward:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Copy <code>packages/i18n/locales/en.json</code> to a new file (e.g., <code>hi.json</code> for Hindi)</li>
+        <li><strong>2.</strong> Translate the values only — keep all keys in English</li>
+        <li><strong>3.</strong> Add your locale to <code>SUPPORTED_LOCALES</code> in <code>packages/i18n/src/catalog.ts</code></li>
+        <li><strong>4.</strong> Run <code>npm run build:locales -w @aura-os/i18n</code></li>
+        <li><strong>5.</strong> Test your translations in the app</li>
+        <li><strong>6.</strong> Submit a PR with the changes</li>
+      </ol>
+      <p style="margin-top:.75rem">The project uses <a href="https://weblate.org" style="color:var(--color-accent)">Weblate</a> for community translations. You can contribute translations via Weblate or directly via PR.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📐 RTL support</h3>
-      <p>Arabic and Persian use <code>dir="rtl"</code> layout. The design system includes IBM Plex Sans Arabic and Tajawal fonts for proper Arabic typography with built-in font substitution.</p>
+      <h3>📐 RTL Support</h3>
+      <p>Arabic and Persian use <code>dir="rtl"</code> layout. The RTL support includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Layout direction</strong> — entire UI flips horizontally</li>
+        <li><strong>Text alignment</strong> — text aligns to the right</li>
+        <li><strong>Navigation</strong> — sidebar and menus flip direction</li>
+        <li><strong>Typography</strong> — IBM Plex Sans Arabic and Tajawal fonts</li>
+        <li><strong>Icons</strong> — directional icons are flipped (arrows, chevrons)</li>
+        <li><strong>Animations</strong> — slide animations respect RTL direction</li>
+      </ul>
+      <p style="margin-top:.75rem">The design system includes proper Arabic typography with built-in font substitution for mixed-language content.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Translation Keys</h3>
+      <p>Translation keys follow a hierarchical structure:</p>
+      <pre><code>{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}",
+    "stats": {
+      "tasks": "Tasks",
+      "projects": "Projects"
+    }
+  },
+  "errors": {
+    "network": "Network error. Please check your connection.",
+    "auth": "Authentication failed. Please log in again."
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Use dot notation to reference keys: <code>t('dashboard.stats.tasks')</code>. Variables are wrapped in double curly braces: <code>{{name}}</code>.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 Translation Best Practices</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Keep keys in English</strong> — only translate values</li>
+        <li><strong>Use placeholders</strong> — for dynamic content (e.g., <code>{{count}}</code>)</li>
+        <li><strong>Consider context</strong> — some words have different translations based on context</li>
+        <li><strong>Test thoroughly</strong> — check for text overflow, alignment issues</li>
+        <li><strong>Use Weblate</strong> — for community translations and consistency</li>
+        <li><strong>Review existing translations</strong> — check <code>en.json</code> for the complete list</li>
+      </ul>
     </div>
   </section>
         </main>

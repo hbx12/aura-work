@@ -1,0 +1,173 @@
+"""
+Translate Issues Bot - Automatically translates non-English issue content to English.
+Uses googletrans library for language detection and translation.
+"""
+import json
+import os
+import subprocess
+import sys
+from googletrans import Translator
+
+# Read the GitHub event
+event_path = os.environ.get("GITHUB_EVENT_PATH", "")
+with open(event_path) as f:
+    event = json.load(f)
+
+event_name = os.environ.get("GITHUB_EVENT_NAME", "")
+repo = os.environ.get("GITHUB_REPOSITORY", "")
+translator = Translator()
+bot_note = "🤖 Translated automatically"
+
+issue_number = None
+text_to_check = None
+translate_body = False
+translate_title = False
+issue_title = None
+comment_user = None
+
+if event_name == "issues":
+    issue = event.get("issue", {})
+    issue_number = issue.get("number")
+    issue_title = issue.get("title", "")
+    issue_body = issue.get("body", "") or ""
+    comment_user = issue.get("user", {}).get("login", "")
+    text_to_check = issue_body or issue_title
+    translate_body = True
+    translate_title = True
+elif event_name == "issue_comment":
+    issue = event.get("issue", {})
+    issue_number = issue.get("number")
+    comment = event.get("comment", {})
+    comment_user = comment.get("user", {}).get("login", "")
+    text_to_check = comment.get("body", "") or ""
+    translate_body = True
+    translate_title = False
+    issue_title = issue.get("title", "")
+
+if not issue_number or not text_to_check:
+    print("No content to translate, exiting")
+    sys.exit(0)
+
+# Skip bot's own comments (prevent loops)
+if "bot" in comment_user.lower() or comment_user == "github-actions":
+    print(f"Skipping - comment from bot user: {comment_user}")
+    sys.exit(0)
+
+
+def is_non_english(text):
+    """Detect if text is non-English using googletrans"""
+    if not text or len(text.strip()) < 2:
+        return False
+    try:
+        result = translator.detect(text[:500])
+        lang = result.lang
+        print(f"Detected language: {lang} (confidence: {result.confidence})")
+        return lang != "en" and lang != "und"
+    except Exception as e:
+        print(f"Detection error: {e}")
+        # Fallback: check for non-ASCII characters
+        non_ascii = sum(1 for c in text if ord(c) > 127)
+        return non_ascii > len(text) * 0.1
+
+
+def translate_text(text):
+    """Translate text to English"""
+    if not text or len(text.strip()) < 2:
+        return None
+    try:
+        result = translator.translate(text[:2000], dest="en")
+        if result and result.text and result.text != text:
+            return result.text
+        return None
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return None
+
+
+# Check and translate body
+body_non_english = is_non_english(text_to_check)
+translated_body = None
+if body_non_english:
+    translated_body = translate_text(text_to_check)
+    if translated_body:
+        print(f"Body translated: {translated_body[:100]}...")
+    else:
+        print("Body translation returned same text, skipping")
+        translate_body = False
+else:
+    print("Body is already English, skipping")
+    translate_body = False
+
+# Check and translate title
+translated_title = None
+if translate_title and is_non_english(issue_title):
+    translated_title = translate_text(issue_title)
+    if translated_title:
+        print(f"Title translated: {translated_title}")
+    else:
+        print("Title could not be translated, skipping")
+        translate_title = False
+else:
+    translate_title = False
+
+# Modify title if needed
+if translate_title and translated_title:
+    title_data = json.dumps({"title": translated_title})
+    result = subprocess.run(
+        [
+            "gh",
+            "api",
+            f"/repos/{repo}/issues/{issue_number}",
+            "--method",
+            "PATCH",
+            "--input",
+            "-",
+        ],
+        input=title_data,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        print(f"Title updated to: {translated_title}")
+    else:
+        print(f"Failed to update title: {result.stderr}")
+
+# Build comment
+if translate_body and translated_body:
+    comment_body = f"""
+> {bot_note}
+
+{translated_body}
+"""
+    if translated_title:
+        comment_body += f"""
+---
+
+**Original Title:** {issue_title}
+**Translated Title:** {translated_title}
+"""
+else:
+    print("Nothing to translate, exiting")
+    sys.exit(0)
+
+# Post comment
+comment_data = json.dumps({"body": comment_body})
+result = subprocess.run(
+    [
+        "gh",
+        "api",
+        f"/repos/{repo}/issues/{issue_number}/comments",
+        "--method",
+        "POST",
+        "--input",
+        "-",
+    ],
+    input=comment_data,
+    capture_output=True,
+    text=True,
+)
+if result.returncode == 0:
+    print(f"Comment posted successfully on issue #{issue_number}")
+else:
+    print(f"Failed to post comment: {result.stderr}")
+    sys.exit(1)

@@ -1,0 +1,25 @@
+name: "Aura Work CodeQL Configuration"
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+paths-ignore:
+  - node_modules
+  - apps/desktop/src-tauri/target
+  - bundles
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/__tests__/**'
+  - sidecar/*/target
+  - registry
+
+paths:
+  - apps
+  - packages
+  - cli
+  - server
+  - sidecar
+  - scripts
+  - qa

@@ -2,23 +2,27 @@ name: Translate Issues
 
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created]
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 permissions:
   issues: write
-  pull-requests: write
 
 jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - uses: lizheming/github-translate-action@v1
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          translate_title: true
-          translate_body: true
-          translate_comment: true
-          languages: ar,en
-          default_language: en
+          python-version: '3.11'
+
+      - name: Install translation library
+        run: pip install googletrans==4.0.0rc1 --quiet
+
+      - name: Translate Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/translate.py

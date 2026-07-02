@@ -1113,7 +1113,7 @@ hasown@2.0.4
   License: MIT
   Source: node_modules/hasown
 
-hono@4.12.23
+hono@4.12.27
   License: MIT
   Source: node_modules/hono
 

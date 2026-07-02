@@ -64,7 +64,7 @@ Please comment on an issue before starting work so effort is not duplicated.
 - Universal Workspace routing for documents, spreadsheets, presentations, PDF, research, data, design, automation, database, and browser workflows
 - Official HBX Marketplace skills with localized Arabic/English metadata and real SVG assets
 - 20 languages with RTL (Arabic, Persian)
-- Integrated docs at [hbx12.github.io/aura-work](https://hbx12.github.io/aura-work) (when deployed)
+- Integrated docs at [aura-work.shop](https://aura-work.shop) (when deployed)
 
 ## Quick start (development)
 
