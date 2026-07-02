@@ -6,9 +6,14 @@ export function useConfig() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadConfig()
-      .then(c => { setConfig(c); setLoading(false); })
-      .catch(() => setLoading(false));
+    try {
+      const c = loadConfig();
+      setConfig(c);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return { config, loading };
