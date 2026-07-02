@@ -22,7 +22,7 @@
     "@tauri-apps/plugin-updater": "^2",
     "monaco-editor": "^0.53.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
