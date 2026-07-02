@@ -51,13 +51,8 @@ async function main() {
         if (args.quiet) setLogLevel("error");
 
         // Launch TUI by default (like Claude Code / OpenCode)
-        const { render } = await import("ink");
-        const { App } = await import("./tui/App.js");
-        render(
-          React.createElement(App, {
-            dir: args.directory as string | undefined,
-          })
-        );
+        const { startTUI } = await import("./tui/index.js");
+        startTUI({ dir: args.directory as string | undefined });
       },
     )
     .command(
@@ -218,15 +213,12 @@ async function main() {
             description: "Model to use",
           }),
       async (args) => {
-        const { render } = await import("ink");
-        const { App } = await import("./tui/App.js");
-        render(
-          React.createElement(App, {
-            sessionId: args.session as string | undefined,
-            model: args.model as string | undefined,
-            dir: args.dir as string | undefined,
-          })
-        );
+        const { startTUI } = await import("./tui/index.js");
+        startTUI({
+          sessionId: args.session as string | undefined,
+          model: args.model as string | undefined,
+          dir: args.dir as string | undefined,
+        });
       },
     )
     .command(

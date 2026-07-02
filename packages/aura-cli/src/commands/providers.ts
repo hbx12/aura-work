@@ -1,33 +1,36 @@
 import chalk from "chalk";
-import { getRuntime } from "../core/runtime.js";
-import { handleError } from "../utils/errors.js";
-import type { ProviderId } from "@aura-os/shared";
+import { loadConfig } from "../core/config.js";
 
-const PROVIDER_META: Record<string, { displayName: string; color: string }> = {
-  "aura-cloud": { displayName: "Aura Cloud", color: "#c48b5c" },
-  openai: { displayName: "OpenAI", color: "#1a7f64" },
-  anthropic: { displayName: "Anthropic", color: "#c2683f" },
-  gemini: { displayName: "Google Gemini", color: "#3a6fc4" },
-  deepseek: { displayName: "DeepSeek", color: "#4b5bb0" },
-  ollama: { displayName: "Ollama (Local)", color: "#7a5c8e" },
-  "openai-compatible": { displayName: "Custom Endpoint", color: "#645d4e" },
-  minimax: { displayName: "Minimax", color: "#e05c2b" },
-  qwen: { displayName: "Qwen", color: "#4f35b3" },
-  lmstudio: { displayName: "LM Studio (Local)", color: "#1988a2" },
+const PROVIDERS: Record<string, { name: string; envKey: string }> = {
+  openai: { name: "OpenAI", envKey: "OPENAI_API_KEY" },
+  anthropic: { name: "Anthropic", envKey: "ANTHROPIC_API_KEY" },
+  groq: { name: "Groq", envKey: "GROQ_API_KEY" },
+  deepseek: { name: "DeepSeek", envKey: "DEEPSEEK_API_KEY" },
+  google: { name: "Google Gemini", envKey: "GOOGLE_API_KEY" },
+  ollama: { name: "Ollama (Local)", envKey: "" },
 };
 
 export async function providersCommand(): Promise<void> {
-  try {
-    console.log(chalk.bold("Supported Providers:"));
-    console.log();
+  console.log(chalk.bold.cyan("✦ Providers"));
+  console.log();
 
-    for (const [id, meta] of Object.entries(PROVIDER_META)) {
-      console.log(`  ${chalk.hex(meta.color)("●")} ${meta.displayName} ${chalk.gray(`(${id})`)}`);
-    }
+  const config = loadConfig();
+  const configKeys = config.apiKeys || {};
 
-    console.log();
-    console.log(chalk.gray("Configure a provider: aura-work config set <provider> <api-key>"));
-  } catch (err) {
-    handleError(err);
+  for (const [id, meta] of Object.entries(PROVIDERS)) {
+    const hasEnv = meta.envKey ? !!process.env[meta.envKey] : false;
+    const hasConfig = !!configKeys[id];
+    const configured = hasEnv || hasConfig;
+
+    const icon = configured ? chalk.green("✔") : chalk.gray("○");
+    const source = hasConfig ? "config" : hasEnv ? `env (${meta.envKey})` : "not configured";
+    const local = id === "ollama" ? chalk.cyan(" [local]") : "";
+
+    console.log(`  ${icon} ${meta.name}${local} ${chalk.gray(`(${source})`)}`);
   }
+
+  console.log();
+  console.log(chalk.gray("Set API key:"));
+  console.log(chalk.gray("  aura config set apiKeys.openai YOUR_KEY"));
+  console.log(chalk.gray("  set OPENAI_API_KEY=your-key"));
 }

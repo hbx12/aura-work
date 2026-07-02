@@ -1,24 +1,27 @@
 import { useState, useCallback } from 'react';
 
-interface Session {
+export interface Session {
   id: string;
-  name?: string;
-  projectPath?: string;
-  model?: string;
+  projectPath: string;
+  createdAt: string;
 }
 
-export function useSession() {
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
+export function useSession(projectPath: string) {
+  const [session, setSession] = useState<Session | null>(null);
 
-  const createSession = useCallback(async (options?: { projectPath?: string; model?: string }) => {
-    const session: Session = {
+  const createSession = useCallback(() => {
+    const newSession: Session = {
       id: `session-${Date.now()}`,
-      projectPath: options?.projectPath,
-      model: options?.model,
+      projectPath,
+      createdAt: new Date().toISOString(),
     };
-    setActiveSession(session);
-    return session;
-  }, []);
+    setSession(newSession);
+    return newSession;
+  }, [projectPath]);
 
-  return { activeSession, createSession };
+  if (!session) {
+    createSession();
+  }
+
+  return { session: session!, createSession };
 }

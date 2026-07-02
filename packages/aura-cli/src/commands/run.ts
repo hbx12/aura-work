@@ -1,61 +1,103 @@
 import chalk from "chalk";
-import ora from "ora";
-import { getRuntime, type RunOptions } from "../core/runtime.js";
-import { formatTokens, formatCost } from "../utils/format.js";
+import { loadConfig } from "../core/config.js";
+import { chat } from "../core/ai.js";
+import type { ChatMessage } from "../core/ai.js";
 import { handleError } from "../utils/errors.js";
+
+interface RunOptions {
+  continue?: boolean;
+  session?: string;
+  fork?: string;
+  model?: string;
+  agent?: string;
+  files?: string[];
+  dir?: string;
+  format?: "text" | "json";
+  auto?: boolean;
+}
 
 export async function runCommand(message: string, opts: RunOptions): Promise<void> {
   try {
-    const runtime = await getRuntime();
-    const project = await runtime.resolveProject(opts.dir);
-    const session = await runtime.resolveSession(opts);
+    const config = loadConfig();
+
+    // Check if model is configured
+    const envKeys: Record<string, string> = {
+      openai: 'OPENAI_API_KEY',
+      anthropic: 'ANTHROPIC_API_KEY',
+      groq: 'GROQ_API_KEY',
+      deepseek: 'DEEPSEEK_API_KEY',
+      google: 'GOOGLE_API_KEY',
+    };
+
+    const configKeys = config.apiKeys || {};
+    const hasConfigKey = Object.keys(configKeys).length > 0;
+    let hasEnvKey = false;
+    for (const envKey of Object.values(envKeys)) {
+      if (process.env[envKey]) { hasEnvKey = true; break; }
+    }
+
+    if (!hasConfigKey && !hasEnvKey && !config.defaultModel) {
+      const errorMsg = "No model configured. Run `aura` and use /model, or set provider API key.";
+      if (opts.format === "json") {
+        console.log(JSON.stringify({ error: errorMsg }));
+      } else {
+        console.log(chalk.red(`Error: ${errorMsg}`));
+        console.log(chalk.gray("  Set API key: set OPENAI_API_KEY=your-key"));
+        console.log(chalk.gray("  Or configure: aura config set apiKeys.openai YOUR_KEY"));
+      }
+      process.exit(1);
+    }
+
+    const model = opts.model || config.defaultModel;
+    const projectPath = opts.dir || process.cwd();
 
     if (opts.format === "json") {
-      // JSON output mode
-      const result = await runtime.sendMessage(message, opts);
-      console.log(JSON.stringify({
-        sessionId: session.id,
-        projectId: project.id,
-        message: {
-          id: result.id,
-          role: result.role,
-          content: result.content,
-          createdAt: result.created_at,
+      // JSON line-delimited output
+      const messages: ChatMessage[] = [
+        { role: 'user', content: message },
+      ];
+
+      console.log(JSON.stringify({ type: "session.created", sessionId: `run-${Date.now()}` }));
+      console.log(JSON.stringify({ type: "message.created", role: "user", content: message }));
+
+      let fullResponse = '';
+      await chat(messages, {
+        onToken: (token) => {
+          fullResponse += token;
+          console.log(JSON.stringify({ type: "message.part.updated", token }));
         },
-      }, null, 2));
+        onDone: () => {
+          console.log(JSON.stringify({ type: "message.created", role: "assistant", content: fullResponse }));
+        },
+        onError: (err) => {
+          console.log(JSON.stringify({ type: "error", message: err.message }));
+        },
+      }, { model });
       return;
     }
 
     // Human-readable output
-    console.log(chalk.gray(`Session: ${session.title ?? session.id.slice(0, 8)}`));
-    console.log(chalk.gray(`Model:   ${session.model_provider ?? "openai"}/${session.model_id ?? "gpt-4o"}`));
+    console.log(chalk.gray(`Model: ${model || 'default'}`));
+    console.log(chalk.gray(`Dir:   ${projectPath}`));
     console.log();
 
-    const spinner = ora({ text: "Thinking...", spinner: "dots" }).start();
+    const messages: ChatMessage[] = [
+      { role: 'user', content: message },
+    ];
 
-    try {
-      const response = await runtime.sendMessage(message, opts);
-      spinner.stop();
-
-      console.log(chalk.bold.green("Assistant:"));
-      console.log(response.content);
-      console.log();
-
-      // Show usage
-      const updatedSession = await runtime.db.getSession(session.id);
-      if (updatedSession) {
-        const tokens = updatedSession.tokens_input + updatedSession.tokens_output;
-        console.log(
-          chalk.gray(
-            `Tokens: ${formatTokens(updatedSession.tokens_input)} in / ${formatTokens(updatedSession.tokens_output)} out | ` +
-            `Cost: ${formatCost(updatedSession.cost_total)}`
-          )
-        );
-      }
-    } catch (err) {
-      spinner.fail("Failed");
-      throw err;
-    }
+    process.stdout.write(chalk.green("Aura: "));
+    await chat(messages, {
+      onToken: (token) => {
+        process.stdout.write(token);
+      },
+      onDone: () => {
+        console.log();
+      },
+      onError: (err) => {
+        console.log();
+        console.log(chalk.red(`Error: ${err.message}`));
+      },
+    }, { model });
   } catch (err) {
     handleError(err);
   }
