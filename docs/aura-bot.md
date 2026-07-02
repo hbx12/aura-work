@@ -2,26 +2,6 @@
 
 Aura Bot is a GitHub Actions-based assistant for the aura-work repository. It reviews PRs, triages issues, replies to comments, and produces daily project health reports — all powered by DeepSeek and repository documentation.
 
-## Setup
-
-### 1. Add the DeepSeek API Key
-
-Go to **Settings → Secrets and variables → Actions → Secrets** and add:
-
-| Name | Description |
-|------|-------------|
-| `DEEPSEEK_API_KEY` | Your DeepSeek API key (required) |
-
-### 2. Optional Variables
-
-Go to **Settings → Secrets and variables → Actions → Variables** and optionally add:
-
-| Name | Default | Description |
-|------|---------|-------------|
-| `DEEPSEEK_MODEL` | `deepseek-v4-flash` | DeepSeek model to use |
-| `AURA_BOT_NAME` | `aura-bot` | Bot display name |
-| `AURA_BOT_OWNER` | `hbx12` | GitHub username to mention for unanswered questions |
-
 ## Workflows
 
 | Workflow | File | Trigger |
@@ -68,30 +48,6 @@ The bot reads these files (main branch only):
 - `registry/**/*.md`
 
 Every bot answer includes a "Sources checked" list.
-
-## How to Test
-
-### Test PR Review
-
-1. Open a PR from any branch to `main`.
-2. Wait for the `aura-bot PR Review` workflow to complete.
-3. Check the PR for a comment starting with `<!-- aura-bot:pr-review -->`.
-
-### Test Issue Triage
-
-1. Create a new issue.
-2. Wait for the `aura-bot Issue Triage` workflow to complete.
-3. Check for a triage comment starting with `<!-- aura-bot:issue-triage -->`.
-
-### Test Comment Reply
-
-1. On any open issue, write a comment containing `@aura-bot` (or plain `aura-bot`) followed by a question.
-2. Wait for the bot to reply with `<!-- aura-bot:comment-reply -->`.
-
-### Test Daily Scan
-
-1. Go to **Actions → aura-bot Daily Health Scan → Run workflow**.
-2. Check for an issue titled "Aura Bot Daily Project Health Report" with updated content.
 
 ## Architecture
 
