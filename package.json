@@ -58,7 +58,7 @@
   "overrides": {
     "dompurify": "^3.4.10",
     "vite": "^8.0.16",
-    "monaco-editor": "0.53.0"
+    "monaco-editor": "0.55.1"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.9",
@@ -66,6 +66,6 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "monaco-editor": "0.53.0"
+    "monaco-editor": "0.55.1"
   }
 }
