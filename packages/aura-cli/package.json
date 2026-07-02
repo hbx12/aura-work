@@ -1,9 +1,30 @@
 {
-  "name": "@aura-os/aura-cli",
+  "name": "aura-work",
   "version": "0.1.0-alpha.1",
-  "private": true,
   "type": "module",
   "description": "Aura CLI — standalone OpenCode-style terminal interface for Aura Work",
+  "author": "hbx12",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hbx12/aura-work.git",
+    "directory": "packages/aura-cli"
+  },
+  "homepage": "https://github.com/hbx12/aura-work/tree/main/packages/aura-cli#readme",
+  "bugs": {
+    "url": "https://github.com/hbx12/aura-work/issues"
+  },
+  "keywords": [
+    "aura",
+    "cli",
+    "ai",
+    "terminal",
+    "coding-agent",
+    "llm",
+    "openai",
+    "anthropic",
+    "copilot"
+  ],
   "bin": {
     "aura-work": "./bin/aura-work.js"
   },
@@ -15,6 +36,12 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup src/index.ts src/tui.tsx --format esm --dts --external react --external ink",
     "dev": "tsx src/index.ts",
@@ -22,10 +49,10 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "@aura-os/shared": "*",
     "yargs": "^17.7.0",
     "chalk": "^5.3.0",
     "node-fetch": "^3.3.0",
@@ -41,6 +68,7 @@
     "react": "^19.1.0"
   },
   "devDependencies": {
+    "@aura-os/shared": "*",
     "@types/yargs": "^17.0.0",
     "@types/diff": "^7.0.0",
     "@types/node": "^22.0.0",

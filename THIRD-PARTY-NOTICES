@@ -53,10 +53,6 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: Apache-2.0
   Source: sidecar/aura-agent/package.json
 
-@aura-os/aura-cli@0.1.0-alpha.1
-  License: Apache-2.0
-  Source: packages/aura-cli/package.json
-
 @aura-os/bridge@0.9.0
   License: Apache-2.0
   Source: sidecar/aura-bridge/package.json
@@ -660,6 +656,10 @@ ast-v8-to-istanbul@1.0.4
 asynckit@0.4.0
   License: MIT
   Source: node_modules/asynckit
+
+aura-work@0.1.0-alpha.1
+  License: Apache-2.0
+  Source: packages/aura-cli/package.json
 
 auto-bind@5.0.1
   License: MIT

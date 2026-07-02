@@ -17,13 +17,13 @@ Standalone terminal interface for Aura Work — an AI-powered coding assistant.
 ## Installation
 
 ```bash
-npm install -g @aura-os/aura-cli
+npm install -g aura-work
 ```
 
 Or run directly with npx:
 
 ```bash
-npx @aura-os/aura-cli
+npx aura-work
 ```
 
 ## Quick Start

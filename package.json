@@ -31,7 +31,7 @@
     "build:bridge": "npm run build -w @aura-os/bridge",
     "build:computer-use": "npm run build -w @aura-os/computer-use",
     "build:cli": "npm run build -w @aura-os/cli",
-    "build:aura-cli": "npm run build -w @aura-os/aura-cli",
+    "build:aura-cli": "npm run build -w aura-work",
     "build:cloud": "npm run build -w @aura-os/cloud",
     "build:sidecars": "npm run build:sidecar && npm run build:vm && npm run build:browser && npm run build:plugins && npm run build:cloud-sync && npm run build:bridge && npm run build:computer-use",
     "stage:bundle": "node scripts/stage-bundle.mjs",
@@ -61,6 +61,7 @@
     "monaco-editor": "0.53.0"
   },
   "devDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.0.3",
     "@vitest/coverage-v8": "^4.1.9",
     "esbuild": "^0.28.1",
     "vitest": "^4.1.8"

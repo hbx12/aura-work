@@ -2,7 +2,7 @@
  * Cost tracking and budget management for Aura CLI
  */
 
-import { getDatabase } from '../db.js';
+import { getDatabase } from './db.js';
 
 // Pricing per 1M tokens (USD)
 export interface ModelPricing {
@@ -200,7 +200,7 @@ export async function getUsageSummary(
 // Format cost for display
 export function formatCost(cost: number): string {
   if (cost < 0.01) {
-    return `$${(cost * 100).toFixed(2)}¢`;
+    return `${(cost * 100).toFixed(2)}¢`;
   }
   return `$${cost.toFixed(2)}`;
 }
