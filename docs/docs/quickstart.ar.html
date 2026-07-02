@@ -100,30 +100,159 @@
         <main class="content">
           <div class="hero">
     <h1><span>بداية سريعة</span></h1>
-    <p class="subtitle">التثبيت والإعداد وتشغيل أول مهمة</p>
+    <p class="subtitle">من الصفر إلى تشغيل أول مهمة ذكاء اصطناعي.</p>
   </div>
   <section class="section">
-    <div class="section-label">التثبيت</div>
-    <h2>المتطلبات الأساسية</h2>
-    <ul>
-      <li><strong>نظام التشغيل:</strong> Windows 10+ أو macOS 12+ أو أي توزيعة Linux حديثة</li>
-      <li><strong>مساحة تخزين:</strong> ~200 MB للتطبيق + نموذج Ollama للاستخدام المحلي</li>
-      <li><strong>اتصال بالإنترنت:</strong> مطلوب للمزوّدين السحابيين فقط (غير مطلوب لـ Ollama/LM Studio)</li>
-    </ul>
-    <h2>الخطوات</h2>
-    <div class="detail-card"><h3>1. تنزيل من إصدارات GitHub</h3><p>تصفح <a href="https://github.com/hbx12/aura-work/releases">صفحة الإصدارات</a> وحمّل أحدث إصدار لنظام تشغيلك.</p></div>
-    <div class="detail-card"><h3>2. فك الضغط وشغّل Aura Work</h3><p>فك ضغط الملف وشغّل التطبيق. سيظهر في شريط المهام (أو علبة النظام) عند بدء التشغيل.</p></div>
-    <div class="detail-card"><h3>3. إعداد مزوّد</h3><p>اذهب إلى الإعدادات → المزوّدون. أضف مفتاح API لأي مزوّد أو ابدأ Ollama محلياً مجاناً. يتم التحقق من كل مزوّد تلقائياً.</p></div>
-    <div class="detail-card"><h3>4. تشغيل أول مهمة</h3><p>اكتب أمراً مثل: "أنشئ مكون React جديد يجلب البيانات من API". يخطط الوكيل وينفذ ويعرض النتائج.</p></div>
-    <div class="detail-card"><h3>5. استكشف</h3><p>جرّب المهارات من السجل، ثبّت خوادم MCP، اضبط سياسات التوجيه، أو استخدم CLI للتحكم من الطرفية.</p></div>
+    <p>هذا الدليل سيأخذك من التثبيت إلى أول مهمة مدعومة بالذكاء الاصطناعي في أقل من 5 دقائق. Aura Work متوفر لأنظمة <strong>Windows و macOS و Linux</strong>.</p>
+
+    <h2 style="margin-top:2rem">المتطلبات الأساسية</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المنصة</th><th>المتطلبات</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Windows</strong></td><td>Windows 10 فأحدث (يتضمن WebView2)، 4 جيجابايت رام كحد أدنى</td></tr>
+        <tr><td><strong>macOS</strong></td><td>macOS 11 فأحدث، أدوات Xcode Command Line</td></tr>
+        <tr><td><strong>Linux</strong></td><td>Ubuntu 20.04 فأحدث، libwebkit2gtk-4.1-dev، libappindicator3-dev</td></tr>
+      </tbody>
+    </table>
+
+    <div class="detail-card">
+      <h3>1. التثبيت</h3>
+      <p>حمّل أحدث إصدار من <a href="https://github.com/hbx12/aura-work/releases/latest">إصدارات GitHub</a>. برامج التثبيت متوفرة لـ Windows (.msi) و macOS (.dmg) و Linux (.deb، .AppImage).</p>
+      <p style="margin-top:.75rem"><strong>Windows:</strong> شغّل ملف .msi واتبع التعليمات. سيُضاف التطبيق إلى قائمة ابدأ.</p>
+      <p style="margin-top:.5rem"><strong>macOS:</strong> افتح ملف .dmg واسحب Aura Work إلى مجلد Applications.</p>
+      <p style="margin-top:.5rem"><strong>Linux:</strong> ثبّت حزمة .deb عبر <code>sudo dpkg -i aura-work.deb</code> أو شغّل ملف .AppImage مباشرة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>2. التشغيل</h3>
+      <p>افتح Aura Work. يبدأ التطبيق بمشروع افتراضي ولوحة الوكيل جاهزة. سترى واجهة المحادثة حيث يمكنك كتابة أول مهمة.</p>
+      <p style="margin-top:.75rem">عند التشغيل الأول، سيقوم التطبيق بـ:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li>إنشاء قاعدة بيانات SQLite محلية للمشاريع والمهام</li>
+        <li>تهيئة الخزنة المشفرة لمفاتيح API</li>
+        <li>تشغيل الخدمة المساعدة Agent (المنفذ 47821)</li>
+        <li>اكتشاف لغة نظامك وتطبيق الثيم المناسب</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>3. تكوين مزوّد</h3>
+      <p>اذهب إلى <strong>الإعدادات ← المزوّدون</strong>. تحتاج إلى مزوّد ذكاء اصطناعي واحد على الأقل لاستخدام Aura Work. الخيارات:</p>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الخيار أ: مزوّد سحابي (موصى به للبدء)</h4>
+      <ol style="padding-right:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> اضغط على مزوّد (OpenAI، Anthropic، Gemini، إلخ)</li>
+        <li><strong>2.</strong> أدخل مفتاح API الخاص بك</li>
+        <li><strong>3.</strong> اضغط "تحقق" لاختبار الاتصال</li>
+        <li><strong>4.</strong> اختر النماذج التي تريد استخدامها</li>
+      </ol>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الخيار ب: مزوّد محلي (مجاني، دون حاجة لمفتاح API)</h4>
+      <ol style="padding-right:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> ثبّت <a href="https://ollama.ai">Ollama</a> على جهازك</li>
+        <li><strong>2.</strong> اسحب نموذجاً: <code>ollama pull llama3</code></li>
+        <li><strong>3.</strong> في Aura Work، فعّل مزوّد Ollama</li>
+        <li><strong>4.</strong> يكتشف التطبيق النماذج المتاحة تلقائياً</li>
+      </ol>
+      <p style="margin-top:.75rem">المزوّدون المحليون يبقون كل البيانات على جهازك — بدون مفاتيح API، وبدون حاجة للإنترنت.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>4. تشغيل أول مهمة</h3>
+      <p>اكتب طلباً في واجهة المحادثة. إليك بعض الأمثلة لتجربتها:</p>
+      <pre><code># مهام برمجية
+"أنشئ مكوّن React جديد يجلب بيانات من واجهة API"
+"أصلح الخلل في auth.ts حيث يفشل تسجيل الدخول مع الرموز الخاصة"
+"أضف اختبارات وحدة لصنف UserService"
+
+# مهام مستندات
+"أنشئ تقرير PDF يلخص بنية المشروع"
+"أنشئ جدول بيانات بنتائج الاختبارات"
+
+# مهام بحث
+"ابحث عن أحدث أفضل ممارسات أمان Node.js"
+"قارن بين PostgreSQL و MongoDB لحالتنا الاستخدامية"
+
+# مهام متصفح
+"تصفح https://example.com واستخرج كل العناوين"
+"املأ نموذج التواصل على الموقع"</code></pre>
+      <p style="margin-top:.75rem">سيقوم الوكيل بـ:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> تحليل طلبك وإنشاء خطة</li>
+        <li><strong>2.</strong> اختيار أفضل مزوّد ونموذج (حسب سياسة التوجيه لديك)</li>
+        <li><strong>3.</strong> تنفيذ كل خطوة، مستدعياً الأدوات عند الحاجة</li>
+        <li><strong>4.</strong> عرض النتائج عليك وطلب الموافقة على الإجراءات عالية التأثير</li>
+      </ol>
+    </div>
+
+    <div class="detail-card">
+      <h3>5. الاستكشاف</h3>
+      <p>الآن بعد أن أصبحت أول مهمة تعمل، استكشف هذه الميزات:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>المهارات</strong> — جرّب "استخدم مهارة البحث لـ..." أو "أنشئ جدول بيانات بـ..."</li>
+        <li><strong>خوادم MCP</strong> — ثبّت خوادم MCP من لوحة الإضافات لقدرات إضافية</li>
+        <li><strong>سياسات التوجيه</strong> — غيّر سياسة التوجيه من الإعدادات ← التوجيه</li>
+        <li><strong>المهام المجدولة</strong> — أنشئ مهاماً متكررة من صفحة المهام المجدولة</li>
+        <li><strong>واجهة الأوامر</strong> — ثبّت CLI للتحكم من الطرفية: <code>npm install -g @aura-work/cli</code></li>
+        <li><strong>أتمتة المتصفح</strong> — جرّب "تصفح هذا الموقع و..." لمهام الويب</li>
+        <li><strong>التحكم بالحاسوب</strong> — فعّل ميزة التحكم بالحاسوب التجريبية لأتمتة سطح المكتب</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الإعدادات</div>
+    <h2>الإعدادات الأساسية</h2>
+
+    <div class="detail-card">
+      <h3>🔀 سياسة التوجيه</h3>
+      <p>اضبط كيفية اختيار الوكيل للمزوّدين من <strong>الإعدادات ← التوجيه</strong>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>الجودة أولاً</strong> — يستخدم أفضل نموذج متاح (موصى به للمهام المهمة)</li>
+        <li><strong>التكلفة أولاً</strong> — يستخدم أرخص نموذج قادر على التعامل مع المهمة</li>
+        <li><strong>الخصوصية أولاً</strong> — يستخدم المزوّدين المحليين فقط (Ollama، LM Studio)</li>
+        <li><strong>محلي فقط</strong> — مثل الخصوصية أولاً، لكن بفرض أكثر صرامة</li>
+        <li><strong>يدوي</strong> — أنت تختار المزوّد لكل مهمة</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 الأذونات</h3>
+      <p>اضبط ما يمكن للوكيل فعله من <strong>الإعدادات ← الأذونات</strong>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>اسأل أولاً</strong> (افتراضي) — يسأل الوكيل قبل كل إجراء عالي التأثير</li>
+        <li><strong>قراءة فقط</strong> — يمكن للوكيل فقط قراءة الملفات، لا تعديلات</li>
+        <li><strong>وصول كامل</strong> — يمكن للوكيل فعل أي شيء (استخدم بحذر)</li>
+      </ul>
+      <p style="margin-top:.75rem">يمكنك أيضاً ضبط أذونات لكل فئة (ملفات، shell، متصفح، إلخ) وإنشاء ملفات تعريف مخصصة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🎨 الثيم</h3>
+      <p>اختر من بين أكثر من 35 ثيماً من <strong>الإعدادات ← عام ← الثيم</strong>. تشمل الخيارات الفاتح والداكن وAMOLED وثيمات فاخرة. ثيم <code>system</code> يطابق تلقائياً تفضيل نظام التشغيل لديك.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">استكشاف الأخطاء وإصلاحها</div>
+    <h2>مشاكل شائعة وحلولها</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المشكلة</th><th>الحل</th></tr></thead>
+      <tbody>
+        <tr><td>لا يبدأ التطبيق</td><td>تأكد من تحديث WebView2 (Windows) أو تثبيت متطلبات libwebkit2gtk (Linux)</td></tr>
+        <tr><td>فشل التحقق من مزوّد سحابي</td><td>تحقق من صحة مفتاح API ووجود رصيد كافٍ في حساب المزوّد</td></tr>
+        <tr><td>Ollama لا يظهر في القائمة</td><td>تأكد من تشغيل <code>ollama serve</code> وسحب نموذج واحد على الأقل</td></tr>
+        <tr><td>الخدمة المساعدة لا تستجيب</td><td>راجع الإعدادات ← التشخيص وأعد تشغيل الخدمة المتعطلة يدوياً</td></tr>
+        <tr><td>المهمة عالقة في "بانتظار الموافقة"</td><td>افتح لوحة الموافقات وراجع الإجراء المطلوب، أو غيّر ملف الأذونات</td></tr>
+      </tbody>
+    </table>
   </section>
   <section class="section">
     <div class="section-label">الخطوات التالية</div>
     <h2>التعمق أكثر</h2>
     <p>Read about <a href="providers.ar.html">المزوّدون</a>, <a href="routing.ar.html">التوجيه</a>, <a href="skills.ar.html">المهارات</a>, or <a href="architecture.ar.html">الهندسة</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
+  </section>
   <section class="section">
     <div class="section-label">التثبيت المتقدم</div>
-    <h2>خيارات التثبيت الاخرى</h2>
+    <h2>خيارات التثبيت الأخرى</h2>
     <div class="detail-card">
       <h3>باستخدام Homebrew (macOS و Linux)</h3>
       <pre><code>brew install aura-work</code></pre>
@@ -143,14 +272,13 @@ npm link</code></pre>
     <p style="margin-top:1rem">يتطلب Node.js 18+. يدعم Windows و macOS و Linux مع حزم منفصلة لكل منصة.</p>
   </section>
   <section class="section">
-    <div class="section-label">الاستخدام الاول</div>
-    <h2>تجربتك الاولى</h2>
-    <p>بعد التثبيت، جرب هذه الاوامر للتعرف على Aura Work:</p>
+    <div class="section-label">الاستخدام الأول</div>
+    <h2>تجربتك الأولى مع CLI</h2>
+    <p>بعد التثبيت، جرّب هذه الأوامر للتعرف على Aura Work:</p>
     <pre><code>aura --help
 aura --version
 aura config list
-aura --dry-run "انشئ مشروع Node.js جديد"</code></pre>
-  </section>
+aura --dry-run "أنشئ مشروع Node.js جديد"</code></pre>
   </section>
         </main>
        </div>

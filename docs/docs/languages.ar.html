@@ -108,6 +108,16 @@
       <div class="stat-card fade-in delay-2"><div class="num">2</div><div class="lbl">لغات من اليمين لليسار</div></div>
     </div>
     <p>Aura Work مبني لجمهور عالمي. نظام التدويل يستخدم فهارس TypeScript مصدرية تُنتج ملفات JSON متوافقة مع Weblate. إضافة لغة جديدة على بعد PR واحد.</p>
+
+    <h2 style="margin-top:2rem">لماذا يهم التدويل (i18n)</h2>
+    <p>يُستخدم Aura Work من قِبل مطورين حول العالم. من خلال دعم 20 لغة، نضمن ما يلي:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>سهولة الوصول</strong> — يمكن للمطورين استخدام الأداة بلغتهم الأم</li>
+      <li><strong>الشمولية</strong> — لغات الكتابة من اليمين لليسار (العربية، الفارسية) مدعومة بالكامل</li>
+      <li><strong>المجتمع</strong> — يمكن للمساهمين إضافة ترجمات للغتهم</li>
+      <li><strong>الانتشار العالمي</strong> — يمكن استخدام الأداة في أي بلد</li>
+    </ul>
+
     <div class="section-label">اللغات المدعومة</div>
     <div class="lang-grid"><a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/ar.json" class="lang-badge fade-in" style="animation: fadeIn .4s ease forwards">العربية <span class="rtl-mark">من اليمين</span></a>
 <a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/de.json" class="lang-badge fade-in" style="animation: fadeIn .4s ease forwards">Deutsch </a>
@@ -133,31 +143,91 @@
   <section class="section">
     <div class="section-label">الهندسة</div>
     <h2>كيف يعمل التدويل</h2>
-    <p>يستخدم Aura Work نهج تدويل TypeScript أولاً. فهارس الترجمة موجودة في packages/i18n/src/catalog.ts وتعرّف رموز اللغات والأسماء المحلية وعلامات RTL وتنسيقات التواريخ والأرقام.</p>
-    <div class="section-label">إضافة لغة جديدة</div>
-    <ul>
-      <li>أضف رمز لغتك إلى SUPPORTED_LOCALES</li>
-      <li>أنشئ ملف ترجمة JSON</li>
-      <li>فعّل RTL إذا كانت لغتك تكتب من اليمين لليسار</li>
-      <li>قدّم طلب سحب (PR)</li>
-    </ul>
-  <section class="section">
-    <div class="section-label">دعم RTL</div>
-    <h2>دعم اللغات من اليمين لليسار</h2>
-    <p>يدعم Aura Work اللغات من اليمين لليسار (RTL) مثل العربية والعبرية والفارسية بشكل كامل. يتم ضبط اتجاه النص تلقائيا وفقا لإعدادات اللغة المختارة. جميع مكونات TUI (القوائم، النوافذ، مربعات الحوار) تعكس تخطيطها بشكل صحيح عند استخدام لغة RTL.</p>
+    <p>يستخدم نظام التدويل هيكلية طبقية مبنية بـ TypeScript:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. كتالوج المصدر</strong> — سلاسل الترجمة تُعرَّف في <code>packages/i18n/src/catalog.ts</code> ككائن TypeScript مُنمَّط</li>
+      <li><strong>2. خطوة البناء</strong> — تشغيل <code>npm run build:locales</code> يُصدِر ملفات JSON إلى <code>packages/i18n/locales/</code></li>
+      <li><strong>3. التحميل وقت التشغيل</strong> — يكتشف التطبيق لغة النظام عند التشغيل الأول ويحمّل ملف JSON المناسب</li>
+      <li><strong>4. الرجوع الافتراضي</strong> — إذا كانت الترجمة مفقودة، يرجع النظام إلى الإنجليزية</li>
+    </ol>
+
     <div class="detail-card">
-      <h3>اللغات المدعومة حاليا</h3>
-      <p>الإنجليزية، العربية، الإسبانية، الفرنسية، الألمانية، الصينية، اليابانية، الكورية، البرتغالية، الروسية، الهندية، التركية. مع إمكانية إضافة المزيد عبر مساهمات المجتمع.</p>
+      <h3>🌐 إضافة لغة جديدة</h3>
+      <p>المساهمة بلغة جديدة عملية مباشرة:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> انسخ <code>packages/i18n/locales/en.json</code> إلى ملف جديد (مثلاً <code>hi.json</code> للهندية)</li>
+        <li><strong>2.</strong> ترجم القيم فقط — أبقِ جميع المفاتيح بالإنجليزية</li>
+        <li><strong>3.</strong> أضف لغتك إلى <code>SUPPORTED_LOCALES</code> في <code>packages/i18n/src/catalog.ts</code></li>
+        <li><strong>4.</strong> شغّل <code>npm run build:locales -w @aura-os/i18n</code></li>
+        <li><strong>5.</strong> اختبر ترجماتك في التطبيق</li>
+        <li><strong>6.</strong> أرسل طلب سحب (PR) بالتغييرات</li>
+      </ol>
+      <p style="margin-top:.75rem">يستخدم المشروع <a href="https://weblate.org" style="color:var(--color-accent)">Weblate</a> للترجمات المجتمعية. يمكنك المساهمة بالترجمات عبر Weblate أو مباشرة عبر PR.</p>
     </div>
+
     <div class="detail-card">
-      <h3>الترجمة الآلية</h3>
-      <p>يستخدم Aura Work نظام ترجمة مدمج يدعم الاستبدال السياقي (Contextual Replacement) مما يسمح بترجمة دقيقة حتى للجمل التي تحتوي على متغيرات ديناميكية مثل أسماء الملفات والنماذج.</p>
+      <h3>📐 دعم RTL</h3>
+      <p>تستخدم العربية والفارسية تخطيط <code>dir="rtl"</code>. يشمل دعم RTL:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>اتجاه التخطيط</strong> — تنعكس الواجهة بأكملها أفقياً</li>
+        <li><strong>محاذاة النص</strong> — يُحاذى النص لليمين</li>
+        <li><strong>التنقل</strong> — الشريط الجانبي والقوائم تعكس اتجاهها</li>
+        <li><strong>الطباعة</strong> — خطوط IBM Plex Sans Arabic و Tajawal</li>
+        <li><strong>الأيقونات</strong> — الأيقونات الاتجاهية تُعكس (الأسهم، الشيفرونات)</li>
+        <li><strong>الحركات</strong> — حركات الانزلاق تحترم اتجاه RTL</li>
+      </ul>
+      <p style="margin-top:.75rem">يتضمن نظام التصميم طباعة عربية صحيحة مع استبدال خطوط مدمج للمحتوى ثنائي اللغة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>المساهمة بلغة جديدة</h3>
-      <p>يمكن لأي شخص إضافة لغة جديدة. انسخ ملف <code>ar.json</code> في مجلد <code>src/i18n/</code>، وترجم القيم، وارفع PR. سنقوم بمراجعته ودمجه.</p>
+      <h3>🔧 مفاتيح الترجمة</h3>
+      <p>تتبع مفاتيح الترجمة هيكلية هرمية:</p>
+      <pre><code>{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك، {{name}}",
+    "stats": {
+      "tasks": "المهام",
+      "projects": "المشاريع"
+    }
+  },
+  "errors": {
+    "network": "خطأ في الشبكة. يرجى التحقق من الاتصال.",
+    "auth": "فشلت المصادقة. يرجى تسجيل الدخول مجدداً."
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">استخدم الترميز النقطي للإشارة للمفاتيح: <code>t('dashboard.stats.tasks')</code>. المتغيرات تُحاط بأقواس معقوفة مزدوجة: <code>{{name}}</code>.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 أفضل ممارسات الترجمة</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>أبقِ المفاتيح بالإنجليزية</strong> — ترجم القيم فقط</li>
+        <li><strong>استخدم العناصر النائبة</strong> — للمحتوى الديناميكي (مثل <code>{{count}}</code>)</li>
+        <li><strong>راعِ السياق</strong> — بعض الكلمات لها ترجمات مختلفة حسب السياق</li>
+        <li><strong>اختبر جيداً</strong> — تحقق من فيض النص ومشاكل المحاذاة</li>
+        <li><strong>استخدم Weblate</strong> — للترجمات المجتمعية والاتساق</li>
+        <li><strong>راجع الترجمات الموجودة</strong> — تفقد <code>en.json</code> للقائمة الكاملة</li>
+      </ul>
     </div>
   </section>
+  <section class="section">
+    <div class="section-label">المساهمة</div>
+    <h2>كيف تساهم بلغة جديدة</h2>
+    <p>يمكن لأي شخص إضافة لغة جديدة إلى Aura Work. العملية بسيطة ومفتوحة للجميع:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> افتح نقاشاً أو مشكلة (issue) على GitHub لإعلام الفريق برغبتك بإضافة لغة</li>
+      <li><strong>2.</strong> اتبع دليل "إضافة لغة جديدة" أعلاه لإنشاء ملف الترجمة</li>
+      <li><strong>3.</strong> استخدم أدوات الترجمة الآلية كنقطة بداية، ثم راجعها يدوياً لضمان الدقة والسياق الثقافي</li>
+      <li><strong>4.</strong> اختبر لغتك في جميع صفحات التطبيق للتأكد من عدم وجود نصوص مقطوعة</li>
+      <li><strong>5.</strong> أرسل طلب السحب وانتظر مراجعة الفريق</li>
+    </ol>
+    <p style="margin-top:.75rem">جميع المساهمات مُقدَّرة، سواء كانت ترجمة كاملة أو تصحيحات بسيطة على ترجمات موجودة.</p>
   </section>
         </main>
        </div>

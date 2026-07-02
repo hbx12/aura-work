@@ -105,9 +105,115 @@
   <section class="section">
     <div class="stats-bar">
       <div class="stat-card fade-in delay-1"><div class="num">18</div><div class="lbl">إجمالي المهارات</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">26</div><div class="lbl">الفئات</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">2</div><div class="lbl">مخاطرة منخفضة</div></div>
     </div>
-    <p>مهارات الوكيل هي قدرات قابلة لإعادة الاستخدام مسجلة كتعريفات JSON في registry/skills/. كل مهارة تعلن أدواتها ومستوى المخاطرة. يمكن للوكيل استدعاء المهارات وتكون معزولة بنظام الأذونات.</p>
-    
+    <p>المهارات هي آلية التوسّع الأساسية في Aura Work. كل مهارة هي <strong>بيان JSON مُرقّم بإصدار</strong> يحدد قدرة معينة يمكن للوكيل استخدامها — من إنشاء المستندات وجداول البيانات إلى أتمتة المتصفحات وتحليل البيانات. تُنشر المهارات في السجل ضمن <code>registry/skills/</code> ويمكن تثبيتها من السوق.</p>
+
+    <h2 style="margin-top:2rem">ما هي المهارة؟</h2>
+    <p>المهارة قدرة وكيل قائمة بذاتها تتضمن:</p>
+    <ul style="padding-right:1.25rem;margin-bottom:1.5rem;line-height:2">
+      <li><strong>الهوية</strong> — معرّف فريد واسم وإصدار وناشر</li>
+      <li><strong>الفئات</strong> — وسوم للتصفية (مستندات، كود، بيانات، متصفح، إلخ)</li>
+      <li><strong>الأدوات</strong> — الدوال الفعلية التي يمكن للوكيل استدعاؤها</li>
+      <li><strong>الأذونات</strong> — ما تحتاج المهارة للوصول إليه (ملفات، shell، متصفح، إلخ)</li>
+      <li><strong>مستوى المخاطرة</strong> — منخفض أو متوسط أو عالٍ حسب الأذونات المطلوبة</li>
+      <li><strong>تعليمات التثبيت</strong> — كيفية إعداد المهارة</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 كيف تعمل المهارات</h3>
+      <p>عندما تطلب من الوكيل تنفيذ مهمة، يحلل طلبك ويحدد المهارات المطلوبة. ثم يحمّل الوكيل بيان المهارة، يفحص الأذونات، وينفذ الأدوات المطلوبة. كل استدعاء أداة يمر عبر بوابة الأذونات — إذا احتاجت المهارة وصولاً للملفات أو أوامر shell، سيُطلب منك الموافقة (ما لم يكن ملف التعريف مضبوطاً على السماح التلقائي).</p>
+      <p style="margin-top:.75rem">المهارات <strong>معزولة (sandboxed)</strong> — يمكنها الوصول فقط لما يعلنه بيانها. مهارة المستندات لا يمكنها تنفيذ أوامر shell ما لم يُمنح ذلك صراحة. هذا يضمن الأمان حتى مع مهارات الطرف الثالث من السوق.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 استخدام المهارات</h3>
+      <p>تُستخدم المهارات تلقائياً عند تفاعلك مع الوكيل. على سبيل المثال:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>"أنشئ تقرير PDF"</strong> ← يستخدم الوكيل مهارة <code>aura-pdf</code></li>
+        <li><strong>"حلّل هذا الجدول"</strong> ← يستخدم الوكيل مهارة <code>aura-spreadsheets</code></li>
+        <li><strong>"تصفح هذا الموقع واستخرج البيانات"</strong> ← يستخدم الوكيل مهارة <code>aura-browser-assistant</code></li>
+        <li><strong>"حوّل هذه الصورة إلى WebP"</strong> ← يستخدم الوكيل مهارة <code>aura-file-converter</code></li>
+      </ul>
+      <p style="margin-top:.75rem">يمكنك أيضاً طلب مهارة باسمها صراحة: <code>"استخدم مهارة البحث للعثور على معلومات حول..."</code></p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 صيغة بيان المهارة</h3>
+      <p>تُعرَّف كل مهارة في ملف JSON بهذا الهيكل:</p>
+      <pre><code>{
+  "id": "aura-documents",
+  "name": "Documents",
+  "version": "1.0.0",
+  "summary": "إنشاء وتحرير وتنسيق المستندات",
+  "description": "معالجة مستندات كاملة تشمل...",
+  "publisher": "aura-work",
+  "categories": ["documents", "productivity"],
+  "risk": "low",
+  "permissions": [
+    { "category": "file", "action": "write", "target": "*.md" }
+  ],
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "إنشاء مستند جديد",
+      "parameters": {
+        "title": { "type": "string", "required": true },
+        "format": { "type": "string", "enum": ["md", "txt", "docx"] }
+      }
+    }
+  ],
+  "install": {
+    "command": "npm install",
+    "workingDir": "skills/documents"
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏗️ إنشاء مهارات مخصصة</h3>
+      <p>يمكنك إنشاء مهاراتك الخاصة باتباع هذه الخطوات:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> أنشئ ملف JSON جديد في <code>registry/skills/</code></li>
+        <li><strong>2.</strong> عرّف هوية المهارة (معرّف، اسم، إصدار، ناشر)</li>
+        <li><strong>3.</strong> أضف الفئات وحدد مستوى المخاطرة</li>
+        <li><strong>4.</strong> صرّح بالأذونات المطلوبة (ملفات، shell، متصفح، إلخ)</li>
+        <li><strong>5.</strong> عرّف الأدوات مع معاملاتها وأوصافها</li>
+        <li><strong>6.</strong> أضف تعليمات التثبيت إذا لزم</li>
+        <li><strong>7.</strong> تحقق باستخدام <code>node scripts/validate-marketplace-manifests.js</code></li>
+        <li><strong>8.</strong> أرسل طلب سحب (PR) إلى السجل</li>
+      </ol>
+      <p style="margin-top:.75rem">راجع <code>registry/skills/aura-documents.json</code> كمثال كامل.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📊 شرح مستويات المخاطرة</h3>
+      <p>كل مهارة لها مستوى مخاطرة حسب الأذونات المطلوبة:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>المستوى</th><th>الوصف</th><th>مثال</th></tr></thead>
+        <tbody>
+          <tr><td><code>low</code></td><td>وصول للقراءة فقط، بدون آثار جانبية</td><td>البحث، تحليل البيانات</td></tr>
+          <tr><td><code>medium</code></td><td>كتابة الملفات، طلبات الشبكة</td><td>إنشاء المستندات، أتمتة المتصفح</td></tr>
+          <tr><td><code>high</code></td><td>تنفيذ shell، وصول للنظام</td><td>الأتمتة، عمليات الآلة الافتراضية</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">المهارات عالية المخاطرة تتطلب موافقة صريحة في وضع <code>ask-first</code>. يمكنك ضبط الموافقة التلقائية لفئات معينة من الإعدادات ← الأذونات.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏪 السوق (Marketplace)</h3>
+      <p>يجمّع السوق (<code>registry/marketplace.json</code>) المهارات وخوادم MCP والإضافات. كل إدخال يشمل:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>أوصاف مترجمة</strong> — متوفرة بـ 20 لغة</li>
+        <li><strong>أيقونات وصور غلاف</strong> — أصول SVG في <code>registry/assets/</code></li>
+        <li><strong>سجل الإصدارات</strong> — للتحديثات والتراجع</li>
+        <li><strong>توثيق الناشر</strong> — مهارات رسمية مقابل مهارات مجتمعية</li>
+        <li><strong>معلومات التوافق</strong> — الحد الأدنى لإصدار Aura Work المطلوب</li>
+      </ul>
+      <p style="margin-top:.75rem">ثبّت المهارات من لوحة الإضافات في تطبيق سطح المكتب أو استخدم CLI: <code>aura skill install &lt;skill-id&gt;</code></p>
+    </div>
+
     <div class="section-label">تصفية حسب الفئة</div>
     <div class="skills-filter">
       <button class="filter-btn active" onclick="filterSkills('all')">الكل</button>
@@ -124,6 +230,7 @@
           <span>الأتمتة، Workflow، Productivity</span>
         </div>
         <p>Plan and run repeatable workflows, reminders, monitors, and connector actions.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>automation_create_task</code> <code>automation_schedule</code> <code>automation_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-2" data-category="Browser,Web,Automation">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Browser Assistant</h3>
@@ -133,6 +240,7 @@
           <span>Browser، Web، الأتمتة</span>
         </div>
         <p>Read pages, extract tables, verify websites, and plan safe browser workflows.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>browser_read_page</code> <code>browser_extract_table</code> <code>browser_verify_page</code></div>
       </div>
 <div class="detail-card fade-in delay-3" data-category="Business,Documents,Productivity">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Business Kit</h3>
@@ -142,6 +250,7 @@
           <span>Business، Documents، Productivity</span>
         </div>
         <p>Create business plans, policies, proposals, operations docs, and KPI reports.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>business_brief</code> <code>kpi_report</code> <code>business_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-4" data-category="Dashboards,Data,Design">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Dashboard Builder</h3>
@@ -151,6 +260,7 @@
           <span>Dashboards، البيانات، التصميم</span>
         </div>
         <p>Create dashboard specs, HTML previews, metrics tables, and reporting layouts.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>dashboard_plan</code> <code>dashboard_create_html</code> <code>dashboard_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-1" data-category="Data,Analytics,Business">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Data Analyst</h3>
@@ -160,6 +270,7 @@
           <span>البيانات، Analytics، Business</span>
         </div>
         <p>Profile, clean, transform, chart, and explain datasets.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>data_profile</code> <code>data_clean</code> <code>data_export_report</code></div>
       </div>
 <div class="detail-card fade-in delay-2" data-category="Database,Data,Business">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Database Analyst</h3>
@@ -169,6 +280,7 @@
           <span>Database، البيانات، Business</span>
         </div>
         <p>Inspect schemas, write safe queries, explain plans, and export database reports.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>database_schema_inspect</code> <code>database_query</code> <code>database_export_report</code></div>
       </div>
 <div class="detail-card fade-in delay-3" data-category="Design,Productivity,Marketing">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Design Studio</h3>
@@ -178,6 +290,7 @@
           <span>التصميم، Productivity، التسويق</span>
         </div>
         <p>Create UI mockups, HTML previews, dashboards, landing pages, and design systems.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>design_create_html</code> <code>design_update_html</code> <code>design_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-4" data-category="Documents,Productivity,Business">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Documents</h3>
@@ -187,6 +300,7 @@
           <span>Documents، Productivity، Business</span>
         </div>
         <p>Create and edit document-style files, reports, letters, resumes, and policies.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>document_create</code> <code>document_edit</code> <code>document_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-1" data-category="Files,Conversion,Productivity">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura File Converter</h3>
@@ -196,6 +310,7 @@
           <span>Files، Conversion، Productivity</span>
         </div>
         <p>Convert content between Markdown, CSV, HTML, text, and report formats.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>format_infer</code> <code>convert_content</code> <code>verify_output</code></div>
       </div>
 <div class="detail-card fade-in delay-2" data-category="Forms,Business,Productivity">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Forms</h3>
@@ -205,6 +320,7 @@
           <span>Forms، Business، Productivity</span>
         </div>
         <p>Create forms, surveys, intake sheets, checklists, and response templates.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>form_create</code> <code>form_export</code> <code>form_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-3" data-category="Images,Design,Marketing">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Image Studio</h3>
@@ -214,6 +330,7 @@
           <span>Images، التصميم، التسويق</span>
         </div>
         <p>Create image briefs, banners, icons, SVG concepts, and visual asset plans.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>image_create_brief</code> <code>image_export_svg</code> <code>image_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-4" data-category="PDF,Documents,Research">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura PDF</h3>
@@ -223,6 +340,7 @@
           <span>PDF، Documents، البحث الاستقصائي</span>
         </div>
         <p>Summarize, search, convert, and extract structured notes from PDF files.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>pdf_extract_text</code> <code>pdf_extract_tables</code> <code>pdf_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-1" data-category="Presentations,Design,Business">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Presentations</h3>
@@ -232,6 +350,7 @@
           <span>Presentations، التصميم، Business</span>
         </div>
         <p>Plan and create presentation storylines, slide outlines, and deck-ready files.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>presentation_create_storyline</code> <code>presentation_create_deck_outline</code> <code>presentation_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-2" data-category="Research,Web,Business">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Research</h3>
@@ -241,6 +360,7 @@
           <span>البحث الاستقصائي، Web، Business</span>
         </div>
         <p>Research, compare, verify sources, and create cited reports.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>research_plan</code> <code>source_quality_check</code> <code>research_create_report</code></div>
       </div>
 <div class="detail-card fade-in delay-3" data-category="Spreadsheets,Data,Productivity">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Spreadsheets</h3>
@@ -250,6 +370,7 @@
           <span>Spreadsheets، البيانات، Productivity</span>
         </div>
         <p>Build spreadsheet-style tables, budgets, CSV files, formulas, and analysis reports.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>spreadsheet_create_table</code> <code>spreadsheet_set_formula</code> <code>spreadsheet_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-4" data-category="Study,Documents,Productivity">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">A</span> Aura Study Kit</h3>
@@ -259,6 +380,7 @@
           <span>Study، Documents، Productivity</span>
         </div>
         <p>Create study notes, lesson plans, quizzes, flashcards, and learning reports.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>study_notes</code> <code>quiz_create</code> <code>study_verify</code></div>
       </div>
 <div class="detail-card fade-in delay-1" data-category="Development,Utility">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">G</span> Git Master</h3>
@@ -268,6 +390,7 @@
           <span>تطوير، الأدوات المساعدة</span>
         </div>
         <p>AI Git expert to write structured commit messages, review diffs, and manage releases.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>analyze_diff</code> <code>audit_pre_commit</code> <code>generate_changelog</code></div>
       </div>
 <div class="detail-card fade-in delay-2" data-category="Security,Quality">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#7a5c8e;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">S</span> Security Auditor</h3>
@@ -277,8 +400,10 @@
           <span>الأمان، Quality</span>
         </div>
         <p>Reviews your codebase for defensive security improvements.</p>
+        <div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> <code>scan_file</code> <code>scan_directory</code></div>
       </div>
     </div>
+  </section>
   <section class="section">
     <div class="section-label">مهارات مدمجة</div>
     <h2>المهارات الاساسية</h2>
@@ -286,7 +411,6 @@
       <h3>web-search</h3>
       <p>يبحث في الويب ويستخرج معلومات حديثة مع روابط المصادر. يدعم محركات بحث متعددة.</p>
     </div>
-  </section>
   </section>
         </main>
        </div>

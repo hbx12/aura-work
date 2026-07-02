@@ -106,6 +106,37 @@
     <div class="stats-bar">
       <div class="stat-card fade-in delay-1"><div class="num">5</div><div class="lbl">سياسات التوجيه</div></div>
     </div>
+    <p>محرك التوجيه هو عقل عملية اختيار المزوّد في Aura Work. يقيّم كل مهمة بناءً على نوعها وحساسيتها والقدرات المطلوبة وسياستك المُعدّة لاختيار النموذج الأمثل. هذا يضمن حصولك دائماً على أفضل النتائج مع التحكم في التكلفة والخصوصية.</p>
+
+    <h2 style="margin-top:2rem">كيف يعمل التوجيه</h2>
+    <p>عند إرسال طلب، يقوم محرك التوجيه بـ:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. تحليل المهمة</strong> — يحدد إذا كانت برمجة، بحثاً، عمل مستندات، تحليل بيانات، أتمتة متصفح، إلخ</li>
+      <li><strong>2. فحص القدرات</strong> — هل تحتاج المهمة رؤية؟ استدعاء أدوات؟ سياقاً طويلاً؟ تفكيراً معقداً؟</li>
+      <li><strong>3. تقييم الحساسية</strong> — هل البيانات عادية أم حساسة أم عالية المخاطر؟</li>
+      <li><strong>4. تطبيق سياستك</strong> — الجودة أولاً، التكلفة أولاً، الخصوصية أولاً، محلي فقط، أو يدوي</li>
+      <li><strong>5. اختيار النموذج</strong> — يختار أفضل توليفة مزوّد + نموذج</li>
+      <li><strong>6. إرجاع قرار</strong> — يشمل النموذج المختار والتكلفة المقدرة ومستوى الثقة</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>📊 أنواع المهام</h3>
+      <p>يتعرف محرك التوجيه على أنواع المهام التالية:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>النوع</th><th>الوصف</th><th>أفضل المزوّدين</th></tr></thead>
+        <tbody>
+          <tr><td><code>coding</code></td><td>توليد الكود، إعادة الهيكلة، تصحيح الأخطاء</td><td>Anthropic، DeepSeek، OpenAI</td></tr>
+          <tr><td><code>research</code></td><td>جمع المعلومات، التحليل</td><td>OpenAI، Gemini، Anthropic</td></tr>
+          <tr><td><code>document</code></td><td>الكتابة، التحرير، التنسيق</td><td>OpenAI، Anthropic، Gemini</td></tr>
+          <tr><td><code>data</code></td><td>تحليل البيانات، عمل جداول البيانات</td><td>OpenAI، Gemini، DeepSeek</td></tr>
+          <tr><td><code>browser</code></td><td>تصفح الويب، ملء النماذج</td><td>OpenAI، Anthropic (رؤية)</td></tr>
+          <tr><td><code>review</code></td><td>مراجعة الكود، الملاحظات</td><td>Anthropic، OpenAI</td></tr>
+          <tr><td><code>security</code></td><td>تحليل الأمان، كشف الثغرات</td><td>Anthropic، OpenAI</td></tr>
+          <tr><td><code>general</code></td><td>محادثة عامة، أسئلة وأجوبة</td><td>أي مزوّد</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;background:#c2683f;color:#fff;font-size:.625rem;font-family:var(--font-mono);flex-shrink:0">1</span> الجودة أولاً</h3>
         <p>يعطي الأولوية للنموذج الأكثر قدرة لكل مهمة بغض النظر عن التكلفة.</p>
@@ -126,6 +157,7 @@
         <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;background:#4b5bb0;color:#fff;font-size:.625rem;font-family:var(--font-mono);flex-shrink:0">5</span> يدوي</h3>
         <p>يختار المستخدم المزوّد والنموذج يدوياً لكل جلسة. لا توجيه تلقائي.</p>
       </div>
+  </section>
   <section class="section">
     <div class="section-label">استراتيجيات التوجيه</div>
     <h2>خمس استراتيجيات توجيه</h2>
@@ -150,6 +182,77 @@
       <p>تحدد المزود والنموذج يدويا لكل طلب: <code>aura --provider openai --model gpt-4o</code></p>
     </div>
   </section>
+  <section class="section">
+    <div class="section-label">التكلفة والخصوصية</div>
+    <h2>تحسين التكلفة</h2>
+    <p>لتقليل تكاليف الذكاء الاصطناعي دون التضحية بالجودة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>استخدم سياسة التكلفة أولاً</strong> للمهام الروتينية اليومية (تنسيق، بحث بسيط، أسئلة)</li>
+      <li><strong>خصّص سياسة لكل مشروع</strong> — مشاريع الإنتاج تستخدم الجودة أولاً، بينما التجارب تستخدم التكلفة أولاً</li>
+      <li><strong>راقب استخدام الرموز</strong> من لوحة التحكم لاكتشاف الأنماط المكلفة مبكراً</li>
+      <li><strong>استخدم Ollama محلياً</strong> للتطوير والاختبار المتكرر بدون أي تكلفة</li>
+      <li><strong>عيّن حدود تكلفة صارمة</strong> لكل مهمة أو لكل يوم لمنع الفواتير غير المتوقعة</li>
+    </ul>
+
+    <h2 style="margin-top:2rem">التوجيه القائم على الخصوصية</h2>
+    <p>عند التعامل مع كود ملكية خاصة أو بيانات حساسة أو معلومات شخصية، سياسة <strong>الخصوصية أولاً</strong> تضمن عدم مغادرة أي بيانات لجهازك أبداً:</p>
+    <div class="detail-card">
+      <h3>🔒 كيف تعمل الخصوصية أولاً</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li>يحلل محرك التوجيه حساسية البيانات في كل طلب (كلمات مرور، مفاتيح، بيانات شخصية)</li>
+        <li>إذا اكتُشفت حساسية عالية، يُقصر التوجيه على المزوّدين المحليين فقط</li>
+        <li>إذا لم يتوفر مزوّد محلي، تفشل المهمة بدلاً من إرسال بيانات حساسة للسحابة</li>
+        <li>يمكنك فرض هذا السلوك دائماً عبر سياسة <strong>محلي فقط</strong> بغض النظر عن الحساسية المكتشفة</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الإعدادات</div>
+    <h2>إعداد التوجيه</h2>
+    <p>اضبط سياسة التوجيه من <strong>الإعدادات ← التوجيه</strong>:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> اختر سياستك الافتراضية (تُطبَّق على جميع المهام ما لم تُستبدل)</li>
+      <li><strong>2.</strong> اضبط سياسات لكل مشروع اختيارياً (تجاوز لمشاريع معينة)</li>
+      <li><strong>3.</strong> اضبط مزوّدين احتياطيين (ماذا تستخدم إذا فشل الأساسي)</li>
+      <li><strong>4.</strong> عيّن حدود تكلفة (أقصى رموز/تكلفة لكل مهمة)</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>💡 متى تستخدم كل سياسة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>السياسة</th><th>الأفضل لـ</th><th>المقايضات</th></tr></thead>
+        <tbody>
+          <tr><td><strong>الجودة أولاً</strong></td><td>مهام مهمة، كود إنتاجي، عمل العملاء</td><td>تكلفة أعلى، أبطأ</td></tr>
+          <tr><td><strong>التكلفة أولاً</strong></td><td>مهام روتينية، تطوير، اختبار</td><td>قد يستخدم نماذج أضعف</td></tr>
+          <tr><td><strong>الخصوصية أولاً</strong></td><td>بيانات حساسة، كود ملكية خاصة، معلومات شخصية</td><td>محدود بالنماذج المحلية</td></tr>
+          <tr><td><strong>محلي فقط</strong></td><td>عمل بدون اتصال، بيئات معزولة تماماً</td><td>يتطلب معدات محلية</td></tr>
+          <tr><td><strong>يدوي</strong></td><td>التعلم، مقارنة المزوّدين، احتياجات نموذج محدد</td><td>سير عمل أبطأ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 سلسلة التراجع (Fallback)</h3>
+      <p>إذا فشل المزوّد الأساسي، يحاول محرك التوجيه البدائل:</p>
+      <pre><code>// مثال على إعداد التراجع
+{
+  "routing": {
+    "policy": "quality-first",
+    "fallback": [
+      "anthropic/claude-3-5-sonnet",
+      "openai/gpt-4o",
+      "deepseek/deepseek-coder",
+      "ollama/llama3"
+    ],
+    "maxRetries": 3,
+    "costLimit": {
+      "perTask": 0.50,
+      "perDay": 10.00
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">يحاول المحرك كل بديل بالترتيب حتى ينجح أحدها. إذا فشلت جميعها، يُعلمك ويطلب تدخلاً يدوياً.</p>
+    </div>
   </section>
         </main>
        </div>

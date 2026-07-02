@@ -109,6 +109,16 @@
       <div class="stat-card fade-in delay-3"><div class="num">3</div><div class="lbl">المزوّدون المحليون</div></div>
     </div>
     <p>يدعم Aura Work 10 مزوّدي ذكاء اصطناعي تشمل النماذج السحابية والمحلية. كل مزوّد له محول خاص يدير المصادقة واكتشاف النماذج. المزوّدون المحليون لا يرسلون بيانات خارج جهازك أبداً.</p>
+
+    <h2 style="margin-top:2rem">ما هي المزوّدات؟</h2>
+    <p>المزوّدات هي الجسر بين Aura Work ونماذج الذكاء الاصطناعي. كل مزوّد ينفّذ واجهة موحدة تتعامل مع:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>المصادقة</strong> — مفاتيح API، رموز OAuth، أو اتصالات محلية</li>
+      <li><strong>اكتشاف النماذج</strong> — اكتشاف تلقائي للنماذج المتوفرة</li>
+      <li><strong>إكمالات المحادثة</strong> — إرسال الطلبات واستلام الردود</li>
+      <li><strong>تتبع الاستخدام</strong> — عدّ الرموز (tokens) وتقدير التكلفة</li>
+    </ul>
+
     <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c48b5c;flex-shrink:0"></span> Aura Cloud Models</h3>
         <div class="meta">
@@ -116,6 +126,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج مستضافة عبر API Aura. تشمل Aura Fast و Aura Coder و Aura Premium.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 سجّل الدخول بحساب Aura Cloud من الإعدادات ← المزوّدون ← Aura Cloud. لا حاجة لمفتاح API منفصل — يتم استخدام رمز الجلسة المرتبط بحسابك.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> Anthropic</h3>
@@ -124,6 +135,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>Claude Sonnet 4 و Claude 3.5 Haiku. قدرات استدلال وتوليد كود ورؤية من الطراز الأول.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من console.anthropic.com، ثم الصقه في الإعدادات ← المزوّدون ← Anthropic واضغط 'تحقق'.</p>
       </div>
 <div class="detail-card fade-in delay-3">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1a7f64;flex-shrink:0"></span> OpenAI</h3>
@@ -132,6 +144,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>GPT-4o و GPT-4o mini. نماذج لغوية معيارية مع دعم واسع لاستدعاء الأدوات.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من platform.openai.com/api-keys. يدعم أيضاً حسابات GitHub Copilot عبر تسجيل الدخول بـ OAuth.</p>
       </div>
 <div class="detail-card fade-in delay-4">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#3a6fc4;flex-shrink:0"></span> Google Gemini</h3>
@@ -140,6 +153,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>Gemini 2.0 Flash و Gemini 2.5 Pro. استدلال قوي مع نوافذ سياق ضخمة.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من Google AI Studio (aistudio.google.com)، ثم أضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> DeepSeek</h3>
@@ -148,6 +162,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>DeepSeek V3 و R1. نماذج فعالة من حيث التكلفة مع استدلال تنافسي.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من platform.deepseek.com. الأسعار منخفضة جداً مقارنة بالمزودين الآخرين.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#7a5c8e;flex-shrink:0"></span> Ollama</h3>
@@ -156,6 +171,7 @@
           <span class="local-badge yes">محلي</span>
         </div>
         <p>محلي بالكامل. شغّل أي نموذج من مكتبة Ollama. لا حاجة لمفتاح API ولا تغادر بياناتك جهازك.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 ثبّت Ollama من ollama.ai، شغّل <code>ollama serve</code>، ثم اسحب نموذجاً بـ <code>ollama pull llama3</code>. لا حاجة لمفتاح API.</p>
       </div>
 <div class="detail-card fade-in delay-3">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1988a2;flex-shrink:0"></span> OpenAI Compatible</h3>
@@ -164,6 +180,7 @@
           <span class="local-badge yes">محلي</span>
         </div>
         <p>نقاط نهاية مخصصة تحاكي واجهة OpenAI. استخدم مع أي خدمة متوافقة.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أدخل عنوان URL الأساسي (base URL) للخادم المتوافق مع OpenAI، ومفتاح API إن وجد.</p>
       </div>
 <div class="detail-card fade-in delay-4">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a9761f;flex-shrink:0"></span> Minimax</h3>
@@ -172,6 +189,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج Minimax. مفتاح API مطلوب.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من منصة Minimax الرسمية وأضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a855f7;flex-shrink:0"></span> Qwen</h3>
@@ -180,6 +198,7 @@
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج Qwen (Plus و Turbo). مفتاح API مطلوب.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من منصة Alibaba Cloud DashScope وأضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#e05c2b;flex-shrink:0"></span> LM Studio</h3>
@@ -188,14 +207,43 @@
           <span class="local-badge yes">محلي</span>
         </div>
         <p>محلي بالكامل. اتصل بخادم LM Studio المحلي. لا حاجة لمفتاح API.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 ثبّت LM Studio من lmstudio.ai، حمّل نموذجاً، وشغّل الخادم المحلي من تبويب 'Local Server'. لا حاجة لمفتاح API.</p>
       </div>
+  </section>
+  <section class="section">
+    <div class="section-label">مقارنة</div>
+    <h2>محلي مقابل سحابي</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المعيار</th><th>مزوّدات محلية</th><th>مزوّدات سحابية</th></tr></thead>
+      <tbody>
+        <tr><td><strong>الخصوصية</strong></td><td>كاملة — لا تغادر البيانات جهازك</td><td>تُرسل الطلبات لخوادم المزوّد</td></tr>
+        <tr><td><strong>التكلفة</strong></td><td>مجانية بعد التثبيت</td><td>دفع لكل رمز (token) مستخدم</td></tr>
+        <tr><td><strong>الجودة</strong></td><td>جيدة، تعتمد على قوة جهازك</td><td>الأفضل عادةً (نماذج ضخمة)</td></tr>
+        <tr><td><strong>السرعة</strong></td><td>تعتمد على معدات الجهاز (GPU/CPU)</td><td>سريعة عادةً مع بنية تحتية قوية</td></tr>
+        <tr><td><strong>الاتصال بالإنترنت</strong></td><td>غير مطلوب</td><td>مطلوب</td></tr>
+        <tr><td><strong>الأفضل لـ</strong></td><td>بيانات حساسة، عمل بدون اتصال، توفير التكلفة</td><td>مهام معقدة، أفضل جودة ممكنة</td></tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:2rem">اختيار النموذج المناسب</h2>
+    <div class="detail-card">
+      <h3>🎯 دليل اختيار النموذج</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>للبرمجة المعقدة</strong> — Claude Sonnet 4 أو GPT-4o أو DeepSeek R1 (تفكير متقدم)</li>
+        <li><strong>للمهام السريعة/البسيطة</strong> — Claude 3.5 Haiku أو GPT-4o mini أو Gemini 2.0 Flash</li>
+        <li><strong>للسياق الطويل جداً</strong> — Gemini 2.5 Pro (نافذة سياق ضخمة)</li>
+        <li><strong>للخصوصية القصوى</strong> — أي نموذج عبر Ollama أو LM Studio</li>
+        <li><strong>لأقل تكلفة ممكنة</strong> — DeepSeek V3 أو نموذج محلي عبر Ollama</li>
+      </ul>
+    </div>
+  </section>
   <section class="section">
     <div class="section-label">نظرة عامة على المزودين</div>
     <h2>المزودون المدعومون</h2>
     <p>يدعم Aura Work 10 مزودين لضمان المرونة القصوى. لكل مزود نقاط قوته:</p>
     <div class="detail-card">
       <h3>السحابيون (Cloud)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>OpenAI</strong> - GPT-4o, GPT-4.5, o1, o3. أداء متميز في البرمجة والتحليل</li>
         <li><strong>Anthropic</strong> - Claude Opus, Sonnet, Haiku. سياق طويل ورؤية حاسوبية</li>
         <li><strong>Google Gemini</strong> - Gemini 2.5 Pro, Flash. متعدد الوسائط ونماذج خفيفة</li>
@@ -205,10 +253,43 @@
     </div>
     <div class="detail-card">
       <h3>المحليون (Local)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>Ollama</strong> - LLama, Mistral, Gemma, Qwen. خصوصية كاملة</li>
         <li><strong>LM Studio</strong> - واجهة رسومية لتشغيل النماذج محليا</li>
         <li><strong>LocalAI</strong> - OpenAI-compatible API محلية</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الأمان والموثوقية</div>
+    <h2>حماية بيانات الاعتماد</h2>
+    <p>تُشفَّر مفاتيح API باستخدام الخزنة المرتبطة بالجهاز قبل التخزين. تستخدم الخزنة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Windows</strong> — DPAPI (واجهة حماية البيانات)</li>
+      <li><strong>macOS</strong> — Keychain</li>
+      <li><strong>Linux</strong> — Secret Service (GNOME Keyring / KWallet)</li>
+    </ul>
+    <p style="margin-top:.75rem">بيانات الاعتماد لا تُسجَّل أبداً، ولا تُعرَض للوكيل، ولا تُدرَج في سجلات التدقيق.</p>
+
+    <div class="detail-card">
+      <h3>🔄 التراجع وإعادة المحاولة</h3>
+      <p>إذا فشل مزوّد، يمكن لـ Aura Work إعادة المحاولة تلقائياً مع بديل:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> يفشل المزوّد الأساسي (حد المعدل، مهلة، خطأ)</li>
+        <li><strong>2.</strong> يفحص النظام عن مزوّدين احتياطيين في إعداداتك</li>
+        <li><strong>3.</strong> إذا وُجد احتياطي، يعيد المحاولة مع المزوّد البديل</li>
+        <li><strong>4.</strong> إذا لم يوجد احتياطي، يُعلمك ويطلب تدخلاً يدوياً</li>
+      </ol>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 نصائح لتحسين التكلفة</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>استخدم سياسة التكلفة أولاً</strong> للمهام الروتينية</li>
+        <li><strong>أعدّ Ollama</strong> للتطوير والاختبار (مجاني)</li>
+        <li><strong>استخدم DeepSeek</strong> لمهام الكود (أرخص من OpenAI/Anthropic)</li>
+        <li><strong>راقب الاستخدام</strong> في لوحة التحكم لتحديد الأنماط المكلفة</li>
+        <li><strong>عيّن حدوداً للرموز</strong> لكل مهمة لمنع التكاليف المتزايدة</li>
       </ul>
     </div>
   </section>
@@ -222,7 +303,6 @@ aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
     <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
 aura config set providers.ollama.model llama3.2</code></pre>
     <p>كل المفاتيح تخزن مشفرة باستخدام تشفير على مستوى النظام (Keytar على macOS، DPAPI على Windows، libsecret على Linux).</p>
-  </section>
   </section>
         </main>
        </div>

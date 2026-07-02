@@ -109,8 +109,22 @@
       <div class="stat-card fade-in delay-3"><div class="num">17</div><div class="lbl">ثيمات داكنة</div></div>
       <div class="stat-card fade-in delay-4"><div class="num">3</div><div class="lbl">ثيمات خاصة</div></div>
     </div>
-  </section>
-  <section class="section">
+    <p>كل ثيم يستخدم <strong>ألواناً صلبة مسطحة دون تدرجات</strong> — فلسفة تصميم مستوحاة من مساحات العمل المشتركة الدافئة والهادئة. رموز التصميم مبنية بخصائص CSS المخصصة، مما يجعل الثيمات قابلة للتركيب بالكامل.</p>
+
+    <h2 style="margin-top:2rem">فئات الثيمات</h2>
+    <p>تُصنَّف الثيمات إلى فئات:</p>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>الفئة</th><th>الوصف</th><th>أمثلة</th></tr></thead>
+      <tbody>
+        <tr><td><strong>قياسي</strong></td><td>ثيمات نظيفة واحترافية للاستخدام اليومي</td><td>light، dark، amoled</td></tr>
+        <tr><td><strong>ملوّن</strong></td><td>ثيمات نابضة بألوان مميزة</td><td>blue، forest، ocean، sunset</td></tr>
+        <tr><td><strong>فاخر</strong></td><td>ثيمات مميزة بألوان غنية وراقية</td><td>mocha، lavender، peach</td></tr>
+        <tr><td><strong>خاص</strong></td><td>ثيمات فريدة لأمزجة أو بيئات محددة</td><td>gruvbox، nord، sepia</td></tr>
+        <tr><td><strong>إمكانية الوصول</strong></td><td>ثيمات عالية التباين لقراءة أفضل</td><td>high-contrast</td></tr>
+        <tr><td><strong>النظام</strong></td><td>يكتشف تفضيل نظام التشغيل تلقائياً (فاتح/داكن)</td><td>system</td></tr>
+      </tbody>
+    </table>
+
     <div class="section-label">تصنيفات الثيمات</div>
     <h2>ثيمات فاتحة</h2>
     <div class="lang-grid"><span class="lang-badge">light</span>
@@ -163,9 +177,96 @@
     <div class="detail-card"><h3>رموز المكونات</h3><p>تجاوزات دقيقة لكل مكون (زر، بطاقة، إدخال)</p></div>
     <h2 style="margin-top:2rem">تبديل الثيمات</h2>
     <p>تُطبق الثيمات ديناميكياً عبر خصائص CSS المخصصة. التبديل بين الثيمات فوري — لا حاجة لإعادة تحميل الصفحة.</p>
+
+    <div class="detail-card">
+      <h3>🎨 الألوان الأساسية (Primitives)</h3>
+      <p>لوحة ألوان دافئة قائمة على الطين تشمل:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>محايدات رملية</strong> — رماديات دافئة للخلفيات والنصوص</li>
+        <li><strong>لون التمييز الطيني (Terracotta)</strong> — لون تمييز واحد يتغير بين الوضعين الفاتح والداكن</li>
+        <li><strong>أخضر دلالي</strong> — لحالات النجاح والتأكيدات</li>
+        <li><strong>عنبري للتحذيرات</strong> — لحالات الحذر والتنبيهات</li>
+        <li><strong>أحمر للأخطاء</strong> — لحالات الخطأ والإجراءات المدمرة</li>
+      </ul>
+      <p style="margin-top:.75rem">لون التمييز يتحول بين الوضعين الفاتح والداكن مع الحفاظ على نفس الطابع الدافئ.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 جدول رموز CSS المخصصة</h3>
+      <p>تستخدم الثيمات خصائص CSS مخصصة لكل الألوان:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الرمز</th><th>الوصف</th><th>مثال (فاتح)</th></tr></thead>
+        <tbody>
+          <tr><td><code>--color-bg</code></td><td>خلفية الصفحة الأساسية</td><td>#faf9f5</td></tr>
+          <tr><td><code>--color-bg-card</code></td><td>خلفية البطاقات والعناصر المرتفعة</td><td>#ffffff</td></tr>
+          <tr><td><code>--color-text</code></td><td>لون النص الأساسي</td><td>#5c5544</td></tr>
+          <tr><td><code>--color-text-strong</code></td><td>نص العناوين البارزة</td><td>#28241d</td></tr>
+          <tr><td><code>--color-accent</code></td><td>لون التمييز والروابط والأزرار الأساسية</td><td>#c2683f</td></tr>
+          <tr><td><code>--color-success</code></td><td>حالات النجاح</td><td>#4f7d47</td></tr>
+          <tr><td><code>--color-warning</code></td><td>حالات التحذير</td><td>#a9761f</td></tr>
+          <tr><td><code>--color-danger</code></td><td>حالات الخطأ</td><td>#b8482f</td></tr>
+          <tr><td><code>--shadow-md</code></td><td>ظل متوسط للبطاقات</td><td>0 4px 16px rgba(...)</td></tr>
+        </tbody>
+      </table>
+      <pre><code>:root {
+  /* الخلفيات */
+  --color-bg: #faf9f5;
+  --color-bg-weak: #f5f3ec;
+  --color-bg-card: #ffffff;
+  --color-bg-strong: #1e1b16;
+
+  /* النصوص */
+  --color-text: #5c5544;
+  --color-text-weak: #938a76;
+  --color-text-strong: #28241d;
+
+  /* التمييز */
+  --color-accent: #c2683f;
+  --color-accent-warm: #cf7a52;
+  --color-accent-subtle: rgba(194, 104, 63, 0.11);
+
+  /* دلالية */
+  --color-success: #4f7d47;
+  --color-warning: #a9761f;
+  --color-danger: #b8482f;
+}</code></pre>
+      <p style="margin-top:.75rem">تجاوز هذه الخصائص في ثيمك المخصص لتغيير المظهر بأكمله.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>☀️🌙 الوضع الفاتح والداكن</h3>
+      <p>كل ثيم في Aura Work له نسخة فاتحة وأخرى داكنة (مثل <code>ocean-light</code> و <code>ocean-dark</code>). يتم التبديل بينهما فورياً دون إعادة تحميل الصفحة. ثيم <code>system</code> الخاص يتبع تلقائياً تفضيل نظام التشغيل عبر خاصية <code>prefers-color-scheme</code> ويبدّل تلقائياً عند تغيير إعدادات الجهاز (مثلاً غروب الشمس في macOS).</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 إنشاء ثيمات مخصصة</h3>
+      <p>أنشئ ثيمك الخاص باتباع هذه الخطوات:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> انسخ ثيماً موجوداً (مثل <code>light.css</code>)</li>
+        <li><strong>2.</strong> تجاوز خصائص CSS المخصصة بألوانك</li>
+        <li><strong>3.</strong> أضف ثيمك إلى <code>packages/ui/src/themes/</code></li>
+        <li><strong>4.</strong> سجّله في قائمة الثيمات</li>
+        <li><strong>5.</strong> اختبره في الوضعين الفاتح والداكن</li>
+        <li><strong>6.</strong> أرسل طلب سحب (PR)</li>
+      </ol>
+      <p style="margin-top:.75rem">راجع <code>packages/ui/src/themes/</code> لكل ملفات الثيمات.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📱 RTL وإمكانية الوصول</h3>
+      <p>يتضمن نظام الثيمات:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>ثيم عالي التباين</strong> — لإمكانية الوصول (متوافق مع WCAG AA)</li>
+        <li><strong>دعم RTL كامل</strong> — للعربية والفارسية</li>
+        <li><strong>اكتشاف تفضيل النظام</strong> — عبر <code>prefers-color-scheme</code></li>
+        <li><strong>تقليل الحركة</strong> — يحترم <code>prefers-reduced-motion</code></li>
+        <li><strong>تحجيم الخط</strong> — يدعم تعديلات حجم الخط في المتصفح</li>
+      </ul>
+    </div>
+  </section>
   <section class="section">
     <div class="section-label">السمات المخصصة</div>
-    <h2>انشاء سمة مخصصة</h2>
+    <h2>انشاء سمة مخصصة يدوياً</h2>
     <p>يمكنك انشاء سمة مخصصة بتعريف مجموعة من متغيرات CSS. ضع ملف السمة في <code>~/.config/aura/themes/</code> وسيتم تحميله تلقائيا.</p>
     <pre><code>{
   "name": "my-theme",
@@ -176,7 +277,6 @@
   }
 }</code></pre>
     <p style="margin-top:1rem">يمكنك تصدير السمات ومشاركتها مع المجتمع. السمات المميزة من المجتمع تضاف إلى المعرض الرسمي.</p>
-  </section>
   </section>
         </main>
        </div>

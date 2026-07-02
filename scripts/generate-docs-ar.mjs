@@ -735,7 +735,53 @@ function generateDocsHubAr() {
     </div>
   </a>`).join("\n");
 
-  return wrapPageAr(tr("Documentation Hub"), hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`, "hub");
+  const quickLinks = `<section class="section">
+    <div class="section-label">روابط سريعة</div>
+    <h2>ابدأ من هنا</h2>
+    <p>سواء كنت مستخدماً جديداً أو مطوراً يريد المساهمة في الكود المصدري، إليك أسرع الطرق للوصول إلى ما تحتاجه بالضبط:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:1rem">
+      <div class="detail-card">
+        <h3>👋 مستخدم جديد؟</h3>
+        <p>ابدأ بصفحة <a href="overview.ar.html">نظرة عامة</a> لفهم فلسفة Aura Work، ثم انتقل إلى <a href="quickstart.ar.html">البداية السريعة</a> لتثبيت التطبيق وتشغيل أول مهمة خلال دقائق.</p>
+      </div>
+      <div class="detail-card">
+        <h3>🧑‍💻 مطور أو مساهم؟</h3>
+        <p>راجع صفحة <a href="architecture.ar.html">الهندسة</a> لفهم بنية النظام متعددة العمليات، ثم <a href="skills.ar.html">المهارات</a> و <a href="mcp.ar.html">بروتوكول السياق (MCP)</a> لإضافة قدرات جديدة للوكيل.</p>
+      </div>
+      <div class="detail-card">
+        <h3>🔐 مهتم بالخصوصية والأمان؟</h3>
+        <p>اطلع على <a href="permissions.ar.html">الأذونات</a> و <a href="routing.ar.html">التوجيه</a> لمعرفة كيف يبقى Aura Work محلي البيانات وآمناً بشكل افتراضي دون أي تنازلات.</p>
+      </div>
+      <div class="detail-card">
+        <h3>⌘ تفضل الطرفية (Terminal)؟</h3>
+        <p>راجع صفحة <a href="cli.ar.html">واجهة الأوامر</a> للتحكم الكامل في Aura Work من سطر الأوامر — إنشاء المهام ومتابعتها عن بُعد.</p>
+      </div>
+    </div>
+  </section>`;
+
+  const pagesTable = `<section class="section">
+    <div class="section-label">فهرس كامل للوثائق</div>
+    <h2>كل صفحات الوثائق</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>الصفحة</th><th>الوصف</th></tr></thead>
+      <tbody>
+        <tr><td><a href="overview.ar.html">نظرة عامة</a></td><td>ما هو Aura Work، فلسفة تصميمه، ولماذا وُجد</td></tr>
+        <tr><td><a href="quickstart.ar.html">بداية سريعة</a></td><td>التثبيت والإعداد وتشغيل أول مهمة خلال دقائق</td></tr>
+        <tr><td><a href="providers.ar.html">المزوّدون</a></td><td>${providers.length} مزوّد نماذج ذكاء اصطناعي، سحابي ومحلي، مع الاكتشاف التلقائي للنماذج</td></tr>
+        <tr><td><a href="routing.ar.html">التوجيه</a></td><td>محرك التوجيه الذكي و${routes.length} سياسات لاختيار النموذج الأمثل لكل مهمة</td></tr>
+        <tr><td><a href="skills.ar.html">المهارات</a></td><td>${skills.length} مهارة جاهزة ومُسندبة يمكن للوكيل استخدامها فوراً</td></tr>
+        <tr><td><a href="sidecars.ar.html">الخدمات المساعدة</a></td><td>${sidecars.length} خدمة خلفية معيارية تشغّل قدرات النظام المختلفة</td></tr>
+        <tr><td><a href="languages.ar.html">اللغات</a></td><td>${languages.length} لغة بشرية مدعومة مع دعم كامل للكتابة من اليمين لليسار</td></tr>
+        <tr><td><a href="themes.ar.html">الثيمات</a></td><td>${themes.length} ثيم بصري مصمم يدوياً بين الفاتح والداكن والفاخر</td></tr>
+        <tr><td><a href="permissions.ar.html">الأذونات</a></td><td>نظام أذونات دقيق يتحكم في كل ما يفعله الوكيل على جهازك</td></tr>
+        <tr><td><a href="architecture.ar.html">الهندسة</a></td><td>بنية Tauri 2 + React 19 + Rust متعددة العمليات بالتفصيل</td></tr>
+        <tr><td><a href="cli.ar.html">واجهة الأوامر</a></td><td>عميل سطر أوامر (CLI) للتحكم في Aura Work عن بعد</td></tr>
+        <tr><td><a href="mcp.ar.html">بروتوكول السياق (MCP)</a></td><td>دمج أدوات وخوادم الطرف الثالث عبر بروتوكول سياق النماذج</td></tr>
+      </tbody>
+    </table>
+  </section>`;
+
+  return wrapPageAr(tr("Documentation Hub"), hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>` + quickLinks + pagesTable, "hub");
 }
 
 function generateOverviewAr() {
@@ -746,7 +792,34 @@ function generateOverviewAr() {
   </div>
   <section class="section">
     <p>Aura Work هي <strong>منصة وكلاء ذكاء اصطناعي مكتبية متعددة المزوّدين</strong> مبنية للمطورين الذين يريدون مساعدة ذكاء اصطناعي <strong>محلية أولاً ومقيدة بالأذونات وقابلة للاستضافة الذاتية</strong>. تدعم 10 مزوّدي ذكاء اصطناعي فورياً، مع محرك توجيه ذكي يختار النموذج المناسب لكل مهمة.</p>
-    <p>على عكس الأدوات السحابية فقط، يحتفظ Aura Work ببياناتك على جهازك. يستخدم هندسة إضافات مع تنفيذ معزول وتخزين مشفر للبيانات الاعتمادية وتحكم دقيق في الأذونات.</p>
+    <p>على عكس الأدوات السحابية فقط، التي ترسل شيفرتك إلى خوادم خارجية، يحتفظ Aura Work ببياناتك على جهازك. يستخدم هندسة إضافات مع تنفيذ معزول، وتخزين مشفر للبيانات الاعتمادية، وتحكم دقيق في الأذونات. المنصة مصممة للمطورين الذين يريدون تحكماً كاملاً في أدوات الذكاء الاصطناعي الخاصة بهم — لا تغادر أي بيانات جهازك إلا إذا اخترت المزامنة صراحةً.</p>
+
+    <h2 style="margin-top:2rem">لماذا Aura Work؟</h2>
+    <p>معظم أدوات الذكاء الاصطناعي البرمجية إما سحابية فقط (ترسل شيفرتك لخوادم خارجية) أو محدودة بمزود واحد. Aura Work يحل كلا المشكلتين:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>متعدد المزوّدين</strong> — استخدم OpenAI و Anthropic و Gemini و DeepSeek و Ollama والمزيد من واجهة واحدة</li>
+      <li><strong>محلي أولاً</strong> — بياناتك تبقى على جهازك، مشفرة بمفاتيح مرتبطة بالجهاز</li>
+      <li><strong>مقيد بالأذونات</strong> — كل إجراء يتطلب موافقة صريحة (أو ملفات تعريف مُعدّة مسبقاً)</li>
+      <li><strong>قابل للاستضافة الذاتية</strong> — شغّل خادم المزامنة السحابية الخاص بك، دون اعتماد على بنيتنا التحتية</li>
+      <li><strong>قابل للتوسيع</strong> — أضف قدرات عبر المهارات وخوادم MCP والإضافات</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 القدرات الأساسية</h3>
+      <p>Aura Work أكثر من مجرد واجهة محادثة. إنه بيئة تطوير كاملة تشمل:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>محرك المهام</strong> — تنفيذ مهام متعددة الخطوات مع مراحل التخطيط والتنفيذ والمراجعة</li>
+        <li><strong>عمليات الملفات</strong> — قراءة وكتابة وبحث وإدارة الملفات مع ضوابط أذونات</li>
+        <li><strong>تكامل Git</strong> — الحالة، الفرق، الالتزام، وإدارة الفروع مباشرة من الوكيل</li>
+        <li><strong>أتمتة المتصفح</strong> — تصفح المواقع واستخراج البيانات وملء النماذج عبر Puppeteer</li>
+        <li><strong>استخدام الحاسوب</strong> — التحكم بتطبيقات سطح المكتب عبر لقطات الشاشة والفأرة ولوحة المفاتيح</li>
+        <li><strong>صندوق الرمل الافتراضي</strong> — تنفيذ أوامر shell في بيئات WSL2 أو حاويات معزولة</li>
+        <li><strong>المزامنة السحابية</strong> — مزامنة مشفرة من طرف إلى طرف عبر الأجهزة، بخادم قابل للاستضافة الذاتية</li>
+        <li><strong>المهام المجدولة</strong> — أتمتة المهام المتكررة بجدولة شبيهة بـ cron</li>
+        <li><strong>18 مهارة مدمجة</strong> — مستندات، جداول بيانات، ملفات PDF، بحث، تصميم، والمزيد</li>
+        <li><strong>دعم MCP</strong> — الاتصال بأي خادم MCP لتوسّع غير محدود</li>
+      </ul>
+    </div>
   </section>
   <section class="section">
     <div class="section-label">${tr("Key Facts")}</div>
@@ -757,51 +830,96 @@ function generateOverviewAr() {
       <div class="stat-card fade-in delay-4"><div class="num">Rust</div><div class="lbl">${tr("Core backend")}</div></div>
     </div>
     <h2 style="margin-top:2rem">${tr("Architecture at a glance")}</h2>
-    <div class="detail-card"><h3>${tr("Desktop App")}</h3><p>${tr("Tauri 2 shell hosting the React 19 frontend. Manages windows, system tray, native menus, and IPC with sidecar processes.")}</p></div>
-    <div class="detail-card"><h3>${tr("Sidecar Services")}</h3><p>${tr("8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more.")}</p></div>
-    <div class="detail-card"><h3>${tr("Agent Engine")}</h3><p>${tr("Multi-agent orchestration with planner, executor, reviewer, and safety roles. Supports custom tools and MCP servers.")}</p></div>
-    <div class="detail-card"><h3>${tr("Routing Engine")}</h3><p>${tr("Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.")}</p></div>
+    <div class="detail-card">
+      <h3>🖥️ تطبيق سطح المكتب</h3>
+      <p>غلاف Tauri 2 يستضيف واجهة React 19 الأمامية. يدير النوافذ وعلبة النظام والقوائم الأصلية والتواصل (IPC) مع العمليات المساعدة. يتولى الجزء الخلفي المبني بـ Rust العمليات الحساسة للأداء وتكامل النظام.</p>
+      <p style="margin-top:.75rem">يوفر تطبيق سطح المكتب 14 صفحة رئيسية: لوحة التحكم، المهام، الملفات، Git، الطرفية، المزوّدون، الإضافات، المتصفح، التحكم بالحاسوب، المهام المجدولة، الذاكرة، سجل التدقيق، السحابة، والإضافات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>⚙️ الخدمات المساعدة (Sidecars)</h3>
+      <p>8 خدمات Node.js مستقلة لتنفيذ الوكيل، أتمتة المتصفح، صندوق الرمل الافتراضي، المزامنة السحابية، التحكم بالحاسوب، والمزيد. كل خدمة تعمل في مساحة عملية خاصة بها بدورة حياة مستقلة، وتتواصل عبر IPC أو HTTP.</p>
+      <p style="margin-top:.75rem">الخدمات المساعدة: Agent (47821)، VM Helper (47822)، Browser Helper (47823)، Plugins Helper (47824)، Cloud Sync (47825)، Bridge (47826)، Computer Use (47828)، Cloud Server (47830).</p>
+    </div>
+    <div class="detail-card">
+      <h3>🤖 محرك الوكيل</h3>
+      <p>تنسيق متعدد الوكلاء بأدوار متخصصة: <strong>المخطط (Planner)</strong> يفكك المهام إلى خطوات، <strong>المنفذ (Executor)</strong> ينفذ كل خطوة، <strong>المراجع (Reviewer)</strong> يتحقق من صحة المخرجات، و<strong>الأمان (Safety)</strong> يفرض الحدود. يدعم الأدوات المخصصة وخوادم MCP.</p>
+      <p style="margin-top:.75rem">يمكن للوكيل استخدام أي مزيج من الأدوات المدمجة والمهارات وخوادم MCP والإضافات لإتمام المهام، ويختار تلقائياً أفضل أداة لكل خطوة حسب متطلبات المهمة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🔀 محرك التوجيه</h3>
+      <p>موجّه نماذج ذكي عبر 10 مزوّدين بـ 5 سياسات توجيه: <strong>الجودة أولاً</strong> (أفضل نموذج للمهمة)، <strong>التكلفة أولاً</strong> (الخيار الأرخص)، <strong>الخصوصية أولاً</strong> (محلي فقط)، <strong>محلي فقط</strong> (Ollama/LM Studio)، أو <strong>يدوي</strong> (أنت تختار).</p>
+      <p style="margin-top:.75rem">يحلل محرك التوجيه نوع كل مهمة وحساسيتها والقدرات المطلوبة لاختيار المزود والنموذج الأمثلين، ويمكنه التراجع إلى مزوّدين بديلين إذا فشل المزوّد الأساسي.</p>
+    </div>
+  </section>
   <section class="section">
-    <div class="section-label">لماذا Aura Work</div>
-    <h2>لماذا تختار Aura Work</h2>
-    <p>معظم أدوات الذكاء الاصطناعي إما سحابية فقط أو محدودة بمزود واحد. Aura Work يحل كلا المشكلتين:</p>
-    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
-      <li><strong>متعدد المزودين</strong> - استخدم OpenAI و Anthropic و Gemini و DeepSeek و Ollama من واجهة واحدة</li>
-      <li><strong>محلية أولا</strong> - بياناتك تبقى على جهازك، مشفرة بمفاتيح مرتبطة بالجهاز</li>
-      <li><strong>مقيدة بالأذونات</strong> - كل إجراء يتطلب موافقة صريحة</li>
-      <li><strong>قابلة للاستضافة الذاتية</strong> - شغل خادم المزامنة السحابية الخاص بك</li>
-      <li><strong>قابلة للتوسيع</strong> - أضف قدرات عبر المهارات وخوادم MCP والإضافات</li>
+    <div class="section-label">كيف يعمل النظام</div>
+    <h2>سير العمل</h2>
+    <p>عندما تكتب طلباً في Aura Work، إليك ما يحدث:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. إنشاء المهمة</strong> — يتحول طلبك إلى مهمة في قاعدة بيانات SQLite</li>
+      <li><strong>2. التخطيط</strong> — وكيل المخطط يحلل المهمة وينشئ خطة خطوة بخطوة</li>
+      <li><strong>3. التوجيه</strong> — محرك التوجيه يختار أفضل مزود/نموذج حسب سياستك</li>
+      <li><strong>4. فحص الأذونات</strong> — كل خطوة تُفحص مقابل ملف الأذونات النشط</li>
+      <li><strong>5. التنفيذ</strong> — وكيل المنفذ ينفذ كل خطوة، مستدعياً الأدوات عند الحاجة</li>
+      <li><strong>6. المراجعة</strong> — وكيل المراجع يتحقق من صحة المخرجات وسلامتها</li>
+      <li><strong>7. الإنجاز</strong> — تُعرض النتائج وتُسجَّل في سجل التدقيق</li>
+    </ol>
+    <p style="margin-top:1.5rem">الإجراءات عالية التأثير (كتابة الملفات، أوامر shell، أتمتة المتصفح) تتطلب موافقة صريحة في وضع <code>ask-first</code>. يمكنك ضبط الموافقة التلقائية للعمليات الموثوقة من الإعدادات ← الأذونات.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">الأمان والخصوصية</div>
+    <h2>بياناتك تبقى ملكك</h2>
+    <p>بُني Aura Work مع الأمان كأولوية أساسية:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>مفاتيح API لا تغادر جهازك أبداً</strong> — تُخزَّن في خزنة مشفرة بمفاتيح مرتبطة بالجهاز (DPAPI في Windows، Keychain في macOS، Secret Service في Linux)</li>
+      <li><strong>لا قياس عن بعد افتراضياً</strong> — لا تُجمع أي بيانات استخدام ما لم تختر ذلك</li>
+      <li><strong>مزامنة سحابية مشفرة من طرف إلى طرف</strong> — إذا استخدمت Aura Cloud، تُشفَّر البيانات بـ XChaCha20-Poly1305 قبل مغادرة جهازك</li>
+      <li><strong>سجل تدقيق</strong> — كل إجراء يُسجَّل مع الفاعل والفئة والإجراء والهدف ومستوى المخاطرة والنتيجة</li>
+      <li><strong>نظام أذونات</strong> — تحكم دقيق فيما يمكن للوكيل الوصول إليه (ملفات، shell، متصفح، شبكة)</li>
     </ul>
+  </section>
+  <section class="section">
+    <div class="section-label">حالات الاستخدام</div>
+    <h2>لمن صُمم Aura Work؟</h2>
     <div class="detail-card">
-      <h3>القدرات الأساسية</h3>
-      <p>Aura Work أكثر من مجرد واجهة محادثة. إنه بيئة تطوير كاملة تشمل:</p>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
-        <li><strong>محرك المهام</strong> - تنفيذ مهام متعددة الخطوات مع التخطيط والتنفيذ والمراجعة</li>
-        <li><strong>عمليات الملفات</strong> - قراءة وكتابة وبحث وإدارة الملفات</li>
-        <li><strong>تكامل Git</strong> - الحالة والفرق والالتزام وإدارة الفروع</li>
-        <li><strong>أتمتة المتصفح</strong> - تصفح المواقع واستخراج البيانات</li>
-        <li><strong>استخدام الحاسوب</strong> - التحكم بتطبيقات سطح المكتب</li>
-        <li><strong>صندوق الرمل</strong> - تنفيذ أوامر Shell في بيئات WSL2 أو حاويات</li>
-        <li><strong>المزامنة السحابية</strong> - مزامنة E2EE عبر الأجهزة</li>
-      </ul>
+      <h3>👨‍💻 للمطورين</h3>
+      <p>ابدأ ميزة جديدة بجملة واحدة: <code>"أضف مصادقة JWT إلى واجهة API"</code>. سيحلل Aura قاعدة الشيفرة وينشئ خطة ويكتب الكود ويشغل الاختبارات ويفتح طلب سحب — كل ذلك مع مراجعتك في كل خطوة حساسة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>✍️ للكتّاب والمحللين</h3>
+      <p>حلّل مستنداً: <code>"حلّل التقرير السنوي واستخرج أهم النقاط"</code>، ثم <code>"أنشئ عرضاً تقديمياً من هذه النتائج"</code>. مهارات المستندات وجداول البيانات وملفات PDF مدمجة وجاهزة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🛠️ لمديري الأنظمة</h3>
+      <p>راقب خادماً: <code>"افحص استخدام القرص وأنشئ تقريراً"</code>. ادمج مع أدوات المراقبة الخاصة بك عبر خوادم MCP، وجدول المهام المتكررة تلقائياً.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🔬 للباحثين</h3>
+      <p>اجمع معلومات من مصادر متعددة: <code>"قارن بين PostgreSQL و MongoDB لحالتنا الاستخدامية"</code>. مهارة البحث تصفح الويب وتلخص وتذكر مصادرها.</p>
     </div>
   </section>
   <section class="section">
-    <div class="section-label">سير العمل اليومي</div>
-    <h2>كيف تستخدم Aura Work يوميا</h2>
-    <div class="detail-card">
-      <h3>للمطورين</h3>
-      <p>ابدأ ميزة جديدة: <code>aura "أضف مصادقة JWT"</code>. سيقوم Aura بتحليل قاعدة الشيفرة، وإنشاء خطة، وكتابة الأكواد، وتشغيل الاختبارات، وفتح PR. كل هذا بضغطة واحدة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>للكتاب والمحللين</h3>
-      <p>حلل مستندا: <code>aura "حلل التقرير السنوي واستخرج النقاط الرئيسية"</code>. ثم <code>aura "أنشئ عرضا تقديميا من هذه النتائج"</code>.</p>
-    </div>
-    <div class="detail-card">
-      <h3>لإدارة الأنظمة</h3>
-      <p>راقب الخادم: <code>aura "افحص استخدام القرص وانشئ تقريرا"</code>. دمج مع أدوات المراقبة عبر MCP.</p>
-    </div>
-  </section>
+    <div class="section-label">لمحة معمارية</div>
+    <h2>مخطط النظام</h2>
+    <pre><code>┌─────────────────────────────────────────────┐
+│           تطبيق Aura Work (Tauri 2)          │
+│   React 19 + قذيفة Rust + IPC + علبة النظام   │
+└───────────────────────┬───────────────────────┘
+                         │ IPC / HTTP محلي
+      ┌──────────────────┼──────────────────┐
+      │                  │                  │
+┌─────▼─────┐     ┌──────▼──────┐    ┌──────▼──────┐
+│  Agent    │     │  Browser    │    │  VM Helper  │
+│  :47821   │     │  Helper     │    │  :47822     │
+│ (المخطط،  │     │  :47823     │    │ (صندوق رمل  │
+│  المنفذ،  │     │ (أتمتة الويب)│    │  معزول)     │
+│  المراجع) │     └─────────────┘    └─────────────┘
+└─────┬─────┘
+      │ محرك التوجيه (5 سياسات)
+┌─────▼─────────────────────────────────────────┐
+│   10 مزوّدي ذكاء اصطناعي (سحابي + محلي)        │
+│   OpenAI · Anthropic · Gemini · Ollama · ...   │
+└─────────────────────────────────────────────────┘</code></pre>
   </section>`;
   return wrapPageAr(tr("Overview"), body, "overview");
 }
@@ -809,30 +927,159 @@ function generateOverviewAr() {
 function generateQuickStartAr() {
   const body = `<div class="hero">
     <h1><span>${tr("Quick Start")}</span></h1>
-    <p class="subtitle">${tr("Install, configure, run your first task")}</p>
+    <p class="subtitle">من الصفر إلى تشغيل أول مهمة ذكاء اصطناعي.</p>
   </div>
   <section class="section">
-    <div class="section-label">${tr("Installation")}</div>
-    <h2>${tr("Prerequisites")}</h2>
-    <ul>
-      <li><strong>نظام التشغيل:</strong> Windows 10+ أو macOS 12+ أو أي توزيعة Linux حديثة</li>
-      <li><strong>مساحة تخزين:</strong> ~200 MB للتطبيق + نموذج Ollama للاستخدام المحلي</li>
-      <li><strong>اتصال بالإنترنت:</strong> مطلوب للمزوّدين السحابيين فقط (غير مطلوب لـ Ollama/LM Studio)</li>
-    </ul>
-    <h2>${tr("Steps")}</h2>
-    <div class="detail-card"><h3>1. ${tr("Download from GitHub Releases")}</h3><p>تصفح <a href="https://github.com/hbx12/aura-work/releases">صفحة الإصدارات</a> وحمّل أحدث إصدار لنظام تشغيلك.</p></div>
-    <div class="detail-card"><h3>2. ${tr("Extract and run Aura Work")}</h3><p>فك ضغط الملف وشغّل التطبيق. سيظهر في شريط المهام (أو علبة النظام) عند بدء التشغيل.</p></div>
-    <div class="detail-card"><h3>3. ${tr("Configure a provider")}</h3><p>${tr("Go to Settings → Providers. Add an API key for any provider (OpenAI, Anthropic, etc.) or start Ollama locally for free. Each provider is validated automatically.")}</p></div>
-    <div class="detail-card"><h3>4. ${tr("Run your first task")}</h3><p>${tr('Type a prompt like: "Create a new React component that fetches data from an API". The agent plans the task, executes it step by step, and shows you the results.')}</p></div>
-    <div class="detail-card"><h3>5. ${tr("Explore")}</h3><p>${tr("Try skills from the registry, install MCP servers, configure routing policies, set up scheduled tasks, or pair the CLI for terminal-based control.")}</p></div>
+    <p>هذا الدليل سيأخذك من التثبيت إلى أول مهمة مدعومة بالذكاء الاصطناعي في أقل من 5 دقائق. Aura Work متوفر لأنظمة <strong>Windows و macOS و Linux</strong>.</p>
+
+    <h2 style="margin-top:2rem">${tr("Prerequisites")}</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المنصة</th><th>المتطلبات</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Windows</strong></td><td>Windows 10 فأحدث (يتضمن WebView2)، 4 جيجابايت رام كحد أدنى</td></tr>
+        <tr><td><strong>macOS</strong></td><td>macOS 11 فأحدث، أدوات Xcode Command Line</td></tr>
+        <tr><td><strong>Linux</strong></td><td>Ubuntu 20.04 فأحدث، libwebkit2gtk-4.1-dev، libappindicator3-dev</td></tr>
+      </tbody>
+    </table>
+
+    <div class="detail-card">
+      <h3>1. التثبيت</h3>
+      <p>حمّل أحدث إصدار من <a href="https://github.com/hbx12/aura-work/releases/latest">إصدارات GitHub</a>. برامج التثبيت متوفرة لـ Windows (.msi) و macOS (.dmg) و Linux (.deb، .AppImage).</p>
+      <p style="margin-top:.75rem"><strong>Windows:</strong> شغّل ملف .msi واتبع التعليمات. سيُضاف التطبيق إلى قائمة ابدأ.</p>
+      <p style="margin-top:.5rem"><strong>macOS:</strong> افتح ملف .dmg واسحب Aura Work إلى مجلد Applications.</p>
+      <p style="margin-top:.5rem"><strong>Linux:</strong> ثبّت حزمة .deb عبر <code>sudo dpkg -i aura-work.deb</code> أو شغّل ملف .AppImage مباشرة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>2. التشغيل</h3>
+      <p>افتح Aura Work. يبدأ التطبيق بمشروع افتراضي ولوحة الوكيل جاهزة. سترى واجهة المحادثة حيث يمكنك كتابة أول مهمة.</p>
+      <p style="margin-top:.75rem">عند التشغيل الأول، سيقوم التطبيق بـ:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li>إنشاء قاعدة بيانات SQLite محلية للمشاريع والمهام</li>
+        <li>تهيئة الخزنة المشفرة لمفاتيح API</li>
+        <li>تشغيل الخدمة المساعدة Agent (المنفذ 47821)</li>
+        <li>اكتشاف لغة نظامك وتطبيق الثيم المناسب</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>3. تكوين مزوّد</h3>
+      <p>اذهب إلى <strong>الإعدادات ← المزوّدون</strong>. تحتاج إلى مزوّد ذكاء اصطناعي واحد على الأقل لاستخدام Aura Work. الخيارات:</p>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الخيار أ: مزوّد سحابي (موصى به للبدء)</h4>
+      <ol style="padding-right:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> اضغط على مزوّد (OpenAI، Anthropic، Gemini، إلخ)</li>
+        <li><strong>2.</strong> أدخل مفتاح API الخاص بك</li>
+        <li><strong>3.</strong> اضغط "تحقق" لاختبار الاتصال</li>
+        <li><strong>4.</strong> اختر النماذج التي تريد استخدامها</li>
+      </ol>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الخيار ب: مزوّد محلي (مجاني، دون حاجة لمفتاح API)</h4>
+      <ol style="padding-right:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> ثبّت <a href="https://ollama.ai">Ollama</a> على جهازك</li>
+        <li><strong>2.</strong> اسحب نموذجاً: <code>ollama pull llama3</code></li>
+        <li><strong>3.</strong> في Aura Work، فعّل مزوّد Ollama</li>
+        <li><strong>4.</strong> يكتشف التطبيق النماذج المتاحة تلقائياً</li>
+      </ol>
+      <p style="margin-top:.75rem">المزوّدون المحليون يبقون كل البيانات على جهازك — بدون مفاتيح API، وبدون حاجة للإنترنت.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>4. تشغيل أول مهمة</h3>
+      <p>اكتب طلباً في واجهة المحادثة. إليك بعض الأمثلة لتجربتها:</p>
+      <pre><code># مهام برمجية
+"أنشئ مكوّن React جديد يجلب بيانات من واجهة API"
+"أصلح الخلل في auth.ts حيث يفشل تسجيل الدخول مع الرموز الخاصة"
+"أضف اختبارات وحدة لصنف UserService"
+
+# مهام مستندات
+"أنشئ تقرير PDF يلخص بنية المشروع"
+"أنشئ جدول بيانات بنتائج الاختبارات"
+
+# مهام بحث
+"ابحث عن أحدث أفضل ممارسات أمان Node.js"
+"قارن بين PostgreSQL و MongoDB لحالتنا الاستخدامية"
+
+# مهام متصفح
+"تصفح https://example.com واستخرج كل العناوين"
+"املأ نموذج التواصل على الموقع"</code></pre>
+      <p style="margin-top:.75rem">سيقوم الوكيل بـ:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> تحليل طلبك وإنشاء خطة</li>
+        <li><strong>2.</strong> اختيار أفضل مزوّد ونموذج (حسب سياسة التوجيه لديك)</li>
+        <li><strong>3.</strong> تنفيذ كل خطوة، مستدعياً الأدوات عند الحاجة</li>
+        <li><strong>4.</strong> عرض النتائج عليك وطلب الموافقة على الإجراءات عالية التأثير</li>
+      </ol>
+    </div>
+
+    <div class="detail-card">
+      <h3>5. الاستكشاف</h3>
+      <p>الآن بعد أن أصبحت أول مهمة تعمل، استكشف هذه الميزات:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>المهارات</strong> — جرّب "استخدم مهارة البحث لـ..." أو "أنشئ جدول بيانات بـ..."</li>
+        <li><strong>خوادم MCP</strong> — ثبّت خوادم MCP من لوحة الإضافات لقدرات إضافية</li>
+        <li><strong>سياسات التوجيه</strong> — غيّر سياسة التوجيه من الإعدادات ← التوجيه</li>
+        <li><strong>المهام المجدولة</strong> — أنشئ مهاماً متكررة من صفحة المهام المجدولة</li>
+        <li><strong>واجهة الأوامر</strong> — ثبّت CLI للتحكم من الطرفية: <code>npm install -g @aura-work/cli</code></li>
+        <li><strong>أتمتة المتصفح</strong> — جرّب "تصفح هذا الموقع و..." لمهام الويب</li>
+        <li><strong>التحكم بالحاسوب</strong> — فعّل ميزة التحكم بالحاسوب التجريبية لأتمتة سطح المكتب</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الإعدادات</div>
+    <h2>الإعدادات الأساسية</h2>
+
+    <div class="detail-card">
+      <h3>🔀 سياسة التوجيه</h3>
+      <p>اضبط كيفية اختيار الوكيل للمزوّدين من <strong>الإعدادات ← التوجيه</strong>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>الجودة أولاً</strong> — يستخدم أفضل نموذج متاح (موصى به للمهام المهمة)</li>
+        <li><strong>التكلفة أولاً</strong> — يستخدم أرخص نموذج قادر على التعامل مع المهمة</li>
+        <li><strong>الخصوصية أولاً</strong> — يستخدم المزوّدين المحليين فقط (Ollama، LM Studio)</li>
+        <li><strong>محلي فقط</strong> — مثل الخصوصية أولاً، لكن بفرض أكثر صرامة</li>
+        <li><strong>يدوي</strong> — أنت تختار المزوّد لكل مهمة</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 الأذونات</h3>
+      <p>اضبط ما يمكن للوكيل فعله من <strong>الإعدادات ← الأذونات</strong>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>اسأل أولاً</strong> (افتراضي) — يسأل الوكيل قبل كل إجراء عالي التأثير</li>
+        <li><strong>قراءة فقط</strong> — يمكن للوكيل فقط قراءة الملفات، لا تعديلات</li>
+        <li><strong>وصول كامل</strong> — يمكن للوكيل فعل أي شيء (استخدم بحذر)</li>
+      </ul>
+      <p style="margin-top:.75rem">يمكنك أيضاً ضبط أذونات لكل فئة (ملفات، shell، متصفح، إلخ) وإنشاء ملفات تعريف مخصصة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🎨 الثيم</h3>
+      <p>اختر من بين أكثر من 35 ثيماً من <strong>الإعدادات ← عام ← الثيم</strong>. تشمل الخيارات الفاتح والداكن وAMOLED وثيمات فاخرة. ثيم <code>system</code> يطابق تلقائياً تفضيل نظام التشغيل لديك.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">استكشاف الأخطاء وإصلاحها</div>
+    <h2>مشاكل شائعة وحلولها</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المشكلة</th><th>الحل</th></tr></thead>
+      <tbody>
+        <tr><td>لا يبدأ التطبيق</td><td>تأكد من تحديث WebView2 (Windows) أو تثبيت متطلبات libwebkit2gtk (Linux)</td></tr>
+        <tr><td>فشل التحقق من مزوّد سحابي</td><td>تحقق من صحة مفتاح API ووجود رصيد كافٍ في حساب المزوّد</td></tr>
+        <tr><td>Ollama لا يظهر في القائمة</td><td>تأكد من تشغيل <code>ollama serve</code> وسحب نموذج واحد على الأقل</td></tr>
+        <tr><td>الخدمة المساعدة لا تستجيب</td><td>راجع الإعدادات ← التشخيص وأعد تشغيل الخدمة المتعطلة يدوياً</td></tr>
+        <tr><td>المهمة عالقة في "بانتظار الموافقة"</td><td>افتح لوحة الموافقات وراجع الإجراء المطلوب، أو غيّر ملف الأذونات</td></tr>
+      </tbody>
+    </table>
   </section>
   <section class="section">
     <div class="section-label">${tr("Next Steps")}</div>
     <h2>${tr("Going deeper")}</h2>
     <p>${tr("Read about")} <a href="providers.ar.html">${tr("Providers")}</a>, <a href="routing.ar.html">${tr("Routing")}</a>, <a href="skills.ar.html">${tr("Skills")}</a>, ${tr("or")} <a href="architecture.ar.html">${tr("Architecture")}</a>. ${tr("For contributors, see the")} <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
+  </section>
   <section class="section">
     <div class="section-label">التثبيت المتقدم</div>
-    <h2>خيارات التثبيت الاخرى</h2>
+    <h2>خيارات التثبيت الأخرى</h2>
     <div class="detail-card">
       <h3>باستخدام Homebrew (macOS و Linux)</h3>
       <pre><code>brew install aura-work</code></pre>
@@ -852,14 +1099,13 @@ npm link</code></pre>
     <p style="margin-top:1rem">يتطلب Node.js 18+. يدعم Windows و macOS و Linux مع حزم منفصلة لكل منصة.</p>
   </section>
   <section class="section">
-    <div class="section-label">الاستخدام الاول</div>
-    <h2>تجربتك الاولى</h2>
-    <p>بعد التثبيت، جرب هذه الاوامر للتعرف على Aura Work:</p>
+    <div class="section-label">الاستخدام الأول</div>
+    <h2>تجربتك الأولى مع CLI</h2>
+    <p>بعد التثبيت، جرّب هذه الأوامر للتعرف على Aura Work:</p>
     <pre><code>aura --help
 aura --version
 aura config list
-aura --dry-run "انشئ مشروع Node.js جديد"</code></pre>
-  </section>
+aura --dry-run "أنشئ مشروع Node.js جديد"</code></pre>
   </section>`;
   return wrapPageAr(tr("Quick Start"), body, "quickstart");
 }
@@ -883,6 +1129,19 @@ function generateProvidersAr() {
     "LM Studio": tr("Fully local. Connect to LM Studio's local inference server. No API key needed. Auto-discovers running models."),
   };
 
+  const authGuide = {
+    "Aura Cloud Models": "سجّل الدخول بحساب Aura Cloud من الإعدادات ← المزوّدون ← Aura Cloud. لا حاجة لمفتاح API منفصل — يتم استخدام رمز الجلسة المرتبط بحسابك.",
+    "Anthropic": "أنشئ مفتاح API من console.anthropic.com، ثم الصقه في الإعدادات ← المزوّدون ← Anthropic واضغط 'تحقق'.",
+    "OpenAI": "أنشئ مفتاح API من platform.openai.com/api-keys. يدعم أيضاً حسابات GitHub Copilot عبر تسجيل الدخول بـ OAuth.",
+    "Google Gemini": "أنشئ مفتاح API من Google AI Studio (aistudio.google.com)، ثم أضفه في إعدادات المزوّد.",
+    "DeepSeek": "أنشئ مفتاح API من platform.deepseek.com. الأسعار منخفضة جداً مقارنة بالمزودين الآخرين.",
+    "Ollama": "ثبّت Ollama من ollama.ai، شغّل <code>ollama serve</code>، ثم اسحب نموذجاً بـ <code>ollama pull llama3</code>. لا حاجة لمفتاح API.",
+    "OpenAI Compatible": "أدخل عنوان URL الأساسي (base URL) للخادم المتوافق مع OpenAI، ومفتاح API إن وجد.",
+    "Minimax": "أنشئ مفتاح API من منصة Minimax الرسمية وأضفه في إعدادات المزوّد.",
+    "Qwen": "أنشئ مفتاح API من منصة Alibaba Cloud DashScope وأضفه في إعدادات المزوّد.",
+    "LM Studio": "ثبّت LM Studio من lmstudio.ai، حمّل نموذجاً، وشغّل الخادم المحلي من تبويب 'Local Server'. لا حاجة لمفتاح API.",
+  };
+
   const colors = ["#c48b5c","#c2683f","#1a7f64","#3a6fc4","#4b5bb0","#7a5c8e","#1988a2","#a9761f","#a855f7","#e05c2b"];
   const colorDots = ["#c48b5c","#c2683f","#1a7f64","#3a6fc4","#4b5bb0","#7a5c8e","#1988a2","#a9761f","#a855f7","#e05c2b"];
 
@@ -897,6 +1156,16 @@ function generateProvidersAr() {
       <div class="stat-card fade-in delay-3"><div class="num">${localCount}</div><div class="lbl">${tr("Local Providers")}</div></div>
     </div>
     <p>${tr("Aura Work supports 10 AI providers covering both cloud-hosted and local (Ollama, LM Studio, Custom Endpoint) models. Each provider has its own adapter that handles authentication, model discovery, and chat completions. Providers marked as local never send data off your machine.")}</p>
+
+    <h2 style="margin-top:2rem">ما هي المزوّدات؟</h2>
+    <p>المزوّدات هي الجسر بين Aura Work ونماذج الذكاء الاصطناعي. كل مزوّد ينفّذ واجهة موحدة تتعامل مع:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>المصادقة</strong> — مفاتيح API، رموز OAuth، أو اتصالات محلية</li>
+      <li><strong>اكتشاف النماذج</strong> — اكتشاف تلقائي للنماذج المتوفرة</li>
+      <li><strong>إكمالات المحادثة</strong> — إرسال الطلبات واستلام الردود</li>
+      <li><strong>تتبع الاستخدام</strong> — عدّ الرموز (tokens) وتقدير التكلفة</li>
+    </ul>
+
     ${providers.map((p, i) => {
       const desc = providerDesc[p.name] || "";
       return `<div class="detail-card fade-in delay-${(i % 4) + 1}">
@@ -906,15 +1175,44 @@ function generateProvidersAr() {
           <span class="local-badge ${p.local ? 'yes' : 'no'}">${p.local ? tr("Local") : tr("Cloud")}</span>
         </div>
         <p>${desc}</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 ${authGuide[p.name] || ""}</p>
       </div>`;
     }).join("\n")}
+  </section>
+  <section class="section">
+    <div class="section-label">مقارنة</div>
+    <h2>محلي مقابل سحابي</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المعيار</th><th>مزوّدات محلية</th><th>مزوّدات سحابية</th></tr></thead>
+      <tbody>
+        <tr><td><strong>الخصوصية</strong></td><td>كاملة — لا تغادر البيانات جهازك</td><td>تُرسل الطلبات لخوادم المزوّد</td></tr>
+        <tr><td><strong>التكلفة</strong></td><td>مجانية بعد التثبيت</td><td>دفع لكل رمز (token) مستخدم</td></tr>
+        <tr><td><strong>الجودة</strong></td><td>جيدة، تعتمد على قوة جهازك</td><td>الأفضل عادةً (نماذج ضخمة)</td></tr>
+        <tr><td><strong>السرعة</strong></td><td>تعتمد على معدات الجهاز (GPU/CPU)</td><td>سريعة عادةً مع بنية تحتية قوية</td></tr>
+        <tr><td><strong>الاتصال بالإنترنت</strong></td><td>غير مطلوب</td><td>مطلوب</td></tr>
+        <tr><td><strong>الأفضل لـ</strong></td><td>بيانات حساسة، عمل بدون اتصال، توفير التكلفة</td><td>مهام معقدة، أفضل جودة ممكنة</td></tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:2rem">اختيار النموذج المناسب</h2>
+    <div class="detail-card">
+      <h3>🎯 دليل اختيار النموذج</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>للبرمجة المعقدة</strong> — Claude Sonnet 4 أو GPT-4o أو DeepSeek R1 (تفكير متقدم)</li>
+        <li><strong>للمهام السريعة/البسيطة</strong> — Claude 3.5 Haiku أو GPT-4o mini أو Gemini 2.0 Flash</li>
+        <li><strong>للسياق الطويل جداً</strong> — Gemini 2.5 Pro (نافذة سياق ضخمة)</li>
+        <li><strong>للخصوصية القصوى</strong> — أي نموذج عبر Ollama أو LM Studio</li>
+        <li><strong>لأقل تكلفة ممكنة</strong> — DeepSeek V3 أو نموذج محلي عبر Ollama</li>
+      </ul>
+    </div>
+  </section>
   <section class="section">
     <div class="section-label">نظرة عامة على المزودين</div>
     <h2>المزودون المدعومون</h2>
     <p>يدعم Aura Work 10 مزودين لضمان المرونة القصوى. لكل مزود نقاط قوته:</p>
     <div class="detail-card">
       <h3>السحابيون (Cloud)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>OpenAI</strong> - GPT-4o, GPT-4.5, o1, o3. أداء متميز في البرمجة والتحليل</li>
         <li><strong>Anthropic</strong> - Claude Opus, Sonnet, Haiku. سياق طويل ورؤية حاسوبية</li>
         <li><strong>Google Gemini</strong> - Gemini 2.5 Pro, Flash. متعدد الوسائط ونماذج خفيفة</li>
@@ -924,10 +1222,43 @@ function generateProvidersAr() {
     </div>
     <div class="detail-card">
       <h3>المحليون (Local)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>Ollama</strong> - LLama, Mistral, Gemma, Qwen. خصوصية كاملة</li>
         <li><strong>LM Studio</strong> - واجهة رسومية لتشغيل النماذج محليا</li>
         <li><strong>LocalAI</strong> - OpenAI-compatible API محلية</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الأمان والموثوقية</div>
+    <h2>حماية بيانات الاعتماد</h2>
+    <p>تُشفَّر مفاتيح API باستخدام الخزنة المرتبطة بالجهاز قبل التخزين. تستخدم الخزنة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Windows</strong> — DPAPI (واجهة حماية البيانات)</li>
+      <li><strong>macOS</strong> — Keychain</li>
+      <li><strong>Linux</strong> — Secret Service (GNOME Keyring / KWallet)</li>
+    </ul>
+    <p style="margin-top:.75rem">بيانات الاعتماد لا تُسجَّل أبداً، ولا تُعرَض للوكيل، ولا تُدرَج في سجلات التدقيق.</p>
+
+    <div class="detail-card">
+      <h3>🔄 التراجع وإعادة المحاولة</h3>
+      <p>إذا فشل مزوّد، يمكن لـ Aura Work إعادة المحاولة تلقائياً مع بديل:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> يفشل المزوّد الأساسي (حد المعدل، مهلة، خطأ)</li>
+        <li><strong>2.</strong> يفحص النظام عن مزوّدين احتياطيين في إعداداتك</li>
+        <li><strong>3.</strong> إذا وُجد احتياطي، يعيد المحاولة مع المزوّد البديل</li>
+        <li><strong>4.</strong> إذا لم يوجد احتياطي، يُعلمك ويطلب تدخلاً يدوياً</li>
+      </ol>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 نصائح لتحسين التكلفة</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>استخدم سياسة التكلفة أولاً</strong> للمهام الروتينية</li>
+        <li><strong>أعدّ Ollama</strong> للتطوير والاختبار (مجاني)</li>
+        <li><strong>استخدم DeepSeek</strong> لمهام الكود (أرخص من OpenAI/Anthropic)</li>
+        <li><strong>راقب الاستخدام</strong> في لوحة التحكم لتحديد الأنماط المكلفة</li>
+        <li><strong>عيّن حدوداً للرموز</strong> لكل مهمة لمنع التكاليف المتزايدة</li>
       </ul>
     </div>
   </section>
@@ -941,7 +1272,6 @@ aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
     <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
 aura config set providers.ollama.model llama3.2</code></pre>
     <p>كل المفاتيح تخزن مشفرة باستخدام تشفير على مستوى النظام (Keytar على macOS، DPAPI على Windows، libsecret على Linux).</p>
-  </section>
   </section>`;
   return wrapPageAr(tr("Providers"), body, "providers");
 }
@@ -956,6 +1286,37 @@ function generateRoutingAr() {
     <div class="stats-bar">
       <div class="stat-card fade-in delay-1"><div class="num">${routes.length}</div><div class="lbl">${tr("Routing Policies")}</div></div>
     </div>
+    <p>محرك التوجيه هو عقل عملية اختيار المزوّد في Aura Work. يقيّم كل مهمة بناءً على نوعها وحساسيتها والقدرات المطلوبة وسياستك المُعدّة لاختيار النموذج الأمثل. هذا يضمن حصولك دائماً على أفضل النتائج مع التحكم في التكلفة والخصوصية.</p>
+
+    <h2 style="margin-top:2rem">كيف يعمل التوجيه</h2>
+    <p>عند إرسال طلب، يقوم محرك التوجيه بـ:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. تحليل المهمة</strong> — يحدد إذا كانت برمجة، بحثاً، عمل مستندات، تحليل بيانات، أتمتة متصفح، إلخ</li>
+      <li><strong>2. فحص القدرات</strong> — هل تحتاج المهمة رؤية؟ استدعاء أدوات؟ سياقاً طويلاً؟ تفكيراً معقداً؟</li>
+      <li><strong>3. تقييم الحساسية</strong> — هل البيانات عادية أم حساسة أم عالية المخاطر؟</li>
+      <li><strong>4. تطبيق سياستك</strong> — الجودة أولاً، التكلفة أولاً، الخصوصية أولاً، محلي فقط، أو يدوي</li>
+      <li><strong>5. اختيار النموذج</strong> — يختار أفضل توليفة مزوّد + نموذج</li>
+      <li><strong>6. إرجاع قرار</strong> — يشمل النموذج المختار والتكلفة المقدرة ومستوى الثقة</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>📊 أنواع المهام</h3>
+      <p>يتعرف محرك التوجيه على أنواع المهام التالية:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>النوع</th><th>الوصف</th><th>أفضل المزوّدين</th></tr></thead>
+        <tbody>
+          <tr><td><code>coding</code></td><td>توليد الكود، إعادة الهيكلة، تصحيح الأخطاء</td><td>Anthropic، DeepSeek، OpenAI</td></tr>
+          <tr><td><code>research</code></td><td>جمع المعلومات، التحليل</td><td>OpenAI، Gemini، Anthropic</td></tr>
+          <tr><td><code>document</code></td><td>الكتابة، التحرير، التنسيق</td><td>OpenAI، Anthropic، Gemini</td></tr>
+          <tr><td><code>data</code></td><td>تحليل البيانات، عمل جداول البيانات</td><td>OpenAI، Gemini، DeepSeek</td></tr>
+          <tr><td><code>browser</code></td><td>تصفح الويب، ملء النماذج</td><td>OpenAI، Anthropic (رؤية)</td></tr>
+          <tr><td><code>review</code></td><td>مراجعة الكود، الملاحظات</td><td>Anthropic، OpenAI</td></tr>
+          <tr><td><code>security</code></td><td>تحليل الأمان، كشف الثغرات</td><td>Anthropic، OpenAI</td></tr>
+          <tr><td><code>general</code></td><td>محادثة عامة، أسئلة وأجوبة</td><td>أي مزوّد</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     ${routes.map((r, i) => {
       const descMap = {
         "Quality First": tr("Prioritizes the most capable model for each task regardless of cost. Uses premium models for complex work, budget models for simple tasks."),
@@ -969,6 +1330,7 @@ function generateRoutingAr() {
         <p>${descMap[r.label]}</p>
       </div>`;
     }).join("\n")}
+  </section>
   <section class="section">
     <div class="section-label">استراتيجيات التوجيه</div>
     <h2>خمس استراتيجيات توجيه</h2>
@@ -993,6 +1355,77 @@ function generateRoutingAr() {
       <p>تحدد المزود والنموذج يدويا لكل طلب: <code>aura --provider openai --model gpt-4o</code></p>
     </div>
   </section>
+  <section class="section">
+    <div class="section-label">التكلفة والخصوصية</div>
+    <h2>تحسين التكلفة</h2>
+    <p>لتقليل تكاليف الذكاء الاصطناعي دون التضحية بالجودة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>استخدم سياسة التكلفة أولاً</strong> للمهام الروتينية اليومية (تنسيق، بحث بسيط، أسئلة)</li>
+      <li><strong>خصّص سياسة لكل مشروع</strong> — مشاريع الإنتاج تستخدم الجودة أولاً، بينما التجارب تستخدم التكلفة أولاً</li>
+      <li><strong>راقب استخدام الرموز</strong> من لوحة التحكم لاكتشاف الأنماط المكلفة مبكراً</li>
+      <li><strong>استخدم Ollama محلياً</strong> للتطوير والاختبار المتكرر بدون أي تكلفة</li>
+      <li><strong>عيّن حدود تكلفة صارمة</strong> لكل مهمة أو لكل يوم لمنع الفواتير غير المتوقعة</li>
+    </ul>
+
+    <h2 style="margin-top:2rem">التوجيه القائم على الخصوصية</h2>
+    <p>عند التعامل مع كود ملكية خاصة أو بيانات حساسة أو معلومات شخصية، سياسة <strong>الخصوصية أولاً</strong> تضمن عدم مغادرة أي بيانات لجهازك أبداً:</p>
+    <div class="detail-card">
+      <h3>🔒 كيف تعمل الخصوصية أولاً</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li>يحلل محرك التوجيه حساسية البيانات في كل طلب (كلمات مرور، مفاتيح، بيانات شخصية)</li>
+        <li>إذا اكتُشفت حساسية عالية، يُقصر التوجيه على المزوّدين المحليين فقط</li>
+        <li>إذا لم يتوفر مزوّد محلي، تفشل المهمة بدلاً من إرسال بيانات حساسة للسحابة</li>
+        <li>يمكنك فرض هذا السلوك دائماً عبر سياسة <strong>محلي فقط</strong> بغض النظر عن الحساسية المكتشفة</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الإعدادات</div>
+    <h2>إعداد التوجيه</h2>
+    <p>اضبط سياسة التوجيه من <strong>الإعدادات ← التوجيه</strong>:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> اختر سياستك الافتراضية (تُطبَّق على جميع المهام ما لم تُستبدل)</li>
+      <li><strong>2.</strong> اضبط سياسات لكل مشروع اختيارياً (تجاوز لمشاريع معينة)</li>
+      <li><strong>3.</strong> اضبط مزوّدين احتياطيين (ماذا تستخدم إذا فشل الأساسي)</li>
+      <li><strong>4.</strong> عيّن حدود تكلفة (أقصى رموز/تكلفة لكل مهمة)</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>💡 متى تستخدم كل سياسة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>السياسة</th><th>الأفضل لـ</th><th>المقايضات</th></tr></thead>
+        <tbody>
+          <tr><td><strong>الجودة أولاً</strong></td><td>مهام مهمة، كود إنتاجي، عمل العملاء</td><td>تكلفة أعلى، أبطأ</td></tr>
+          <tr><td><strong>التكلفة أولاً</strong></td><td>مهام روتينية، تطوير، اختبار</td><td>قد يستخدم نماذج أضعف</td></tr>
+          <tr><td><strong>الخصوصية أولاً</strong></td><td>بيانات حساسة، كود ملكية خاصة، معلومات شخصية</td><td>محدود بالنماذج المحلية</td></tr>
+          <tr><td><strong>محلي فقط</strong></td><td>عمل بدون اتصال، بيئات معزولة تماماً</td><td>يتطلب معدات محلية</td></tr>
+          <tr><td><strong>يدوي</strong></td><td>التعلم، مقارنة المزوّدين، احتياجات نموذج محدد</td><td>سير عمل أبطأ</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 سلسلة التراجع (Fallback)</h3>
+      <p>إذا فشل المزوّد الأساسي، يحاول محرك التوجيه البدائل:</p>
+      <pre><code>// مثال على إعداد التراجع
+{
+  "routing": {
+    "policy": "quality-first",
+    "fallback": [
+      "anthropic/claude-3-5-sonnet",
+      "openai/gpt-4o",
+      "deepseek/deepseek-coder",
+      "ollama/llama3"
+    ],
+    "maxRetries": 3,
+    "costLimit": {
+      "perTask": 0.50,
+      "perDay": 10.00
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">يحاول المحرك كل بديل بالترتيب حتى ينجح أحدها. إذا فشلت جميعها، يُعلمك ويطلب تدخلاً يدوياً.</p>
+    </div>
   </section>`;
   return wrapPageAr(tr("Routing"), body, "routing");
 }
@@ -1021,9 +1454,115 @@ function generateSkillsAr() {
   <section class="section">
     <div class="stats-bar">
       <div class="stat-card fade-in delay-1"><div class="num">${skills.length}</div><div class="lbl">${tr("Total Skills")}</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">${categories.length}</div><div class="lbl">الفئات</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">${skills.filter(s => (s.risk||"low")==='low').length}</div><div class="lbl">مخاطرة منخفضة</div></div>
     </div>
-    <p>${tr("Agent skills are reusable capabilities registered as JSON definitions in the registry/skills/ directory. Each skill declares its tools, risk level, and allowed categories. Skills can be invoked by the agent at runtime and are sandboxed by the permission system.")}</p>
-    
+    <p>المهارات هي آلية التوسّع الأساسية في Aura Work. كل مهارة هي <strong>بيان JSON مُرقّم بإصدار</strong> يحدد قدرة معينة يمكن للوكيل استخدامها — من إنشاء المستندات وجداول البيانات إلى أتمتة المتصفحات وتحليل البيانات. تُنشر المهارات في السجل ضمن <code>registry/skills/</code> ويمكن تثبيتها من السوق.</p>
+
+    <h2 style="margin-top:2rem">ما هي المهارة؟</h2>
+    <p>المهارة قدرة وكيل قائمة بذاتها تتضمن:</p>
+    <ul style="padding-right:1.25rem;margin-bottom:1.5rem;line-height:2">
+      <li><strong>الهوية</strong> — معرّف فريد واسم وإصدار وناشر</li>
+      <li><strong>الفئات</strong> — وسوم للتصفية (مستندات، كود، بيانات، متصفح، إلخ)</li>
+      <li><strong>الأدوات</strong> — الدوال الفعلية التي يمكن للوكيل استدعاؤها</li>
+      <li><strong>الأذونات</strong> — ما تحتاج المهارة للوصول إليه (ملفات، shell، متصفح، إلخ)</li>
+      <li><strong>مستوى المخاطرة</strong> — منخفض أو متوسط أو عالٍ حسب الأذونات المطلوبة</li>
+      <li><strong>تعليمات التثبيت</strong> — كيفية إعداد المهارة</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 كيف تعمل المهارات</h3>
+      <p>عندما تطلب من الوكيل تنفيذ مهمة، يحلل طلبك ويحدد المهارات المطلوبة. ثم يحمّل الوكيل بيان المهارة، يفحص الأذونات، وينفذ الأدوات المطلوبة. كل استدعاء أداة يمر عبر بوابة الأذونات — إذا احتاجت المهارة وصولاً للملفات أو أوامر shell، سيُطلب منك الموافقة (ما لم يكن ملف التعريف مضبوطاً على السماح التلقائي).</p>
+      <p style="margin-top:.75rem">المهارات <strong>معزولة (sandboxed)</strong> — يمكنها الوصول فقط لما يعلنه بيانها. مهارة المستندات لا يمكنها تنفيذ أوامر shell ما لم يُمنح ذلك صراحة. هذا يضمن الأمان حتى مع مهارات الطرف الثالث من السوق.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 استخدام المهارات</h3>
+      <p>تُستخدم المهارات تلقائياً عند تفاعلك مع الوكيل. على سبيل المثال:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>"أنشئ تقرير PDF"</strong> ← يستخدم الوكيل مهارة <code>aura-pdf</code></li>
+        <li><strong>"حلّل هذا الجدول"</strong> ← يستخدم الوكيل مهارة <code>aura-spreadsheets</code></li>
+        <li><strong>"تصفح هذا الموقع واستخرج البيانات"</strong> ← يستخدم الوكيل مهارة <code>aura-browser-assistant</code></li>
+        <li><strong>"حوّل هذه الصورة إلى WebP"</strong> ← يستخدم الوكيل مهارة <code>aura-file-converter</code></li>
+      </ul>
+      <p style="margin-top:.75rem">يمكنك أيضاً طلب مهارة باسمها صراحة: <code>"استخدم مهارة البحث للعثور على معلومات حول..."</code></p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 صيغة بيان المهارة</h3>
+      <p>تُعرَّف كل مهارة في ملف JSON بهذا الهيكل:</p>
+      <pre><code>{
+  "id": "aura-documents",
+  "name": "Documents",
+  "version": "1.0.0",
+  "summary": "إنشاء وتحرير وتنسيق المستندات",
+  "description": "معالجة مستندات كاملة تشمل...",
+  "publisher": "aura-work",
+  "categories": ["documents", "productivity"],
+  "risk": "low",
+  "permissions": [
+    { "category": "file", "action": "write", "target": "*.md" }
+  ],
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "إنشاء مستند جديد",
+      "parameters": {
+        "title": { "type": "string", "required": true },
+        "format": { "type": "string", "enum": ["md", "txt", "docx"] }
+      }
+    }
+  ],
+  "install": {
+    "command": "npm install",
+    "workingDir": "skills/documents"
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏗️ إنشاء مهارات مخصصة</h3>
+      <p>يمكنك إنشاء مهاراتك الخاصة باتباع هذه الخطوات:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> أنشئ ملف JSON جديد في <code>registry/skills/</code></li>
+        <li><strong>2.</strong> عرّف هوية المهارة (معرّف، اسم، إصدار، ناشر)</li>
+        <li><strong>3.</strong> أضف الفئات وحدد مستوى المخاطرة</li>
+        <li><strong>4.</strong> صرّح بالأذونات المطلوبة (ملفات، shell، متصفح، إلخ)</li>
+        <li><strong>5.</strong> عرّف الأدوات مع معاملاتها وأوصافها</li>
+        <li><strong>6.</strong> أضف تعليمات التثبيت إذا لزم</li>
+        <li><strong>7.</strong> تحقق باستخدام <code>node scripts/validate-marketplace-manifests.js</code></li>
+        <li><strong>8.</strong> أرسل طلب سحب (PR) إلى السجل</li>
+      </ol>
+      <p style="margin-top:.75rem">راجع <code>registry/skills/aura-documents.json</code> كمثال كامل.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📊 شرح مستويات المخاطرة</h3>
+      <p>كل مهارة لها مستوى مخاطرة حسب الأذونات المطلوبة:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>المستوى</th><th>الوصف</th><th>مثال</th></tr></thead>
+        <tbody>
+          <tr><td><code>low</code></td><td>وصول للقراءة فقط، بدون آثار جانبية</td><td>البحث، تحليل البيانات</td></tr>
+          <tr><td><code>medium</code></td><td>كتابة الملفات، طلبات الشبكة</td><td>إنشاء المستندات، أتمتة المتصفح</td></tr>
+          <tr><td><code>high</code></td><td>تنفيذ shell، وصول للنظام</td><td>الأتمتة، عمليات الآلة الافتراضية</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">المهارات عالية المخاطرة تتطلب موافقة صريحة في وضع <code>ask-first</code>. يمكنك ضبط الموافقة التلقائية لفئات معينة من الإعدادات ← الأذونات.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏪 السوق (Marketplace)</h3>
+      <p>يجمّع السوق (<code>registry/marketplace.json</code>) المهارات وخوادم MCP والإضافات. كل إدخال يشمل:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>أوصاف مترجمة</strong> — متوفرة بـ 20 لغة</li>
+        <li><strong>أيقونات وصور غلاف</strong> — أصول SVG في <code>registry/assets/</code></li>
+        <li><strong>سجل الإصدارات</strong> — للتحديثات والتراجع</li>
+        <li><strong>توثيق الناشر</strong> — مهارات رسمية مقابل مهارات مجتمعية</li>
+        <li><strong>معلومات التوافق</strong> — الحد الأدنى لإصدار Aura Work المطلوب</li>
+      </ul>
+      <p style="margin-top:.75rem">ثبّت المهارات من لوحة الإضافات في تطبيق سطح المكتب أو استخدم CLI: <code>aura skill install &lt;skill-id&gt;</code></p>
+    </div>
+
     <div class="section-label">تصفية حسب الفئة</div>
     <div class="skills-filter">
       <button class="filter-btn active" onclick="filterSkills('all')">الكل</button>
@@ -1040,8 +1579,10 @@ function generateSkillsAr() {
           <span>${s.categories ? s.categories.map(trCat).join("، ") : ""}</span>
         </div>
         <p>${s.summary || s.description || ""}</p>
+        ${s.tools && s.tools.length ? `<div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">الأدوات:</strong> ${s.tools.map(t => `<code>${t.name}</code>`).join(" ")}</div>` : ""}
       </div>`).join("\n")}
     </div>
+  </section>
   <section class="section">
     <div class="section-label">مهارات مدمجة</div>
     <h2>المهارات الاساسية</h2>
@@ -1049,7 +1590,6 @@ function generateSkillsAr() {
       <h3>web-search</h3>
       <p>يبحث في الويب ويستخرج معلومات حديثة مع روابط المصادر. يدعم محركات بحث متعددة.</p>
     </div>
-  </section>
   </section>`;
   return wrapPageAr(tr("Skills"), body, "skills");
 }
@@ -1076,37 +1616,107 @@ function generateLanguagesAr() {
       <div class="stat-card fade-in delay-2"><div class="num">${rtlLanguages.length}</div><div class="lbl">${tr("RTL Languages")}</div></div>
     </div>
     <p>${tr("Aura Work is built for a global audience. The i18n system uses TypeScript source catalogs that emit Weblate-compatible JSON files. Adding a new language is a single PR away.")}</p>
+
+    <h2 style="margin-top:2rem">لماذا يهم التدويل (i18n)</h2>
+    <p>يُستخدم Aura Work من قِبل مطورين حول العالم. من خلال دعم ${languages.length} لغة، نضمن ما يلي:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>سهولة الوصول</strong> — يمكن للمطورين استخدام الأداة بلغتهم الأم</li>
+      <li><strong>الشمولية</strong> — لغات الكتابة من اليمين لليسار (العربية، الفارسية) مدعومة بالكامل</li>
+      <li><strong>المجتمع</strong> — يمكن للمساهمين إضافة ترجمات للغتهم</li>
+      <li><strong>الانتشار العالمي</strong> — يمكن استخدام الأداة في أي بلد</li>
+    </ul>
+
     <div class="section-label">${tr("Supported Languages")}</div>
     <div class="lang-grid">${languages.map(l => `<a href="https://github.com/hbx12/aura-work/blob/main/packages/i18n/locales/${l}.json" class="lang-badge fade-in" style="animation: fadeIn .4s ease forwards">${langNames[l] || l} ${rtlLanguages.includes(l) ? `<span class="rtl-mark">${tr("RTL")}</span>` : ""}</a>`).join("\n")}</div>
   </section>
   <section class="section">
     <div class="section-label">${tr("Architecture")}</div>
     <h2>${tr("How i18n works")}</h2>
-    <p>${tr("Aura Work uses a TypeScript-first i18n approach. Translation catalogs live in packages/i18n/src/catalog.ts and define locale IDs, native names, RTL flags, and date/number formats. The build pipeline exports JSON files consumed by the UI.")}</p>
-    <div class="section-label">${tr("Adding a language")}</div>
-    <ul>
-      <li>${tr("Add your locale ID to SUPPORTED_LOCALES")}</li>
-      <li>${tr("Create a JSON translation file")}</li>
-      <li>${tr("Optionally set RTL if your script is right-to-left")}</li>
-      <li>${tr("Submit a pull request")}</li>
-    </ul>
-  <section class="section">
-    <div class="section-label">دعم RTL</div>
-    <h2>دعم اللغات من اليمين لليسار</h2>
-    <p>يدعم Aura Work اللغات من اليمين لليسار (RTL) مثل العربية والعبرية والفارسية بشكل كامل. يتم ضبط اتجاه النص تلقائيا وفقا لإعدادات اللغة المختارة. جميع مكونات TUI (القوائم، النوافذ، مربعات الحوار) تعكس تخطيطها بشكل صحيح عند استخدام لغة RTL.</p>
+    <p>يستخدم نظام التدويل هيكلية طبقية مبنية بـ TypeScript:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. كتالوج المصدر</strong> — سلاسل الترجمة تُعرَّف في <code>packages/i18n/src/catalog.ts</code> ككائن TypeScript مُنمَّط</li>
+      <li><strong>2. خطوة البناء</strong> — تشغيل <code>npm run build:locales</code> يُصدِر ملفات JSON إلى <code>packages/i18n/locales/</code></li>
+      <li><strong>3. التحميل وقت التشغيل</strong> — يكتشف التطبيق لغة النظام عند التشغيل الأول ويحمّل ملف JSON المناسب</li>
+      <li><strong>4. الرجوع الافتراضي</strong> — إذا كانت الترجمة مفقودة، يرجع النظام إلى الإنجليزية</li>
+    </ol>
+
     <div class="detail-card">
-      <h3>اللغات المدعومة حاليا</h3>
-      <p>الإنجليزية، العربية، الإسبانية، الفرنسية، الألمانية، الصينية، اليابانية، الكورية، البرتغالية، الروسية، الهندية، التركية. مع إمكانية إضافة المزيد عبر مساهمات المجتمع.</p>
+      <h3>🌐 إضافة لغة جديدة</h3>
+      <p>المساهمة بلغة جديدة عملية مباشرة:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> انسخ <code>packages/i18n/locales/en.json</code> إلى ملف جديد (مثلاً <code>hi.json</code> للهندية)</li>
+        <li><strong>2.</strong> ترجم القيم فقط — أبقِ جميع المفاتيح بالإنجليزية</li>
+        <li><strong>3.</strong> أضف لغتك إلى <code>SUPPORTED_LOCALES</code> في <code>packages/i18n/src/catalog.ts</code></li>
+        <li><strong>4.</strong> شغّل <code>npm run build:locales -w @aura-os/i18n</code></li>
+        <li><strong>5.</strong> اختبر ترجماتك في التطبيق</li>
+        <li><strong>6.</strong> أرسل طلب سحب (PR) بالتغييرات</li>
+      </ol>
+      <p style="margin-top:.75rem">يستخدم المشروع <a href="https://weblate.org" style="color:var(--color-accent)">Weblate</a> للترجمات المجتمعية. يمكنك المساهمة بالترجمات عبر Weblate أو مباشرة عبر PR.</p>
     </div>
+
     <div class="detail-card">
-      <h3>الترجمة الآلية</h3>
-      <p>يستخدم Aura Work نظام ترجمة مدمج يدعم الاستبدال السياقي (Contextual Replacement) مما يسمح بترجمة دقيقة حتى للجمل التي تحتوي على متغيرات ديناميكية مثل أسماء الملفات والنماذج.</p>
+      <h3>📐 دعم RTL</h3>
+      <p>تستخدم العربية والفارسية تخطيط <code>dir="rtl"</code>. يشمل دعم RTL:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>اتجاه التخطيط</strong> — تنعكس الواجهة بأكملها أفقياً</li>
+        <li><strong>محاذاة النص</strong> — يُحاذى النص لليمين</li>
+        <li><strong>التنقل</strong> — الشريط الجانبي والقوائم تعكس اتجاهها</li>
+        <li><strong>الطباعة</strong> — خطوط IBM Plex Sans Arabic و Tajawal</li>
+        <li><strong>الأيقونات</strong> — الأيقونات الاتجاهية تُعكس (الأسهم، الشيفرونات)</li>
+        <li><strong>الحركات</strong> — حركات الانزلاق تحترم اتجاه RTL</li>
+      </ul>
+      <p style="margin-top:.75rem">يتضمن نظام التصميم طباعة عربية صحيحة مع استبدال خطوط مدمج للمحتوى ثنائي اللغة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>المساهمة بلغة جديدة</h3>
-      <p>يمكن لأي شخص إضافة لغة جديدة. انسخ ملف <code>ar.json</code> في مجلد <code>src/i18n/</code>، وترجم القيم، وارفع PR. سنقوم بمراجعته ودمجه.</p>
+      <h3>🔧 مفاتيح الترجمة</h3>
+      <p>تتبع مفاتيح الترجمة هيكلية هرمية:</p>
+      <pre><code>{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك، {{name}}",
+    "stats": {
+      "tasks": "المهام",
+      "projects": "المشاريع"
+    }
+  },
+  "errors": {
+    "network": "خطأ في الشبكة. يرجى التحقق من الاتصال.",
+    "auth": "فشلت المصادقة. يرجى تسجيل الدخول مجدداً."
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">استخدم الترميز النقطي للإشارة للمفاتيح: <code>t('dashboard.stats.tasks')</code>. المتغيرات تُحاط بأقواس معقوفة مزدوجة: <code>{{name}}</code>.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 أفضل ممارسات الترجمة</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>أبقِ المفاتيح بالإنجليزية</strong> — ترجم القيم فقط</li>
+        <li><strong>استخدم العناصر النائبة</strong> — للمحتوى الديناميكي (مثل <code>{{count}}</code>)</li>
+        <li><strong>راعِ السياق</strong> — بعض الكلمات لها ترجمات مختلفة حسب السياق</li>
+        <li><strong>اختبر جيداً</strong> — تحقق من فيض النص ومشاكل المحاذاة</li>
+        <li><strong>استخدم Weblate</strong> — للترجمات المجتمعية والاتساق</li>
+        <li><strong>راجع الترجمات الموجودة</strong> — تفقد <code>en.json</code> للقائمة الكاملة</li>
+      </ul>
     </div>
   </section>
+  <section class="section">
+    <div class="section-label">المساهمة</div>
+    <h2>كيف تساهم بلغة جديدة</h2>
+    <p>يمكن لأي شخص إضافة لغة جديدة إلى Aura Work. العملية بسيطة ومفتوحة للجميع:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> افتح نقاشاً أو مشكلة (issue) على GitHub لإعلام الفريق برغبتك بإضافة لغة</li>
+      <li><strong>2.</strong> اتبع دليل "إضافة لغة جديدة" أعلاه لإنشاء ملف الترجمة</li>
+      <li><strong>3.</strong> استخدم أدوات الترجمة الآلية كنقطة بداية، ثم راجعها يدوياً لضمان الدقة والسياق الثقافي</li>
+      <li><strong>4.</strong> اختبر لغتك في جميع صفحات التطبيق للتأكد من عدم وجود نصوص مقطوعة</li>
+      <li><strong>5.</strong> أرسل طلب السحب وانتظر مراجعة الفريق</li>
+    </ol>
+    <p style="margin-top:.75rem">جميع المساهمات مُقدَّرة، سواء كانت ترجمة كاملة أو تصحيحات بسيطة على ترجمات موجودة.</p>
   </section>`;
   return wrapPageAr(tr("Languages"), body, "languages");
 }
@@ -1128,8 +1738,22 @@ function generateThemesAr() {
       <div class="stat-card fade-in delay-3"><div class="num">${darkThemes.length}</div><div class="lbl">${tr("Dark themes")}</div></div>
       <div class="stat-card fade-in delay-4"><div class="num">${specialThemes.length}</div><div class="lbl">${tr("Special themes")}</div></div>
     </div>
-  </section>
-  <section class="section">
+    <p>كل ثيم يستخدم <strong>ألواناً صلبة مسطحة دون تدرجات</strong> — فلسفة تصميم مستوحاة من مساحات العمل المشتركة الدافئة والهادئة. رموز التصميم مبنية بخصائص CSS المخصصة، مما يجعل الثيمات قابلة للتركيب بالكامل.</p>
+
+    <h2 style="margin-top:2rem">فئات الثيمات</h2>
+    <p>تُصنَّف الثيمات إلى فئات:</p>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>الفئة</th><th>الوصف</th><th>أمثلة</th></tr></thead>
+      <tbody>
+        <tr><td><strong>قياسي</strong></td><td>ثيمات نظيفة واحترافية للاستخدام اليومي</td><td>light، dark، amoled</td></tr>
+        <tr><td><strong>ملوّن</strong></td><td>ثيمات نابضة بألوان مميزة</td><td>blue، forest، ocean، sunset</td></tr>
+        <tr><td><strong>فاخر</strong></td><td>ثيمات مميزة بألوان غنية وراقية</td><td>mocha، lavender، peach</td></tr>
+        <tr><td><strong>خاص</strong></td><td>ثيمات فريدة لأمزجة أو بيئات محددة</td><td>gruvbox، nord، sepia</td></tr>
+        <tr><td><strong>إمكانية الوصول</strong></td><td>ثيمات عالية التباين لقراءة أفضل</td><td>high-contrast</td></tr>
+        <tr><td><strong>النظام</strong></td><td>يكتشف تفضيل نظام التشغيل تلقائياً (فاتح/داكن)</td><td>system</td></tr>
+      </tbody>
+    </table>
+
     <div class="section-label">${tr("Theme Categories")}</div>
     <h2>${tr("Light themes")}</h2>
     <div class="lang-grid">${lightThemes.map(t => `<span class="lang-badge">${t}</span>`).join("\n")}</div>
@@ -1147,9 +1771,96 @@ function generateThemesAr() {
     <div class="detail-card"><h3>${tr("Component tokens")}</h3><p>${tr("Fine-grained overrides per component (button, card, input)")}</p></div>
     <h2 style="margin-top:2rem">${tr("Theme Switching")}</h2>
     <p>${tr("Themes are applied dynamically via CSS custom properties. Switching between light, dark, amoled, or any of the 35+ themes is instantaneous — no page reload needed.")}</p>
+
+    <div class="detail-card">
+      <h3>🎨 الألوان الأساسية (Primitives)</h3>
+      <p>لوحة ألوان دافئة قائمة على الطين تشمل:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>محايدات رملية</strong> — رماديات دافئة للخلفيات والنصوص</li>
+        <li><strong>لون التمييز الطيني (Terracotta)</strong> — لون تمييز واحد يتغير بين الوضعين الفاتح والداكن</li>
+        <li><strong>أخضر دلالي</strong> — لحالات النجاح والتأكيدات</li>
+        <li><strong>عنبري للتحذيرات</strong> — لحالات الحذر والتنبيهات</li>
+        <li><strong>أحمر للأخطاء</strong> — لحالات الخطأ والإجراءات المدمرة</li>
+      </ul>
+      <p style="margin-top:.75rem">لون التمييز يتحول بين الوضعين الفاتح والداكن مع الحفاظ على نفس الطابع الدافئ.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 جدول رموز CSS المخصصة</h3>
+      <p>تستخدم الثيمات خصائص CSS مخصصة لكل الألوان:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الرمز</th><th>الوصف</th><th>مثال (فاتح)</th></tr></thead>
+        <tbody>
+          <tr><td><code>--color-bg</code></td><td>خلفية الصفحة الأساسية</td><td>#faf9f5</td></tr>
+          <tr><td><code>--color-bg-card</code></td><td>خلفية البطاقات والعناصر المرتفعة</td><td>#ffffff</td></tr>
+          <tr><td><code>--color-text</code></td><td>لون النص الأساسي</td><td>#5c5544</td></tr>
+          <tr><td><code>--color-text-strong</code></td><td>نص العناوين البارزة</td><td>#28241d</td></tr>
+          <tr><td><code>--color-accent</code></td><td>لون التمييز والروابط والأزرار الأساسية</td><td>#c2683f</td></tr>
+          <tr><td><code>--color-success</code></td><td>حالات النجاح</td><td>#4f7d47</td></tr>
+          <tr><td><code>--color-warning</code></td><td>حالات التحذير</td><td>#a9761f</td></tr>
+          <tr><td><code>--color-danger</code></td><td>حالات الخطأ</td><td>#b8482f</td></tr>
+          <tr><td><code>--shadow-md</code></td><td>ظل متوسط للبطاقات</td><td>0 4px 16px rgba(...)</td></tr>
+        </tbody>
+      </table>
+      <pre><code>:root {
+  /* الخلفيات */
+  --color-bg: #faf9f5;
+  --color-bg-weak: #f5f3ec;
+  --color-bg-card: #ffffff;
+  --color-bg-strong: #1e1b16;
+
+  /* النصوص */
+  --color-text: #5c5544;
+  --color-text-weak: #938a76;
+  --color-text-strong: #28241d;
+
+  /* التمييز */
+  --color-accent: #c2683f;
+  --color-accent-warm: #cf7a52;
+  --color-accent-subtle: rgba(194, 104, 63, 0.11);
+
+  /* دلالية */
+  --color-success: #4f7d47;
+  --color-warning: #a9761f;
+  --color-danger: #b8482f;
+}</code></pre>
+      <p style="margin-top:.75rem">تجاوز هذه الخصائص في ثيمك المخصص لتغيير المظهر بأكمله.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>☀️🌙 الوضع الفاتح والداكن</h3>
+      <p>كل ثيم في Aura Work له نسخة فاتحة وأخرى داكنة (مثل <code>ocean-light</code> و <code>ocean-dark</code>). يتم التبديل بينهما فورياً دون إعادة تحميل الصفحة. ثيم <code>system</code> الخاص يتبع تلقائياً تفضيل نظام التشغيل عبر خاصية <code>prefers-color-scheme</code> ويبدّل تلقائياً عند تغيير إعدادات الجهاز (مثلاً غروب الشمس في macOS).</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 إنشاء ثيمات مخصصة</h3>
+      <p>أنشئ ثيمك الخاص باتباع هذه الخطوات:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> انسخ ثيماً موجوداً (مثل <code>light.css</code>)</li>
+        <li><strong>2.</strong> تجاوز خصائص CSS المخصصة بألوانك</li>
+        <li><strong>3.</strong> أضف ثيمك إلى <code>packages/ui/src/themes/</code></li>
+        <li><strong>4.</strong> سجّله في قائمة الثيمات</li>
+        <li><strong>5.</strong> اختبره في الوضعين الفاتح والداكن</li>
+        <li><strong>6.</strong> أرسل طلب سحب (PR)</li>
+      </ol>
+      <p style="margin-top:.75rem">راجع <code>packages/ui/src/themes/</code> لكل ملفات الثيمات.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📱 RTL وإمكانية الوصول</h3>
+      <p>يتضمن نظام الثيمات:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>ثيم عالي التباين</strong> — لإمكانية الوصول (متوافق مع WCAG AA)</li>
+        <li><strong>دعم RTL كامل</strong> — للعربية والفارسية</li>
+        <li><strong>اكتشاف تفضيل النظام</strong> — عبر <code>prefers-color-scheme</code></li>
+        <li><strong>تقليل الحركة</strong> — يحترم <code>prefers-reduced-motion</code></li>
+        <li><strong>تحجيم الخط</strong> — يدعم تعديلات حجم الخط في المتصفح</li>
+      </ul>
+    </div>
+  </section>
   <section class="section">
     <div class="section-label">السمات المخصصة</div>
-    <h2>انشاء سمة مخصصة</h2>
+    <h2>انشاء سمة مخصصة يدوياً</h2>
     <p>يمكنك انشاء سمة مخصصة بتعريف مجموعة من متغيرات CSS. ضع ملف السمة في <code>~/.config/aura/themes/</code> وسيتم تحميله تلقائيا.</p>
     <pre><code>{
   "name": "my-theme",
@@ -1160,7 +1871,6 @@ function generateThemesAr() {
   }
 }</code></pre>
     <p style="margin-top:1rem">يمكنك تصدير السمات ومشاركتها مع المجتمع. السمات المميزة من المجتمع تضاف إلى المعرض الرسمي.</p>
-  </section>
   </section>`;
   return wrapPageAr(tr("Themes"), body, "themes");
 }
