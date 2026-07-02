@@ -77,6 +77,18 @@ export function isSlashCommand(input: string): boolean {
   return input.startsWith('/');
 }
 
+// Get autocomplete suggestions for slash commands
+export function getCommandSuggestions(partial: string): SlashCommand[] {
+  const all = getAllCommands();
+  if (!partial || partial === '/') return all;
+
+  const query = partial.startsWith('/') ? partial.slice(1) : partial;
+  return all.filter(cmd =>
+    cmd.name.startsWith(query) ||
+    cmd.aliases?.some(a => a.startsWith(query))
+  );
+}
+
 // Register built-in commands
 function registerBuiltinCommands(): void {
   // /help - Show available commands

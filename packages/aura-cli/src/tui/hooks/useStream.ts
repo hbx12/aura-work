@@ -25,7 +25,8 @@ export function useStream({ dir }: UseStreamOptions) {
       const runtime = await getRuntime();
 
       // Use the streaming endpoint
-      const response = await fetch(`http://127.0.0.1:${config.agentPort}/task/stream`, {
+      const baseUrl = config.agentUrl || 'http://127.0.0.1:47821';
+      const response = await fetch(`${baseUrl}/task/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +83,12 @@ export function useStream({ dir }: UseStreamOptions) {
       return currentResponse;
     } catch (err: any) {
       setStreaming(false);
-      throw err;
+      // Return error message instead of throwing to prevent TUI crash
+      const errorMsg = err?.code === 'ECONNREFUSED' || err?.message?.includes('fetch')
+        ? '⚠ Agent offline — start sidecar first: `aura-work agent start`'
+        : `Error: ${err?.message || 'Unknown error'}`;
+      setCurrentResponse(errorMsg);
+      return errorMsg;
     }
   }, [dir, currentResponse]);
 
