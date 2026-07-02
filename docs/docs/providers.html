@@ -306,6 +306,61 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-3"><div class="num">3</div><div class="lbl">Local Providers</div></div>
     </div>
     <p>Aura Work supports <strong>10 AI providers</strong> covering both cloud-hosted and local (Ollama, LM Studio, Custom Endpoint) models. Each provider has its own adapter that handles authentication, model discovery, and chat completions. Providers marked as <strong>local</strong> never send data off your machine.</p>
+    
+    <h2 style="margin-top:2rem">What are Providers?</h2>
+    <p>Providers are the bridge between Aura Work and AI models. Each provider implements a standard interface that handles:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Authentication</strong> — API keys, OAuth tokens, or local connections</li>
+      <li><strong>Model discovery</strong> — automatically detecting available models</li>
+      <li><strong>Chat completions</strong> — sending prompts and receiving responses</li>
+      <li><strong>Usage tracking</strong> — counting tokens and estimating costs</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>☁️ Cloud Providers</h3>
+      <p>Cloud providers host models on their infrastructure. You need an API key to use them:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Provider</th><th>Best For</th><th>Pricing</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OpenAI</strong></td><td>General purpose, code generation</td><td>Pay per token</td></tr>
+          <tr><td><strong>Anthropic</strong></td><td>Complex reasoning, long context</td><td>Pay per token</td></tr>
+          <tr><td><strong>Google Gemini</strong></td><td>Multimodal, large context windows</td><td>Pay per token</td></tr>
+          <tr><td><strong>DeepSeek</strong></td><td>Code-focused, cost-effective</td><td>Pay per token</td></tr>
+          <tr><td><strong>Minimax</strong></td><td>Chinese language tasks</td><td>Pay per token</td></tr>
+          <tr><td><strong>Qwen</strong></td><td>Chinese language, reasoning</td><td>Pay per token</td></tr>
+          <tr><td><strong>Aura Cloud</strong></td><td>Managed service with E2EE sync</td><td>Subscription</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏠 Local Providers</h3>
+      <p>Local providers run models on your own hardware. No API keys, no internet required, complete privacy:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Provider</th><th>Setup</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Ollama</strong></td><td><code>ollama pull llama3</code></td><td>Easy local model management</td></tr>
+          <tr><td><strong>LM Studio</strong></td><td>Download from lmstudio.ai</td><td>GUI for model management</td></tr>
+          <tr><td><strong>Custom Endpoint</strong></td><td>Any OpenAI-compatible API</td><td>Self-hosted models, proxies</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Local providers are ideal for privacy-sensitive work, offline environments, and cost savings (no per-token charges).</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Setting Up Providers</h3>
+      <p>To add a provider:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Go to <strong>Settings → Providers</strong></li>
+        <li><strong>2.</strong> Click on the provider you want to add</li>
+        <li><strong>3.</strong> Enter your API key (for cloud providers)</li>
+        <li><strong>4.</strong> Click <strong>"Validate"</strong> to test the connection</li>
+        <li><strong>5.</strong> Select which models you want to use</li>
+        <li><strong>6.</strong> Configure optional settings (base URL, max tokens, etc.)</li>
+      </ol>
+      <p style="margin-top:.75rem">For local providers, just install the software (Ollama/LM Studio) and Aura Work will auto-discover available models.</p>
+    </div>
+
     <div class="detail-card fade-in delay-1">
       <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c48b5c;flex-shrink:0"></span> Aura Cloud Models</h3>
       <div class="meta">
@@ -391,13 +446,51 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="section-label">Architecture</div>
     <h2>How providers work</h2>
     <p>Each provider implements a <code>ProviderAdapter</code> interface with <code>listModels()</code>, <code>validateCredentials()</code>, and <code>chat()</code> methods. The system auto-discovers available models on connection and caches them. OpenAI-compatible providers share a single adapter implementation.</p>
+    
     <div class="detail-card">
-      <h3>🔑 Credential security</h3>
-      <p>API keys are encrypted using the device-bound vault before storage. The vault supports biometric unlock on supported platforms. Credentials are never logged or exposed to the agent.</p>
+      <h3>🔑 Credential Security</h3>
+      <p>API keys are encrypted using the device-bound vault before storage. The vault uses:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Windows</strong> — DPAPI (Data Protection API)</li>
+        <li><strong>macOS</strong> — Keychain</li>
+        <li><strong>Linux</strong> — Secret Service (GNOME Keyring / KWallet)</li>
+      </ul>
+      <p style="margin-top:.75rem">Credentials are never logged, never exposed to the agent, and never included in audit entries. The vault supports biometric unlock on supported platforms.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📊 Usage tracking</h3>
-      <p>Every task records input/output token counts and estimated cost per model. The audit log maintains a permanent record of all provider interactions for accountability.</p>
+      <h3>📊 Usage Tracking</h3>
+      <p>Every task records detailed usage information:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Input tokens</strong> — tokens sent to the model</li>
+        <li><strong>Output tokens</strong> — tokens received from the model</li>
+        <li><strong>Estimated cost</strong> — calculated from the pricing cache</li>
+        <li><strong>Model used</strong> — which provider and model handled the task</li>
+      </ul>
+      <p style="margin-top:.75rem">View usage statistics in the Dashboard or export them for billing. The audit log maintains a permanent record of all provider interactions.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 Fallback & Retry</h3>
+      <p>If a provider fails, Aura Work can automatically retry with an alternative:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Primary provider fails (rate limit, timeout, error)</li>
+        <li><strong>2.</strong> System checks for fallback providers in your configuration</li>
+        <li><strong>3.</strong> If fallback exists, retries with the alternative provider</li>
+        <li><strong>4.</strong> If no fallback, notifies you and asks for manual intervention</li>
+      </ol>
+      <p style="margin-top:.75rem">Configure fallback providers in Settings → Providers → Fallback Chain.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 Cost Optimization Tips</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Use the cost-first routing policy</strong> for routine tasks</li>
+        <li><strong>Set up Ollama</strong> for development and testing (free)</li>
+        <li><strong>Use DeepSeek</strong> for code tasks (cheaper than OpenAI/Anthropic)</li>
+        <li><strong>Monitor usage</strong> in the Dashboard to identify expensive patterns</li>
+        <li><strong>Set token limits</strong> per task to prevent runaway costs</li>
+      </ul>
     </div>
   </section>
         </main>

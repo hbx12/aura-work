@@ -305,8 +305,113 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-2"><div class="num">26</div><div class="lbl">Categories</div></div>
       <div class="stat-card fade-in delay-3"><div class="num">2</div><div class="lbl">Low Risk</div></div>
     </div>
-    <p>Skills are versioned JSON-manifest agent capabilities published to the registry at <code>registry/skills/</code>. Each skill defines its identity, publisher, authentication requirements, permissions, tools, and install instructions.</p>
+    <p>Skills are the core extension mechanism in Aura Work. Each skill is a <strong>versioned JSON manifest</strong> that defines a specific capability the agent can use — from creating documents and spreadsheets to automating browsers and analyzing data. Skills are published to the registry at <code>registry/skills/</code> and can be installed from the marketplace.</p>
     
+    <h2 style="margin-top:2rem">What is a Skill?</h2>
+    <p>A skill is a self-contained agent capability that includes:</p>
+    <ul style="padding-left:1.25rem;margin-bottom:1.5rem;line-height:2">
+      <li><strong>Identity</strong> — unique ID, name, version, and publisher</li>
+      <li><strong>Categories</strong> — tags for filtering (documents, code, data, browser, etc.)</li>
+      <li><strong>Tools</strong> — the actual functions the agent can call</li>
+      <li><strong>Permissions</strong> — what the skill needs access to (files, shell, browser, etc.)</li>
+      <li><strong>Risk level</strong> — low, medium, or high based on required permissions</li>
+      <li><strong>Install instructions</strong> — how to set up the skill</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 How Skills Work</h3>
+      <p>When you ask the agent to perform a task, it analyzes your request and determines which skills are needed. The agent then loads the skill manifest, checks permissions, and executes the required tools. Each tool call goes through the permission gate — if the skill needs file access or shell commands, you'll be asked to approve (unless you've set the profile to auto-allow).</p>
+      <p style="margin-top:.75rem">Skills are <strong>sandboxed</strong> — they can only access what their manifest declares. A document skill can't execute shell commands unless explicitly granted. This ensures security even with third-party skills from the marketplace.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Using Skills</h3>
+      <p>Skills are used automatically when you interact with the agent. For example:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>"Create a PDF report"</strong> → Agent uses the <code>aura-pdf</code> skill</li>
+        <li><strong>"Analyze this spreadsheet"</strong> → Agent uses the <code>aura-spreadsheets</code> skill</li>
+        <li><strong>"Browse this website and extract data"</strong> → Agent uses the <code>aura-browser-assistant</code> skill</li>
+        <li><strong>"Convert this image to WebP"</strong> → Agent uses the <code>aura-file-converter</code> skill</li>
+      </ul>
+      <p style="margin-top:.75rem">You can also explicitly request a skill by name: <code>"Use the research skill to find information about..."</code></p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 Skill Manifest Format</h3>
+      <p>Each skill is defined in a JSON file with this structure:</p>
+      <pre><code>{
+  "id": "aura-documents",
+  "name": "Documents",
+  "version": "1.0.0",
+  "summary": "Create, edit, and format documents",
+  "description": "Full document processing with...",
+  "publisher": "aura-work",
+  "categories": ["documents", "productivity"],
+  "risk": "low",
+  "permissions": [
+    { "category": "file", "action": "write", "target": "*.md" }
+  ],
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "Create a new document",
+      "parameters": {
+        "title": { "type": "string", "required": true },
+        "format": { "type": "string", "enum": ["md", "txt", "docx"] }
+      }
+    }
+  ],
+  "install": {
+    "command": "npm install",
+    "workingDir": "skills/documents"
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏗️ Creating Custom Skills</h3>
+      <p>You can create your own skills by following these steps:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Create a new JSON file in <code>registry/skills/</code></li>
+        <li><strong>2.</strong> Define the skill identity (id, name, version, publisher)</li>
+        <li><strong>3.</strong> Add categories and set the risk level</li>
+        <li><strong>4.</strong> Declare required permissions (file, shell, browser, etc.)</li>
+        <li><strong>5.</strong> Define tools with their parameters and descriptions</li>
+        <li><strong>6.</strong> Add install instructions if needed</li>
+        <li><strong>7.</strong> Validate with <code>node scripts/validate-marketplace-manifests.js</code></li>
+        <li><strong>8.</strong> Submit a PR to the registry</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>registry/skills/aura-documents.json</code> for a complete example.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📊 Risk Levels Explained</h3>
+      <p>Each skill has a risk level based on its required permissions:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Level</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>low</code></td><td>Read-only access, no side effects</td><td>Research, data analysis</td></tr>
+          <tr><td><code>medium</code></td><td>File writes, network requests</td><td>Document creation, browser automation</td></tr>
+          <tr><td><code>high</code></td><td>Shell execution, system access</td><td>Automation, VM operations</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">High-risk skills require explicit approval in <code>ask-first</code> mode. You can configure auto-approval for specific categories in Settings → Permissions.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏪 Marketplace</h3>
+      <p>The marketplace (<code>registry/marketplace.json</code>) aggregates skills, MCP servers, and plugins. Each entry includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Localized descriptions</strong> — available in 20 languages</li>
+        <li><strong>Icon and cover images</strong> — SVG assets in <code>registry/assets/</code></li>
+        <li><strong>Version history</strong> — for updates and rollbacks</li>
+        <li><strong>Publisher verification</strong> — official vs community skills</li>
+        <li><strong>Compatibility info</strong> — minimum Aura Work version required</li>
+      </ul>
+      <p style="margin-top:.75rem">Install skills from the Plugins panel in the desktop app or use the CLI: <code>aura skill install &lt;skill-id&gt;</code></p>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Filter by Category</div>
     <div class="skills-filter">
       <button class="filter-btn active" onclick="filterSkills('all')">All</button>

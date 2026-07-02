@@ -300,46 +300,151 @@ pre:hover .copy-code-btn{opacity:1}
     <p class="subtitle">Tauri 2 + React 19 + Rust — a modern, multi-process desktop platform.</p>
   </div>
   <section class="section">
-    <h2>System architecture</h2>
-    <p>Aura Work is built on a <strong>multi-process architecture</strong> where the Tauri 2 shell hosts a React 19 frontend and manages 8 independent sidecar processes, each sandboxed and authenticated.</p>
+    <p>Aura Work is built on a <strong>multi-process architecture</strong> where the Tauri 2 shell hosts a React 19 frontend and manages 8 independent sidecar processes, each sandboxed and authenticated. This design ensures security, isolation, and extensibility.</p>
+    
+    <h2 style="margin-top:2rem">System Architecture</h2>
+    <p>The architecture follows a layered approach:</p>
+    <pre><code>┌─────────────────────────────────────────────────────────┐
+│                    Desktop Shell (Tauri 2 + Rust)        │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Frontend (React 19 + Vite)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Tasks │ │Files │ │ Git  │ │Browse│ │Plugins│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ IPC                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Rust Backend (Commands)                │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Vault │ │SQLite│ │Shell │ │ FS   │ │Process│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ HTTP/IPC                    │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Sidecar Services (Node.js)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Agent │ │  VM  │ │Browse│ │Plugin│ │Cloud │     │ │
+│  │  │:47821│ │:47822│ │:47823│ │:47824│ │:47825│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐                        │ │
+│  │  │Bridge│ │CompU │ │CloudS│                        │ │
+│  │  │:47826│ │:47828│ │:47830│                        │ │
+│  │  └──────┘ └──────┘ └──────┘                        │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘</code></pre>
     
     <div class="detail-card">
-      <h3>🖥️ Desktop shell (Tauri 2 + Rust)</h3>
-      <p>Window management, system tray, native menus, IPC bridge to sidecars, filesystem access, and process lifecycle. The Rust backend handles performance-critical operations and system integration.</p>
+      <h3>🖥️ Desktop Shell (Tauri 2 + Rust)</h3>
+      <p>The outer shell built with Tauri 2 and Rust. It handles:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Window management</strong> — native windows, system tray, menus</li>
+        <li><strong>IPC bridge</strong> — communication between frontend and sidecars</li>
+        <li><strong>Filesystem access</strong> — secure file operations with permission checks</li>
+        <li><strong>Process lifecycle</strong> — starting, stopping, and monitoring sidecars</li>
+        <li><strong>Vault management</strong> — encrypted storage for API keys and secrets</li>
+        <li><strong>SQLite database</strong> — local persistence for projects, tasks, settings</li>
+      </ul>
+      <p style="margin-top:.75rem">The Rust backend is performance-critical and security-sensitive. It handles operations that require system-level access.</p>
     </div>
     <div class="detail-card">
       <h3>🎨 Frontend (React 19 + TypeScript)</h3>
-      <p>UI layer with task management, file browser, Git integration, provider configuration, plugin marketplace, browser automation UI, computer-use controls, memory viewer, audit log, and settings.</p>
+      <p>The UI layer built with React 19 and Vite. It provides:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>14 main pages</strong> — Dashboard, Tasks, Files, Git, Terminal, Providers, Plugins, Browser, Computer Use, Scheduled Tasks, Memory, Audit Log, Cloud, Extensions</li>
+        <li><strong>10 settings tabs</strong> — General, Vault, VM, Cloud, Extension, Pet, Readiness, Diagnostics, Local Model, Approvals</li>
+        <li><strong>Chat interface</strong> — the main interaction point with the agent</li>
+        <li><strong>Monaco editor</strong> — code editing with syntax highlighting</li>
+        <li><strong>Design system</strong> — 35+ themes, RTL support, responsive layout</li>
+      </ul>
+      <p style="margin-top:.75rem">The frontend communicates with the Rust backend via Tauri's IPC system. All commands are typed and validated.</p>
     </div>
     <div class="detail-card">
-      <h3>⚙️ Agent engine (TypeScript)</h3>
-      <p>Multi-agent orchestration with specialized roles: planner decomposes tasks, executor runs steps, reviewer validates output, safety enforces boundaries. Supports custom tools and MCP servers.</p>
+      <h3>⚙️ Agent Engine (TypeScript)</h3>
+      <p>The brain of Aura Work — a multi-agent orchestration system:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Planner</strong> — decomposes tasks into step-by-step plans</li>
+        <li><strong>Executor</strong> — runs each step, calling tools as needed</li>
+        <li><strong>Reviewer</strong> — validates output for correctness and safety</li>
+        <li><strong>Safety</strong> — enforces boundaries and permission checks</li>
+      </ul>
+      <p style="margin-top:.75rem">The agent supports custom tools, MCP servers, and plugins. It can use any combination of capabilities to complete tasks.</p>
     </div>
     <div class="detail-card">
-      <h3>🔗 Bridge server (TypeScript)</h3>
-      <p>HTTP API for pairing external clients — CLI, browser extensions, Office add-ins. Enables remote task creation, status polling, and cross-device workflows.</p>
+      <h3>🔗 Bridge Server (TypeScript)</h3>
+      <p>HTTP API for pairing external clients:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>CLI</strong> — terminal-based control via <code>aura</code> command</li>
+        <li><strong>Chrome extension</strong> — browser integration for page reading</li>
+        <li><strong>Office add-in</strong> — document delegation from Word/Excel</li>
+      </ul>
+      <p style="margin-top:.75rem">The Bridge runs on port 47826 and requires session-based authentication. It only listens on localhost for security.</p>
     </div>
   </section>
   <section class="section">
     <div class="section-label">Data Flow</div>
     <h2>How data moves</h2>
-    <p>User input → React UI → Tauri IPC → Agent Orchestrator → Router → Provider Adapter → LLM API. File operations go through the permission gate before reaching the filesystem. All interactions are logged to the audit trail.</p>
+    <p>When you type a prompt, here's the complete data flow:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. User Input</strong> — You type in the React chat interface</li>
+      <li><strong>2. IPC Call</strong> — Frontend sends the prompt to Rust backend via Tauri IPC</li>
+      <li><strong>3. Task Creation</strong> — Rust creates a task in SQLite with status "planning"</li>
+      <li><strong>4. Agent Orchestration</strong> — Rust calls the Agent sidecar (port 47821)</li>
+      <li><strong>5. Planning</strong> — Planner agent creates a step-by-step plan</li>
+      <li><strong>6. Routing</strong> — Routing engine selects the best provider/model</li>
+      <li><strong>7. Permission Check</strong> — Each step is checked against permission profile</li>
+      <li><strong>8. Execution</strong> — Executor agent runs each step, calling tools</li>
+      <li><strong>9. Tool Calls</strong> — Tools may call other sidecars (VM, Browser, etc.)</li>
+      <li><strong>10. Review</strong> — Reviewer agent validates the output</li>
+      <li><strong>11. Response</strong> — Results are sent back to frontend via IPC</li>
+      <li><strong>12. Display</strong> — Frontend renders the results in the chat</li>
+    </ol>
+    <p style="margin-top:1.5rem">All interactions are logged to the audit trail. File operations go through the permission gate before reaching the filesystem.</p>
   </section>
   <section class="section">
     <div class="section-label">Tech Stack</div>
+    <h2>Technologies used</h2>
     <table>
       <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>Desktop Shell</td><td>Tauri 2</td><td>Native window, menus, system tray</td></tr>
-        <tr><td>Core Backend</td><td>Rust</td><td>Performance-critical operations</td></tr>
-        <tr><td>Frontend</td><td>React 19 + Vite 8</td><td>UI rendering</td></tr>
+        <tr><td>Desktop Shell</td><td>Tauri 2</td><td>Native window, menus, system tray, IPC</td></tr>
+        <tr><td>Core Backend</td><td>Rust</td><td>Performance-critical operations, security</td></tr>
+        <tr><td>Frontend</td><td>React 19 + Vite 8</td><td>UI rendering, hot reload, TypeScript</td></tr>
         <tr><td>Sidecars</td><td>Node.js / TypeScript</td><td>Background daemon services</td></tr>
         <tr><td>Agent Engine</td><td>TypeScript</td><td>Multi-agent orchestration</td></tr>
-        <tr><td>Persistence</td><td>SQLite</td><td>Local data storage</td></tr>
-        <tr><td>Encryption</td><td>Device-bound vault</td><td>Credential security</td></tr>
+        <tr><td>Persistence</td><td>SQLite (rusqlite)</td><td>Local data storage</td></tr>
+        <tr><td>Encryption</td><td>ChaCha20-Poly1305 + Argon2</td><td>Credential security</td></tr>
         <tr><td>Build System</td><td>npm workspaces + esbuild</td><td>Monorepo tooling</td></tr>
+        <tr><td>Package Format</td><td>Tauri bundler</td><td>.msi, .dmg, .deb, .AppImage</td></tr>
       </tbody>
     </table>
+  </section>
+  <section class="section">
+    <div class="section-label">Project Structure</div>
+    <h2>Codebase organization</h2>
+    <pre><code>aura-work/
+├── apps/desktop/           # Tauri desktop app
+│   ├── src/                # React components and pages
+│   └── src-tauri/src/      # Rust commands and business logic
+├── packages/
+│   ├── ui/src/             # Design system (tokens, components)
+│   ├── shared/             # TypeScript types and constants
+│   ├── i18n/               # i18n localization (20 languages)
+│   └── aura-plugin/        # Plugin SDK
+├── sidecar/
+│   ├── aura-agent/         # Task engine + providers
+│   ├── aura-vm-helper/     # VM/shell execution
+│   ├── aura-browser-helper/# Browser automation
+│   ├── aura-plugins-helper/# Plugin/MCP management
+│   ├── aura-cloud-sync/    # E2EE sync client
+│   ├── aura-bridge/        # Extension bridge
+│   ├── aura-computer-use/  # Computer Use helper
+│   └── aura-cloud/         # Self-hostable cloud server
+├── cli/aura-cli/           # CLI companion
+├── registry/               # Marketplace registry
+├── docs/                   # Feature documentation
+├── examples/               # Sample plugins and MCP servers
+├── qa/                     # Acceptance test suite
+└── scripts/                # Build, bundle, release scripts</code></pre>
   </section>
         </main>
        </div>

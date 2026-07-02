@@ -300,31 +300,138 @@ pre:hover .copy-code-btn{opacity:1}
     <p class="subtitle">From zero to running your first AI agent task.</p>
   </div>
   <section class="section">
+    <p>This guide will get you from installation to your first AI-powered task in under 5 minutes. Aura Work is available for <strong>Windows, macOS, and Linux</strong>.</p>
+
+    <h2 style="margin-top:2rem">System Requirements</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Platform</th><th>Requirements</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Windows</strong></td><td>Windows 10+ (WebView2 included), 4GB RAM minimum</td></tr>
+        <tr><td><strong>macOS</strong></td><td>macOS 11+, Xcode Command Line Tools</td></tr>
+        <tr><td><strong>Linux</strong></td><td>Ubuntu 20.04+, libwebkit2gtk-4.1-dev, libappindicator3-dev</td></tr>
+      </tbody>
+    </table>
+
     <div class="detail-card">
       <h3>1. Install</h3>
-      <p>Download the latest release from <a href="https://github.com/hbx12/aura-work/releases/latest">GitHub Releases</a>. Installers are available for Windows, macOS, and Linux.</p>
+      <p>Download the latest release from <a href="https://github.com/hbx12/aura-work/releases/latest" style="color:var(--color-accent)">GitHub Releases</a>. Installers are available for Windows (.msi), macOS (.dmg), and Linux (.deb, .AppImage).</p>
+      <p style="margin-top:.75rem"><strong>Windows:</strong> Run the .msi installer and follow the prompts. The app will be added to your Start Menu.</p>
+      <p style="margin-top:.5rem"><strong>macOS:</strong> Open the .dmg file and drag Aura Work to your Applications folder.</p>
+      <p style="margin-top:.5rem"><strong>Linux:</strong> Install the .deb package with <code>sudo dpkg -i aura-work.deb</code> or run the .AppImage directly.</p>
     </div>
+
     <div class="detail-card">
       <h3>2. Launch</h3>
       <p>Open Aura Work. The app starts with a default project and the Agent panel ready. You'll see the chat interface where you can type your first task.</p>
+      <p style="margin-top:.75rem">On first launch, the app will:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li>Create a local SQLite database for projects and tasks</li>
+        <li>Initialize the encrypted vault for API keys</li>
+        <li>Start the Agent sidecar (port 47821)</li>
+        <li>Detect your system language and apply the appropriate theme</li>
+      </ul>
     </div>
+
     <div class="detail-card">
-      <h3>3. Configure a provider</h3>
-      <p>Go to <strong>Settings → Providers</strong>. Add an API key for any provider (OpenAI, Anthropic, etc.) or start Ollama locally for free. Each provider is validated automatically.</p>
+      <h3>3. Configure a Provider</h3>
+      <p>Go to <strong>Settings → Providers</strong>. You need at least one AI provider to use Aura Work. Options:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Option A: Cloud Provider (Recommended for getting started)</h4>
+      <ol style="padding-left:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> Click on a provider (OpenAI, Anthropic, Gemini, etc.)</li>
+        <li><strong>2.</strong> Enter your API key</li>
+        <li><strong>3.</strong> Click "Validate" to test the connection</li>
+        <li><strong>4.</strong> Select which models you want to use</li>
+      </ol>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Option B: Local Provider (Free, no API key needed)</h4>
+      <ol style="padding-left:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> Install <a href="https://ollama.ai" style="color:var(--color-accent)">Ollama</a> on your machine</li>
+        <li><strong>2.</strong> Pull a model: <code>ollama pull llama3</code></li>
+        <li><strong>3.</strong> In Aura Work, enable the Ollama provider</li>
+        <li><strong>4.</strong> The app auto-discovers available models</li>
+      </ol>
+      <p style="margin-top:.75rem">Local providers keep all data on your machine — no API keys, no internet required.</p>
     </div>
+
     <div class="detail-card">
-      <h3>4. Run your first task</h3>
-      <p>Type a prompt like: <code>"Create a new React component that fetches data from an API"</code>. The agent plans the task, executes it step by step, and shows you the results.</p>
+      <h3>4. Run Your First Task</h3>
+      <p>Type a prompt in the chat interface. Here are some examples to try:</p>
+      <pre><code># Code tasks
+"Create a new React component that fetches data from an API"
+"Fix the bug in auth.ts where login fails with special characters"
+"Add unit tests for the UserService class"
+
+# Document tasks
+"Create a PDF report summarizing the project structure"
+"Generate a spreadsheet with the test results"
+
+# Research tasks
+"Find information about the latest Node.js security best practices"
+"Compare PostgreSQL vs MongoDB for our use case"
+
+# Browser tasks
+"Browse https://example.com and extract all the headings"
+"Fill out the contact form on the website"</code></pre>
+      <p style="margin-top:.75rem">The agent will:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Analyze your request and create a plan</li>
+        <li><strong>2.</strong> Select the best provider and model (based on your routing policy)</li>
+        <li><strong>3.</strong> Execute each step, calling tools as needed</li>
+        <li><strong>4.</strong> Show you the results and ask for approval on high-impact actions</li>
+      </ol>
     </div>
+
     <div class="detail-card">
       <h3>5. Explore</h3>
-      <p>Try skills from the registry, install MCP servers, configure routing policies, set up scheduled tasks, or pair the CLI for terminal-based control.</p>
+      <p>Now that you have your first task running, explore these features:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Skills</strong> — try "Use the research skill to..." or "Create a spreadsheet with..."</li>
+        <li><strong>MCP Servers</strong> — install MCP servers from the Plugins panel for more capabilities</li>
+        <li><strong>Routing Policies</strong> — change your routing policy in Settings → Routing</li>
+        <li><strong>Scheduled Tasks</strong> — set up recurring tasks in the Scheduled Tasks page</li>
+        <li><strong>CLI</strong> — install the CLI for terminal-based control: <code>npm install -g @aura-work/cli</code></li>
+        <li><strong>Browser Automation</strong> — try "Browse this website and..." for web tasks</li>
+        <li><strong>Computer Use</strong> — enable experimental computer use for desktop automation</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Configuration</div>
+    <h2>Essential settings</h2>
+    
+    <div class="detail-card">
+      <h3>🔀 Routing Policy</h3>
+      <p>Configure how the agent selects providers in <strong>Settings → Routing</strong>:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Quality-first</strong> — uses the best model available (recommended for important tasks)</li>
+        <li><strong>Cost-first</strong> — uses the cheapest model that can handle the task</li>
+        <li><strong>Privacy-first</strong> — only uses local providers (Ollama, LM Studio)</li>
+        <li><strong>Local-only</strong> — same as privacy-first, but stricter enforcement</li>
+        <li><strong>Manual</strong> — you choose the provider for each task</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 Permissions</h3>
+      <p>Configure what the agent can do in <strong>Settings → Permissions</strong>:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Ask-first</strong> (default) — agent asks before each high-impact action</li>
+        <li><strong>Read-only</strong> — agent can only read files, no modifications</li>
+        <li><strong>Full access</strong> — agent can do anything (use with caution)</li>
+      </ul>
+      <p style="margin-top:.75rem">You can also set per-category permissions (file, shell, browser, etc.) and create custom profiles.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🎨 Theme</h3>
+      <p>Choose from 35+ themes in <strong>Settings → General → Theme</strong>. Options include light, dark, AMOLED, and luxury themes. The <code>system</code> theme automatically matches your OS preference.</p>
     </div>
   </section>
   <section class="section">
     <div class="section-label">Next Steps</div>
     <h2>Going deeper</h2>
-    <p>Read about <a href="providers">Providers</a>, <a href="routing">Routing</a>, <a href="skills">Skills</a>, or <a href="architecture">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">New Contributor Guide</a>.</p>
+    <p>Read about <a href="providers" style="color:var(--color-accent)">Providers</a>, <a href="routing" style="color:var(--color-accent)">Routing</a>, <a href="skills" style="color:var(--color-accent)">Skills</a>, or <a href="architecture" style="color:var(--color-accent)">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" style="color:var(--color-accent)">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" style="color:var(--color-accent)">New Contributor Guide</a>.</p>
   </section>
         </main>
        </div>

@@ -305,7 +305,22 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-2"><div class="num">10</div><div class="lbl">Luxury Themes</div></div>
       <div class="stat-card fade-in delay-3"><div class="num">system</div><div class="lbl">Auto mode</div></div>
     </div>
-    <p>Every theme uses flat, solid colors with no gradients — a design philosophy inspired by warm, calm, coworking spaces. The design tokens are built with CSS custom properties, making themes fully composable.</p>
+    <p>Every theme uses <strong>flat, solid colors with no gradients</strong> — a design philosophy inspired by warm, calm, coworking spaces. The design tokens are built with CSS custom properties, making themes fully composable.</p>
+    
+    <h2 style="margin-top:2rem">Theme Categories</h2>
+    <p>Themes are organized into categories:</p>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Category</th><th>Description</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Standard</strong></td><td>Clean, professional themes for daily use</td><td>light, dark, amoled</td></tr>
+        <tr><td><strong>Colorful</strong></td><td>Vibrant themes with distinct color palettes</td><td>blue, forest, ocean, sunset</td></tr>
+        <tr><td><strong>Luxury</strong></td><td>Premium themes with rich, sophisticated colors</td><td>luxury-gold, luxury-emerald, luxury-royal</td></tr>
+        <tr><td><strong>Specialty</strong></td><td>Unique themes for specific moods or environments</td><td>cyberpunk, matrix, sakura, coffee</td></tr>
+        <tr><td><strong>Accessibility</strong></td><td>High-contrast themes for better readability</td><td>high-contrast</td></tr>
+        <tr><td><strong>System</strong></td><td>Auto-detects OS preference (light/dark)</td><td>system</td></tr>
+      </tbody>
+    </table>
+
     <div class="section-label">Theme Gallery</div>
     <div class="theme-grid">
       <div class="theme-swatch fade-in delay-1">
@@ -663,14 +678,85 @@ pre:hover .copy-code-btn{opacity:1}
   <section class="section">
     <div class="section-label">Design System</div>
     <h2>Token architecture</h2>
-    <p>The design system is defined in <code>packages/ui/src/tokens.css</code> with a layered architecture: primitives → semantic tokens → component tokens. All themes share the same primitive color ramps and override only semantic tokens.</p>
+    <p>The design system is defined in <code>packages/ui/src/tokens.css</code> with a layered architecture:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Primitives</strong> — base color ramps (sand, terracotta, green, amber, red)</li>
+      <li><strong>2. Semantic tokens</strong> — purpose-driven colors (--color-bg, --color-text, --color-accent)</li>
+      <li><strong>3. Component tokens</strong> — component-specific overrides (--button-bg, --card-border)</li>
+    </ol>
+    <p style="margin-top:.75rem">All themes share the same primitive color ramps and override only semantic tokens. This ensures consistency while allowing customization.</p>
+
     <div class="detail-card">
-      <h3>🎨 Color primitives</h3>
-      <p>A warm, clay-based palette with sand neutrals, a single terracotta accent, and semantic greens/ambers/reds. The accent shifts between light and dark modes while maintaining the same warm character.</p>
+      <h3>🎨 Color Primitives</h3>
+      <p>A warm, clay-based palette with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Sand neutrals</strong> — warm grays for backgrounds and text</li>
+        <li><strong>Terracotta accent</strong> — a single accent color that shifts between light/dark modes</li>
+        <li><strong>Semantic greens</strong> — for success states and confirmations</li>
+        <li><strong>Amber warnings</strong> — for caution states and alerts</li>
+        <li><strong>Red errors</strong> — for error states and destructive actions</li>
+      </ul>
+      <p style="margin-top:.75rem">The accent shifts between light and dark modes while maintaining the same warm character.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📱 RTL & a11y ready</h3>
-      <p>The system includes a high-contrast theme for accessibility, full RTL support for Arabic/Persian, and system-preference auto-detection via <code>prefers-color-scheme</code>.</p>
+      <h3>📝 CSS Custom Properties</h3>
+      <p>Themes use CSS custom properties for all colors:</p>
+      <pre><code>:root {
+  /* Backgrounds */
+  --color-bg: #faf9f5;
+  --color-bg-weak: #f5f3ec;
+  --color-bg-card: #ffffff;
+  --color-bg-strong: #1e1b16;
+
+  /* Text */
+  --color-text: #5c5544;
+  --color-text-weak: #938a76;
+  --color-text-strong: #28241d;
+
+  /* Accent */
+  --color-accent: #c2683f;
+  --color-accent-warm: #cf7a52;
+  --color-accent-subtle: rgba(194, 104, 63, 0.11);
+
+  /* Semantic */
+  --color-success: #4f7d47;
+  --color-warning: #a9761f;
+  --color-danger: #b8482f;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(54, 46, 32, 0.06);
+  --shadow-md: 0 4px 16px rgba(54, 46, 32, 0.09);
+  --shadow-lg: 0 16px 40px rgba(54, 46, 32, 0.13);
+}</code></pre>
+      <p style="margin-top:.75rem">Override these properties in your custom theme to change the entire look.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Creating Custom Themes</h3>
+      <p>Create your own theme by following these steps:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Copy an existing theme (e.g., <code>light.css</code>)</li>
+        <li><strong>2.</strong> Override the CSS custom properties with your colors</li>
+        <li><strong>3.</strong> Add your theme to <code>packages/ui/src/themes/</code></li>
+        <li><strong>4.</strong> Register it in the theme list</li>
+        <li><strong>5.</strong> Test in both light and dark modes</li>
+        <li><strong>6.</strong> Submit a PR</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>packages/ui/src/themes/</code> for all theme files.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📱 RTL & Accessibility</h3>
+      <p>The theme system includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>High-contrast theme</strong> — for accessibility (WCAG AA compliant)</li>
+        <li><strong>Full RTL support</strong> — for Arabic and Persian</li>
+        <li><strong>System preference detection</strong> — via <code>prefers-color-scheme</code></li>
+        <li><strong>Reduced motion</strong> — respects <code>prefers-reduced-motion</code></li>
+        <li><strong>Font scaling</strong> — supports browser font size adjustments</li>
+      </ul>
+      <p style="margin-top:.75rem">The <code>system</code> theme automatically matches your OS preference, switching between light and dark mode.</p>
     </div>
   </section>
         </main>

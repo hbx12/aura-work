@@ -300,32 +300,129 @@ pre:hover .copy-code-btn{opacity:1}
     <p class="subtitle">Command-line bridge client for remote control of the Aura desktop app.</p>
   </div>
   <section class="section">
-    <p>The <code>aura</code> CLI tool pairs with the Aura Work desktop app via the Bridge sidecar. It allows creating tasks, checking status, and managing projects — all from the terminal.</p>
+    <p>The <code>aura</code> CLI tool pairs with the Aura Work desktop app via the Bridge sidecar. It allows creating tasks, checking status, and managing projects — all from the terminal. The CLI is perfect for automation, CI/CD pipelines, and developers who prefer terminal workflows.</p>
+    
+    <h2 style="margin-top:2rem">Installation</h2>
+    <p>Install the CLI globally via npm:</p>
+    <pre><code>npm install -g @aura-work/cli</code></pre>
+    <p style="margin-top:.75rem">Or use it directly with npx:</p>
+    <pre><code>npx @aura-work/cli status</code></pre>
+
     <div class="detail-card">
-      <h3>Commands</h3>
-      <table>
-        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <h3>📋 Complete Command Reference</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
         <tbody>
-          <tr><td><code>aura status</code></td><td>Check bridge health and connection status</td></tr>
-          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>Pair CLI with desktop app</td></tr>
-          <tr><td><code>aura projects</code></td><td>List all projects</td></tr>
-          <tr><td><code>aura task create --project &lt;id&gt; --prompt "..."</code></td><td>Create and start a task</td></tr>
-          <tr><td><code>aura task get &lt;id&gt;</code></td><td>Get task details and status</td></tr>
-          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>Stream task execution logs</td></tr>
-          <tr><td><code>aura open task &lt;id&gt;</code></td><td>Open task in desktop UI</td></tr>
+          <tr><td><code>aura status</code></td><td>Check bridge health and connection</td><td><code>aura status</code></td></tr>
+          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>Pair CLI with desktop app</td><td><code>aura pair --code ABC123</code></td></tr>
+          <tr><td><code>aura projects</code></td><td>List all projects</td><td><code>aura projects</code></td></tr>
+          <tr><td><code>aura task create</code></td><td>Create and start a task</td><td><code>aura task create --project my-app --prompt "Add auth"</code></td></tr>
+          <tr><td><code>aura task get &lt;id&gt;</code></td><td>Get task details and status</td><td><code>aura task get task_abc123</code></td></tr>
+          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>Stream task execution logs</td><td><code>aura task logs task_abc123</code></td></tr>
+          <tr><td><code>aura open task &lt;id&gt;</code></td><td>Open task in desktop UI</td><td><code>aura open task task_abc123</code></td></tr>
         </tbody>
       </table>
     </div>
+
     <div class="detail-card">
-      <h3>🔐 Pairing flow</h3>
-      <p>1. In the desktop app, go to Extensions → Pair New Device<br>
-      2. Run <code>aura pair --code &lt;code&gt;</code><br>
-      3. The CLI saves a session token to <code>~/.aura/config.json</code><br>
-      4. All subsequent commands use this token for authentication</p>
+      <h3>🔐 Pairing Flow</h3>
+      <p>The CLI connects to the desktop app through the Bridge sidecar. Here's how to set it up:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Open the desktop app and go to <strong>Extensions → Pair New Device</strong></li>
+        <li><strong>2.</strong> A pairing code is displayed (valid for 10 minutes)</li>
+        <li><strong>3.</strong> Run <code>aura pair --code &lt;code&gt;</code> in your terminal</li>
+        <li><strong>4.</strong> The CLI saves a session token to <code>~/.aura/config.json</code></li>
+        <li><strong>5.</strong> All subsequent commands use this token for authentication</li>
+      </ol>
+      <p style="margin-top:.75rem">The pairing creates a secure session. You can revoke access anytime from the desktop app under Extensions → Paired Devices.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Security model</h3>
-      <p>The CLI connects through the local Bridge sidecar (port 47826). All requests must carry a valid session token. The CLI cannot bypass any permission — it respects the same permission profiles as the desktop UI.</p>
+      <h3>🔄 Usage Examples</h3>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Create a task from the terminal</h4>
+      <pre><code># Create a task in the current project
+aura task create --prompt "Fix the login bug in auth.ts"
+
+# Create a task in a specific project
+aura task create --project my-web-app --prompt "Add user profile page"
+
+# Create a task with specific permissions
+aura task create --prompt "Refactor database" --permissions "file,shell"</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Monitor task progress</h4>
+      <pre><code># Get task status
+aura task get task_abc123
+
+# Stream logs in real-time
+aura task logs task_abc123
+
+# Open task in desktop UI for visual monitoring
+aura open task task_abc123</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Automation script</h4>
+      <pre><code>#!/bin/bash
+# Run a task and wait for completion
+TASK_ID=$(aura task create --prompt "Run tests" --json | jq -r '.id')
+echo "Task created: $TASK_ID"
+
+# Poll for completion
+while true; do
+  STATUS=$(aura task get $TASK_ID --json | jq -r '.status')
+  if [ "$STATUS" = "completed" ]; then
+    echo "Task completed!"
+    break
+  elif [ "$STATUS" = "failed" ]; then
+    echo "Task failed!"
+    exit 1
+  fi
+  sleep 5
+done</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔒 Security Model</h3>
+      <p>The CLI connects through the local Bridge sidecar (port 47826). Key security features:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Session-based auth</strong> — each CLI session has a unique token</li>
+        <li><strong>Permission respect</strong> — CLI cannot bypass any permission, it follows the same profiles as the desktop UI</li>
+        <li><strong>Local only</strong> — Bridge only listens on localhost, no remote access</li>
+        <li><strong>Token revocation</strong> — revoke CLI access anytime from the desktop app</li>
+        <li><strong>Audit logging</strong> — all CLI actions are logged in the audit trail</li>
+      </ul>
+      <p style="margin-top:.75rem">The Bridge sidecar runs only when the desktop app is open. It stops when the app closes — no background daemon.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>⚡ CI/CD Integration</h3>
+      <p>Use the CLI in automation pipelines:</p>
+      <pre><code># GitHub Actions example
+name: Run AI Task
+on: push
+jobs:
+  ai-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @aura-work/cli
+      - run: aura pair --code ${{ secrets.AURA_PAIR_CODE }}
+      - run: aura task create --prompt "Review code changes" --wait</code></pre>
+      <p style="margin-top:.75rem">Store the pairing code as a GitHub secret. The <code>--wait</code> flag blocks until the task completes.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ Configuration</h3>
+      <p>The CLI stores its configuration in <code>~/.aura/config.json</code>:</p>
+      <pre><code>{
+  "sessionToken": "abc123...",
+  "bridgeHost": "localhost",
+  "bridgePort": 47826,
+  "defaultProject": "my-project",
+  "outputFormat": "text"  // or "json"
+}</code></pre>
+      <p style="margin-top:.75rem">Set <code>outputFormat</code> to <code>json</code> for machine-readable output in scripts.</p>
     </div>
   </section>
         </main>

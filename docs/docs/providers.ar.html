@@ -295,6 +295,40 @@ pre:hover .copy-code-btn{opacity:1}
         </div>
         <p>محلي بالكامل. اتصل بخادم LM Studio المحلي. لا حاجة لمفتاح API.</p>
       </div>
+  <section class="section">
+    <div class="section-label">نظرة عامة على المزودين</div>
+    <h2>المزودون المدعومون</h2>
+    <p>يدعم Aura Work 10 مزودين لضمان المرونة القصوى. لكل مزود نقاط قوته:</p>
+    <div class="detail-card">
+      <h3>السحابيون (Cloud)</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>OpenAI</strong> - GPT-4o, GPT-4.5, o1, o3. أداء متميز في البرمجة والتحليل</li>
+        <li><strong>Anthropic</strong> - Claude Opus, Sonnet, Haiku. سياق طويل ورؤية حاسوبية</li>
+        <li><strong>Google Gemini</strong> - Gemini 2.5 Pro, Flash. متعدد الوسائط ونماذج خفيفة</li>
+        <li><strong>DeepSeek</strong> - DeepSeek-V3, R1. أداء قوي بتكلفة منخفضة</li>
+        <li><strong>xAI Grok</strong> - Grok-3. نماذج متطورة من xAI</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h3>المحليون (Local)</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Ollama</strong> - LLama, Mistral, Gemma, Qwen. خصوصية كاملة</li>
+        <li><strong>LM Studio</strong> - واجهة رسومية لتشغيل النماذج محليا</li>
+        <li><strong>LocalAI</strong> - OpenAI-compatible API محلية</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">التكوين</div>
+    <h2>كيفية تكوين المزودين</h2>
+    <p>استخدم الامر التالي لتكوين مزود:</p>
+    <pre><code>aura config set providers.openai.apiKey sk-...
+aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
+    <p>للمزودين المحليين:</p>
+    <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
+aura config set providers.ollama.model llama3.2</code></pre>
+    <p>كل المفاتيح تخزن مشفرة باستخدام تشفير على مستوى النظام (Keytar على macOS، DPAPI على Windows، libsecret على Linux).</p>
+  </section>
   </section>
         </main>
        </div>

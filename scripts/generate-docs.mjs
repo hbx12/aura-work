@@ -845,7 +845,34 @@ function generateOverview() {
   </div>
   <section class="section">
     <p>Aura Work is a <strong>multi-provider desktop AI agent platform</strong> built for developers who want <strong>local-first, permission-gated, self-hostable</strong> AI assistance. It supports 10 AI providers out of the box, with an intelligent routing engine that picks the right model for each task.</p>
-    <p>Unlike cloud-only tools, Aura Work keeps your data on your machine. It uses a plugin architecture with sandboxed execution, encrypted credential storage, and granular permission controls.</p>
+    <p>Unlike cloud-only tools, Aura Work keeps your data on your machine. It uses a plugin architecture with sandboxed execution, encrypted credential storage, and granular permission controls. The platform is designed for developers who want full control over their AI tools — no data leaves your device unless you explicitly choose to sync.</p>
+    
+    <h2 style="margin-top:2rem">Why Aura Work?</h2>
+    <p>Most AI coding tools are either cloud-only (sending your code to external servers) or limited to a single provider. Aura Work solves both problems:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Multi-provider</strong> — use OpenAI, Anthropic, Gemini, DeepSeek, Ollama, and more from one interface</li>
+      <li><strong>Local-first</strong> — your data stays on your machine, encrypted with device-bound keys</li>
+      <li><strong>Permission-gated</strong> — every action requires explicit approval (or pre-configured profiles)</li>
+      <li><strong>Self-hostable</strong> — run your own cloud sync server, no dependency on our infrastructure</li>
+      <li><strong>Extensible</strong> — add capabilities via skills, MCP servers, and plugins</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 Core Capabilities</h3>
+      <p>Aura Work is more than just a chat interface. It's a full development environment with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Task Engine</strong> — multi-step task execution with planning, execution, and review phases</li>
+        <li><strong>File Operations</strong> — read, write, search, and manage files with permission controls</li>
+        <li><strong>Git Integration</strong> — status, diff, commit, branch management directly from the agent</li>
+        <li><strong>Browser Automation</strong> — browse websites, extract data, fill forms with Puppeteer</li>
+        <li><strong>Computer Use</strong> — control desktop applications via screenshots and mouse/keyboard</li>
+        <li><strong>VM Sandbox</strong> — execute shell commands in isolated WSL2 or container environments</li>
+        <li><strong>Cloud Sync</strong> — E2EE sync across devices with self-hostable server</li>
+        <li><strong>Scheduled Tasks</strong> — automate recurring tasks with cron-like scheduling</li>
+        <li><strong>18 Built-in Skills</strong> — documents, spreadsheets, PDFs, research, design, and more</li>
+        <li><strong>MCP Support</strong> — connect to any MCP server for unlimited extensibility</li>
+      </ul>
+    </div>
   </section>
   <section class="section">
     <div class="section-label">Key Facts</div>
@@ -857,21 +884,52 @@ function generateOverview() {
     </div>
     <h2 style="margin-top:2rem">Architecture at a glance</h2>
     <div class="detail-card">
-      <h3>Desktop App</h3>
-      <p>Tauri 2 shell hosting the React 19 frontend. Manages windows, system tray, native menus, and IPC with sidecar processes.</p>
+      <h3>🖥️ Desktop App</h3>
+      <p>Tauri 2 shell hosting the React 19 frontend. Manages windows, system tray, native menus, and IPC with sidecar processes. The Rust backend handles performance-critical operations and system integration.</p>
+      <p style="margin-top:.75rem">The desktop app provides 14 main pages: Dashboard, Tasks, Files, Git, Terminal, Providers, Plugins, Browser, Computer Use, Scheduled Tasks, Memory, Audit Log, Cloud, and Extensions.</p>
     </div>
     <div class="detail-card">
-      <h3>Sidecar Services</h3>
-      <p>8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more.</p>
+      <h3>⚙️ Sidecar Services</h3>
+      <p>8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP.</p>
+      <p style="margin-top:.75rem">Sidecars: Agent (47821), VM Helper (47822), Browser Helper (47823), Plugins Helper (47824), Cloud Sync (47825), Bridge (47826), Computer Use (47828), Cloud Server (47830).</p>
     </div>
     <div class="detail-card">
-      <h3>Agent Engine</h3>
-      <p>Multi-agent orchestration with planner, executor, reviewer, and safety roles. Supports custom tools and MCP servers.</p>
+      <h3>🤖 Agent Engine</h3>
+      <p>Multi-agent orchestration with specialized roles: <strong>Planner</strong> decomposes tasks into steps, <strong>Executor</strong> runs each step, <strong>Reviewer</strong> validates output, and <strong>Safety</strong> enforces boundaries. Supports custom tools and MCP servers.</p>
+      <p style="margin-top:.75rem">The agent can use any combination of built-in tools, skills, MCP servers, and plugins to complete tasks. It automatically selects the best tool for each step based on the task requirements.</p>
     </div>
     <div class="detail-card">
-      <h3>Routing Engine</h3>
-      <p>Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.</p>
+      <h3>🔀 Routing Engine</h3>
+      <p>Smart model router across 10 providers with 5 routing policies: <strong>quality-first</strong> (best model for the task), <strong>cost-first</strong> (cheapest option), <strong>privacy-first</strong> (local-only), <strong>local-only</strong> (Ollama/LM Studio), or <strong>manual</strong> (you choose).</p>
+      <p style="margin-top:.75rem">The routing engine analyzes each task's type, sensitivity, and required capabilities to select the optimal provider and model. It can also fall back to alternative providers if the primary one fails.</p>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">How It Works</div>
+    <h2>Workflow</h2>
+    <p>When you type a prompt in Aura Work, here's what happens:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Task Creation</strong> — Your prompt becomes a task in the SQLite database</li>
+      <li><strong>2. Planning</strong> — The Planner agent analyzes the task and creates a step-by-step plan</li>
+      <li><strong>3. Routing</strong> — The routing engine selects the best provider/model based on your policy</li>
+      <li><strong>4. Permission Check</strong> — Each step is checked against your permission profile</li>
+      <li><strong>5. Execution</strong> — The Executor agent runs each step, calling tools as needed</li>
+      <li><strong>6. Review</strong> — The Reviewer agent validates the output for correctness and safety</li>
+      <li><strong>7. Completion</strong> — Results are displayed and logged to the audit trail</li>
+    </ol>
+    <p style="margin-top:1.5rem">High-impact actions (file writes, shell commands, browser automation) require explicit approval in <code>ask-first</code> mode. You can configure auto-approval for trusted operations in Settings → Permissions.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">Security & Privacy</div>
+    <h2>Your data stays yours</h2>
+    <p>Aura Work is built with security as a first-class concern:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>API keys never leave your device</strong> — stored in an encrypted vault using device-bound keys (DPAPI on Windows, Keychain on macOS, Secret Service on Linux)</li>
+      <li><strong>No telemetry by default</strong> — no usage data is collected unless you opt in</li>
+      <li><strong>E2EE cloud sync</strong> — if you use Aura Cloud, data is encrypted with XChaCha20-Poly1305 before leaving your device</li>
+      <li><strong>Audit logging</strong> — every action is recorded with actor, category, action, target, risk level, and result</li>
+      <li><strong>Permission system</strong> — granular control over what the agent can access (files, shell, browser, network)</li>
+    </ul>
   </section>`;
   return wrapPage("Overview", body, "overview");
 }
@@ -893,6 +951,61 @@ function generateProviders() {
       <div class="stat-card fade-in delay-3"><div class="num">${localCount}</div><div class="lbl">Local Providers</div></div>
     </div>
     <p>Aura Work supports <strong>${providers.length} AI providers</strong> covering both cloud-hosted and local (Ollama, LM Studio, Custom Endpoint) models. Each provider has its own adapter that handles authentication, model discovery, and chat completions. Providers marked as <strong>local</strong> never send data off your machine.</p>
+    
+    <h2 style="margin-top:2rem">What are Providers?</h2>
+    <p>Providers are the bridge between Aura Work and AI models. Each provider implements a standard interface that handles:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Authentication</strong> — API keys, OAuth tokens, or local connections</li>
+      <li><strong>Model discovery</strong> — automatically detecting available models</li>
+      <li><strong>Chat completions</strong> — sending prompts and receiving responses</li>
+      <li><strong>Usage tracking</strong> — counting tokens and estimating costs</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>☁️ Cloud Providers</h3>
+      <p>Cloud providers host models on their infrastructure. You need an API key to use them:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Provider</th><th>Best For</th><th>Pricing</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OpenAI</strong></td><td>General purpose, code generation</td><td>Pay per token</td></tr>
+          <tr><td><strong>Anthropic</strong></td><td>Complex reasoning, long context</td><td>Pay per token</td></tr>
+          <tr><td><strong>Google Gemini</strong></td><td>Multimodal, large context windows</td><td>Pay per token</td></tr>
+          <tr><td><strong>DeepSeek</strong></td><td>Code-focused, cost-effective</td><td>Pay per token</td></tr>
+          <tr><td><strong>Minimax</strong></td><td>Chinese language tasks</td><td>Pay per token</td></tr>
+          <tr><td><strong>Qwen</strong></td><td>Chinese language, reasoning</td><td>Pay per token</td></tr>
+          <tr><td><strong>Aura Cloud</strong></td><td>Managed service with E2EE sync</td><td>Subscription</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏠 Local Providers</h3>
+      <p>Local providers run models on your own hardware. No API keys, no internet required, complete privacy:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Provider</th><th>Setup</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Ollama</strong></td><td><code>ollama pull llama3</code></td><td>Easy local model management</td></tr>
+          <tr><td><strong>LM Studio</strong></td><td>Download from lmstudio.ai</td><td>GUI for model management</td></tr>
+          <tr><td><strong>Custom Endpoint</strong></td><td>Any OpenAI-compatible API</td><td>Self-hosted models, proxies</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Local providers are ideal for privacy-sensitive work, offline environments, and cost savings (no per-token charges).</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Setting Up Providers</h3>
+      <p>To add a provider:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Go to <strong>Settings → Providers</strong></li>
+        <li><strong>2.</strong> Click on the provider you want to add</li>
+        <li><strong>3.</strong> Enter your API key (for cloud providers)</li>
+        <li><strong>4.</strong> Click <strong>"Validate"</strong> to test the connection</li>
+        <li><strong>5.</strong> Select which models you want to use</li>
+        <li><strong>6.</strong> Configure optional settings (base URL, max tokens, etc.)</li>
+      </ol>
+      <p style="margin-top:.75rem">For local providers, just install the software (Ollama/LM Studio) and Aura Work will auto-discover available models.</p>
+    </div>
+
     ${providers.map((p, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}">
       <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></span> ${p.name}</h3>
       <div class="meta">
@@ -906,13 +1019,51 @@ function generateProviders() {
     <div class="section-label">Architecture</div>
     <h2>How providers work</h2>
     <p>Each provider implements a <code>ProviderAdapter</code> interface with <code>listModels()</code>, <code>validateCredentials()</code>, and <code>chat()</code> methods. The system auto-discovers available models on connection and caches them. OpenAI-compatible providers share a single adapter implementation.</p>
+    
     <div class="detail-card">
-      <h3>🔑 Credential security</h3>
-      <p>API keys are encrypted using the device-bound vault before storage. The vault supports biometric unlock on supported platforms. Credentials are never logged or exposed to the agent.</p>
+      <h3>🔑 Credential Security</h3>
+      <p>API keys are encrypted using the device-bound vault before storage. The vault uses:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Windows</strong> — DPAPI (Data Protection API)</li>
+        <li><strong>macOS</strong> — Keychain</li>
+        <li><strong>Linux</strong> — Secret Service (GNOME Keyring / KWallet)</li>
+      </ul>
+      <p style="margin-top:.75rem">Credentials are never logged, never exposed to the agent, and never included in audit entries. The vault supports biometric unlock on supported platforms.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📊 Usage tracking</h3>
-      <p>Every task records input/output token counts and estimated cost per model. The audit log maintains a permanent record of all provider interactions for accountability.</p>
+      <h3>📊 Usage Tracking</h3>
+      <p>Every task records detailed usage information:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Input tokens</strong> — tokens sent to the model</li>
+        <li><strong>Output tokens</strong> — tokens received from the model</li>
+        <li><strong>Estimated cost</strong> — calculated from the pricing cache</li>
+        <li><strong>Model used</strong> — which provider and model handled the task</li>
+      </ul>
+      <p style="margin-top:.75rem">View usage statistics in the Dashboard or export them for billing. The audit log maintains a permanent record of all provider interactions.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 Fallback & Retry</h3>
+      <p>If a provider fails, Aura Work can automatically retry with an alternative:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Primary provider fails (rate limit, timeout, error)</li>
+        <li><strong>2.</strong> System checks for fallback providers in your configuration</li>
+        <li><strong>3.</strong> If fallback exists, retries with the alternative provider</li>
+        <li><strong>4.</strong> If no fallback, notifies you and asks for manual intervention</li>
+      </ol>
+      <p style="margin-top:.75rem">Configure fallback providers in Settings → Providers → Fallback Chain.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 Cost Optimization Tips</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Use the cost-first routing policy</strong> for routine tasks</li>
+        <li><strong>Set up Ollama</strong> for development and testing (free)</li>
+        <li><strong>Use DeepSeek</strong> for code tasks (cheaper than OpenAI/Anthropic)</li>
+        <li><strong>Monitor usage</strong> in the Dashboard to identify expensive patterns</li>
+        <li><strong>Set token limits</strong> per task to prevent runaway costs</li>
+      </ul>
     </div>
   </section>`;
   return wrapPage("Providers", body, "providers");
@@ -930,7 +1081,37 @@ function generateRouting() {
     <div class="stats-bar">
       ${policies.map((p, i) => `<div class="stat-card fade-in delay-${i+1}"><div class="num">${p.id.split("-")[0]}</div><div class="lbl">${p.title}</div></div>`).join("\n")}
     </div>
-    <p>The routing engine evaluates each task based on its type (coding, research, document, data, browser, review, security, general), sensitivity level, required capabilities (vision, tool-calling, reasoning), and your configured routing policy to select the optimal model.</p>
+    <p>The routing engine is the brain of Aura Work's provider selection. It evaluates each task based on its type, sensitivity, required capabilities, and your configured policy to select the optimal model. This ensures you always get the best results while controlling costs and privacy.</p>
+    
+    <h2 style="margin-top:2rem">How Routing Works</h2>
+    <p>When you send a prompt, the routing engine:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Analyzes the task</strong> — determines if it's coding, research, document work, data analysis, browser automation, etc.</li>
+      <li><strong>2. Checks capabilities</strong> — does the task need vision? Tool calling? Long context? Reasoning?</li>
+      <li><strong>3. Evaluates sensitivity</strong> — is the data normal, sensitive, or secret-risk?</li>
+      <li><strong>4. Applies your policy</strong> — quality-first, cost-first, privacy-first, local-only, or manual</li>
+      <li><strong>5. Selects the model</strong> — picks the best provider + model combination</li>
+      <li><strong>6. Returns a decision</strong> — includes the selected model, estimated cost, and confidence</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>📊 Task Types</h3>
+      <p>The routing engine recognizes these task types:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Type</th><th>Description</th><th>Best Providers</th></tr></thead>
+        <tbody>
+          <tr><td><code>coding</code></td><td>Code generation, refactoring, debugging</td><td>Anthropic, DeepSeek, OpenAI</td></tr>
+          <tr><td><code>research</code></td><td>Information gathering, analysis</td><td>OpenAI, Gemini, Anthropic</td></tr>
+          <tr><td><code>document</code></td><td>Writing, editing, formatting</td><td>OpenAI, Anthropic, Gemini</td></tr>
+          <tr><td><code>data</code></td><td>Data analysis, spreadsheet work</td><td>OpenAI, Gemini, DeepSeek</td></tr>
+          <tr><td><code>browser</code></td><td>Web browsing, form filling</td><td>OpenAI, Anthropic (vision)</td></tr>
+          <tr><td><code>review</code></td><td>Code review, feedback</td><td>Anthropic, OpenAI</td></tr>
+          <tr><td><code>security</code></td><td>Security analysis, vulnerability detection</td><td>Anthropic, OpenAI</td></tr>
+          <tr><td><code>general</code></td><td>General conversation, Q&A</td><td>Any provider</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     ${policies.map((p, i) => `<div class="detail-card fade-in delay-${(i % 5) + 1}">
       <h3>${p.title}</h3>
       <div class="meta"><span>${p.subtitle}</span></div>
@@ -938,17 +1119,52 @@ function generateRouting() {
     </div>`).join("\n")}
   </section>
   <section class="section">
-    <div class="section-label">How it works</div>
-    <h2>Routing decision flow</h2>
-    <p>When a task is created, the routing engine:</p>
-    <ul style="padding-left:1.25rem;margin-bottom:1.5rem;line-height:2">
-      <li><strong>1.</strong> Analyzes the task type and required capabilities</li>
-      <li><strong>2.</strong> Checks sensitivity level (normal / sensitive / secret-risk)</li>
-      <li><strong>3.</strong> Applies your configured routing policy</li>
-      <li><strong>4.</strong> Selects the best provider + model combination</li>
-      <li><strong>5.</strong> Returns a routing decision with cost estimate</li>
-    </ul>
-    <p>Each routing decision includes an estimated cost class (low / medium / high / unknown) and may require user approval for high-cost or sensitive operations.</p>
+    <div class="section-label">Configuration</div>
+    <h2>Setting up routing</h2>
+    <p>Configure your routing policy in <strong>Settings → Routing</strong>:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> Choose your default policy (applies to all tasks unless overridden)</li>
+      <li><strong>2.</strong> Optionally set per-project policies (override for specific projects)</li>
+      <li><strong>3.</strong> Configure fallback providers (what to use if primary fails)</li>
+      <li><strong>4.</strong> Set cost limits (maximum tokens/cost per task)</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>💡 When to Use Each Policy</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Policy</th><th>Best For</th><th>Trade-offs</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Quality-first</strong></td><td>Important tasks, production code, client work</td><td>Higher cost, slower</td></tr>
+          <tr><td><strong>Cost-first</strong></td><td>Routine tasks, development, testing</td><td>May use weaker models</td></tr>
+          <tr><td><strong>Privacy-first</strong></td><td>Sensitive data, proprietary code, personal info</td><td>Limited to local models</td></tr>
+          <tr><td><strong>Local-only</strong></td><td>Offline work, air-gapped environments</td><td>Requires local hardware</td></tr>
+          <tr><td><strong>Manual</strong></td><td>Learning, comparing providers, specific model needs</td><td>Slower workflow</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 Fallback Chain</h3>
+      <p>If the primary provider fails, the routing engine tries alternatives:</p>
+      <pre><code>// Example fallback configuration
+{
+  "routing": {
+    "policy": "quality-first",
+    "fallback": [
+      "anthropic/claude-3-5-sonnet",
+      "openai/gpt-4o",
+      "deepseek/deepseek-coder",
+      "ollama/llama3"
+    ],
+    "maxRetries": 3,
+    "costLimit": {
+      "perTask": 0.50,
+      "perDay": 10.00
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">The engine tries each fallback in order until one succeeds. If all fail, it notifies you and asks for manual intervention.</p>
+    </div>
   </section>`;
   return wrapPage("Routing", body, "routing");
 }
@@ -968,8 +1184,113 @@ function generateSkills() {
       <div class="stat-card fade-in delay-2"><div class="num">${categories.length}</div><div class="lbl">Categories</div></div>
       <div class="stat-card fade-in delay-3"><div class="num">${skills.filter(s=>s.risk==='low').length}</div><div class="lbl">Low Risk</div></div>
     </div>
-    <p>Skills are versioned JSON-manifest agent capabilities published to the registry at <code>registry/skills/</code>. Each skill defines its identity, publisher, authentication requirements, permissions, tools, and install instructions.</p>
+    <p>Skills are the core extension mechanism in Aura Work. Each skill is a <strong>versioned JSON manifest</strong> that defines a specific capability the agent can use — from creating documents and spreadsheets to automating browsers and analyzing data. Skills are published to the registry at <code>registry/skills/</code> and can be installed from the marketplace.</p>
     
+    <h2 style="margin-top:2rem">What is a Skill?</h2>
+    <p>A skill is a self-contained agent capability that includes:</p>
+    <ul style="padding-left:1.25rem;margin-bottom:1.5rem;line-height:2">
+      <li><strong>Identity</strong> — unique ID, name, version, and publisher</li>
+      <li><strong>Categories</strong> — tags for filtering (documents, code, data, browser, etc.)</li>
+      <li><strong>Tools</strong> — the actual functions the agent can call</li>
+      <li><strong>Permissions</strong> — what the skill needs access to (files, shell, browser, etc.)</li>
+      <li><strong>Risk level</strong> — low, medium, or high based on required permissions</li>
+      <li><strong>Install instructions</strong> — how to set up the skill</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 How Skills Work</h3>
+      <p>When you ask the agent to perform a task, it analyzes your request and determines which skills are needed. The agent then loads the skill manifest, checks permissions, and executes the required tools. Each tool call goes through the permission gate — if the skill needs file access or shell commands, you'll be asked to approve (unless you've set the profile to auto-allow).</p>
+      <p style="margin-top:.75rem">Skills are <strong>sandboxed</strong> — they can only access what their manifest declares. A document skill can't execute shell commands unless explicitly granted. This ensures security even with third-party skills from the marketplace.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Using Skills</h3>
+      <p>Skills are used automatically when you interact with the agent. For example:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>"Create a PDF report"</strong> → Agent uses the <code>aura-pdf</code> skill</li>
+        <li><strong>"Analyze this spreadsheet"</strong> → Agent uses the <code>aura-spreadsheets</code> skill</li>
+        <li><strong>"Browse this website and extract data"</strong> → Agent uses the <code>aura-browser-assistant</code> skill</li>
+        <li><strong>"Convert this image to WebP"</strong> → Agent uses the <code>aura-file-converter</code> skill</li>
+      </ul>
+      <p style="margin-top:.75rem">You can also explicitly request a skill by name: <code>"Use the research skill to find information about..."</code></p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 Skill Manifest Format</h3>
+      <p>Each skill is defined in a JSON file with this structure:</p>
+      <pre><code>{
+  "id": "aura-documents",
+  "name": "Documents",
+  "version": "1.0.0",
+  "summary": "Create, edit, and format documents",
+  "description": "Full document processing with...",
+  "publisher": "aura-work",
+  "categories": ["documents", "productivity"],
+  "risk": "low",
+  "permissions": [
+    { "category": "file", "action": "write", "target": "*.md" }
+  ],
+  "tools": [
+    {
+      "name": "create_document",
+      "description": "Create a new document",
+      "parameters": {
+        "title": { "type": "string", "required": true },
+        "format": { "type": "string", "enum": ["md", "txt", "docx"] }
+      }
+    }
+  ],
+  "install": {
+    "command": "npm install",
+    "workingDir": "skills/documents"
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏗️ Creating Custom Skills</h3>
+      <p>You can create your own skills by following these steps:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Create a new JSON file in <code>registry/skills/</code></li>
+        <li><strong>2.</strong> Define the skill identity (id, name, version, publisher)</li>
+        <li><strong>3.</strong> Add categories and set the risk level</li>
+        <li><strong>4.</strong> Declare required permissions (file, shell, browser, etc.)</li>
+        <li><strong>5.</strong> Define tools with their parameters and descriptions</li>
+        <li><strong>6.</strong> Add install instructions if needed</li>
+        <li><strong>7.</strong> Validate with <code>node scripts/validate-marketplace-manifests.js</code></li>
+        <li><strong>8.</strong> Submit a PR to the registry</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>registry/skills/aura-documents.json</code> for a complete example.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📊 Risk Levels Explained</h3>
+      <p>Each skill has a risk level based on its required permissions:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Level</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>low</code></td><td>Read-only access, no side effects</td><td>Research, data analysis</td></tr>
+          <tr><td><code>medium</code></td><td>File writes, network requests</td><td>Document creation, browser automation</td></tr>
+          <tr><td><code>high</code></td><td>Shell execution, system access</td><td>Automation, VM operations</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">High-risk skills require explicit approval in <code>ask-first</code> mode. You can configure auto-approval for specific categories in Settings → Permissions.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🏪 Marketplace</h3>
+      <p>The marketplace (<code>registry/marketplace.json</code>) aggregates skills, MCP servers, and plugins. Each entry includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Localized descriptions</strong> — available in 20 languages</li>
+        <li><strong>Icon and cover images</strong> — SVG assets in <code>registry/assets/</code></li>
+        <li><strong>Version history</strong> — for updates and rollbacks</li>
+        <li><strong>Publisher verification</strong> — official vs community skills</li>
+        <li><strong>Compatibility info</strong> — minimum Aura Work version required</li>
+      </ul>
+      <p style="margin-top:.75rem">Install skills from the Plugins panel in the desktop app or use the CLI: <code>aura skill install &lt;skill-id&gt;</code></p>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Filter by Category</div>
     <div class="skills-filter">
       <button class="filter-btn active" onclick="filterSkills('all')">All</button>
@@ -1004,7 +1325,32 @@ function generateSidecars() {
       <div class="stat-card fade-in delay-1"><div class="num">${sidecars.length}</div><div class="lbl">Sidecars</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">TypeScript</div><div class="lbl">Language</div></div>
     </div>
-    <p>Sidecars are independent Node.js daemon processes managed by the Tauri shell. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP. They provide sandboxed, isolated capabilities that the agent orchestrator can invoke.</p>
+    <p>Sidecars are <strong>independent Node.js daemon processes</strong> managed by the Tauri shell. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP. They provide sandboxed, isolated capabilities that the agent orchestrator can invoke.</p>
+    
+    <h2 style="margin-top:2rem">Why Sidecars?</h2>
+    <p>The sidecar architecture provides several benefits:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Isolation</strong> — each sidecar runs in its own process, so crashes don't affect the main app</li>
+      <li><strong>Security</strong> — sidecars are sandboxed and authenticated, limiting their access</li>
+      <li><strong>Extensibility</strong> — new capabilities can be added as new sidecars without modifying the core</li>
+      <li><strong>Resource management</strong> — each sidecar can be started/stopped independently</li>
+      <li><strong>Language flexibility</strong> — sidecars can be written in any language (currently all TypeScript)</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🔌 Communication</h3>
+      <p>Sidecars communicate with the main app via:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Method</th><th>Port</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP API</strong></td><td>47821-47830</td><td>REST endpoints for task management, health checks</td></tr>
+          <tr><td><strong>IPC</strong></td><td>N/A</td><td>Direct inter-process communication for fast operations</td></tr>
+          <tr><td><strong>WebSocket</strong></td><td>47826</td><td>Real-time streaming for logs and events</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">All sidecars expose a <code>GET /health</code> endpoint that returns status, version, and phase information.</p>
+    </div>
+
     ${sidecars.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}">
       <h3>${s.name}</h3>
       <div class="meta"><span>${s.path}</span><span>${s.lang}</span></div>
@@ -1012,9 +1358,91 @@ function generateSidecars() {
     </div>`).join("\n")}
   </section>
   <section class="section">
+    <div class="section-label">Health Monitoring</div>
+    <h2>Checking sidecar status</h2>
+    <p>Each sidecar exposes a health endpoint. Check all sidecars at once:</p>
+    <pre><code># Check Agent sidecar health
+curl http://localhost:47821/health
+
+# Response:
+{
+  "phase": 7,
+  "version": "0.1.0-alpha",
+  "status": "ready",
+  "uptime": 3600
+}</code></pre>
+    <p style="margin-top:.75rem">The desktop app monitors sidecar health automatically and will restart failed sidecars. You can also check status in <strong>Settings → Diagnostics</strong>.</p>
+
+    <div class="detail-card">
+      <h3>📊 Sidecar Ports</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Sidecar</th><th>Port</th><th>Health Endpoint</th></tr></thead>
+        <tbody>
+          <tr><td>Agent</td><td>47821</td><td>GET /health</td></tr>
+          <tr><td>VM Helper</td><td>47822</td><td>GET /health</td></tr>
+          <tr><td>Browser Helper</td><td>47823</td><td>GET /health</td></tr>
+          <tr><td>Plugins Helper</td><td>47824</td><td>GET /health</td></tr>
+          <tr><td>Cloud Sync</td><td>47825</td><td>GET /health</td></tr>
+          <tr><td>Bridge</td><td>47826</td><td>GET /health</td></tr>
+          <tr><td>Computer Use</td><td>47828</td><td>GET /health</td></tr>
+          <tr><td>Cloud Server</td><td>47830</td><td>GET /health</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Security Model</div>
     <h2>Sidecar authentication</h2>
-    <p>All sidecars use a shared authentication system (<code>sidecar-auth.ts</code>) with token-based authorization. Each inter-process request is validated against a runtime-loaded sidecar token. Failed authentications are rejected with <code>401 Unauthorized</code>.</p>
+    <p>All sidecars use a shared authentication system with token-based authorization:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Token-based auth</strong> — each inter-process request must include a valid sidecar token</li>
+      <li><strong>Runtime-loaded</strong> — tokens are generated at app startup and loaded into each sidecar</li>
+      <li><strong>Request validation</strong> — every request is validated against the token</li>
+      <li><strong>401 rejection</strong> — failed authentications are rejected with <code>401 Unauthorized</code></li>
+    </ul>
+    <p style="margin-top:.75rem">The token is stored in memory only and never persisted to disk. It's regenerated on each app launch for security.</p>
+
+    <div class="detail-card">
+      <h3>🛡️ Isolation</h3>
+      <p>Each sidecar runs in its own process space with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Separate Node.js process</strong> — no shared memory or state</li>
+        <li><strong>Limited filesystem access</strong> — only the directories it needs</li>
+        <li><strong>No network access by default</strong> — must be explicitly granted</li>
+        <li><strong>Resource limits</strong> — CPU and memory usage is monitored</li>
+      </ul>
+      <p style="margin-top:.75rem">If a sidecar crashes, the main app detects it via health checks and can restart it automatically.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Development</div>
+    <h2>Building sidecars</h2>
+    <p>Sidecars are built with TypeScript and bundled with esbuild:</p>
+    <pre><code># Build all sidecars
+npm run build:sidecars
+
+# Build a specific sidecar
+npm run build:sidecar -w sidecar/aura-agent
+
+# Run a sidecar in development mode
+npm run sidecar  # Agent sidecar
+npm run vm-helper  # VM Helper
+npm run browser-helper  # Browser Helper</code></pre>
+    <p style="margin-top:.75rem">Each sidecar has its own <code>package.json</code> and can have its own dependencies. They share common types from <code>packages/shared/</code>.</p>
+
+    <div class="detail-card">
+      <h3>📝 Creating a New Sidecar</h3>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Create a new directory in <code>sidecar/</code></li>
+        <li><strong>2.</strong> Add <code>package.json</code> with dependencies</li>
+        <li><strong>3.</strong> Implement the health endpoint: <code>GET /health</code></li>
+        <li><strong>4.</strong> Implement your business logic endpoints</li>
+        <li><strong>5.</strong> Add authentication using <code>sidecar-auth.ts</code></li>
+        <li><strong>6.</strong> Register the sidecar in the main app's process manager</li>
+        <li><strong>7.</strong> Add build script to <code>package.json</code> root</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>sidecar/aura-agent/</code> for a complete example.</p>
+    </div>
   </section>`;
   return wrapPage("Sidecars", body, "sidecars");
 }
@@ -1041,21 +1469,94 @@ function generateLanguages() {
       <div class="stat-card fade-in delay-1"><div class="num">${languages.length}</div><div class="lbl">Languages</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">${rtlLocales.length}</div><div class="lbl">RTL Languages</div></div>
     </div>
-    <p>Aura Work is built for a global audience. The i18n system uses TypeScript source catalogs that emit Weblate-compatible JSON files. Adding a new language is a single PR away.</p>
+    <p>Aura Work is built for a <strong>global audience</strong>. The i18n system uses TypeScript source catalogs that emit Weblate-compatible JSON files. Adding a new language is a single PR away.</p>
+    
+    <h2 style="margin-top:2rem">Why i18n Matters</h2>
+    <p>Aura Work is used by developers worldwide. By supporting 20 languages, we ensure that:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Accessibility</strong> — developers can use the tool in their native language</li>
+      <li><strong>Inclusivity</strong> — RTL languages (Arabic, Persian) are fully supported</li>
+      <li><strong>Community</strong> — contributors can add translations for their language</li>
+      <li><strong>Global reach</strong> — the tool can be used in any country</li>
+    </ul>
+
     <div class="section-label">Supported Languages</div>
     <div class="lang-grid">${langItems}</div>
   </section>
   <section class="section">
     <div class="section-label">Architecture</div>
     <h2>How i18n works</h2>
-    <p>Translation source files live in <code>packages/i18n/src/catalog.ts</code> as a typed TypeScript object. Running <code>npm run build:locales</code> emits JSON files to <code>packages/i18n/locales/</code>. The system automatically detects the system language on first launch and falls back to English.</p>
+    <p>The i18n system is built with TypeScript and follows a layered architecture:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Source Catalog</strong> — Translation strings are defined in <code>packages/i18n/src/catalog.ts</code> as a typed TypeScript object</li>
+      <li><strong>2. Build Step</strong> — Running <code>npm run build:locales</code> emits JSON files to <code>packages/i18n/locales/</code></li>
+      <li><strong>3. Runtime Loading</strong> — The app detects the system language on first launch and loads the appropriate JSON</li>
+      <li><strong>4. Fallback</strong> — If a translation is missing, it falls back to English</li>
+    </ol>
+
     <div class="detail-card">
-      <h3>🌐 Adding a new language</h3>
-      <p>Add your locale to <code>SUPPORTED_LOCALES</code> in <code>packages/i18n/src/catalog.ts</code>, translate the strings, run the build script, and submit a PR. The project uses Weblate for community translations.</p>
+      <h3>🌐 Adding a New Language</h3>
+      <p>Contributing a new language is straightforward:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Copy <code>packages/i18n/locales/en.json</code> to a new file (e.g., <code>hi.json</code> for Hindi)</li>
+        <li><strong>2.</strong> Translate the values only — keep all keys in English</li>
+        <li><strong>3.</strong> Add your locale to <code>SUPPORTED_LOCALES</code> in <code>packages/i18n/src/catalog.ts</code></li>
+        <li><strong>4.</strong> Run <code>npm run build:locales -w @aura-os/i18n</code></li>
+        <li><strong>5.</strong> Test your translations in the app</li>
+        <li><strong>6.</strong> Submit a PR with the changes</li>
+      </ol>
+      <p style="margin-top:.75rem">The project uses <a href="https://weblate.org" style="color:var(--color-accent)">Weblate</a> for community translations. You can contribute translations via Weblate or directly via PR.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📐 RTL support</h3>
-      <p>Arabic and Persian use <code>dir="rtl"</code> layout. The design system includes IBM Plex Sans Arabic and Tajawal fonts for proper Arabic typography with built-in font substitution.</p>
+      <h3>📐 RTL Support</h3>
+      <p>Arabic and Persian use <code>dir="rtl"</code> layout. The RTL support includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Layout direction</strong> — entire UI flips horizontally</li>
+        <li><strong>Text alignment</strong> — text aligns to the right</li>
+        <li><strong>Navigation</strong> — sidebar and menus flip direction</li>
+        <li><strong>Typography</strong> — IBM Plex Sans Arabic and Tajawal fonts</li>
+        <li><strong>Icons</strong> — directional icons are flipped (arrows, chevrons)</li>
+        <li><strong>Animations</strong> — slide animations respect RTL direction</li>
+      </ul>
+      <p style="margin-top:.75rem">The design system includes proper Arabic typography with built-in font substitution for mixed-language content.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Translation Keys</h3>
+      <p>Translation keys follow a hierarchical structure:</p>
+      <pre><code>{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}",
+    "stats": {
+      "tasks": "Tasks",
+      "projects": "Projects"
+    }
+  },
+  "errors": {
+    "network": "Network error. Please check your connection.",
+    "auth": "Authentication failed. Please log in again."
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Use dot notation to reference keys: <code>t('dashboard.stats.tasks')</code>. Variables are wrapped in double curly braces: <code>{{name}}</code>.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📝 Translation Best Practices</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Keep keys in English</strong> — only translate values</li>
+        <li><strong>Use placeholders</strong> — for dynamic content (e.g., <code>{{count}}</code>)</li>
+        <li><strong>Consider context</strong> — some words have different translations based on context</li>
+        <li><strong>Test thoroughly</strong> — check for text overflow, alignment issues</li>
+        <li><strong>Use Weblate</strong> — for community translations and consistency</li>
+        <li><strong>Review existing translations</strong> — check <code>en.json</code> for the complete list</li>
+      </ul>
     </div>
   </section>`;
   return wrapPage("Languages", body, "languages");
@@ -1077,7 +1578,22 @@ function generateThemes() {
       <div class="stat-card fade-in delay-2"><div class="num">${luxuryCount}</div><div class="lbl">Luxury Themes</div></div>
       <div class="stat-card fade-in delay-3"><div class="num">system</div><div class="lbl">Auto mode</div></div>
     </div>
-    <p>Every theme uses flat, solid colors with no gradients — a design philosophy inspired by warm, calm, coworking spaces. The design tokens are built with CSS custom properties, making themes fully composable.</p>
+    <p>Every theme uses <strong>flat, solid colors with no gradients</strong> — a design philosophy inspired by warm, calm, coworking spaces. The design tokens are built with CSS custom properties, making themes fully composable.</p>
+    
+    <h2 style="margin-top:2rem">Theme Categories</h2>
+    <p>Themes are organized into categories:</p>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Category</th><th>Description</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Standard</strong></td><td>Clean, professional themes for daily use</td><td>light, dark, amoled</td></tr>
+        <tr><td><strong>Colorful</strong></td><td>Vibrant themes with distinct color palettes</td><td>blue, forest, ocean, sunset</td></tr>
+        <tr><td><strong>Luxury</strong></td><td>Premium themes with rich, sophisticated colors</td><td>luxury-gold, luxury-emerald, luxury-royal</td></tr>
+        <tr><td><strong>Specialty</strong></td><td>Unique themes for specific moods or environments</td><td>cyberpunk, matrix, sakura, coffee</td></tr>
+        <tr><td><strong>Accessibility</strong></td><td>High-contrast themes for better readability</td><td>high-contrast</td></tr>
+        <tr><td><strong>System</strong></td><td>Auto-detects OS preference (light/dark)</td><td>system</td></tr>
+      </tbody>
+    </table>
+
     <div class="section-label">Theme Gallery</div>
     <div class="theme-grid">
       ${themes.map((t, i) => {
@@ -1098,14 +1614,85 @@ function generateThemes() {
   <section class="section">
     <div class="section-label">Design System</div>
     <h2>Token architecture</h2>
-    <p>The design system is defined in <code>packages/ui/src/tokens.css</code> with a layered architecture: primitives → semantic tokens → component tokens. All themes share the same primitive color ramps and override only semantic tokens.</p>
+    <p>The design system is defined in <code>packages/ui/src/tokens.css</code> with a layered architecture:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Primitives</strong> — base color ramps (sand, terracotta, green, amber, red)</li>
+      <li><strong>2. Semantic tokens</strong> — purpose-driven colors (--color-bg, --color-text, --color-accent)</li>
+      <li><strong>3. Component tokens</strong> — component-specific overrides (--button-bg, --card-border)</li>
+    </ol>
+    <p style="margin-top:.75rem">All themes share the same primitive color ramps and override only semantic tokens. This ensures consistency while allowing customization.</p>
+
     <div class="detail-card">
-      <h3>🎨 Color primitives</h3>
-      <p>A warm, clay-based palette with sand neutrals, a single terracotta accent, and semantic greens/ambers/reds. The accent shifts between light and dark modes while maintaining the same warm character.</p>
+      <h3>🎨 Color Primitives</h3>
+      <p>A warm, clay-based palette with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Sand neutrals</strong> — warm grays for backgrounds and text</li>
+        <li><strong>Terracotta accent</strong> — a single accent color that shifts between light/dark modes</li>
+        <li><strong>Semantic greens</strong> — for success states and confirmations</li>
+        <li><strong>Amber warnings</strong> — for caution states and alerts</li>
+        <li><strong>Red errors</strong> — for error states and destructive actions</li>
+      </ul>
+      <p style="margin-top:.75rem">The accent shifts between light and dark modes while maintaining the same warm character.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📱 RTL & a11y ready</h3>
-      <p>The system includes a high-contrast theme for accessibility, full RTL support for Arabic/Persian, and system-preference auto-detection via <code>prefers-color-scheme</code>.</p>
+      <h3>📝 CSS Custom Properties</h3>
+      <p>Themes use CSS custom properties for all colors:</p>
+      <pre><code>:root {
+  /* Backgrounds */
+  --color-bg: #faf9f5;
+  --color-bg-weak: #f5f3ec;
+  --color-bg-card: #ffffff;
+  --color-bg-strong: #1e1b16;
+
+  /* Text */
+  --color-text: #5c5544;
+  --color-text-weak: #938a76;
+  --color-text-strong: #28241d;
+
+  /* Accent */
+  --color-accent: #c2683f;
+  --color-accent-warm: #cf7a52;
+  --color-accent-subtle: rgba(194, 104, 63, 0.11);
+
+  /* Semantic */
+  --color-success: #4f7d47;
+  --color-warning: #a9761f;
+  --color-danger: #b8482f;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(54, 46, 32, 0.06);
+  --shadow-md: 0 4px 16px rgba(54, 46, 32, 0.09);
+  --shadow-lg: 0 16px 40px rgba(54, 46, 32, 0.13);
+}</code></pre>
+      <p style="margin-top:.75rem">Override these properties in your custom theme to change the entire look.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔧 Creating Custom Themes</h3>
+      <p>Create your own theme by following these steps:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Copy an existing theme (e.g., <code>light.css</code>)</li>
+        <li><strong>2.</strong> Override the CSS custom properties with your colors</li>
+        <li><strong>3.</strong> Add your theme to <code>packages/ui/src/themes/</code></li>
+        <li><strong>4.</strong> Register it in the theme list</li>
+        <li><strong>5.</strong> Test in both light and dark modes</li>
+        <li><strong>6.</strong> Submit a PR</li>
+      </ol>
+      <p style="margin-top:.75rem">See <code>packages/ui/src/themes/</code> for all theme files.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📱 RTL & Accessibility</h3>
+      <p>The theme system includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>High-contrast theme</strong> — for accessibility (WCAG AA compliant)</li>
+        <li><strong>Full RTL support</strong> — for Arabic and Persian</li>
+        <li><strong>System preference detection</strong> — via <code>prefers-color-scheme</code></li>
+        <li><strong>Reduced motion</strong> — respects <code>prefers-reduced-motion</code></li>
+        <li><strong>Font scaling</strong> — supports browser font size adjustments</li>
+      </ul>
+      <p style="margin-top:.75rem">The <code>system</code> theme automatically matches your OS preference, switching between light and dark mode.</p>
     </div>
   </section>`;
   return wrapPage("Themes", body, "themes");
@@ -1124,7 +1711,60 @@ function generatePermissions() {
       <div class="stat-card fade-in delay-1"><div class="num">${profiles.length}</div><div class="lbl">Profiles</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">ask-first</div><div class="lbl">Default mode</div></div>
     </div>
-    <p>Aura Work uses a three-tier permission system. Every action is categorized (file, shell, browser, network) and checked against the active permission profile. Users can override per-action with "always allow" or "always ask".</p>
+    <p>Aura Work uses a <strong>three-tier permission system</strong> to control what the agent can do. Every action is categorized (file, shell, browser, network, etc.) and checked against the active permission profile. This ensures the agent can never do anything you haven't approved.</p>
+    
+    <h2 style="margin-top:2rem">Why Permissions Matter</h2>
+    <p>AI agents are powerful — they can read/write files, execute shell commands, browse the web, and interact with external services. Without proper controls, an agent could:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li>Modify or delete important files</li>
+      <li>Execute destructive shell commands</li>
+      <li>Send data to external services</li>
+      <li>Install unwanted software</li>
+      <li>Make unauthorized API calls</li>
+    </ul>
+    <p style="margin-top:.75rem">The permission system prevents this by requiring explicit approval for high-impact actions. You stay in control at all times.</p>
+
+    <div class="detail-card">
+      <h3>🔐 Three Permission Levels</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Level</th><th>Description</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>read-only</code></td>
+            <td>Agent can only read files and data. No modifications allowed.</td>
+            <td>Code review, research, analysis</td>
+          </tr>
+          <tr>
+            <td><code>ask-first</code></td>
+            <td>Agent asks before each high-impact action. You approve or deny.</td>
+            <td>Default mode, balanced control</td>
+          </tr>
+          <tr>
+            <td><code>full-access</code></td>
+            <td>Agent can do anything without asking. Use with caution.</td>
+            <td>Trusted automation, CI/CD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 Permission Categories</h3>
+      <p>Actions are grouped into categories for fine-grained control:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Category</th><th>Controls</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr><td><code>file</code></td><td>File read/write operations</td><td>Read source code, write new files, delete files</td></tr>
+          <tr><td><code>shell</code></td><td>Shell command execution</td><td>Run npm install, execute scripts, compile code</td></tr>
+          <tr><td><code>browser</code></td><td>Browser automation</td><td>Browse websites, fill forms, extract data</td></tr>
+          <tr><td><code>network</code></td><td>Network requests</td><td>API calls, downloads, webhooks</td></tr>
+          <tr><td><code>git</code></td><td>Git operations</td><td>Commit, push, branch, merge</td></tr>
+          <tr><td><code>plugin</code></td><td>Plugin/MCP calls</td><td>Invoke MCP tools, run plugin functions</td></tr>
+          <tr><td><code>computer-use</code></td><td>Desktop automation</td><td>Click, type, screenshot, app control</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     ${profiles.map((p, i) => `<div class="detail-card fade-in delay-${i+1}">
       <h3>${p.name}</h3>
       <p>${p.desc}</p>
@@ -1135,12 +1775,75 @@ function generatePermissions() {
     </div>`).join("\n")}
   </section>
   <section class="section">
+    <div class="section-label">Configuration</div>
+    <h2>Setting up permissions</h2>
+    <p>Configure permissions in <strong>Settings → Permissions</strong>:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> Choose your default permission level (read-only, ask-first, or full-access)</li>
+      <li><strong>2.</strong> Select a pre-built profile or create a custom one</li>
+      <li><strong>3.</strong> Configure per-category permissions (file, shell, browser, etc.)</li>
+      <li><strong>4.</strong> Set "always allow" or "always deny" for specific operations</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>⚙️ Custom Profiles</h3>
+      <p>Create custom permission profiles for different workflows:</p>
+      <pre><code>{
+  "name": "Development Profile",
+  "description": "Full access for trusted development work",
+  "permissions": {
+    "file": { "read": true, "write": true, "delete": "ask" },
+    "shell": { "execute": "ask", "destructive": "deny" },
+    "browser": { "browse": true, "forms": "ask" },
+    "git": { "commit": true, "push": "ask" },
+    "plugin": { "invoke": "ask" }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Profiles can be per-project — use read-only for client projects and full-access for personal projects.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🚨 High-Impact Actions</h3>
+      <p>These actions always require explicit approval in <code>ask-first</code> mode:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Permanent delete</strong> — deleting files or data</li>
+        <li><strong>Shell execution</strong> — running commands (especially destructive ones)</li>
+        <li><strong>Computer use</strong> — controlling desktop applications</li>
+        <li><strong>Remote dispatch</strong> — sending tasks to Aura Cloud</li>
+        <li><strong>File writes</strong> — modifying existing files</li>
+        <li><strong>Git commits</strong> — creating commits or pushing</li>
+        <li><strong>Browser forms</strong> — submitting forms on websites</li>
+        <li><strong>Plugin/MCP calls</strong> — invoking external tools</li>
+      </ul>
+      <p style="margin-top:.75rem">You can set "always allow" for specific operations you trust, but this is not recommended for high-impact actions.</p>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Audit Trail</div>
     <h2>Every action is logged</h2>
-    <p>All permission requests, grants, and denials are recorded in the audit log (<code>AuditEntry</code>) with actor, category, action, target, risk level, decision, and result. Users can review their full permission history at any time.</p>
+    <p>All permission requests, grants, and denials are recorded in the audit log with complete details:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Actor</strong> — who performed the action (agent or user)</li>
+      <li><strong>Category</strong> — file, shell, browser, git, plugin, etc.</li>
+      <li><strong>Action</strong> — read, write, execute, commit, etc.</li>
+      <li><strong>Target</strong> — file path, URL, command, etc.</li>
+      <li><strong>Risk level</strong> — low, medium, high, critical</li>
+      <li><strong>Decision</strong> — allow, deny, approved, pending</li>
+      <li><strong>Result</strong> — success, failure, pending</li>
+    </ul>
+    <p style="margin-top:.75rem">View the audit log in the <strong>Audit Log</strong> page. You can filter by category, risk level, date range, and more. The audit log is append-only and cannot be modified.</p>
+
     <div class="detail-card">
-      <h3>🔐 Encrypted vault</h3>
-      <p>Secrets, API keys, and session tokens are stored in a device-bound encrypted vault (<code>VaultStatus</code>) with biometric unlock support. The vault supports versioned secrets and secure deletion.</p>
+      <h3>🔐 Encrypted Vault</h3>
+      <p>Secrets, API keys, and session tokens are stored in a device-bound encrypted vault:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Encryption</strong> — ChaCha20-Poly1305 with Argon2 key derivation</li>
+        <li><strong>Device-bound</strong> — keys are tied to your device (DPAPI/Keychain/Secret Service)</li>
+        <li><strong>Biometric unlock</strong> — supports fingerprint/face recognition on supported platforms</li>
+        <li><strong>Versioned secrets</strong> — track changes to API keys over time</li>
+        <li><strong>Secure deletion</strong> — secrets are securely wiped when removed</li>
+      </ul>
+      <p style="margin-top:.75rem">The vault is stored at <code>%APPDATA%\\com.auraos.desktop\\vault.enc</code> on Windows, <code>~/Library/Application Support/com.auraos.desktop/vault.enc</code> on macOS, and <code>~/.config/com.auraos.desktop/vault.enc</code> on Linux.</p>
     </div>
   </section>`;
   return wrapPage("Permissions", body, "permissions");
@@ -1154,46 +1857,151 @@ function generateArchitecture() {
     <p class="subtitle">Tauri 2 + React 19 + Rust — a modern, multi-process desktop platform.</p>
   </div>
   <section class="section">
-    <h2>System architecture</h2>
-    <p>Aura Work is built on a <strong>multi-process architecture</strong> where the Tauri 2 shell hosts a React 19 frontend and manages 8 independent sidecar processes, each sandboxed and authenticated.</p>
+    <p>Aura Work is built on a <strong>multi-process architecture</strong> where the Tauri 2 shell hosts a React 19 frontend and manages 8 independent sidecar processes, each sandboxed and authenticated. This design ensures security, isolation, and extensibility.</p>
+    
+    <h2 style="margin-top:2rem">System Architecture</h2>
+    <p>The architecture follows a layered approach:</p>
+    <pre><code>┌─────────────────────────────────────────────────────────┐
+│                    Desktop Shell (Tauri 2 + Rust)        │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Frontend (React 19 + Vite)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Tasks │ │Files │ │ Git  │ │Browse│ │Plugins│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ IPC                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Rust Backend (Commands)                │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Vault │ │SQLite│ │Shell │ │ FS   │ │Process│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ HTTP/IPC                    │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Sidecar Services (Node.js)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Agent │ │  VM  │ │Browse│ │Plugin│ │Cloud │     │ │
+│  │  │:47821│ │:47822│ │:47823│ │:47824│ │:47825│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐                        │ │
+│  │  │Bridge│ │CompU │ │CloudS│                        │ │
+│  │  │:47826│ │:47828│ │:47830│                        │ │
+│  │  └──────┘ └──────┘ └──────┘                        │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘</code></pre>
     
     <div class="detail-card">
-      <h3>🖥️ Desktop shell (Tauri 2 + Rust)</h3>
-      <p>Window management, system tray, native menus, IPC bridge to sidecars, filesystem access, and process lifecycle. The Rust backend handles performance-critical operations and system integration.</p>
+      <h3>🖥️ Desktop Shell (Tauri 2 + Rust)</h3>
+      <p>The outer shell built with Tauri 2 and Rust. It handles:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Window management</strong> — native windows, system tray, menus</li>
+        <li><strong>IPC bridge</strong> — communication between frontend and sidecars</li>
+        <li><strong>Filesystem access</strong> — secure file operations with permission checks</li>
+        <li><strong>Process lifecycle</strong> — starting, stopping, and monitoring sidecars</li>
+        <li><strong>Vault management</strong> — encrypted storage for API keys and secrets</li>
+        <li><strong>SQLite database</strong> — local persistence for projects, tasks, settings</li>
+      </ul>
+      <p style="margin-top:.75rem">The Rust backend is performance-critical and security-sensitive. It handles operations that require system-level access.</p>
     </div>
     <div class="detail-card">
       <h3>🎨 Frontend (React 19 + TypeScript)</h3>
-      <p>UI layer with task management, file browser, Git integration, provider configuration, plugin marketplace, browser automation UI, computer-use controls, memory viewer, audit log, and settings.</p>
+      <p>The UI layer built with React 19 and Vite. It provides:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>14 main pages</strong> — Dashboard, Tasks, Files, Git, Terminal, Providers, Plugins, Browser, Computer Use, Scheduled Tasks, Memory, Audit Log, Cloud, Extensions</li>
+        <li><strong>10 settings tabs</strong> — General, Vault, VM, Cloud, Extension, Pet, Readiness, Diagnostics, Local Model, Approvals</li>
+        <li><strong>Chat interface</strong> — the main interaction point with the agent</li>
+        <li><strong>Monaco editor</strong> — code editing with syntax highlighting</li>
+        <li><strong>Design system</strong> — 35+ themes, RTL support, responsive layout</li>
+      </ul>
+      <p style="margin-top:.75rem">The frontend communicates with the Rust backend via Tauri's IPC system. All commands are typed and validated.</p>
     </div>
     <div class="detail-card">
-      <h3>⚙️ Agent engine (TypeScript)</h3>
-      <p>Multi-agent orchestration with specialized roles: planner decomposes tasks, executor runs steps, reviewer validates output, safety enforces boundaries. Supports custom tools and MCP servers.</p>
+      <h3>⚙️ Agent Engine (TypeScript)</h3>
+      <p>The brain of Aura Work — a multi-agent orchestration system:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Planner</strong> — decomposes tasks into step-by-step plans</li>
+        <li><strong>Executor</strong> — runs each step, calling tools as needed</li>
+        <li><strong>Reviewer</strong> — validates output for correctness and safety</li>
+        <li><strong>Safety</strong> — enforces boundaries and permission checks</li>
+      </ul>
+      <p style="margin-top:.75rem">The agent supports custom tools, MCP servers, and plugins. It can use any combination of capabilities to complete tasks.</p>
     </div>
     <div class="detail-card">
-      <h3>🔗 Bridge server (TypeScript)</h3>
-      <p>HTTP API for pairing external clients — CLI, browser extensions, Office add-ins. Enables remote task creation, status polling, and cross-device workflows.</p>
+      <h3>🔗 Bridge Server (TypeScript)</h3>
+      <p>HTTP API for pairing external clients:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>CLI</strong> — terminal-based control via <code>aura</code> command</li>
+        <li><strong>Chrome extension</strong> — browser integration for page reading</li>
+        <li><strong>Office add-in</strong> — document delegation from Word/Excel</li>
+      </ul>
+      <p style="margin-top:.75rem">The Bridge runs on port 47826 and requires session-based authentication. It only listens on localhost for security.</p>
     </div>
   </section>
   <section class="section">
     <div class="section-label">Data Flow</div>
     <h2>How data moves</h2>
-    <p>User input → React UI → Tauri IPC → Agent Orchestrator → Router → Provider Adapter → LLM API. File operations go through the permission gate before reaching the filesystem. All interactions are logged to the audit trail.</p>
+    <p>When you type a prompt, here's the complete data flow:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. User Input</strong> — You type in the React chat interface</li>
+      <li><strong>2. IPC Call</strong> — Frontend sends the prompt to Rust backend via Tauri IPC</li>
+      <li><strong>3. Task Creation</strong> — Rust creates a task in SQLite with status "planning"</li>
+      <li><strong>4. Agent Orchestration</strong> — Rust calls the Agent sidecar (port 47821)</li>
+      <li><strong>5. Planning</strong> — Planner agent creates a step-by-step plan</li>
+      <li><strong>6. Routing</strong> — Routing engine selects the best provider/model</li>
+      <li><strong>7. Permission Check</strong> — Each step is checked against permission profile</li>
+      <li><strong>8. Execution</strong> — Executor agent runs each step, calling tools</li>
+      <li><strong>9. Tool Calls</strong> — Tools may call other sidecars (VM, Browser, etc.)</li>
+      <li><strong>10. Review</strong> — Reviewer agent validates the output</li>
+      <li><strong>11. Response</strong> — Results are sent back to frontend via IPC</li>
+      <li><strong>12. Display</strong> — Frontend renders the results in the chat</li>
+    </ol>
+    <p style="margin-top:1.5rem">All interactions are logged to the audit trail. File operations go through the permission gate before reaching the filesystem.</p>
   </section>
   <section class="section">
     <div class="section-label">Tech Stack</div>
+    <h2>Technologies used</h2>
     <table>
       <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>Desktop Shell</td><td>Tauri 2</td><td>Native window, menus, system tray</td></tr>
-        <tr><td>Core Backend</td><td>Rust</td><td>Performance-critical operations</td></tr>
-        <tr><td>Frontend</td><td>React 19 + Vite 8</td><td>UI rendering</td></tr>
+        <tr><td>Desktop Shell</td><td>Tauri 2</td><td>Native window, menus, system tray, IPC</td></tr>
+        <tr><td>Core Backend</td><td>Rust</td><td>Performance-critical operations, security</td></tr>
+        <tr><td>Frontend</td><td>React 19 + Vite 8</td><td>UI rendering, hot reload, TypeScript</td></tr>
         <tr><td>Sidecars</td><td>Node.js / TypeScript</td><td>Background daemon services</td></tr>
         <tr><td>Agent Engine</td><td>TypeScript</td><td>Multi-agent orchestration</td></tr>
-        <tr><td>Persistence</td><td>SQLite</td><td>Local data storage</td></tr>
-        <tr><td>Encryption</td><td>Device-bound vault</td><td>Credential security</td></tr>
+        <tr><td>Persistence</td><td>SQLite (rusqlite)</td><td>Local data storage</td></tr>
+        <tr><td>Encryption</td><td>ChaCha20-Poly1305 + Argon2</td><td>Credential security</td></tr>
         <tr><td>Build System</td><td>npm workspaces + esbuild</td><td>Monorepo tooling</td></tr>
+        <tr><td>Package Format</td><td>Tauri bundler</td><td>.msi, .dmg, .deb, .AppImage</td></tr>
       </tbody>
     </table>
+  </section>
+  <section class="section">
+    <div class="section-label">Project Structure</div>
+    <h2>Codebase organization</h2>
+    <pre><code>aura-work/
+├── apps/desktop/           # Tauri desktop app
+│   ├── src/                # React components and pages
+│   └── src-tauri/src/      # Rust commands and business logic
+├── packages/
+│   ├── ui/src/             # Design system (tokens, components)
+│   ├── shared/             # TypeScript types and constants
+│   ├── i18n/               # i18n localization (20 languages)
+│   └── aura-plugin/        # Plugin SDK
+├── sidecar/
+│   ├── aura-agent/         # Task engine + providers
+│   ├── aura-vm-helper/     # VM/shell execution
+│   ├── aura-browser-helper/# Browser automation
+│   ├── aura-plugins-helper/# Plugin/MCP management
+│   ├── aura-cloud-sync/    # E2EE sync client
+│   ├── aura-bridge/        # Extension bridge
+│   ├── aura-computer-use/  # Computer Use helper
+│   └── aura-cloud/         # Self-hostable cloud server
+├── cli/aura-cli/           # CLI companion
+├── registry/               # Marketplace registry
+├── docs/                   # Feature documentation
+├── examples/               # Sample plugins and MCP servers
+├── qa/                     # Acceptance test suite
+└── scripts/                # Build, bundle, release scripts</code></pre>
   </section>`;
   return wrapPage("Architecture", body, "architecture");
 }
@@ -1206,32 +2014,129 @@ function generateCLI() {
     <p class="subtitle">Command-line bridge client for remote control of the Aura desktop app.</p>
   </div>
   <section class="section">
-    <p>The <code>aura</code> CLI tool pairs with the Aura Work desktop app via the Bridge sidecar. It allows creating tasks, checking status, and managing projects — all from the terminal.</p>
+    <p>The <code>aura</code> CLI tool pairs with the Aura Work desktop app via the Bridge sidecar. It allows creating tasks, checking status, and managing projects — all from the terminal. The CLI is perfect for automation, CI/CD pipelines, and developers who prefer terminal workflows.</p>
+    
+    <h2 style="margin-top:2rem">Installation</h2>
+    <p>Install the CLI globally via npm:</p>
+    <pre><code>npm install -g @aura-work/cli</code></pre>
+    <p style="margin-top:.75rem">Or use it directly with npx:</p>
+    <pre><code>npx @aura-work/cli status</code></pre>
+
     <div class="detail-card">
-      <h3>Commands</h3>
-      <table>
-        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <h3>📋 Complete Command Reference</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Command</th><th>Description</th><th>Example</th></tr></thead>
         <tbody>
-          <tr><td><code>aura status</code></td><td>Check bridge health and connection status</td></tr>
-          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>Pair CLI with desktop app</td></tr>
-          <tr><td><code>aura projects</code></td><td>List all projects</td></tr>
-          <tr><td><code>aura task create --project &lt;id&gt; --prompt "..."</code></td><td>Create and start a task</td></tr>
-          <tr><td><code>aura task get &lt;id&gt;</code></td><td>Get task details and status</td></tr>
-          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>Stream task execution logs</td></tr>
-          <tr><td><code>aura open task &lt;id&gt;</code></td><td>Open task in desktop UI</td></tr>
+          <tr><td><code>aura status</code></td><td>Check bridge health and connection</td><td><code>aura status</code></td></tr>
+          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>Pair CLI with desktop app</td><td><code>aura pair --code ABC123</code></td></tr>
+          <tr><td><code>aura projects</code></td><td>List all projects</td><td><code>aura projects</code></td></tr>
+          <tr><td><code>aura task create</code></td><td>Create and start a task</td><td><code>aura task create --project my-app --prompt "Add auth"</code></td></tr>
+          <tr><td><code>aura task get &lt;id&gt;</code></td><td>Get task details and status</td><td><code>aura task get task_abc123</code></td></tr>
+          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>Stream task execution logs</td><td><code>aura task logs task_abc123</code></td></tr>
+          <tr><td><code>aura open task &lt;id&gt;</code></td><td>Open task in desktop UI</td><td><code>aura open task task_abc123</code></td></tr>
         </tbody>
       </table>
     </div>
+
     <div class="detail-card">
-      <h3>🔐 Pairing flow</h3>
-      <p>1. In the desktop app, go to Extensions → Pair New Device<br>
-      2. Run <code>aura pair --code &lt;code&gt;</code><br>
-      3. The CLI saves a session token to <code>~/.aura/config.json</code><br>
-      4. All subsequent commands use this token for authentication</p>
+      <h3>🔐 Pairing Flow</h3>
+      <p>The CLI connects to the desktop app through the Bridge sidecar. Here's how to set it up:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Open the desktop app and go to <strong>Extensions → Pair New Device</strong></li>
+        <li><strong>2.</strong> A pairing code is displayed (valid for 10 minutes)</li>
+        <li><strong>3.</strong> Run <code>aura pair --code &lt;code&gt;</code> in your terminal</li>
+        <li><strong>4.</strong> The CLI saves a session token to <code>~/.aura/config.json</code></li>
+        <li><strong>5.</strong> All subsequent commands use this token for authentication</li>
+      </ol>
+      <p style="margin-top:.75rem">The pairing creates a secure session. You can revoke access anytime from the desktop app under Extensions → Paired Devices.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Security model</h3>
-      <p>The CLI connects through the local Bridge sidecar (port 47826). All requests must carry a valid session token. The CLI cannot bypass any permission — it respects the same permission profiles as the desktop UI.</p>
+      <h3>🔄 Usage Examples</h3>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Create a task from the terminal</h4>
+      <pre><code># Create a task in the current project
+aura task create --prompt "Fix the login bug in auth.ts"
+
+# Create a task in a specific project
+aura task create --project my-web-app --prompt "Add user profile page"
+
+# Create a task with specific permissions
+aura task create --prompt "Refactor database" --permissions "file,shell"</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Monitor task progress</h4>
+      <pre><code># Get task status
+aura task get task_abc123
+
+# Stream logs in real-time
+aura task logs task_abc123
+
+# Open task in desktop UI for visual monitoring
+aura open task task_abc123</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Automation script</h4>
+      <pre><code>#!/bin/bash
+# Run a task and wait for completion
+TASK_ID=$(aura task create --prompt "Run tests" --json | jq -r '.id')
+echo "Task created: $TASK_ID"
+
+# Poll for completion
+while true; do
+  STATUS=$(aura task get $TASK_ID --json | jq -r '.status')
+  if [ "$STATUS" = "completed" ]; then
+    echo "Task completed!"
+    break
+  elif [ "$STATUS" = "failed" ]; then
+    echo "Task failed!"
+    exit 1
+  fi
+  sleep 5
+done</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔒 Security Model</h3>
+      <p>The CLI connects through the local Bridge sidecar (port 47826). Key security features:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Session-based auth</strong> — each CLI session has a unique token</li>
+        <li><strong>Permission respect</strong> — CLI cannot bypass any permission, it follows the same profiles as the desktop UI</li>
+        <li><strong>Local only</strong> — Bridge only listens on localhost, no remote access</li>
+        <li><strong>Token revocation</strong> — revoke CLI access anytime from the desktop app</li>
+        <li><strong>Audit logging</strong> — all CLI actions are logged in the audit trail</li>
+      </ul>
+      <p style="margin-top:.75rem">The Bridge sidecar runs only when the desktop app is open. It stops when the app closes — no background daemon.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>⚡ CI/CD Integration</h3>
+      <p>Use the CLI in automation pipelines:</p>
+      <pre><code># GitHub Actions example
+name: Run AI Task
+on: push
+jobs:
+  ai-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @aura-work/cli
+      - run: aura pair --code \${{ secrets.AURA_PAIR_CODE }}
+      - run: aura task create --prompt "Review code changes" --wait</code></pre>
+      <p style="margin-top:.75rem">Store the pairing code as a GitHub secret. The <code>--wait</code> flag blocks until the task completes.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ Configuration</h3>
+      <p>The CLI stores its configuration in <code>~/.aura/config.json</code>:</p>
+      <pre><code>{
+  "sessionToken": "abc123...",
+  "bridgeHost": "localhost",
+  "bridgePort": 47826,
+  "defaultProject": "my-project",
+  "outputFormat": "text"  // or "json"
+}</code></pre>
+      <p style="margin-top:.75rem">Set <code>outputFormat</code> to <code>json</code> for machine-readable output in scripts.</p>
     </div>
   </section>`;
   return wrapPage("CLI", body, "cli");
@@ -1245,25 +2150,171 @@ function generateMCP() {
     <p class="subtitle">Model Context Protocol — extend agent capabilities with third-party tools.</p>
   </div>
   <section class="section">
-    <p>MCP (Model Context Protocol) is an open standard for connecting AI agents with external tools and data sources. Aura Work supports MCP servers as a first-class extension mechanism alongside built-in skills and plugins.</p>
+    <p>MCP (Model Context Protocol) is an <strong>open standard</strong> for connecting AI agents with external tools and data sources. Aura Work supports MCP servers as a first-class extension mechanism alongside built-in skills and plugins. MCP allows you to add new capabilities without modifying the core application — just install a server and the agent can use its tools.</p>
+    
+    <h2 style="margin-top:2rem">What is MCP?</h2>
+    <p>MCP is a protocol that lets AI agents communicate with external services through a standardized interface. Think of it as a <strong>universal adapter</strong> for AI tools — instead of building custom integrations for each service, MCP provides a common language that both the agent and the service understand.</p>
+    <p style="margin-top:.75rem">With MCP, you can connect the agent to:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Databases</strong> — query PostgreSQL, MySQL, SQLite, MongoDB</li>
+      <li><strong>APIs</strong> — interact with GitHub, Slack, Discord, Jira, etc.</li>
+      <li><strong>File systems</strong> — access cloud storage (S3, GCS, Azure Blob)</li>
+      <li><strong>Development tools</strong> — linters, formatters, test runners</li>
+      <li><strong>Custom services</strong> — your own internal tools and APIs</li>
+    </ul>
+
     <div class="detail-card">
-      <h3>How MCP works</h3>
-      <p>MCP servers are managed by the <strong>Plugins Helper</strong> sidecar. Each server defines tools, resources, and prompts that the agent can discover and invoke. Servers communicate over stdio or SSE transport.</p>
+      <h3>⚙️ How MCP Works in Aura Work</h3>
+      <p>MCP servers are managed by the <strong>Plugins Helper</strong> sidecar (port 47824). When you add an MCP server:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> The Plugins Helper starts the server process (for stdio) or connects to it (for SSE)</li>
+        <li><strong>2.</strong> The server announces its capabilities (tools, resources, prompts)</li>
+        <li><strong>3.</strong> These capabilities are registered with the agent engine</li>
+        <li><strong>4.</strong> When the agent needs a tool, it can now call the MCP server's tools</li>
+        <li><strong>5.</strong> Each tool call goes through the permission gate for approval</li>
+      </ol>
+      <p style="margin-top:.75rem">The agent automatically discovers which MCP tools are available and selects them when appropriate — you don't need to explicitly tell it to use an MCP tool.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Supported transports</h3>
-      <ul>
-        <li><strong>stdio</strong> — subprocess-based, ideal for local tools</li>
-        <li><strong>SSE</strong> — HTTP-based, for remote or containerized servers</li>
+      <h3>🔌 Supported Transports</h3>
+      <p>MCP supports two transport mechanisms:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Transport</th><th>How it Works</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>stdio</code></td>
+            <td>Server runs as a subprocess. Communication happens via stdin/stdout pipes.</td>
+            <td>Local tools, CLI wrappers, simple integrations</td>
+          </tr>
+          <tr>
+            <td><code>SSE</code></td>
+            <td>Server runs as an HTTP service. Communication happens via Server-Sent Events.</td>
+            <td>Remote services, containerized servers, multi-client setups</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Most community MCP servers use <code>stdio</code> because it's simpler — no network configuration needed. Use <code>SSE</code> when the server needs to be shared across multiple clients or runs in a container.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📦 Installing MCP Servers</h3>
+      <p>There are three ways to add MCP servers:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 1: Marketplace (Recommended)</h4>
+      <p>Open the <strong>Plugins panel</strong> in the desktop app, search for an MCP server, and click Install. The marketplace handles versioning, updates, and dependency management.</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 2: Manual Configuration</h4>
+      <p>Add a server manually in Settings → Plugins → MCP Servers:</p>
+      <pre><code>{
+  "name": "my-database-server",
+  "command": "node",
+  "args": ["path/to/mcp-server.js"],
+  "env": {
+    "DATABASE_URL": "postgresql://localhost/mydb"
+  }
+}</code></pre>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 3: Project-Level Config</h4>
+      <p>Add MCP servers to your project's <code>aura.jsonc</code> file:</p>
+      <pre><code>{
+  "mcp": {
+    "test-project-server": {
+      "type": "local",
+      "command": ["node", "/path/to/test-mcp-server.js"],
+      "enabled": true,
+      "environment": {
+        "TEST_ENV_VAR": "Hello from project-level config"
+      }
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Project-level servers are only available when working in that project — perfect for project-specific tools.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 Security & Permissions</h3>
+      <p>MCP tool calls are subject to the same permission system as built-in tools:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Per-tool approval</strong> — each MCP tool can be individually approved or denied</li>
+        <li><strong>Sandboxed execution</strong> — MCP servers run in isolated processes</li>
+        <li><strong>Permission declarations</strong> — servers must declare what they need access to</li>
+        <li><strong>Audit logging</strong> — all MCP calls are logged with tool name, arguments, and result</li>
       </ul>
+      <p style="margin-top:.75rem">In <code>ask-first</code> mode, you'll be prompted before each MCP tool call. You can set "always allow" for trusted servers in Settings → Permissions.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Installing MCP servers</h3>
-      <p>From the Plugins panel in the desktop app, search the marketplace or add a custom MCP server by providing its command and arguments. The Plugins Helper handles discovery, lifecycle, and capability registration.</p>
+      <h3>🛒 Marketplace</h3>
+      <p>The marketplace (<code>registry/marketplace.json</code>) includes MCP servers alongside skills and plugins. Each entry includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Server manifest</strong> — command, args, env vars, transport type</li>
+        <li><strong>Tool descriptions</strong> — what each tool does and its parameters</li>
+        <li><strong>Localized descriptions</strong> — available in 20 languages</li>
+        <li><strong>Version info</strong> — for updates and compatibility checks</li>
+        <li><strong>Risk assessment</strong> — based on required permissions</li>
+      </ul>
+      <p style="margin-top:.75rem">Browse the marketplace in the Plugins panel or check <code>registry/mcp/</code> for available servers.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📦 Marketplace</h3>
-      <p>The <code>MarketplaceEntry</code> system supports skills, MCP servers, and plugins with versioning, publisher verification, risk assessment, and localized descriptions.</p>
+      <h3>🛠️ Developing MCP Servers</h3>
+      <p>You can create your own MCP servers using the official MCP SDK:</p>
+      <pre><code>// my-mcp-server.js
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+const server = new Server({
+  name: "my-custom-server",
+  version: "1.0.0"
+}, {
+  capabilities: { tools: {} }
+});
+
+// Define a tool
+server.setRequestHandler("tools/list", async () => ({
+  tools: [{
+    name: "my_tool",
+    description: "Does something useful",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Input query" }
+      },
+      required: ["query"]
+    }
+  }]
+}));
+
+// Handle tool calls
+server.setRequestHandler("tools/call", async (request) => {
+  const { name, arguments: args } = request.params;
+  if (name === "my_tool") {
+    return { content: [{ type: "text", text: "Result: " + args.query }] };
+  }
+});
+
+// Start the server
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+      <p style="margin-top:.75rem">See <code>examples/mcp-server/</code> for a complete working example.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 Common MCP Servers</h3>
+      <p>Popular community MCP servers include:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Server</th><th>Purpose</th><th>Transport</th></tr></thead>
+        <tbody>
+          <tr><td><code>filesystem</code></td><td>Read/write files, search, list directories</td><td>stdio</td></tr>
+          <tr><td><code>github</code></td><td>Manage repos, issues, PRs via GitHub API</td><td>stdio</td></tr>
+          <tr><td><code>postgres</code></td><td>Query PostgreSQL databases</td><td>stdio</td></tr>
+          <tr><td><code>slack</code></td><td>Send messages, read channels</td><td>stdio</td></tr>
+          <tr><td><code>puppeteer</code></td><td>Browser automation with Chrome</td><td>stdio</td></tr>
+          <tr><td><code>brave-search</code></td><td>Web search via Brave API</td><td>stdio</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Find more at <a href="https://github.com/modelcontextprotocol/servers" style="color:var(--color-accent)">github.com/modelcontextprotocol/servers</a></p>
     </div>
   </section>`;
   return wrapPage("MCP", body, "mcp");
@@ -1277,31 +2328,138 @@ function generateQuickStart() {
     <p class="subtitle">From zero to running your first AI agent task.</p>
   </div>
   <section class="section">
+    <p>This guide will get you from installation to your first AI-powered task in under 5 minutes. Aura Work is available for <strong>Windows, macOS, and Linux</strong>.</p>
+
+    <h2 style="margin-top:2rem">System Requirements</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Platform</th><th>Requirements</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Windows</strong></td><td>Windows 10+ (WebView2 included), 4GB RAM minimum</td></tr>
+        <tr><td><strong>macOS</strong></td><td>macOS 11+, Xcode Command Line Tools</td></tr>
+        <tr><td><strong>Linux</strong></td><td>Ubuntu 20.04+, libwebkit2gtk-4.1-dev, libappindicator3-dev</td></tr>
+      </tbody>
+    </table>
+
     <div class="detail-card">
       <h3>1. Install</h3>
-      <p>Download the latest release from <a href="https://github.com/hbx12/aura-work/releases/latest">GitHub Releases</a>. Installers are available for Windows, macOS, and Linux.</p>
+      <p>Download the latest release from <a href="https://github.com/hbx12/aura-work/releases/latest" style="color:var(--color-accent)">GitHub Releases</a>. Installers are available for Windows (.msi), macOS (.dmg), and Linux (.deb, .AppImage).</p>
+      <p style="margin-top:.75rem"><strong>Windows:</strong> Run the .msi installer and follow the prompts. The app will be added to your Start Menu.</p>
+      <p style="margin-top:.5rem"><strong>macOS:</strong> Open the .dmg file and drag Aura Work to your Applications folder.</p>
+      <p style="margin-top:.5rem"><strong>Linux:</strong> Install the .deb package with <code>sudo dpkg -i aura-work.deb</code> or run the .AppImage directly.</p>
     </div>
+
     <div class="detail-card">
       <h3>2. Launch</h3>
       <p>Open Aura Work. The app starts with a default project and the Agent panel ready. You'll see the chat interface where you can type your first task.</p>
+      <p style="margin-top:.75rem">On first launch, the app will:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li>Create a local SQLite database for projects and tasks</li>
+        <li>Initialize the encrypted vault for API keys</li>
+        <li>Start the Agent sidecar (port 47821)</li>
+        <li>Detect your system language and apply the appropriate theme</li>
+      </ul>
     </div>
+
     <div class="detail-card">
-      <h3>3. Configure a provider</h3>
-      <p>Go to <strong>Settings → Providers</strong>. Add an API key for any provider (OpenAI, Anthropic, etc.) or start Ollama locally for free. Each provider is validated automatically.</p>
+      <h3>3. Configure a Provider</h3>
+      <p>Go to <strong>Settings → Providers</strong>. You need at least one AI provider to use Aura Work. Options:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Option A: Cloud Provider (Recommended for getting started)</h4>
+      <ol style="padding-left:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> Click on a provider (OpenAI, Anthropic, Gemini, etc.)</li>
+        <li><strong>2.</strong> Enter your API key</li>
+        <li><strong>3.</strong> Click "Validate" to test the connection</li>
+        <li><strong>4.</strong> Select which models you want to use</li>
+      </ol>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Option B: Local Provider (Free, no API key needed)</h4>
+      <ol style="padding-left:1.25rem;margin-top:.5rem;line-height:2">
+        <li><strong>1.</strong> Install <a href="https://ollama.ai" style="color:var(--color-accent)">Ollama</a> on your machine</li>
+        <li><strong>2.</strong> Pull a model: <code>ollama pull llama3</code></li>
+        <li><strong>3.</strong> In Aura Work, enable the Ollama provider</li>
+        <li><strong>4.</strong> The app auto-discovers available models</li>
+      </ol>
+      <p style="margin-top:.75rem">Local providers keep all data on your machine — no API keys, no internet required.</p>
     </div>
+
     <div class="detail-card">
-      <h3>4. Run your first task</h3>
-      <p>Type a prompt like: <code>"Create a new React component that fetches data from an API"</code>. The agent plans the task, executes it step by step, and shows you the results.</p>
+      <h3>4. Run Your First Task</h3>
+      <p>Type a prompt in the chat interface. Here are some examples to try:</p>
+      <pre><code># Code tasks
+"Create a new React component that fetches data from an API"
+"Fix the bug in auth.ts where login fails with special characters"
+"Add unit tests for the UserService class"
+
+# Document tasks
+"Create a PDF report summarizing the project structure"
+"Generate a spreadsheet with the test results"
+
+# Research tasks
+"Find information about the latest Node.js security best practices"
+"Compare PostgreSQL vs MongoDB for our use case"
+
+# Browser tasks
+"Browse https://example.com and extract all the headings"
+"Fill out the contact form on the website"</code></pre>
+      <p style="margin-top:.75rem">The agent will:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> Analyze your request and create a plan</li>
+        <li><strong>2.</strong> Select the best provider and model (based on your routing policy)</li>
+        <li><strong>3.</strong> Execute each step, calling tools as needed</li>
+        <li><strong>4.</strong> Show you the results and ask for approval on high-impact actions</li>
+      </ol>
     </div>
+
     <div class="detail-card">
       <h3>5. Explore</h3>
-      <p>Try skills from the registry, install MCP servers, configure routing policies, set up scheduled tasks, or pair the CLI for terminal-based control.</p>
+      <p>Now that you have your first task running, explore these features:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Skills</strong> — try "Use the research skill to..." or "Create a spreadsheet with..."</li>
+        <li><strong>MCP Servers</strong> — install MCP servers from the Plugins panel for more capabilities</li>
+        <li><strong>Routing Policies</strong> — change your routing policy in Settings → Routing</li>
+        <li><strong>Scheduled Tasks</strong> — set up recurring tasks in the Scheduled Tasks page</li>
+        <li><strong>CLI</strong> — install the CLI for terminal-based control: <code>npm install -g @aura-work/cli</code></li>
+        <li><strong>Browser Automation</strong> — try "Browse this website and..." for web tasks</li>
+        <li><strong>Computer Use</strong> — enable experimental computer use for desktop automation</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Configuration</div>
+    <h2>Essential settings</h2>
+    
+    <div class="detail-card">
+      <h3>🔀 Routing Policy</h3>
+      <p>Configure how the agent selects providers in <strong>Settings → Routing</strong>:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Quality-first</strong> — uses the best model available (recommended for important tasks)</li>
+        <li><strong>Cost-first</strong> — uses the cheapest model that can handle the task</li>
+        <li><strong>Privacy-first</strong> — only uses local providers (Ollama, LM Studio)</li>
+        <li><strong>Local-only</strong> — same as privacy-first, but stricter enforcement</li>
+        <li><strong>Manual</strong> — you choose the provider for each task</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 Permissions</h3>
+      <p>Configure what the agent can do in <strong>Settings → Permissions</strong>:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Ask-first</strong> (default) — agent asks before each high-impact action</li>
+        <li><strong>Read-only</strong> — agent can only read files, no modifications</li>
+        <li><strong>Full access</strong> — agent can do anything (use with caution)</li>
+      </ul>
+      <p style="margin-top:.75rem">You can also set per-category permissions (file, shell, browser, etc.) and create custom profiles.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🎨 Theme</h3>
+      <p>Choose from 35+ themes in <strong>Settings → General → Theme</strong>. Options include light, dark, AMOLED, and luxury themes. The <code>system</code> theme automatically matches your OS preference.</p>
     </div>
   </section>
   <section class="section">
     <div class="section-label">Next Steps</div>
     <h2>Going deeper</h2>
-    <p>Read about <a href="providers">Providers</a>, <a href="routing">Routing</a>, <a href="skills">Skills</a>, or <a href="architecture">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">New Contributor Guide</a>.</p>
+    <p>Read about <a href="providers" style="color:var(--color-accent)">Providers</a>, <a href="routing" style="color:var(--color-accent)">Routing</a>, <a href="skills" style="color:var(--color-accent)">Skills</a>, or <a href="architecture" style="color:var(--color-accent)">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" style="color:var(--color-accent)">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" style="color:var(--color-accent)">New Contributor Guide</a>.</p>
   </section>`;
   return wrapPage("Quick Start", body, "quickstart");
 }

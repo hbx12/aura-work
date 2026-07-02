@@ -218,6 +218,31 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="detail-card"><h3>تسجيل أدوات ديناميكي أثناء التشغيل</h3></div>
     <div class="detail-card"><h3>تنفيذ معزول مع التحكم بالأذونات</h3></div>
     <div class="detail-card"><h3>سوق خوادم MCP المجتمعية</h3></div>
+  <section class="section">
+    <div class="section-label">تطوير خادم MCP</div>
+    <h2>انشاء خادم MCP خاص بك</h2>
+    <p>يمكنك انشاء خادم MCP باستخدام Node.js. هذا مثال بسيط:</p>
+    <pre><code>import { Server } from "@modelcontextprotocol/sdk";
+
+const server = new Server({
+  name: "my-tools",
+  version: "1.0.0"
+});
+
+server.tool("hello", {
+  description: "يقول مرحبا",
+  handler: async ({ name }) =&gt; ({
+    content: `مرحبا ${name}!`
+  })
+});
+
+server.start();</code></pre>
+    <p style="margin-top:1rem">ضع الخادم في <code>~/.config/aura/mcp-servers/</code> وسيتم تحميله تلقائيا عند بدء التشغيل.</p>
+    <div class="detail-card" style="margin-top:1.5rem">
+      <h3>مكتبة MCP الرسمية</h3>
+      <p>نحن نبني مكتبة MCP للغة العربية تسهل انشاء خوادم MCP للناطقين بالعربية. تشمل ادوات جاهزة للبحث، الترجمة، التحليل النصي، والمزيد.</p>
+    </div>
+  </section>
   </section>
         </main>
        </div>

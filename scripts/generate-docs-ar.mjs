@@ -731,6 +731,47 @@ function generateOverviewAr() {
     <div class="detail-card"><h3>${tr("Sidecar Services")}</h3><p>${tr("8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more.")}</p></div>
     <div class="detail-card"><h3>${tr("Agent Engine")}</h3><p>${tr("Multi-agent orchestration with planner, executor, reviewer, and safety roles. Supports custom tools and MCP servers.")}</p></div>
     <div class="detail-card"><h3>${tr("Routing Engine")}</h3><p>${tr("Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.")}</p></div>
+  <section class="section">
+    <div class="section-label">لماذا Aura Work</div>
+    <h2>لماذا تختار Aura Work</h2>
+    <p>معظم أدوات الذكاء الاصطناعي إما سحابية فقط أو محدودة بمزود واحد. Aura Work يحل كلا المشكلتين:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>متعدد المزودين</strong> - استخدم OpenAI و Anthropic و Gemini و DeepSeek و Ollama من واجهة واحدة</li>
+      <li><strong>محلية أولا</strong> - بياناتك تبقى على جهازك، مشفرة بمفاتيح مرتبطة بالجهاز</li>
+      <li><strong>مقيدة بالأذونات</strong> - كل إجراء يتطلب موافقة صريحة</li>
+      <li><strong>قابلة للاستضافة الذاتية</strong> - شغل خادم المزامنة السحابية الخاص بك</li>
+      <li><strong>قابلة للتوسيع</strong> - أضف قدرات عبر المهارات وخوادم MCP والإضافات</li>
+    </ul>
+    <div class="detail-card">
+      <h3>القدرات الأساسية</h3>
+      <p>Aura Work أكثر من مجرد واجهة محادثة. إنه بيئة تطوير كاملة تشمل:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>محرك المهام</strong> - تنفيذ مهام متعددة الخطوات مع التخطيط والتنفيذ والمراجعة</li>
+        <li><strong>عمليات الملفات</strong> - قراءة وكتابة وبحث وإدارة الملفات</li>
+        <li><strong>تكامل Git</strong> - الحالة والفرق والالتزام وإدارة الفروع</li>
+        <li><strong>أتمتة المتصفح</strong> - تصفح المواقع واستخراج البيانات</li>
+        <li><strong>استخدام الحاسوب</strong> - التحكم بتطبيقات سطح المكتب</li>
+        <li><strong>صندوق الرمل</strong> - تنفيذ أوامر Shell في بيئات WSL2 أو حاويات</li>
+        <li><strong>المزامنة السحابية</strong> - مزامنة E2EE عبر الأجهزة</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">سير العمل اليومي</div>
+    <h2>كيف تستخدم Aura Work يوميا</h2>
+    <div class="detail-card">
+      <h3>للمطورين</h3>
+      <p>ابدأ ميزة جديدة: <code>aura "أضف مصادقة JWT"</code>. سيقوم Aura بتحليل قاعدة الشيفرة، وإنشاء خطة، وكتابة الأكواد، وتشغيل الاختبارات، وفتح PR. كل هذا بضغطة واحدة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>للكتاب والمحللين</h3>
+      <p>حلل مستندا: <code>aura "حلل التقرير السنوي واستخرج النقاط الرئيسية"</code>. ثم <code>aura "أنشئ عرضا تقديميا من هذه النتائج"</code>.</p>
+    </div>
+    <div class="detail-card">
+      <h3>لإدارة الأنظمة</h3>
+      <p>راقب الخادم: <code>aura "افحص استخدام القرص وانشئ تقريرا"</code>. دمج مع أدوات المراقبة عبر MCP.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Overview"), body, "overview");
 }
@@ -759,6 +800,36 @@ function generateQuickStartAr() {
     <div class="section-label">${tr("Next Steps")}</div>
     <h2>${tr("Going deeper")}</h2>
     <p>${tr("Read about")} <a href="providers.ar.html">${tr("Providers")}</a>, <a href="routing.ar.html">${tr("Routing")}</a>, <a href="skills.ar.html">${tr("Skills")}</a>, ${tr("or")} <a href="architecture.ar.html">${tr("Architecture")}</a>. ${tr("For contributors, see the")} <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
+  <section class="section">
+    <div class="section-label">التثبيت المتقدم</div>
+    <h2>خيارات التثبيت الاخرى</h2>
+    <div class="detail-card">
+      <h3>باستخدام Homebrew (macOS و Linux)</h3>
+      <pre><code>brew install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>باستخدام Winget (Windows)</h3>
+      <pre><code>winget install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>البناء من المصدر</h3>
+      <pre><code>git clone https://github.com/hbx12/aura-work.git
+cd aura-work
+npm install
+npm run build
+npm link</code></pre>
+    </div>
+    <p style="margin-top:1rem">يتطلب Node.js 18+. يدعم Windows و macOS و Linux مع حزم منفصلة لكل منصة.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">الاستخدام الاول</div>
+    <h2>تجربتك الاولى</h2>
+    <p>بعد التثبيت، جرب هذه الاوامر للتعرف على Aura Work:</p>
+    <pre><code>aura --help
+aura --version
+aura config list
+aura --dry-run "انشئ مشروع Node.js جديد"</code></pre>
+  </section>
   </section>`;
   return wrapPageAr(tr("Quick Start"), body, "quickstart");
 }
@@ -807,6 +878,40 @@ function generateProvidersAr() {
         <p>${desc}</p>
       </div>`;
     }).join("\n")}
+  <section class="section">
+    <div class="section-label">نظرة عامة على المزودين</div>
+    <h2>المزودون المدعومون</h2>
+    <p>يدعم Aura Work 10 مزودين لضمان المرونة القصوى. لكل مزود نقاط قوته:</p>
+    <div class="detail-card">
+      <h3>السحابيون (Cloud)</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>OpenAI</strong> - GPT-4o, GPT-4.5, o1, o3. أداء متميز في البرمجة والتحليل</li>
+        <li><strong>Anthropic</strong> - Claude Opus, Sonnet, Haiku. سياق طويل ورؤية حاسوبية</li>
+        <li><strong>Google Gemini</strong> - Gemini 2.5 Pro, Flash. متعدد الوسائط ونماذج خفيفة</li>
+        <li><strong>DeepSeek</strong> - DeepSeek-V3, R1. أداء قوي بتكلفة منخفضة</li>
+        <li><strong>xAI Grok</strong> - Grok-3. نماذج متطورة من xAI</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h3>المحليون (Local)</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Ollama</strong> - LLama, Mistral, Gemma, Qwen. خصوصية كاملة</li>
+        <li><strong>LM Studio</strong> - واجهة رسومية لتشغيل النماذج محليا</li>
+        <li><strong>LocalAI</strong> - OpenAI-compatible API محلية</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">التكوين</div>
+    <h2>كيفية تكوين المزودين</h2>
+    <p>استخدم الامر التالي لتكوين مزود:</p>
+    <pre><code>aura config set providers.openai.apiKey sk-...
+aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
+    <p>للمزودين المحليين:</p>
+    <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
+aura config set providers.ollama.model llama3.2</code></pre>
+    <p>كل المفاتيح تخزن مشفرة باستخدام تشفير على مستوى النظام (Keytar على macOS، DPAPI على Windows، libsecret على Linux).</p>
+  </section>
   </section>`;
   return wrapPageAr(tr("Providers"), body, "providers");
 }
@@ -834,6 +939,30 @@ function generateRoutingAr() {
         <p>${descMap[r.label]}</p>
       </div>`;
     }).join("\n")}
+  <section class="section">
+    <div class="section-label">استراتيجيات التوجيه</div>
+    <h2>خمس استراتيجيات توجيه</h2>
+    <div class="detail-card">
+      <h3>الجودة أولا (quality-first)</h3>
+      <p>يوجه الطلب إلى أفضل مزود متاح. يستخدم مقاييس الجودة (دقة HumanEval، سرعة الاستجابة، إلخ). مناسب للمهام الحرجة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>التكلفة أولا (cost-first)</h3>
+      <p>يختار أرخص مزود يلبي الحد الأدنى من الجودة. مناسب للمهام البسيطة أو معالجة البيانات الكبيرة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>الخصوصية أولا (privacy-first)</h3>
+      <p>يفضل المزودين المحليين (Ollama، LM Studio). لا يرسل بيانات إلى السحابة. يتطلب مزودا محليا واحدا على الأقل.</p>
+    </div>
+    <div class="detail-card">
+      <h3>محلي فقط (local-only)</h3>
+      <p>يستخدم المزودين المحليين حصرا. يفشل إذا لم يتوفر أي مزود محلي. للبيئات المعزولة تماما.</p>
+    </div>
+    <div class="detail-card">
+      <h3>يدوي (manual)</h3>
+      <p>تحدد المزود والنموذج يدويا لكل طلب: <code>aura --provider openai --model gpt-4o</code></p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Routing"), body, "routing");
 }
@@ -883,6 +1012,14 @@ function generateSkillsAr() {
         <p>${s.summary || s.description || ""}</p>
       </div>`).join("\n")}
     </div>
+  <section class="section">
+    <div class="section-label">مهارات مدمجة</div>
+    <h2>المهارات الاساسية</h2>
+    <div class="detail-card">
+      <h3>web-search</h3>
+      <p>يبحث في الويب ويستخرج معلومات حديثة مع روابط المصادر. يدعم محركات بحث متعددة.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Skills"), body, "skills");
 }
@@ -923,6 +1060,23 @@ function generateLanguagesAr() {
       <li>${tr("Optionally set RTL if your script is right-to-left")}</li>
       <li>${tr("Submit a pull request")}</li>
     </ul>
+  <section class="section">
+    <div class="section-label">دعم RTL</div>
+    <h2>دعم اللغات من اليمين لليسار</h2>
+    <p>يدعم Aura Work اللغات من اليمين لليسار (RTL) مثل العربية والعبرية والفارسية بشكل كامل. يتم ضبط اتجاه النص تلقائيا وفقا لإعدادات اللغة المختارة. جميع مكونات TUI (القوائم، النوافذ، مربعات الحوار) تعكس تخطيطها بشكل صحيح عند استخدام لغة RTL.</p>
+    <div class="detail-card">
+      <h3>اللغات المدعومة حاليا</h3>
+      <p>الإنجليزية، العربية، الإسبانية، الفرنسية، الألمانية، الصينية، اليابانية، الكورية، البرتغالية، الروسية، الهندية، التركية. مع إمكانية إضافة المزيد عبر مساهمات المجتمع.</p>
+    </div>
+    <div class="detail-card">
+      <h3>الترجمة الآلية</h3>
+      <p>يستخدم Aura Work نظام ترجمة مدمج يدعم الاستبدال السياقي (Contextual Replacement) مما يسمح بترجمة دقيقة حتى للجمل التي تحتوي على متغيرات ديناميكية مثل أسماء الملفات والنماذج.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المساهمة بلغة جديدة</h3>
+      <p>يمكن لأي شخص إضافة لغة جديدة. انسخ ملف <code>ar.json</code> في مجلد <code>src/i18n/</code>، وترجم القيم، وارفع PR. سنقوم بمراجعته ودمجه.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Languages"), body, "languages");
 }
@@ -963,6 +1117,20 @@ function generateThemesAr() {
     <div class="detail-card"><h3>${tr("Component tokens")}</h3><p>${tr("Fine-grained overrides per component (button, card, input)")}</p></div>
     <h2 style="margin-top:2rem">${tr("Theme Switching")}</h2>
     <p>${tr("Themes are applied dynamically via CSS custom properties. Switching between light, dark, amoled, or any of the 35+ themes is instantaneous — no page reload needed.")}</p>
+  <section class="section">
+    <div class="section-label">السمات المخصصة</div>
+    <h2>انشاء سمة مخصصة</h2>
+    <p>يمكنك انشاء سمة مخصصة بتعريف مجموعة من متغيرات CSS. ضع ملف السمة في <code>~/.config/aura/themes/</code> وسيتم تحميله تلقائيا.</p>
+    <pre><code>{
+  "name": "my-theme",
+  "colors": {
+    "bg-primary": "#1a1b26",
+    "fg-primary": "#c0caf5",
+    "accent": "#7aa2f7"
+  }
+}</code></pre>
+    <p style="margin-top:1rem">يمكنك تصدير السمات ومشاركتها مع المجتمع. السمات المميزة من المجتمع تضاف إلى المعرض الرسمي.</p>
+  </section>
   </section>`;
   return wrapPageAr(tr("Themes"), body, "themes");
 }
@@ -992,6 +1160,32 @@ function generatePermissionsAr() {
     }
   ]
 }</code></pre>
+  <section class="section">
+    <div class="section-label">نموذج الأذونات</div>
+    <h2>فهم نموذج الأذونات</h2>
+    <p>يستخدم Aura Work نظام أذونات خماسي المستويات للتحكم الكامل في ما يمكن للذكاء الاصطناعي فعله:</p>
+    <div class="detail-card">
+      <h3>المستوى 1: قراءة نظام الملفات</h3>
+      <p>السماح بقراءة الملفات والمجلدات. هذا هو المستوى الأساسي المطلوب لمعظم المهام. يمكن تقييده بمجلدات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 2: كتابة نظام الملفات</h3>
+      <p>السماح بإنشاء وتعديل وحذف الملفات. مطلوب لمهام البرمجة. يمكن تقييده بمسارات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 3: تنفيذ الأوامر</h3>
+      <p>السماح بتشغيل أوامر shell. مطلوب لتشغيل الاختبارات والبناء. يمكن تقييده بأوامر مسموحة فقط.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 4: الوصول للشبكة</h3>
+      <p>السماح بالاتصال بالإنترنت. مطلوب لاستدعاءات API والبحث على الويب. يمكن تقييده بنطاقات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 5: التحكم الكامل</h3>
+      <p>وصول غير مقيد. يتطلب تأكيدا صريحا من المستخدم. غير موصى به للاستخدام اليومي.</p>
+    </div>
+    <p style="margin-top:1.5rem">يمكن تكوين الأذونات بشكل دقيق في ملف <code>aura.config.json</code>. كل طلب يعرض الأذونات المطلوبة قبل التنفيذ.</p>
+  </section>
   </section>`;
   return wrapPageAr(tr("Permissions"), body, "permissions");
 }
@@ -1040,6 +1234,34 @@ function generateArchitectureAr() {
     <div class="section-label">${tr("Security Model")}</div>
     <h2>${tr("Security Model")}</h2>
     <p>${tr("All sidecar processes run with minimal permissions. The credential store uses OS-level encryption (Keytar). Code execution is sandboxed in isolated VMs.")}</p>
+  <section class="section">
+    <div class="section-label">هندسة النظام</div>
+    <h2>تفاصيل الهندسة المعمارية</h2>
+    <div class="detail-card">
+      <h3>طبقة CLI (واجهة سطر الأوامر)</h3>
+      <p>نقطة الدخول الرئيسية. تحلل الأوامر، تدير الجلسات، وتنسق بين الطبقات. مبنية على Commander.js مع دعم كامل للـ subcommands والإضافات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة TUI (واجهة المستخدم الطرفية)</h3>
+      <p>واجهة تفاعلية مبنية على Ink (React للطرفية). تدعم النوافذ المتعددة، التمرير، الموضوعات، وإدخال الفأرة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المحرك (Engine)</h3>
+      <p>قلب النظام. تدير حلقة Agent: التخطيط والتنفيذ والملاحظة والمراجعة. تستخدم نموذج ReAct مع تحسينات مخصصة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المزودين (Providers)</h3>
+      <p>طبقة تجريد موحدة لجميع مزودي LLM. تترجم الطلبات الداخلية إلى صيغ API الخاصة بكل مزود.</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة Sidecars</h3>
+      <p>عمليات خلفية متخصصة: Sandbox (عزل التنفيذ)، FileWatcher (مراقبة التغييرات)، Search (فهرسة الملفات)، Browser (أتمتة المتصفح).</p>
+    </div>
+    <div class="detail-card">
+      <h3>طبقة المزامنة (Sync)</h3>
+      <p>مزامنة مشفرة من طرف إلى طرف (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال و SQLite للتخزين المحلي.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Architecture"), body, "architecture");
 }
@@ -1070,6 +1292,40 @@ aura run "حلل هذا الكود" --json</code></pre>
     <div class="detail-card"><h3>${tr("CI/CD pipeline integration")}</h3></div>
     <div class="detail-card"><h3>${tr("Multiple session management")}</h3></div>
     <div class="detail-card"><h3>${tr("JSON output for tooling")}</h3></div>
+  <section class="section">
+    <div class="section-label">اوامر متقدمة</div>
+    <h2>اوامر CLI المتقدمة</h2>
+    <div class="detail-card">
+      <h3>ادارة الجلسات</h3>
+      <pre><code>aura session list          # عرض الجلسات النشطة
+aura session resume &lt;id&gt;  # استئناف جلسة سابقة
+aura session kill &lt;id&gt;    # إنهاء جلسة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>ادارة المهارات</h3>
+      <pre><code>aura skill list            # عرض المهارات المثبتة
+aura skill install &lt;name&gt;  # تثبيت مهارة
+aura skill create         # انشاء مهارة جديدة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>ادارة MCP</h3>
+      <pre><code>aura mcp list              # عرض خوادم MCP
+aura mcp add &lt;name&gt;       # اضافة خادم MCP
+aura mcp remove &lt;name&gt;    # ازالة خادم MCP</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>المزامنة</h3>
+      <pre><code>aura sync push             # رفع التغييرات
+aura sync pull             # تنزيل التغييرات
+aura sync status           # حالة المزامنة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>التكوين</h3>
+      <pre><code>aura config list           # عرض الاعدادات
+aura config set &lt;k&gt; &lt;v&gt;   # تعيين اعداد
+aura config reset          # اعادة للافتراضي</code></pre>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("CLI"), body, "cli");
 }
@@ -1089,6 +1345,31 @@ function generateMCPAr() {
     <div class="detail-card"><h3>${tr("Dynamic tool registration at runtime")}</h3></div>
     <div class="detail-card"><h3>${tr("Sandboxed execution with permission gating")}</h3></div>
     <div class="detail-card"><h3>${tr("Community MCP server marketplace")}</h3></div>
+  <section class="section">
+    <div class="section-label">تطوير خادم MCP</div>
+    <h2>انشاء خادم MCP خاص بك</h2>
+    <p>يمكنك انشاء خادم MCP باستخدام Node.js. هذا مثال بسيط:</p>
+    <pre><code>import { Server } from "@modelcontextprotocol/sdk";
+
+const server = new Server({
+  name: "my-tools",
+  version: "1.0.0"
+});
+
+server.tool("hello", {
+  description: "يقول مرحبا",
+  handler: async ({ name }) =&gt; ({
+    content: \`مرحبا \${name}!\`
+  })
+});
+
+server.start();</code></pre>
+    <p style="margin-top:1rem">ضع الخادم في <code>~/.config/aura/mcp-servers/</code> وسيتم تحميله تلقائيا عند بدء التشغيل.</p>
+    <div class="detail-card" style="margin-top:1.5rem">
+      <h3>مكتبة MCP الرسمية</h3>
+      <p>نحن نبني مكتبة MCP للغة العربية تسهل انشاء خوادم MCP للناطقين بالعربية. تشمل ادوات جاهزة للبحث، الترجمة، التحليل النصي، والمزيد.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("MCP"), body, "mcp");
 }
@@ -1126,6 +1407,34 @@ function generateSidecarsAr() {
         <p>${sidecarDesc[s] || ""}</p>
       </div>`).join("\n")}
     </div>
+  <section class="section">
+    <div class="section-label">تفاصيل Sidecars</div>
+    <h2>كيف تعمل Sidecars</h2>
+    <div class="detail-card">
+      <h3>Sandbox</h3>
+      <p>ينشئ بيئة معزولة لتشغيل الاكواد. يدعم Docker و WSL2 و VMs الخفيفة. يمنع الوصول غير المصرح للنظام.</p>
+    </div>
+    <div class="detail-card">
+      <h3>FileWatcher</h3>
+      <p>يراقب تغييرات الملفات في الوقت الفعلي باستخدام fs.watch. يخطر المحرك بالتغييرات الخارجية لتجنب التعارضات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Search</h3>
+      <p>يفهرس الملفات باستخدام قاعدة بيانات مدمجة. يدعم البحث النصي الكامل (FTS5) والبحث بالتعبيرات النمطية.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Browser</h3>
+      <p>يوفر Playwright headless browser للتفاعل مع المواقع. يدعم التقاط الشاشة، ملء النماذج، واستخراج البيانات.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Sync</h3>
+      <p>يدير مزامنة E2EE بين الاجهزة. يستخدم WebSocket مع تشفير لكل جهاز على حدة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Shell</h3>
+      <p>واجهة Shell تفاعلية مع دعم PTY كامل. تسمح بتشغيل اوامر مركبة والحفاظ على حالة الجلسة.</p>
+    </div>
+  </section>
   </section>`;
   return wrapPageAr(tr("Sidecars"), body, "sidecars");
 }
