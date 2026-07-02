@@ -44,7 +44,7 @@ export function TitleBar({
       <div className="tb-spacer" />
       <div className="tb-actions">
         {onToggleDir && (
-          <button type="button" className="tb-btn" title="Toggle direction" onClick={onToggleDir} style={{ font: "var(--text-label)", fontWeight: 600 }}>
+          <button type="button" className="tb-btn" title="Toggle direction" aria-label="Toggle text direction" onClick={onToggleDir} style={{ font: "var(--text-label)", fontWeight: 600 }}>
             {dir === "rtl" ? "ع" : "EN"}
           </button>
         )}

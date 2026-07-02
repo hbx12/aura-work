@@ -229,9 +229,77 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@esbuild/win32-x64
 
+@eslint-community/eslint-utils@4.9.1
+  License: MIT
+  Source: node_modules/@eslint-community/eslint-utils
+
+@eslint-community/eslint-utils/node_modules/eslint-visitor-keys@3.4.3
+  License: Apache-2.0
+  Source: node_modules/@eslint-community/eslint-utils/node_modules/eslint-visitor-keys
+
+@eslint-community/regexpp@4.12.2
+  License: MIT
+  Source: node_modules/@eslint-community/regexpp
+
+@eslint/config-array@0.21.2
+  License: Apache-2.0
+  Source: node_modules/@eslint/config-array
+
+@eslint/config-helpers@0.4.2
+  License: Apache-2.0
+  Source: node_modules/@eslint/config-helpers
+
+@eslint/core@0.17.0
+  License: Apache-2.0
+  Source: node_modules/@eslint/core
+
+@eslint/eslintrc@3.3.5
+  License: MIT
+  Source: node_modules/@eslint/eslintrc
+
+@eslint/eslintrc/node_modules/ajv@6.15.0
+  License: MIT
+  Source: node_modules/@eslint/eslintrc/node_modules/ajv
+
+@eslint/eslintrc/node_modules/json-schema-traverse@0.4.1
+  License: MIT
+  Source: node_modules/@eslint/eslintrc/node_modules/json-schema-traverse
+
+@eslint/js@9.39.4
+  License: MIT
+  Source: node_modules/@eslint/js
+
+@eslint/object-schema@2.1.7
+  License: Apache-2.0
+  Source: node_modules/@eslint/object-schema
+
+@eslint/plugin-kit@0.4.1
+  License: Apache-2.0
+  Source: node_modules/@eslint/plugin-kit
+
 @hono/node-server@1.19.14
   License: MIT
   Source: node_modules/@hono/node-server
+
+@humanfs/core@0.19.2
+  License: Apache-2.0
+  Source: node_modules/@humanfs/core
+
+@humanfs/node@0.16.8
+  License: Apache-2.0
+  Source: node_modules/@humanfs/node
+
+@humanfs/types@0.15.0
+  License: Apache-2.0
+  Source: node_modules/@humanfs/types
+
+@humanwhocodes/module-importer@1.0.1
+  License: Apache-2.0
+  Source: node_modules/@humanwhocodes/module-importer
+
+@humanwhocodes/retry@0.4.3
+  License: Apache-2.0
+  Source: node_modules/@humanwhocodes/retry
 
 @jridgewell/resolve-uri@3.1.2
   License: MIT
@@ -421,6 +489,10 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
   License: MIT
   Source: node_modules/@types/fs-extra
 
+@types/json-schema@7.0.15
+  License: MIT
+  Source: node_modules/@types/json-schema
+
 @types/jsonfile@6.1.4
   License: MIT
   Source: node_modules/@types/jsonfile
@@ -444,6 +516,66 @@ All listed npm licenses were reviewed for Apache-2.0 distribution compatibility.
 @types/yauzl@2.10.3
   License: MIT
   Source: node_modules/@types/yauzl
+
+@typescript-eslint/eslint-plugin@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/eslint-plugin
+
+@typescript-eslint/eslint-plugin/node_modules/ignore@7.0.5
+  License: MIT
+  Source: node_modules/@typescript-eslint/eslint-plugin/node_modules/ignore
+
+@typescript-eslint/parser@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/parser
+
+@typescript-eslint/project-service@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/project-service
+
+@typescript-eslint/scope-manager@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/scope-manager
+
+@typescript-eslint/tsconfig-utils@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/tsconfig-utils
+
+@typescript-eslint/type-utils@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/type-utils
+
+@typescript-eslint/types@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/types
+
+@typescript-eslint/typescript-estree@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/typescript-estree
+
+@typescript-eslint/typescript-estree/node_modules/balanced-match@4.0.4
+  License: MIT
+  Source: node_modules/@typescript-eslint/typescript-estree/node_modules/balanced-match
+
+@typescript-eslint/typescript-estree/node_modules/brace-expansion@5.0.7
+  License: MIT
+  Source: node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion
+
+@typescript-eslint/typescript-estree/node_modules/minimatch@10.2.5
+  License: BlueOak-1.0.0
+  Source: node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch
+
+@typescript-eslint/utils@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/utils
+
+@typescript-eslint/visitor-keys@8.62.1
+  License: MIT
+  Source: node_modules/@typescript-eslint/visitor-keys
+
+@typescript-eslint/visitor-keys/node_modules/eslint-visitor-keys@5.0.1
+  License: Apache-2.0
+  Source: node_modules/@typescript-eslint/visitor-keys/node_modules/eslint-visitor-keys
 
 @vitest/coverage-v8@4.1.9
   License: MIT
@@ -481,6 +613,14 @@ accepts@2.0.0
   License: MIT
   Source: node_modules/accepts
 
+acorn@8.17.0
+  License: MIT
+  Source: node_modules/acorn
+
+acorn-jsx@5.3.2
+  License: MIT
+  Source: node_modules/acorn-jsx
+
 agent-base@7.1.4
   License: MIT
   Source: node_modules/agent-base
@@ -500,6 +640,10 @@ ansi-regex@5.0.1
 ansi-styles@4.3.0
   License: MIT
   Source: node_modules/ansi-styles
+
+argparse@2.0.1
+  License: Python-2.0
+  Source: node_modules/argparse
 
 assertion-error@2.0.1
   License: MIT
@@ -537,6 +681,10 @@ b4a@1.8.1
   License: Apache-2.0
   Source: node_modules/b4a
 
+balanced-match@1.0.2
+  License: MIT
+  Source: node_modules/balanced-match
+
 bare-events@2.8.3
   License: Apache-2.0
   Source: node_modules/bare-events
@@ -569,6 +717,10 @@ body-parser@2.2.2
   License: MIT
   Source: node_modules/body-parser
 
+brace-expansion@1.1.15
+  License: MIT
+  Source: node_modules/brace-expansion
+
 buffer-crc32@0.2.13
   License: MIT
   Source: node_modules/buffer-crc32
@@ -585,9 +737,17 @@ call-bound@1.0.4
   License: MIT
   Source: node_modules/call-bound
 
+callsites@3.1.0
+  License: MIT
+  Source: node_modules/callsites
+
 chai@6.2.2
   License: MIT
   Source: node_modules/chai
+
+chalk@4.1.2
+  License: MIT
+  Source: node_modules/chalk
 
 chromium-bidi@14.0.0
   License: Apache-2.0
@@ -608,6 +768,10 @@ color-name@1.1.4
 combined-stream@1.0.8
   License: MIT
   Source: node_modules/combined-stream
+
+concat-map@0.0.1
+  License: MIT
+  Source: node_modules/concat-map
 
 content-disposition@1.1.0
   License: MIT
@@ -648,6 +812,10 @@ data-uri-to-buffer@6.0.2
 debug@4.4.3
   License: MIT
   Source: node_modules/debug
+
+deep-is@0.1.4
+  License: MIT
+  Source: node_modules/deep-is
 
 degenerator@5.0.1
   License: MIT
@@ -721,13 +889,49 @@ escape-html@1.0.3
   License: MIT
   Source: node_modules/escape-html
 
+escape-string-regexp@4.0.0
+  License: MIT
+  Source: node_modules/escape-string-regexp
+
 escodegen@2.1.0
   License: BSD-2-Clause
   Source: node_modules/escodegen
 
+eslint@9.39.4
+  License: MIT
+  Source: node_modules/eslint
+
+eslint-scope@8.4.0
+  License: BSD-2-Clause
+  Source: node_modules/eslint-scope
+
+eslint-visitor-keys@4.2.1
+  License: Apache-2.0
+  Source: node_modules/eslint-visitor-keys
+
+eslint/node_modules/ajv@6.15.0
+  License: MIT
+  Source: node_modules/eslint/node_modules/ajv
+
+eslint/node_modules/json-schema-traverse@0.4.1
+  License: MIT
+  Source: node_modules/eslint/node_modules/json-schema-traverse
+
+espree@10.4.0
+  License: BSD-2-Clause
+  Source: node_modules/espree
+
 esprima@4.0.1
   License: BSD-2-Clause
   Source: node_modules/esprima
+
+esquery@1.7.0
+  License: BSD-3-Clause
+  Source: node_modules/esquery
+
+esrecurse@4.3.0
+  License: BSD-2-Clause
+  Source: node_modules/esrecurse
 
 estraverse@5.3.0
   License: BSD-2-Clause
@@ -781,6 +985,14 @@ fast-fifo@1.3.2
   License: MIT
   Source: node_modules/fast-fifo
 
+fast-json-stable-stringify@2.1.0
+  License: MIT
+  Source: node_modules/fast-json-stable-stringify
+
+fast-levenshtein@2.0.6
+  License: MIT
+  Source: node_modules/fast-levenshtein
+
 fast-uri@3.1.2
   License: BSD-3-Clause
   Source: node_modules/fast-uri
@@ -793,9 +1005,25 @@ fdir@6.5.0
   License: MIT
   Source: node_modules/fdir
 
+file-entry-cache@8.0.0
+  License: MIT
+  Source: node_modules/file-entry-cache
+
 finalhandler@2.1.1
   License: MIT
   Source: node_modules/finalhandler
+
+find-up@5.0.0
+  License: MIT
+  Source: node_modules/find-up
+
+flat-cache@4.0.1
+  License: MIT
+  Source: node_modules/flat-cache
+
+flatted@3.4.2
+  License: ISC
+  Source: node_modules/flatted
 
 follow-redirects@1.16.0
   License: MIT
@@ -853,6 +1081,14 @@ get-uri@6.0.5
   License: MIT
   Source: node_modules/get-uri
 
+glob-parent@6.0.2
+  License: ISC
+  Source: node_modules/glob-parent
+
+globals@14.0.0
+  License: MIT
+  Source: node_modules/globals
+
 gopd@1.2.0
   License: MIT
   Source: node_modules/gopd
@@ -901,6 +1137,18 @@ iconv-lite@0.7.2
   License: MIT
   Source: node_modules/iconv-lite
 
+ignore@5.3.2
+  License: MIT
+  Source: node_modules/ignore
+
+import-fresh@3.3.1
+  License: MIT
+  Source: node_modules/import-fresh
+
+imurmurhash@0.1.4
+  License: MIT
+  Source: node_modules/imurmurhash
+
 inherits@2.0.4
   License: ISC
   Source: node_modules/inherits
@@ -913,9 +1161,17 @@ ipaddr.js@1.9.1
   License: MIT
   Source: node_modules/ipaddr.js
 
+is-extglob@2.1.1
+  License: MIT
+  Source: node_modules/is-extglob
+
 is-fullwidth-code-point@3.0.0
   License: MIT
   Source: node_modules/is-fullwidth-code-point
+
+is-glob@4.0.3
+  License: MIT
+  Source: node_modules/is-glob
 
 is-promise@4.0.0
   License: MIT
@@ -945,6 +1201,14 @@ js-tokens@10.0.0
   License: MIT
   Source: node_modules/js-tokens
 
+js-yaml@4.3.0
+  License: MIT
+  Source: node_modules/js-yaml
+
+json-buffer@3.0.1
+  License: MIT
+  Source: node_modules/json-buffer
+
 json-schema-traverse@1.0.0
   License: MIT
   Source: node_modules/json-schema-traverse
@@ -953,9 +1217,21 @@ json-schema-typed@8.0.2
   License: BSD-2-Clause
   Source: node_modules/json-schema-typed
 
+json-stable-stringify-without-jsonify@1.0.1
+  License: MIT
+  Source: node_modules/json-stable-stringify-without-jsonify
+
 jsonfile@6.2.1
   License: MIT
   Source: node_modules/jsonfile
+
+keyv@4.5.4
+  License: MIT
+  Source: node_modules/keyv
+
+levn@0.4.1
+  License: MIT
+  Source: node_modules/levn
 
 lightningcss@1.32.0
   License: MPL-2.0
@@ -1005,6 +1281,14 @@ lightningcss-win32-x64-msvc@1.32.0
   License: MPL-2.0
   Source: node_modules/lightningcss-win32-x64-msvc
 
+locate-path@6.0.0
+  License: MIT
+  Source: node_modules/locate-path
+
+lodash.merge@4.6.2
+  License: MIT
+  Source: node_modules/lodash.merge
+
 magic-string@0.30.21
   License: MIT
   Source: node_modules/magic-string
@@ -1037,6 +1321,10 @@ mime-types@3.0.2
   License: MIT
   Source: node_modules/mime-types
 
+minimatch@3.1.5
+  License: ISC
+  Source: node_modules/minimatch
+
 mitt@3.0.1
   License: MIT
   Source: node_modules/mitt
@@ -1052,6 +1340,10 @@ ms@2.1.3
 nanoid@3.3.12
   License: MIT
   Source: node_modules/nanoid
+
+natural-compare@1.4.0
+  License: MIT
+  Source: node_modules/natural-compare
 
 negotiator@1.0.0
   License: MIT
@@ -1081,6 +1373,18 @@ once@1.4.0
   License: ISC
   Source: node_modules/once
 
+optionator@0.9.4
+  License: MIT
+  Source: node_modules/optionator
+
+p-limit@3.1.0
+  License: MIT
+  Source: node_modules/p-limit
+
+p-locate@5.0.0
+  License: MIT
+  Source: node_modules/p-locate
+
 pac-proxy-agent@7.2.0
   License: MIT
   Source: node_modules/pac-proxy-agent
@@ -1089,9 +1393,17 @@ pac-resolver@7.0.1
   License: MIT
   Source: node_modules/pac-resolver
 
+parent-module@1.0.1
+  License: MIT
+  Source: node_modules/parent-module
+
 parseurl@1.3.3
   License: MIT
   Source: node_modules/parseurl
+
+path-exists@4.0.0
+  License: MIT
+  Source: node_modules/path-exists
 
 path-key@3.1.1
   License: MIT
@@ -1125,6 +1437,10 @@ postcss@8.5.15
   License: MIT
   Source: node_modules/postcss
 
+prelude-ls@1.2.1
+  License: MIT
+  Source: node_modules/prelude-ls
+
 progress@2.0.3
   License: MIT
   Source: node_modules/progress
@@ -1148,6 +1464,10 @@ proxy-from-env@1.1.0
 pump@3.0.4
   License: MIT
   Source: node_modules/pump
+
+punycode@2.3.1
+  License: MIT
+  Source: node_modules/punycode
 
 puppeteer-core@24.43.1
   License: Apache-2.0
@@ -1180,6 +1500,10 @@ require-directory@2.1.1
 require-from-string@2.0.2
   License: MIT
   Source: node_modules/require-from-string
+
+resolve-from@4.0.0
+  License: MIT
+  Source: node_modules/resolve-from
 
 rolldown@1.0.3
   License: MIT
@@ -1293,6 +1617,10 @@ strip-ansi@6.0.1
   License: MIT
   Source: node_modules/strip-ansi
 
+strip-json-comments@3.1.1
+  License: MIT
+  Source: node_modules/strip-json-comments
+
 supports-color@7.2.0
   License: MIT
   Source: node_modules/supports-color
@@ -1333,9 +1661,17 @@ toidentifier@1.0.1
   License: MIT
   Source: node_modules/toidentifier
 
+ts-api-utils@2.5.0
+  License: MIT
+  Source: node_modules/ts-api-utils
+
 tslib@2.8.1
   License: 0BSD
   Source: node_modules/tslib
+
+type-check@0.4.0
+  License: MIT
+  Source: node_modules/type-check
 
 type-is@2.1.0
   License: MIT
@@ -1353,6 +1689,10 @@ typescript@5.8.3
   License: Apache-2.0
   Source: node_modules/typescript
 
+typescript-eslint@8.62.1
+  License: MIT
+  Source: node_modules/typescript-eslint
+
 undici-types@6.21.0
   License: MIT
   Source: node_modules/undici-types
@@ -1364,6 +1704,10 @@ universalify@2.0.1
 unpipe@1.0.0
   License: MIT
   Source: node_modules/unpipe
+
+uri-js@4.4.1
+  License: BSD-2-Clause
+  Source: node_modules/uri-js
 
 vary@1.1.2
   License: MIT
@@ -1388,6 +1732,10 @@ which@2.0.2
 why-is-node-running@2.3.0
   License: MIT
   Source: node_modules/why-is-node-running
+
+word-wrap@1.2.5
+  License: MIT
+  Source: node_modules/word-wrap
 
 wrap-ansi@7.0.0
   License: MIT
@@ -1416,6 +1764,10 @@ yargs-parser@21.1.1
 yauzl@2.10.0
   License: MIT
   Source: node_modules/yauzl
+
+yocto-queue@0.1.0
+  License: MIT
+  Source: node_modules/yocto-queue
 
 zod@3.25.76
   License: MIT

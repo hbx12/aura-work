@@ -22,6 +22,29 @@ jobs:
         with:
           extra_args: --only-verified
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+
+  cargo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Run cargo audit
+        run: cargo audit -f apps/desktop/src-tauri/Cargo.lock
+        working-directory: .
+
   license-audit:
     runs-on: ubuntu-latest
     steps:
@@ -105,6 +128,21 @@ jobs:
       - run: npm run build:sidecars
       - name: Run tests with coverage
         run: npx vitest run --coverage --config vitest.sidecars.config.ts
+      - name: Check coverage thresholds
+        run: |
+          node -e "
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json','utf8'));
+          const total = report.total;
+          const thresholds = { lines: 10, functions: 10, branches: 10, statements: 10 };
+          let failed = false;
+          for (const [key, min] of Object.entries(thresholds)) {
+            const pct = total[key].pct;
+            if (pct < min) { console.error('❌ ' + key + ' coverage ' + pct + '% < ' + min + '%'); failed = true; }
+            else { console.log('✅ ' + key + ' coverage ' + pct + '% >= ' + min + '%'); }
+          }
+          if (failed) process.exit(1);
+          "
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:

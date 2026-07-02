@@ -773,7 +773,7 @@ export function PluginsPage({
                             }}
                             onKeyDown={(e) => {
                               if (s.id.startsWith("aura_config_")) return;
-                              e.key === "Enter" && void onSetMcpEnabled(s.id, !s.enabled);
+                              if (e.key === "Enter") void onSetMcpEnabled(s.id, !s.enabled);
                             }}
                             role="button"
                             tabIndex={s.id.startsWith("aura_config_") ? -1 : 0}
@@ -908,7 +908,7 @@ export function PluginsPage({
                         disabled={sandboxLoading || !sandboxInput.trim()}
                         onClick={() => void runSandboxTest()}
                       >
-                        {sandboxLoading ? (isAr ? "جاري التشغيل..." : "Running...") : (isAr ? "Run Test" : "Run Test")}
+                        {sandboxLoading ? (isAr ? "جاري التشغيل..." : "Running...") : (isAr ? "تشغيل الاختبار" : "Run Test")}
                       </button>
                       {sandboxOutput && (
                         <button

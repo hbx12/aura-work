@@ -5,6 +5,9 @@
   "description": "Connect Chrome to local Aura OS — page reads require per-task approval.",
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": ["<all_urls>", "http://127.0.0.1:47826/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'self';"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Aura OS"

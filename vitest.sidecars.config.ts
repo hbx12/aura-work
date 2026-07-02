@@ -9,7 +9,7 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "json-summary", "json", "html"],
       include: [
         "sidecar/**/*.ts",
         "packages/shared/**/*.ts",

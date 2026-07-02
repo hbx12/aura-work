@@ -1570,7 +1570,7 @@ export const CATALOG: Record<LocaleId, Partial<MessageCatalog>> = {
   },
 };
 
-export const STRICT_LOCALES: LocaleId[] = ["ar"];
+export const STRICT_LOCALES: LocaleId[] = ["ar", "fa"];
 
 export function resolveCatalog(locale: LocaleId): MessageCatalog {
   const overrides = CATALOG[locale] ?? {};

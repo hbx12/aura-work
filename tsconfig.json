@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/aura-plugin" },
+    { "path": "sidecar/aura-agent" },
+    { "path": "sidecar/aura-vm-helper" },
+    { "path": "sidecar/aura-browser-helper" },
+    { "path": "sidecar/aura-plugins-helper" },
+    { "path": "sidecar/aura-cloud-sync" },
+    { "path": "sidecar/aura-bridge" },
+    { "path": "sidecar/aura-computer-use" },
+    { "path": "server/aura-cloud" },
+    { "path": "cli/aura-cli" },
+    { "path": "qa/acceptance-suite" }
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "bundle",
+    "coverage"
+  ]
+}

@@ -51,6 +51,8 @@
     "test:acceptance": "npm run test -w @aura-os/acceptance-suite",
     "test:installer-smoke": "powershell -ExecutionPolicy Bypass -File scripts/test-installer-smoke.ps1",
     "qa": "npm run build:sidecars && npm run build:cloud && npm run build:bridge && npm run test:sidecars && npm run test:rust && npm run test:acceptance",
+    "lint": "eslint . --max-warnings=120",
+    "lint:fix": "eslint . --fix",
     "audit:licenses": "node scripts/audit-licenses.mjs",
     "sbom": "npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev"
   },
@@ -60,8 +62,11 @@
     "monaco-editor": "0.53.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@vitest/coverage-v8": "^4.1.9",
     "esbuild": "^0.28.1",
+    "eslint": "^9.39.4",
+    "typescript-eslint": "^8.62.1",
     "vitest": "^4.1.8"
   },
   "dependencies": {

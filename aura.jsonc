@@ -5,7 +5,7 @@
       "type": "local",
       "command": [
         "node",
-        "/Users/hbx/Desktop/aura work/examples/test-mcp-server.js"
+        "./examples/test-mcp-server.js"
       ],
       "enabled": true,
       "environment": {
