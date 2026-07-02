@@ -2,7 +2,7 @@
 
 import { chat } from "./deepseek.mjs";
 import { getIssue, listIssueComments, createIssueComment } from "./github.mjs";
-import { loadKnowledgeBase, buildContext, listSources } from "./knowledge.mjs";
+import { loadKnowledgeBase, buildContext, listSources, detectLanguage } from "./knowledge.mjs";
 import { findAuraBotComment } from "./github.mjs";
 
 const MARKER = "<!-- aura-bot:issue-triage -->";
@@ -32,10 +32,18 @@ async function main() {
   const issueBody = issue.body || "(no body)";
   const issueAuthor = `@${issue.user?.login || "unknown"}`;
 
+  const contributorText = [issueTitle, issueBody].join("\n");
+  const lang = detectLanguage(contributorText);
+  const langInstruction = lang === "ar"
+    ? "Reply in Arabic. The contributor wrote in Arabic."
+    : "Reply in English.";
+
   const context = buildContext(docs, 12000);
   const sourcesChecked = listSources(docs);
 
   const prompt = `You are ${process.env.AURA_BOT_NAME || "aura-bot"}, a helpful bot for the ${process.env.GITHUB_REPOSITORY} repository. You triage issues using only the repository documentation as context.
+
+${langInstruction}
 
 ## Repository Knowledge Base
 ${context || "(No repo docs found)"}
@@ -70,7 +78,7 @@ ${sourcesChecked}
 Be friendly and helpful. Use emoji sparingly. Keep it concise.`;
 
   const reply = await chat([
-    { role: "system", content: "You are a helpful issue triage assistant. Be friendly and concise." },
+    { role: "system", content: `You are a helpful issue triage assistant. Be friendly and concise. Reply in the same language used by the contributor. If the contributor writes Arabic, reply in Arabic. If they write English, reply in English. If mixed, use the dominant language and keep technical terms unchanged.` },
     { role: "user", content: prompt },
   ]);
 

@@ -86,3 +86,45 @@ export function listSources(docs) {
   const sorted = [...docs.keys()].sort();
   return sorted.map((f) => `- ${f}`).join("\n");
 }
+
+/**
+ * Simple lightweight language detection based on Unicode character ranges.
+ * Counts Arabic-script vs Latin-script characters and returns the dominant one.
+ * @param {string} text
+ * @returns {"ar" | "en"}
+ */
+export function detectLanguage(text) {
+  if (!text) return "en";
+
+  let arabicChars = 0;
+  let latinChars = 0;
+
+  for (const ch of text) {
+    const cp = ch.codePointAt(0);
+    // Arabic block (0600–06FF), Arabic Supplement (0750–077F),
+    // Arabic Extended-A (08A0–08FF), Arabic Presentation Forms (FB50–FDFF, FE70–FEFF)
+    if (
+      (cp >= 0x0600 && cp <= 0x06ff) ||
+      (cp >= 0x0750 && cp <= 0x077f) ||
+      (cp >= 0x08a0 && cp <= 0x08ff) ||
+      (cp >= 0xfb50 && cp <= 0xfdff) ||
+      (cp >= 0xfe70 && cp <= 0xfeff)
+    ) {
+      arabicChars++;
+    }
+    // Basic Latin (0020–007F), Latin-1 Supplement (00A0–00FF),
+    // Latin Extended-A (0100–017F), Latin Extended-B (0180–024F)
+    else if (
+      (cp >= 0x0020 && cp <= 0x007f) ||
+      (cp >= 0x00a0 && cp <= 0x00ff) ||
+      (cp >= 0x0100 && cp <= 0x017f) ||
+      (cp >= 0x0180 && cp <= 0x024f)
+    ) {
+      latinChars++;
+    }
+  }
+
+  // Require a minimum threshold for Arabic detection
+  if (arabicChars > 5 && arabicChars >= latinChars) return "ar";
+  return "en";
+}

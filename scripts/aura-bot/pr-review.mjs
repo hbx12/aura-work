@@ -2,7 +2,7 @@
 
 import { chat } from "./deepseek.mjs";
 import { getPullRequest, getPullRequestDiff, listPullRequestFiles } from "./github.mjs";
-import { loadKnowledgeBase, buildContext, listSources } from "./knowledge.mjs";
+import { loadKnowledgeBase, buildContext, listSources, detectLanguage } from "./knowledge.mjs";
 import { upsertStickyComment } from "./sticky-comment.mjs";
 
 const MARKER = "<!-- aura-bot:pr-review -->";
@@ -41,10 +41,18 @@ async function main() {
     .map((f) => `- ${f.filename} (+${f.additions}/-${f.deletions})`)
     .join("\n");
 
+  const contributorText = [prTitle, prBody].join("\n");
+  const lang = detectLanguage(contributorText);
+  const langInstruction = lang === "ar"
+    ? "Reply in Arabic. The contributor wrote in Arabic."
+    : "Reply in English.";
+
   const context = buildContext(docs, 12000);
   const sourcesChecked = listSources(docs);
 
   const prompt = `You are ${process.env.AURA_BOT_NAME || "aura-bot"}, a helpful bot for the ${process.env.GITHUB_REPOSITORY} repository. You review pull requests using only the repository documentation as context. Do NOT speculate beyond the docs.
+
+${langInstruction}
 
 ## Repository Knowledge Base
 ${context || "(No repo docs found)"}
@@ -87,7 +95,7 @@ ${sourcesChecked}
 Keep it concise. Do not approve/merge/close. Do NOT use GitHub review tools.`;
 
   const review = await chat([
-    { role: "system", content: "You are a helpful code review assistant. Be concise and factual. Never speculate." },
+    { role: "system", content: `You are a helpful code review assistant. Be concise and factual. Never speculate. Reply in the same language used by the contributor. If the contributor writes Arabic, reply in Arabic. If they write English, reply in English. If mixed, use the dominant language and keep technical terms unchanged.` },
     { role: "user", content: prompt },
   ]);
 

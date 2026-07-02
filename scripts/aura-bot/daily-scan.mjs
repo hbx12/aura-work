@@ -2,7 +2,7 @@
 
 import { chat } from "./deepseek.mjs";
 import { listIssues, listPullRequests, listIssueComments, createIssueComment, updateIssueComment, findAuraBotComment } from "./github.mjs";
-import { loadKnowledgeBase, buildContext } from "./knowledge.mjs";
+import { loadKnowledgeBase, buildContext, detectLanguage } from "./knowledge.mjs";
 
 const REPORT_TITLE = "Aura Bot Daily Project Health Report";
 const MARKER = "<!-- aura-bot:daily-report -->";
@@ -62,7 +62,16 @@ async function main() {
 
   const context = buildContext(docs, 8000);
 
+  // Detect dominant language from unanswered item titles
+  const allTitles = unanswered.map((i) => i.title).join("\n");
+  const dominantLang = detectLanguage(allTitles);
+  const langInstruction = dominantLang === "ar"
+    ? "Reply in Arabic. Most unanswered items are in Arabic."
+    : "Reply in English.";
+
   const prompt = `You are ${process.env.AURA_BOT_NAME || "aura-bot"} for the ${process.env.GITHUB_REPOSITORY} repository.
+
+${langInstruction}
 
 ## Project Status
 - Open issues: ${openIssues.total_count || 0}
@@ -89,7 +98,7 @@ Actionable suggestions based on docs: stale items to close, docs to update, etc.
 Be concise. Do not create panic. Use emoji sparingly.`;
 
   const report = await chat([
-    { role: "system", content: "You are a project health reporter. Be factual and concise." },
+    { role: "system", content: `You are a project health reporter. Be factual and concise. Reply in the same language used by the contributor. If the contributor writes Arabic, reply in Arabic. If they write English, reply in English. If mixed, use the dominant language and keep technical terms unchanged.` },
     { role: "user", content: prompt },
   ]);
 
