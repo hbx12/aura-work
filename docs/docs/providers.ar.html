@@ -9,123 +9,17 @@
 <meta property="og:description" content="وثائق Aura Work — المزوّدون">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--font-sans:"Inter","IBM Plex Sans","Noto Kufi Arabic",system-ui,-apple-system,sans-serif;--font-display:"Outfit","IBM Plex Sans","Noto Kufi Arabic",system-ui,sans-serif;--color-bg:#faf9f5;--color-bg-weak:#f5f3ec;--color-bg-card:#ffffff;--color-bg-strong:#1e1b16;--color-text:#5c5544;--color-text-weak:#938a76;--color-text-strong:#28241d;--color-text-inverted:#faf9f5;--color-border:#e7e1d3;--color-border-weak:rgba(40,36,29,0.08);--color-accent:#c2683f;--color-accent-warm:#cf7a52;--color-accent-subtle:rgba(194,104,63,0.11);--color-plum:#7a5c8e;--color-success:#4f7d47;--color-warning:#a9761f;--color-danger:#b8482f;--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13);--shadow-xl:0 24px 60px rgba(54,46,32,0.16)}
-@media(prefers-color-scheme:dark){:root{--color-bg:#161310;--color-bg-weak:#1e1b16;--color-bg-card:#25221c;--color-bg-strong:#ece7dc;--color-text:#a89e8b;--color-text-weak:#756c5b;--color-text-strong:#ece7dc;--color-text-inverted:#161310;--color-border:#322d25;--color-border-weak:rgba(236,231,220,0.08);--color-accent:#cf7a52;--color-accent-warm:#c2683f;--color-accent-subtle:rgba(207,122,82,0.16);--color-plum:#b794cc;--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60);--shadow-xl:0 20px 50px rgba(0,0,0,0.65)}}
-[dir="rtl"]{text-align:right}
-html{scroll-behavior:smooth;scroll-padding-top:5rem}
-body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:1.7;-webkit-font-smoothing:antialiased}
-.page{max-width:1200px;margin:0 auto;padding:0 2rem}
-@media(max-width:48rem){.page{padding:0 1rem}}
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--color-border-weak);padding:0 2rem}
-@media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
-.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
-.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--color-text-strong);font-size:1rem}
-.logo-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--color-accent);color:#fff;border-radius:4px;font-size:.875rem;font-weight:700}
-header nav ul{display:flex;align-items:center;gap:1.5rem;list-style:none}
-header nav a{text-decoration:none;font-size:.8125rem;color:var(--color-text);font-weight:500;transition:color .15s}
-header nav a:hover{color:var(--color-text-strong)}
-header nav a.active{color:var(--color-accent)}
-.hero{padding:5rem 0 3rem;text-align:center}
-.hero h1{font-family:var(--font-display);font-size:3.25rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.03em;line-height:1.1;margin-bottom:1.25rem}
-.hero h1 span{background:linear-gradient(135deg,var(--color-accent),var(--color-plum));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero .subtitle{font-size:1.125rem;color:var(--color-text);max-width:32rem;margin:0 auto 2rem;line-height:1.7}
-.hero .meta-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--color-accent-subtle);border:1px solid var(--color-accent);border-radius:100px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-accent);margin-bottom:1.5rem}
-@media(max-width:48rem){.hero h1{font-size:2rem}.hero{padding:3rem 0 2rem}}
-.section{padding:4rem 0;border-bottom:1px solid var(--color-border-weak)}
-.section:last-child{border-bottom:none}
-.section-label{font-family:var(--font-mono);font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
-.section-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--color-border)}
-.section h2{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.02em;margin-bottom:.75rem}
-.section h2 .count{font-family:var(--font-mono);font-size:1rem;font-weight:400;color:var(--color-text-weak);letter-spacing:0}
-.section>p{max-width:40rem;margin-bottom:2.5rem;font-size:1rem;color:var(--color-text);line-height:1.8}
-.section p+p{margin-top:1rem}
-.section ul{margin:1rem 0 1.5rem 1.5rem;list-style:disc}
-.section ul li{margin-bottom:.5rem;font-size:.9375rem;line-height:1.7}
-.section ul li strong{color:var(--color-text-strong)}
-code{font-family:var(--font-mono);font-size:.8125rem;background:var(--color-bg-weak);padding:2px 6px;border-radius:4px;color:var(--color-text-strong)}
-pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.5;color:var(--color-text-strong)}
-.stats-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:2.5rem}
-.stat-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.25rem;text-align:center;transition:transform .2s,box-shadow .2s;opacity:0;transform:translateY(12px)}
-.stat-card.visible{opacity:1;transform:translateY(0)}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat-card .num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--color-text-strong)}
-.stat-card .lbl{font-size:.75rem;color:var(--color-text-weak);margin-top:4px}
-.detail-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.5rem;margin-bottom:12px;transition:box-shadow .2s}
-.detail-card:hover{box-shadow:var(--shadow-sm)}
-.detail-card h3{font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--color-text-strong);margin-bottom:6px;display:flex;align-items:center;gap:10px}
-.detail-card .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-weak);margin-bottom:8px}
-.detail-card p{font-size:.9375rem;color:var(--color-text);line-height:1.7}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.lang-grid{display:flex;flex-wrap:wrap;gap:8px;margin:1.5rem 0}
-.lang-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text);text-decoration:none;transition:border-color .15s,background .15s}
-.lang-badge:hover{border-color:var(--color-accent);background:var(--color-accent-subtle);color:var(--color-accent)}
-.lang-badge .rtl-mark{font-size:.5625rem;font-weight:600;text-transform:uppercase;background:var(--color-accent-subtle);color:var(--color-accent);padding:1px 5px;border-radius:3px}
-.fade-in{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-.delay-1{transition-delay:.1s}
-.delay-2{transition-delay:.2s}
-.delay-3{transition-delay:.3s}
-.delay-4{transition-delay:.4s}
-.lang-dropdown{display:none;position:absolute;right:0;top:100%;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:8px 0;min-width:200px;z-index:200;box-shadow:var(--shadow-lg)}
-.lang-dropdown.open{display:block}
-.lang-dropdown a{display:flex;padding:6px 16px;font-size:.8125rem;text-decoration:none;color:var(--color-text);transition:background .12s}
-.lang-dropdown a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.lang-dropdown a.active{color:var(--color-text-strong);font-weight:600}
-
-/* Theme Toggle */
-.theme-toggle{background:none;border:none;color:var(--color-text-weak);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
-.theme-toggle:hover{color:var(--color-text-strong);background:var(--color-bg-weak)}
-.theme-toggle .sun{display:none}
-.theme-toggle .moon{display:block}
-:root.dark .theme-toggle .sun{display:block}
-:root.dark .theme-toggle .moon{display:none}
-@media(prefers-color-scheme:dark){
-  :root:not(.light) .theme-toggle .sun{display:block}
-  :root:not(.light) .theme-toggle .moon{display:none}
-}
-
-/* Sidebar Layout */
-.layout{display:flex;max-width:1200px;margin:0 auto;padding:2rem 0 4rem;gap:3rem}
-@media(max-width:48rem){.layout{flex-direction:column;padding:1rem 0;gap:1.5rem}}
-.sidebar{width:240px;flex-shrink:0}
-@media(max-width:48rem){.sidebar{width:100%}}
-.sidebar-nav{display:flex;flex-direction:column;gap:4px;position:sticky;top:5.5rem}
-@media(max-width:48rem){.sidebar-nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}}
-.sidebar-nav a{display:block;padding:6px 12px;border-radius:6px;font-size:.8125rem;font-weight:500;color:var(--color-text);text-decoration:none;transition:all .12s;font-family:var(--font-mono)}
-.sidebar-nav a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.sidebar-nav a.active{background:var(--color-accent-subtle);color:var(--color-accent);font-weight:600}
-.sidebar-nav .sec{padding:14px 12px 4px;font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);font-family:var(--font-mono);font-weight:600}
-@media(max-width:48rem){.sidebar-nav .sec{display:none}.sidebar-nav a{display:inline-block;padding:4px 10px;font-size:.75rem}}
-.content{flex:1;min-width:0}
-
-/* Sidebar Search */
-.sidebar-search{padding:0 12px 12px}
-.sidebar-search input{width:100%;padding:8px 12px;border:1px solid var(--color-border-weak);border-radius:6px;background:var(--color-bg-card);color:var(--color-text-strong);font-family:var(--font-mono);font-size:.75rem;outline:none;transition:border-color .15s}
-.sidebar-search input:focus{border-color:var(--color-accent)}
-
-/* Copy Code Snippets Button */
-.copy-code-btn{position:absolute;top:8px;left:8px;padding:4px 8px;font-size:.6875rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:4px;color:var(--color-text-weak);cursor:pointer;opacity:0;transition:opacity .2s,background .15s}
-pre:hover .copy-code-btn{opacity:1}
-.copy-code-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-
-/* Interactive Skills Filtering */
-.skills-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-.filter-btn{padding:6px 12px;font-size:.75rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;color:var(--color-text-weak);cursor:pointer;transition:all .15s;border:1px solid var(--color-border-weak)}
-.filter-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.filter-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
-
-@media(max-width:48rem){.card-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(3,1fr)}}</style>
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
+  html[dir="rtl"] .layout { direction: rtl; }
+  html[dir="rtl"] .back-link { flex-direction: row-reverse; }
+  html[dir="rtl"] .sidebar { text-align: right; }
   .hero { padding: 4rem 0 2.5rem; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%); pointer-events: none; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--bg-accent-subtle) 0%, transparent 70%); pointer-events: none; }
   .hero h1 { position: relative; z-index: 1; }
   .hero .subtitle { position: relative; z-index: 1; }
-  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--color-text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
-  .back-link:hover { color: var(--color-accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
+  .back-link:hover { color: var(--text-accent); }
   .section:first-of-type { padding-top: 2rem; }
   .local-badge { display: inline-block; padding: 1px 6px; font-size: .5625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; border-radius: 3px; font-family: var(--font-mono); }
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
@@ -176,7 +70,7 @@ pre:hover .copy-code-btn{opacity:1}
   </div>
 </header>
 
-<a href="docs.ar.html" class="back-link" style="flex-direction:row-reverse">
+<a href="docs.ar.html" class="back-link">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   العودة إلى مركز الوثائق
 </a>
@@ -215,6 +109,16 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-3"><div class="num">3</div><div class="lbl">المزوّدون المحليون</div></div>
     </div>
     <p>يدعم Aura Work 10 مزوّدي ذكاء اصطناعي تشمل النماذج السحابية والمحلية. كل مزوّد له محول خاص يدير المصادقة واكتشاف النماذج. المزوّدون المحليون لا يرسلون بيانات خارج جهازك أبداً.</p>
+
+    <h2 style="margin-top:2rem">ما هي المزوّدات؟</h2>
+    <p>المزوّدات هي الجسر بين Aura Work ونماذج الذكاء الاصطناعي. كل مزوّد ينفّذ واجهة موحدة تتعامل مع:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>المصادقة</strong> — مفاتيح API، رموز OAuth، أو اتصالات محلية</li>
+      <li><strong>اكتشاف النماذج</strong> — اكتشاف تلقائي للنماذج المتوفرة</li>
+      <li><strong>إكمالات المحادثة</strong> — إرسال الطلبات واستلام الردود</li>
+      <li><strong>تتبع الاستخدام</strong> — عدّ الرموز (tokens) وتقدير التكلفة</li>
+    </ul>
+
     <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c48b5c;flex-shrink:0"></span> Aura Cloud Models</h3>
         <div class="meta">
@@ -222,6 +126,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج مستضافة عبر API Aura. تشمل Aura Fast و Aura Coder و Aura Premium.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 سجّل الدخول بحساب Aura Cloud من الإعدادات ← المزوّدون ← Aura Cloud. لا حاجة لمفتاح API منفصل — يتم استخدام رمز الجلسة المرتبط بحسابك.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> Anthropic</h3>
@@ -230,6 +135,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>Claude Sonnet 4 و Claude 3.5 Haiku. قدرات استدلال وتوليد كود ورؤية من الطراز الأول.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من console.anthropic.com، ثم الصقه في الإعدادات ← المزوّدون ← Anthropic واضغط 'تحقق'.</p>
       </div>
 <div class="detail-card fade-in delay-3">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1a7f64;flex-shrink:0"></span> OpenAI</h3>
@@ -238,6 +144,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>GPT-4o و GPT-4o mini. نماذج لغوية معيارية مع دعم واسع لاستدعاء الأدوات.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من platform.openai.com/api-keys. يدعم أيضاً حسابات GitHub Copilot عبر تسجيل الدخول بـ OAuth.</p>
       </div>
 <div class="detail-card fade-in delay-4">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#3a6fc4;flex-shrink:0"></span> Google Gemini</h3>
@@ -246,6 +153,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>Gemini 2.0 Flash و Gemini 2.5 Pro. استدلال قوي مع نوافذ سياق ضخمة.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من Google AI Studio (aistudio.google.com)، ثم أضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> DeepSeek</h3>
@@ -254,6 +162,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>DeepSeek V3 و R1. نماذج فعالة من حيث التكلفة مع استدلال تنافسي.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من platform.deepseek.com. الأسعار منخفضة جداً مقارنة بالمزودين الآخرين.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#7a5c8e;flex-shrink:0"></span> Ollama</h3>
@@ -262,6 +171,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge yes">محلي</span>
         </div>
         <p>محلي بالكامل. شغّل أي نموذج من مكتبة Ollama. لا حاجة لمفتاح API ولا تغادر بياناتك جهازك.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 ثبّت Ollama من ollama.ai، شغّل <code>ollama serve</code>، ثم اسحب نموذجاً بـ <code>ollama pull llama3</code>. لا حاجة لمفتاح API.</p>
       </div>
 <div class="detail-card fade-in delay-3">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#1988a2;flex-shrink:0"></span> OpenAI Compatible</h3>
@@ -270,6 +180,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge yes">محلي</span>
         </div>
         <p>نقاط نهاية مخصصة تحاكي واجهة OpenAI. استخدم مع أي خدمة متوافقة.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أدخل عنوان URL الأساسي (base URL) للخادم المتوافق مع OpenAI، ومفتاح API إن وجد.</p>
       </div>
 <div class="detail-card fade-in delay-4">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a9761f;flex-shrink:0"></span> Minimax</h3>
@@ -278,6 +189,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج Minimax. مفتاح API مطلوب.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من منصة Minimax الرسمية وأضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-1">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a855f7;flex-shrink:0"></span> Qwen</h3>
@@ -286,6 +198,7 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge no">سحابي</span>
         </div>
         <p>نماذج Qwen (Plus و Turbo). مفتاح API مطلوب.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 أنشئ مفتاح API من منصة Alibaba Cloud DashScope وأضفه في إعدادات المزوّد.</p>
       </div>
 <div class="detail-card fade-in delay-2">
         <h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#e05c2b;flex-shrink:0"></span> LM Studio</h3>
@@ -294,14 +207,43 @@ pre:hover .copy-code-btn{opacity:1}
           <span class="local-badge yes">محلي</span>
         </div>
         <p>محلي بالكامل. اتصل بخادم LM Studio المحلي. لا حاجة لمفتاح API.</p>
+        <p style="margin-top:.5rem;font-size:.8125rem;color:var(--color-text-weak)">🔑 ثبّت LM Studio من lmstudio.ai، حمّل نموذجاً، وشغّل الخادم المحلي من تبويب 'Local Server'. لا حاجة لمفتاح API.</p>
       </div>
+  </section>
+  <section class="section">
+    <div class="section-label">مقارنة</div>
+    <h2>محلي مقابل سحابي</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>المعيار</th><th>مزوّدات محلية</th><th>مزوّدات سحابية</th></tr></thead>
+      <tbody>
+        <tr><td><strong>الخصوصية</strong></td><td>كاملة — لا تغادر البيانات جهازك</td><td>تُرسل الطلبات لخوادم المزوّد</td></tr>
+        <tr><td><strong>التكلفة</strong></td><td>مجانية بعد التثبيت</td><td>دفع لكل رمز (token) مستخدم</td></tr>
+        <tr><td><strong>الجودة</strong></td><td>جيدة، تعتمد على قوة جهازك</td><td>الأفضل عادةً (نماذج ضخمة)</td></tr>
+        <tr><td><strong>السرعة</strong></td><td>تعتمد على معدات الجهاز (GPU/CPU)</td><td>سريعة عادةً مع بنية تحتية قوية</td></tr>
+        <tr><td><strong>الاتصال بالإنترنت</strong></td><td>غير مطلوب</td><td>مطلوب</td></tr>
+        <tr><td><strong>الأفضل لـ</strong></td><td>بيانات حساسة، عمل بدون اتصال، توفير التكلفة</td><td>مهام معقدة، أفضل جودة ممكنة</td></tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:2rem">اختيار النموذج المناسب</h2>
+    <div class="detail-card">
+      <h3>🎯 دليل اختيار النموذج</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>للبرمجة المعقدة</strong> — Claude Sonnet 4 أو GPT-4o أو DeepSeek R1 (تفكير متقدم)</li>
+        <li><strong>للمهام السريعة/البسيطة</strong> — Claude 3.5 Haiku أو GPT-4o mini أو Gemini 2.0 Flash</li>
+        <li><strong>للسياق الطويل جداً</strong> — Gemini 2.5 Pro (نافذة سياق ضخمة)</li>
+        <li><strong>للخصوصية القصوى</strong> — أي نموذج عبر Ollama أو LM Studio</li>
+        <li><strong>لأقل تكلفة ممكنة</strong> — DeepSeek V3 أو نموذج محلي عبر Ollama</li>
+      </ul>
+    </div>
+  </section>
   <section class="section">
     <div class="section-label">نظرة عامة على المزودين</div>
     <h2>المزودون المدعومون</h2>
     <p>يدعم Aura Work 10 مزودين لضمان المرونة القصوى. لكل مزود نقاط قوته:</p>
     <div class="detail-card">
       <h3>السحابيون (Cloud)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>OpenAI</strong> - GPT-4o, GPT-4.5, o1, o3. أداء متميز في البرمجة والتحليل</li>
         <li><strong>Anthropic</strong> - Claude Opus, Sonnet, Haiku. سياق طويل ورؤية حاسوبية</li>
         <li><strong>Google Gemini</strong> - Gemini 2.5 Pro, Flash. متعدد الوسائط ونماذج خفيفة</li>
@@ -311,10 +253,43 @@ pre:hover .copy-code-btn{opacity:1}
     </div>
     <div class="detail-card">
       <h3>المحليون (Local)</h3>
-      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
         <li><strong>Ollama</strong> - LLama, Mistral, Gemma, Qwen. خصوصية كاملة</li>
         <li><strong>LM Studio</strong> - واجهة رسومية لتشغيل النماذج محليا</li>
         <li><strong>LocalAI</strong> - OpenAI-compatible API محلية</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">الأمان والموثوقية</div>
+    <h2>حماية بيانات الاعتماد</h2>
+    <p>تُشفَّر مفاتيح API باستخدام الخزنة المرتبطة بالجهاز قبل التخزين. تستخدم الخزنة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Windows</strong> — DPAPI (واجهة حماية البيانات)</li>
+      <li><strong>macOS</strong> — Keychain</li>
+      <li><strong>Linux</strong> — Secret Service (GNOME Keyring / KWallet)</li>
+    </ul>
+    <p style="margin-top:.75rem">بيانات الاعتماد لا تُسجَّل أبداً، ولا تُعرَض للوكيل، ولا تُدرَج في سجلات التدقيق.</p>
+
+    <div class="detail-card">
+      <h3>🔄 التراجع وإعادة المحاولة</h3>
+      <p>إذا فشل مزوّد، يمكن لـ Aura Work إعادة المحاولة تلقائياً مع بديل:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> يفشل المزوّد الأساسي (حد المعدل، مهلة، خطأ)</li>
+        <li><strong>2.</strong> يفحص النظام عن مزوّدين احتياطيين في إعداداتك</li>
+        <li><strong>3.</strong> إذا وُجد احتياطي، يعيد المحاولة مع المزوّد البديل</li>
+        <li><strong>4.</strong> إذا لم يوجد احتياطي، يُعلمك ويطلب تدخلاً يدوياً</li>
+      </ol>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 نصائح لتحسين التكلفة</h3>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>استخدم سياسة التكلفة أولاً</strong> للمهام الروتينية</li>
+        <li><strong>أعدّ Ollama</strong> للتطوير والاختبار (مجاني)</li>
+        <li><strong>استخدم DeepSeek</strong> لمهام الكود (أرخص من OpenAI/Anthropic)</li>
+        <li><strong>راقب الاستخدام</strong> في لوحة التحكم لتحديد الأنماط المكلفة</li>
+        <li><strong>عيّن حدوداً للرموز</strong> لكل مهمة لمنع التكاليف المتزايدة</li>
       </ul>
     </div>
   </section>
@@ -328,7 +303,6 @@ aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
     <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
 aura config set providers.ollama.model llama3.2</code></pre>
     <p>كل المفاتيح تخزن مشفرة باستخدام تشفير على مستوى النظام (Keytar على macOS، DPAPI على Windows، libsecret على Linux).</p>
-  </section>
   </section>
         </main>
        </div>

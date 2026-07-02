@@ -9,123 +9,17 @@
 <meta property="og:description" content="وثائق Aura Work — الخدمات المساعدة">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--font-mono:"JetBrains Mono",ui-monospace,"SF Mono","Cascadia Code",Consolas,monospace;--font-sans:"Inter","IBM Plex Sans","Noto Kufi Arabic",system-ui,-apple-system,sans-serif;--font-display:"Outfit","IBM Plex Sans","Noto Kufi Arabic",system-ui,sans-serif;--color-bg:#faf9f5;--color-bg-weak:#f5f3ec;--color-bg-card:#ffffff;--color-bg-strong:#1e1b16;--color-text:#5c5544;--color-text-weak:#938a76;--color-text-strong:#28241d;--color-text-inverted:#faf9f5;--color-border:#e7e1d3;--color-border-weak:rgba(40,36,29,0.08);--color-accent:#c2683f;--color-accent-warm:#cf7a52;--color-accent-subtle:rgba(194,104,63,0.11);--color-plum:#7a5c8e;--color-success:#4f7d47;--color-warning:#a9761f;--color-danger:#b8482f;--shadow-sm:0 1px 2px rgba(54,46,32,0.06);--shadow-md:0 4px 16px rgba(54,46,32,0.09);--shadow-lg:0 16px 40px rgba(54,46,32,0.13);--shadow-xl:0 24px 60px rgba(54,46,32,0.16)}
-@media(prefers-color-scheme:dark){:root{--color-bg:#161310;--color-bg-weak:#1e1b16;--color-bg-card:#25221c;--color-bg-strong:#ece7dc;--color-text:#a89e8b;--color-text-weak:#756c5b;--color-text-strong:#ece7dc;--color-text-inverted:#161310;--color-border:#322d25;--color-border-weak:rgba(236,231,220,0.08);--color-accent:#cf7a52;--color-accent-warm:#c2683f;--color-accent-subtle:rgba(207,122,82,0.16);--color-plum:#b794cc;--shadow-sm:0 1px 2px rgba(0,0,0,0.45);--shadow-md:0 4px 14px rgba(0,0,0,0.50);--shadow-lg:0 14px 38px rgba(0,0,0,0.60);--shadow-xl:0 20px 50px rgba(0,0,0,0.65)}}
-[dir="rtl"]{text-align:right}
-html{scroll-behavior:smooth;scroll-padding-top:5rem}
-body{font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);line-height:1.7;-webkit-font-smoothing:antialiased}
-.page{max-width:1200px;margin:0 auto;padding:0 2rem}
-@media(max-width:48rem){.page{padding:0 1rem}}
-header{position:sticky;top:0;z-index:100;background:rgba(250,249,245,0.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--color-border-weak);padding:0 2rem}
-@media(prefers-color-scheme:dark){header{background:rgba(22,19,16,0.88)}}
-.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:3.5rem}
-.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font-family:var(--font-mono);font-weight:600;color:var(--color-text-strong);font-size:1rem}
-.logo-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--color-accent);color:#fff;border-radius:4px;font-size:.875rem;font-weight:700}
-header nav ul{display:flex;align-items:center;gap:1.5rem;list-style:none}
-header nav a{text-decoration:none;font-size:.8125rem;color:var(--color-text);font-weight:500;transition:color .15s}
-header nav a:hover{color:var(--color-text-strong)}
-header nav a.active{color:var(--color-accent)}
-.hero{padding:5rem 0 3rem;text-align:center}
-.hero h1{font-family:var(--font-display);font-size:3.25rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.03em;line-height:1.1;margin-bottom:1.25rem}
-.hero h1 span{background:linear-gradient(135deg,var(--color-accent),var(--color-plum));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero .subtitle{font-size:1.125rem;color:var(--color-text);max-width:32rem;margin:0 auto 2rem;line-height:1.7}
-.hero .meta-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--color-accent-subtle);border:1px solid var(--color-accent);border-radius:100px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-accent);margin-bottom:1.5rem}
-@media(max-width:48rem){.hero h1{font-size:2rem}.hero{padding:3rem 0 2rem}}
-.section{padding:4rem 0;border-bottom:1px solid var(--color-border-weak)}
-.section:last-child{border-bottom:none}
-.section-label{font-family:var(--font-mono);font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
-.section-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--color-border)}
-.section h2{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--color-text-strong);letter-spacing:-.02em;margin-bottom:.75rem}
-.section h2 .count{font-family:var(--font-mono);font-size:1rem;font-weight:400;color:var(--color-text-weak);letter-spacing:0}
-.section>p{max-width:40rem;margin-bottom:2.5rem;font-size:1rem;color:var(--color-text);line-height:1.8}
-.section p+p{margin-top:1rem}
-.section ul{margin:1rem 0 1.5rem 1.5rem;list-style:disc}
-.section ul li{margin-bottom:.5rem;font-size:.9375rem;line-height:1.7}
-.section ul li strong{color:var(--color-text-strong)}
-code{font-family:var(--font-mono);font-size:.8125rem;background:var(--color-bg-weak);padding:2px 6px;border-radius:4px;color:var(--color-text-strong)}
-pre{background:var(--color-bg-weak);border:1px solid var(--color-border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;font-family:var(--font-mono);font-size:.8125rem;line-height:1.5;color:var(--color-text-strong)}
-.stats-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:2.5rem}
-.stat-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.25rem;text-align:center;transition:transform .2s,box-shadow .2s;opacity:0;transform:translateY(12px)}
-.stat-card.visible{opacity:1;transform:translateY(0)}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat-card .num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--color-text-strong)}
-.stat-card .lbl{font-size:.75rem;color:var(--color-text-weak);margin-top:4px}
-.detail-card{background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:1.5rem;margin-bottom:12px;transition:box-shadow .2s}
-.detail-card:hover{box-shadow:var(--shadow-sm)}
-.detail-card h3{font-family:var(--font-display);font-size:1.125rem;font-weight:600;color:var(--color-text-strong);margin-bottom:6px;display:flex;align-items:center;gap:10px}
-.detail-card .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text-weak);margin-bottom:8px}
-.detail-card p{font-size:.9375rem;color:var(--color-text);line-height:1.7}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-.lang-grid{display:flex;flex-wrap:wrap;gap:8px;margin:1.5rem 0}
-.lang-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;font-family:var(--font-mono);font-size:.75rem;color:var(--color-text);text-decoration:none;transition:border-color .15s,background .15s}
-.lang-badge:hover{border-color:var(--color-accent);background:var(--color-accent-subtle);color:var(--color-accent)}
-.lang-badge .rtl-mark{font-size:.5625rem;font-weight:600;text-transform:uppercase;background:var(--color-accent-subtle);color:var(--color-accent);padding:1px 5px;border-radius:3px}
-.fade-in{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
-.fade-in.visible{opacity:1;transform:translateY(0)}
-.delay-1{transition-delay:.1s}
-.delay-2{transition-delay:.2s}
-.delay-3{transition-delay:.3s}
-.delay-4{transition-delay:.4s}
-.lang-dropdown{display:none;position:absolute;right:0;top:100%;background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:8px;padding:8px 0;min-width:200px;z-index:200;box-shadow:var(--shadow-lg)}
-.lang-dropdown.open{display:block}
-.lang-dropdown a{display:flex;padding:6px 16px;font-size:.8125rem;text-decoration:none;color:var(--color-text);transition:background .12s}
-.lang-dropdown a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.lang-dropdown a.active{color:var(--color-text-strong);font-weight:600}
-
-/* Theme Toggle */
-.theme-toggle{background:none;border:none;color:var(--color-text-weak);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .15s}
-.theme-toggle:hover{color:var(--color-text-strong);background:var(--color-bg-weak)}
-.theme-toggle .sun{display:none}
-.theme-toggle .moon{display:block}
-:root.dark .theme-toggle .sun{display:block}
-:root.dark .theme-toggle .moon{display:none}
-@media(prefers-color-scheme:dark){
-  :root:not(.light) .theme-toggle .sun{display:block}
-  :root:not(.light) .theme-toggle .moon{display:none}
-}
-
-/* Sidebar Layout */
-.layout{display:flex;max-width:1200px;margin:0 auto;padding:2rem 0 4rem;gap:3rem}
-@media(max-width:48rem){.layout{flex-direction:column;padding:1rem 0;gap:1.5rem}}
-.sidebar{width:240px;flex-shrink:0}
-@media(max-width:48rem){.sidebar{width:100%}}
-.sidebar-nav{display:flex;flex-direction:column;gap:4px;position:sticky;top:5.5rem}
-@media(max-width:48rem){.sidebar-nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}}
-.sidebar-nav a{display:block;padding:6px 12px;border-radius:6px;font-size:.8125rem;font-weight:500;color:var(--color-text);text-decoration:none;transition:all .12s;font-family:var(--font-mono)}
-.sidebar-nav a:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.sidebar-nav a.active{background:var(--color-accent-subtle);color:var(--color-accent);font-weight:600}
-.sidebar-nav .sec{padding:14px 12px 4px;font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-weak);font-family:var(--font-mono);font-weight:600}
-@media(max-width:48rem){.sidebar-nav .sec{display:none}.sidebar-nav a{display:inline-block;padding:4px 10px;font-size:.75rem}}
-.content{flex:1;min-width:0}
-
-/* Sidebar Search */
-.sidebar-search{padding:0 12px 12px}
-.sidebar-search input{width:100%;padding:8px 12px;border:1px solid var(--color-border-weak);border-radius:6px;background:var(--color-bg-card);color:var(--color-text-strong);font-family:var(--font-mono);font-size:.75rem;outline:none;transition:border-color .15s}
-.sidebar-search input:focus{border-color:var(--color-accent)}
-
-/* Copy Code Snippets Button */
-.copy-code-btn{position:absolute;top:8px;left:8px;padding:4px 8px;font-size:.6875rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:4px;color:var(--color-text-weak);cursor:pointer;opacity:0;transition:opacity .2s,background .15s}
-pre:hover .copy-code-btn{opacity:1}
-.copy-code-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-
-/* Interactive Skills Filtering */
-.skills-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-.filter-btn{padding:6px 12px;font-size:.75rem;font-family:var(--font-mono);background:var(--color-bg-card);border:1px solid var(--color-border-weak);border-radius:6px;color:var(--color-text-weak);cursor:pointer;transition:all .15s;border:1px solid var(--color-border-weak)}
-.filter-btn:hover{background:var(--color-bg-weak);color:var(--color-text-strong)}
-.filter-btn.active{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
-
-@media(max-width:48rem){.card-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(3,1fr)}}</style>
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
+  html[dir="rtl"] .layout { direction: rtl; }
+  html[dir="rtl"] .back-link { flex-direction: row-reverse; }
+  html[dir="rtl"] .sidebar { text-align: right; }
   .hero { padding: 4rem 0 2.5rem; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%); pointer-events: none; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(ellipse at center, var(--bg-accent-subtle) 0%, transparent 70%); pointer-events: none; }
   .hero h1 { position: relative; z-index: 1; }
   .hero .subtitle { position: relative; z-index: 1; }
-  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--color-text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
-  .back-link:hover { color: var(--color-accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .75rem; color: var(--text-weak); text-decoration: none; margin-bottom: 1.5rem; transition: color .15s; }
+  .back-link:hover { color: var(--text-accent); }
   .section:first-of-type { padding-top: 2rem; }
   .local-badge { display: inline-block; padding: 1px 6px; font-size: .5625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; border-radius: 3px; font-family: var(--font-mono); }
   .local-badge.yes { background: rgba(79,125,71,0.12); color: var(--color-success); }
@@ -176,7 +70,7 @@ pre:hover .copy-code-btn{opacity:1}
   </div>
 </header>
 
-<a href="docs.ar.html" class="back-link" style="flex-direction:row-reverse">
+<a href="docs.ar.html" class="back-link">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   العودة إلى مركز الوثائق
 </a>
@@ -206,75 +100,173 @@ pre:hover .copy-code-btn{opacity:1}
         <main class="content">
           <div class="hero">
     <h1><span>الخدمات المساعدة</span></h1>
-    <p class="subtitle">8 خدمات خلفية معيارية توسّع منصة الوكيل</p>
+    <p class="subtitle">8 خدمات خلفية معيارية تشغّل قدرات Aura Work</p>
   </div>
   <section class="section">
     <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">8</div><div class="lbl">إجمالي الخدمات المساعدة</div></div>
+      <div class="stat-card fade-in delay-1"><div class="num">8</div><div class="lbl">خدمات مساعدة</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">Node.js</div><div class="lbl">لغة البرمجة</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">IPC+HTTP</div><div class="lbl">آلية التواصل</div></div>
     </div>
-    <p>يدير Aura Work 8 خدمات مساعدة — خدمات Node.js خلفية مستقلة تقدم خدمات متخصصة لمحرك الوكيل. كل خدمة تعمل في عمليتها الخاصة وتتواصل عبر IPC.</p>
+    <p>الخدمات المساعدة (Sidecars) هي <strong>عمليات Node.js مستقلة</strong> تديرها نواة Tauri. كل خدمة تعمل في مساحة عملية منفصلة مع دورة حياة مستقلة، وتتواصل عبر IPC أو HTTP. توفر هذه الخدمات قدرات معزولة وآمنة يمكن لمحرك الوكيل استدعاؤها.</p>
+    
+    <h2 style="margin-top:2rem">لماذا Sidecars؟</h2>
+    <p>هذه الهيكلية توفر عدة مزايا:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>العزل</strong> — كل خدمة في عملية منفصلة، الأعطال لا تؤثر على التطبيق الرئيسي</li>
+      <li><strong>الأمان</strong> — الخدمات معزولة ومصادق عليها، صلاحيات محدودة</li>
+      <li><strong>القابلية للتوسيع</strong> — إمكانيات جديدة تُضاف كخدمات جديدة بدون تعديل النواة</li>
+      <li><strong>إدارة الموارد</strong> — كل خدمة يمكن تشغيلها وإيقافها بشكل مستقل</li>
+      <li><strong>مرونة اللغة</strong> — الخدمات يمكن كتابتها بأي لغة (حالياً جميعها TypeScript)</li>
+    </ul>
+
+    <div class="section-label">الخدمات المساعدة</div>
     <div class="card-grid">
       <div class="detail-card fade-in delay-1">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◎</span> الوكيل</h3>
-        <p>محرك تنفيذ الوكيل الأساسي</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">21</span> المحرك الأساسي</h3>
+        <p style="margin-top:.5rem">المحرك الرئيسي للوكيل — يستقبل المهام من المستخدم، يحللها، يخطط للخطوات، وينفذها. يتواصل مع جميع المزوّدين (OpenAI, Anthropic, Ollama, Gemini وغيرها) عبر محرك التوجيه. يدير دورة حياة المهمة كاملة من التخطيط إلى المراجعة. يدعم أكثر من 50 مهارة جاهزة ويمكن توسيعه بمهارات مخصصة.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47821</span><span>◎ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-2">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">⇄</span> الجسر</h3>
-        <p>جسر تواصل بين العمليات</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">26</span> جسر التواصل</h3>
+        <p style="margin-top:.5rem">خادم HTTP يعمل كجسر بين تطبيق Aura المكتبي والعملاء الخارجيين. يُمكّن CLI من إنشاء المهام ومتابعتها من الطرفية، ويمكن إضافة Chrome extension للتحكم من المتصفح. يستمع على المنفذ 47826 ويتطلب مصادقة بالجلسة. لا يقبل الاتصالات إلا من localhost للأمان.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47826</span><span>⇄ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-3">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◉</span> مساعد المتصفح</h3>
-        <p>أتمتة المتصفح واستخراج بيانات الويب</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">23</span> مساعد المتصفح</h3>
+        <p style="margin-top:.5rem">محرك أتمتة متصفح كامل باستخدام Playwright. يمكنه فتح المواقع، ملء النماذج، التقاط لقطات الشاشة، استخراج البيانات، والتفاعل مع عناصر الصفحة. يدعم متصفحات Chromium و Firefox و WebKit. مثالي لمهام البحث والأتمتة على الويب.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47823</span><span>◉ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-4">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">☁</span> المزامنة السحابية</h3>
-        <p>مزامنة الحالة والإعدادات عبر الأجهزة</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">25</span> مزامنة سحابية</h3>
+        <p style="margin-top:.5rem">خدمة مزامنة مشفرة بالكامل (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال الفوري وتشفير ChaCha20-Poly1305 لكل جهاز. تخزّن المفاتيح محلياً فقط — حتى خوادم Aura لا تستطيع قراءة بياناتك.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47825</span><span>☁ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-1">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">🖥</span> استخدام الحاسوب</h3>
-        <p>أتمتة سطح المكتب (فأرة، لوحة مفاتيح، ملفات)</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">28</span> التحكم بالحاسوب</h3>
+        <p style="margin-top:.5rem">خدمة تحكم كامل بسطح المكتب — تحريك الماوس، النقر، الكتابة، التقاط الشاشة، وإدارة النوافذ. تسمح للوكيل بالتفاعل مع أي تطبيق على جهازك. تتطلب أذونات صريحة لكل إجراء. مثالية لأتمتة المهام المتكررة.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47828</span><span>🖥 TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-2">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">▣</span> مساعد الآلة الافتراضية</h3>
-        <p>تنفيذ كود معزول في آلات افتراضية</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">22</span> مساعد الآلة الافتراضية</h3>
+        <p style="margin-top:.5rem">بيئة تنفيذ معزولة وآمنة للأكواد. تدير حاويات Docker و WSL2 لتشغيل الأكواد في بيئة منفصلة تماماً عن النظام. تمنع الوصول غير المصرح للملفات والشبكة. مثالية لاختبار الأكواد وتجربة المكتبات الجديدة بأمان.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47822</span><span>▣ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-3">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◆</span> مساعد الإضافات</h3>
-        <p>تحميل وإدارة الإضافات الديناميكية</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">24</span> مساعد الإضافات</h3>
+        <p style="margin-top:.5rem">مدير الإضافات الديناميكي — يحمّل ويدير خوادم MCP والمهارات والمكونات الإضافية. يستمع على المنفذ 47824. يكتشف الإضافات تلقائياً من marketplace ويدير دورة حياتها (تثبيت، تشغيل، إيقاف، تحديث).</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47824</span><span>◆ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-4">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">☆</span> نظام الأوامر</h3>
-        <p>إدارة أوامر النظام والقوالب</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">29</span> نظام الأوامر</h3>
+        <p style="margin-top:.5rem">نظام إدارة الأوامر النصية — يتحكم في كيفية تواصل الوكيل مع المستخدم والنظام. يدعم قوالب ديناميكية، تخصيص حسب المزوّد، وإدارة السياق. يضمن تجربة متسقة عبر جميع المزوّدين والنماذج.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47829</span><span>☆ TypeScript</span></div>
       </div>
     </div>
+  </section>
+  
   <section class="section">
-    <div class="section-label">تفاصيل Sidecars</div>
-    <h2>كيف تعمل Sidecars</h2>
+    <div class="section-label">التواصل</div>
+    <h2>كيف تتواصل Sidecars</h2>
     <div class="detail-card">
-      <h3>Sandbox</h3>
-      <p>ينشئ بيئة معزولة لتشغيل الاكواد. يدعم Docker و WSL2 و VMs الخفيفة. يمنع الوصول غير المصرح للنظام.</p>
+      <h3>🔌 طرق التواصل</h3>
+      <p>تتواصل الخدمات المساعدة مع التطبيق الرئيسي عبر:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الطريقة</th><th>المنفذ</th><th>الاستخدام</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP API</strong></td><td>47821-47830</td><td>نقاط REST لإدارة المهام والفحص الصحي</td></tr>
+          <tr><td><strong>IPC</strong></td><td>—</td><td>تواصل مباشر بين العمليات للعمليات السريعة</td></tr>
+          <tr><td><strong>WebSocket</strong></td><td>47826</td><td>بث مباشر للسجلات والأحداث</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">جميع الخدمات تعرض نقطة <code>GET /health</code> تعيد الحالة والإصدار ومعلومات المرحلة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>FileWatcher</h3>
-      <p>يراقب تغييرات الملفات في الوقت الفعلي باستخدام fs.watch. يخطر المحرك بالتغييرات الخارجية لتجنب التعارضات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Search</h3>
-      <p>يفهرس الملفات باستخدام قاعدة بيانات مدمجة. يدعم البحث النصي الكامل (FTS5) والبحث بالتعبيرات النمطية.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Browser</h3>
-      <p>يوفر Playwright headless browser للتفاعل مع المواقع. يدعم التقاط الشاشة، ملء النماذج، واستخراج البيانات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Sync</h3>
-      <p>يدير مزامنة E2EE بين الاجهزة. يستخدم WebSocket مع تشفير لكل جهاز على حدة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Shell</h3>
-      <p>واجهة Shell تفاعلية مع دعم PTY كامل. تسمح بتشغيل اوامر مركبة والحفاظ على حالة الجلسة.</p>
+      <h3>📊 المنافذ والفحص الصحي</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الخدمة</th><th>المنفذ</th><th>نقطة الفحص</th></tr></thead>
+        <tbody>
+          <tr><td>المحرك الأساسي</td><td>47821</td><td>GET /health</td></tr>
+<tr><td>جسر التواصل</td><td>47826</td><td>GET /health</td></tr>
+<tr><td>مساعد المتصفح</td><td>47823</td><td>GET /health</td></tr>
+<tr><td>مزامنة سحابية</td><td>47825</td><td>GET /health</td></tr>
+<tr><td>التحكم بالحاسوب</td><td>47828</td><td>GET /health</td></tr>
+<tr><td>مساعد الآلة الافتراضية</td><td>47822</td><td>GET /health</td></tr>
+<tr><td>مساعد الإضافات</td><td>47824</td><td>GET /health</td></tr>
+<tr><td>نظام الأوامر</td><td>47829</td><td>GET /health</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
+  
+  <section class="section">
+    <div class="section-label">الفحص الصحي</div>
+    <h2>مراقبة حالة الخدمات</h2>
+    <p>كل خدمة تعرض نقطة فحص صحي. يمكنك فحص جميع الخدمات دفعة واحدة:</p>
+    <pre><code># فحص صحة خدمة Agent
+curl http://localhost:47821/health
+
+# الاستجابة:
+{
+  "phase": 7,
+  "version": "0.1.0-alpha",
+  "status": "ready",
+  "uptime": 3600
+}</code></pre>
+    <p style="margin-top:.75rem">تطبيق سطح المكتب يراقب صحة الخدمات تلقائياً ويعيد تشغيل الخدمات المتعطلة. يمكنك أيضاً التحقق من الحالة في <strong>الإعدادات → التشخيص</strong>.</p>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">نموذج الأمان</div>
+    <h2>مصادقة Sidecars</h2>
+    <p>جميع الخدمات تستخدم نظام مصادقة موحد مع رموز (tokens):</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>مصادقة بالرمز</strong> — كل طلب بين العمليات يجب أن يتضمن رمز sidecar صالح</li>
+      <li><strong>تحميل وقت التشغيل</strong> — الرموز تُنشأ عند بدء التطبيق وتُحمّل في كل خدمة</li>
+      <li><strong>التحقق من الطلبات</strong> — كل طلب يُفحص مقابل الرمز</li>
+      <li><strong>رفض 401</strong> — الطلبات غير المصرحة تُرفض بـ <code>401 Unauthorized</code></li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🛡️ العزل</h3>
+      <p>كل خدمة تعمل في مساحة عملية منفصلة مع:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>عملية Node.js منفصلة</strong> — لا ذاكرة أو حالة مشتركة</li>
+        <li><strong>وصول محدود لنظام الملفات</strong> — فقط المجلدات التي تحتاجها</li>
+        <li><strong>لا وصول للشبكة افتراضياً</strong> — يجب منحه صراحة</li>
+        <li><strong>حدود الموارد</strong> — استخدام CPU والذاكرة مراقب</li>
+      </ul>
+    </div>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">التطوير</div>
+    <h2>بناء Sidecars</h2>
+    <p>الخدمات المساعدة تُبنى بـ TypeScript وتُجمع بـ esbuild:</p>
+    <pre><code># بناء جميع الخدمات
+npm run build:sidecars
+
+# بناء خدمة محددة
+npm run build:sidecar -w sidecar/aura-agent
+
+# تشغيل خدمة في وضع التطوير
+npm run sidecar          # Agent
+npm run vm-helper        # VM Helper
+npm run browser-helper   # Browser Helper</code></pre>
+
+    <div class="detail-card">
+      <h3>📝 إنشاء Sidecar جديدة</h3>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> أنشئ مجلد جديد في <code>sidecar/</code></li>
+        <li><strong>2.</strong> أضف <code>package.json</code> مع التبعيات</li>
+        <li><strong>3.</strong> نفّذ نقطة الفحص الصحي: <code>GET /health</code></li>
+        <li><strong>4.</strong> نفّذ نقاط منطق العمل الخاص بك</li>
+        <li><strong>5.</strong> أضف المصادقة باستخدام <code>sidecar-auth.ts</code></li>
+        <li><strong>6.</strong> سجّل الخدمة في مدير العمليات للتطبيق الرئيسي</li>
+        <li><strong>7.</strong> أضف سكريبت البناء إلى <code>package.json</code> الرئيسي</li>
+      </ol>
+    </div>
   </section>
         </main>
        </div>

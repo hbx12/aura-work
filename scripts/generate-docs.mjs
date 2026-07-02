@@ -622,10 +622,7 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
 <meta property="og:description" content="${titleHTML} — Aura Work documentation">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>${getBaseCSS()}</style>
+<link rel="stylesheet" href="../assets/css/main.css">
 <style>
   /* Page-specific enhancements */
   .hero {
@@ -640,7 +637,7 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
     right: -20%;
     width: 60%;
     height: 200%;
-    background: radial-gradient(ellipse at center, var(--color-accent-subtle) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, var(--bg-accent-subtle) 0%, transparent 70%);
     pointer-events: none;
   }
   .hero h1 {
@@ -657,12 +654,12 @@ function wrapPage(titleHTML, bodyContent, pageId = "docs") {
     gap: 6px;
     font-family: var(--font-mono);
     font-size: .75rem;
-    color: var(--color-text-weak);
+    color: var(--text-weak);
     text-decoration: none;
     margin-bottom: 1.5rem;
     transition: color .15s;
   }
-  .back-link:hover { color: var(--color-accent); }
+  .back-link:hover { color: var(--text-accent); }
   .section:first-of-type { padding-top: 2rem; }
   .local-badge {
     display: inline-block;
@@ -831,7 +828,53 @@ function generateDocsHub() {
     </div>
   </a>`).join("\n");
 
-  return wrapPage("Documentation Hub", hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>`, "hub");
+  const quickLinks = `<section class="section">
+    <div class="section-label">Quick Links</div>
+    <h2>Start Here</h2>
+    <p>Whether you're a new user or a developer looking to contribute to the source code, here are the fastest paths to exactly what you need:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:1rem">
+      <div class="detail-card">
+        <h3>👋 New user?</h3>
+        <p>Start with the <a href="overview.html">Overview</a> page to understand the philosophy behind Aura Work, then head to <a href="quickstart.html">Quick Start</a> to install the app and run your first task within minutes.</p>
+      </div>
+      <div class="detail-card">
+        <h3>🧑‍💻 Developer or contributor?</h3>
+        <p>Review the <a href="architecture.html">Architecture</a> page to understand the multi-process system design, then <a href="skills.html">Skills</a> and <a href="mcp.html">Model Context Protocol (MCP)</a> to add new capabilities to the agent.</p>
+      </div>
+      <div class="detail-card">
+        <h3>🔐 Care about privacy and security?</h3>
+        <p>Check out <a href="permissions.html">Permissions</a> and <a href="routing.html">Routing</a> to see how Aura Work keeps your data local and stays secure by default without compromises.</p>
+      </div>
+      <div class="detail-card">
+        <h3>⌘ Prefer the terminal?</h3>
+        <p>See the <a href="cli.html">CLI</a> page for full remote control of Aura Work from the command line — creating tasks and following up on them.</p>
+      </div>
+    </div>
+  </section>`;
+
+  const pagesTable = `<section class="section">
+    <div class="section-label">Complete Documentation Index</div>
+    <h2>All Documentation Pages</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Page</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><a href="overview.html">Overview</a></td><td>What Aura Work is, its design philosophy, and why it exists</td></tr>
+        <tr><td><a href="quickstart.html">Quick Start</a></td><td>Installation, setup, and running your first task in minutes</td></tr>
+        <tr><td><a href="providers.html">Providers</a></td><td>${providers.length} AI model providers, cloud and local, with automatic model discovery</td></tr>
+        <tr><td><a href="routing.html">Routing</a></td><td>The intelligent routing engine and ${routes.length} policies for choosing the optimal model for each task</td></tr>
+        <tr><td><a href="skills.html">Skills</a></td><td>${skills.length} pre-built, sandboxed skills the agent can use immediately</td></tr>
+        <tr><td><a href="sidecars.html">Sidecars</a></td><td>${sidecars.length} modular background services that power the system's different capabilities</td></tr>
+        <tr><td><a href="languages.html">Languages</a></td><td>${languages.length} supported human languages with full right-to-left support</td></tr>
+        <tr><td><a href="themes.html">Themes</a></td><td>${themes.length} hand-crafted visual themes spanning light, dark, and premium styles</td></tr>
+        <tr><td><a href="permissions.html">Permissions</a></td><td>A fine-grained permission system that controls everything the agent does on your machine</td></tr>
+        <tr><td><a href="architecture.html">Architecture</a></td><td>The Tauri 2 + React 19 + Rust multi-process architecture in detail</td></tr>
+        <tr><td><a href="cli.html">CLI</a></td><td>A command-line client (CLI) for controlling Aura Work remotely</td></tr>
+        <tr><td><a href="mcp.html">MCP</a></td><td>Integrating third-party tools and servers via the Model Context Protocol</td></tr>
+      </tbody>
+    </table>
+  </section>`;
+
+  return wrapPage("Documentation Hub", hero + `<section class="section">${statsBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">${cards}</div></section>` + quickLinks + pagesTable, "hub");
 }
 
 // ─── Overview Page ──────────────────────────────────────────────────────────────
@@ -930,6 +973,49 @@ function generateOverview() {
       <li><strong>Audit logging</strong> — every action is recorded with actor, category, action, target, risk level, and result</li>
       <li><strong>Permission system</strong> — granular control over what the agent can access (files, shell, browser, network)</li>
     </ul>
+  </section>
+  <section class="section">
+    <div class="section-label">Use Cases</div>
+    <h2>Who is Aura Work built for?</h2>
+    <div class="detail-card">
+      <h3>👨‍💻 For Developers</h3>
+      <p>Start a new feature with a single sentence: <code>"Add JWT authentication to the API interface"</code>. Aura will analyze the codebase, build a plan, write the code, run the tests, and open a pull request — all while you review every sensitive step.</p>
+    </div>
+    <div class="detail-card">
+      <h3>✍️ For Writers & Analysts</h3>
+      <p>Analyze a document: <code>"Analyze the annual report and extract the key points"</code>, then <code>"Create a presentation from these findings"</code>. Document, spreadsheet, and PDF skills are built in and ready to go.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🛠️ For System Administrators</h3>
+      <p>Monitor a server: <code>"Check disk usage and generate a report"</code>. Integrate with your monitoring tools via MCP servers, and automatically schedule recurring tasks.</p>
+    </div>
+    <div class="detail-card">
+      <h3>🔬 For Researchers</h3>
+      <p>Gather information from multiple sources: <code>"Compare PostgreSQL and MongoDB for our use case"</code>. The research skill browses the web, summarizes, and cites its sources.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Architecture at a Glance</div>
+    <h2>System Diagram</h2>
+    <pre><code>┌─────────────────────────────────────────────┐
+│         Aura Work App (Tauri 2)              │
+│  React 19 + Rust shell + IPC + system tray   │
+└───────────────────────┬───────────────────────┘
+                         │ local IPC / HTTP
+      ┌──────────────────┼──────────────────┐
+      │                  │                  │
+┌─────▼─────┐     ┌──────▼──────┐    ┌──────▼──────┐
+│  Agent    │     │  Browser    │    │  VM Helper  │
+│  :47821   │     │  Helper     │    │  :47822     │
+│ (Planner, │     │  :47823     │    │ (isolated   │
+│ Executor, │     │ (browser    │    │  sandbox)   │
+│ Reviewer) │     │  automation)│    └─────────────┘
+└─────┬─────┘     └─────────────┘
+      │ Routing engine (5 policies)
+┌─────▼─────────────────────────────────────────┐
+│   10 AI providers (cloud + local)              │
+│   OpenAI · Anthropic · Gemini · Ollama · ...   │
+└─────────────────────────────────────────────────┘</code></pre>
   </section>`;
   return wrapPage("Overview", body, "overview");
 }
@@ -1065,6 +1151,67 @@ function generateProviders() {
         <li><strong>Set token limits</strong> per task to prevent runaway costs</li>
       </ul>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Comparison</div>
+    <h2>Local vs. Cloud</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Criteria</th><th>Local Providers</th><th>Cloud Providers</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Privacy</strong></td><td>Complete — data never leaves your machine</td><td>Requests are sent to the provider's servers</td></tr>
+        <tr><td><strong>Cost</strong></td><td>Free after setup</td><td>Pay per token used</td></tr>
+        <tr><td><strong>Quality</strong></td><td>Good, depends on your hardware</td><td>Usually best-in-class (large models)</td></tr>
+        <tr><td><strong>Speed</strong></td><td>Depends on your GPU/CPU</td><td>Usually fast with strong infrastructure</td></tr>
+        <tr><td><strong>Internet required</strong></td><td>No</td><td>Yes</td></tr>
+        <tr><td><strong>Best for</strong></td><td>Sensitive data, offline work, cost savings</td><td>Complex tasks, best possible quality</td></tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:2rem">Choosing the Right Model</h2>
+    <div class="detail-card">
+      <h3>🎯 Model Selection Guide</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>For complex coding</strong> — Claude Sonnet 4, GPT-4o, or DeepSeek R1 (advanced reasoning)</li>
+        <li><strong>For fast/simple tasks</strong> — Claude 3.5 Haiku, GPT-4o mini, or Gemini 2.0 Flash</li>
+        <li><strong>For very long context</strong> — Gemini 2.5 Pro (massive context window)</li>
+        <li><strong>For maximum privacy</strong> — any model via Ollama or LM Studio</li>
+        <li><strong>For lowest possible cost</strong> — DeepSeek V3 or a local model via Ollama</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Provider Overview</div>
+    <h2>Supported Providers</h2>
+    <p>Aura Work supports ${providers.length} providers to maximize flexibility. Each provider has its own strengths:</p>
+    <div class="detail-card">
+      <h3>Cloud</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>OpenAI</strong> — GPT-4o, GPT-4.5, o1, o3. Excellent at coding and analysis</li>
+        <li><strong>Anthropic</strong> — Claude Opus, Sonnet, Haiku. Long context and computer vision</li>
+        <li><strong>Google Gemini</strong> — Gemini 2.5 Pro, Flash. Multimodal and lightweight models</li>
+        <li><strong>DeepSeek</strong> — DeepSeek-V3, R1. Strong performance at low cost</li>
+        <li><strong>xAI Grok</strong> — Grok-3. Cutting-edge models from xAI</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h3>Local</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Ollama</strong> — Llama, Mistral, Gemma, Qwen. Complete privacy</li>
+        <li><strong>LM Studio</strong> — a graphical interface for running models locally</li>
+        <li><strong>LocalAI</strong> — a local OpenAI-compatible API</li>
+      </ul>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Configuration</div>
+    <h2>How to Configure Providers</h2>
+    <p>Use the following command to configure a provider:</p>
+    <pre><code>aura config set providers.openai.apiKey sk-...
+aura config set providers.anthropic.apiKey sk-ant-...</code></pre>
+    <p>For local providers:</p>
+    <pre><code>aura config set providers.ollama.baseUrl http://localhost:11434
+aura config set providers.ollama.model llama3.2</code></pre>
+    <p>All keys are stored encrypted using OS-level encryption (Keytar on macOS, DPAPI on Windows, libsecret on Linux).</p>
   </section>`;
   return wrapPage("Providers", body, "providers");
 }
@@ -1117,6 +1264,54 @@ function generateRouting() {
       <div class="meta"><span>${p.subtitle}</span></div>
       <p>${p.desc}</p>
     </div>`).join("\n")}
+  </section>
+  <section class="section">
+    <div class="section-label">Routing Strategies</div>
+    <h2>Five Routing Strategies</h2>
+    <div class="detail-card">
+      <h3>Quality-first</h3>
+      <p>Routes the request to the best available provider. Uses quality benchmarks (HumanEval accuracy, response speed, etc.). Suited for critical tasks.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Cost-first</h3>
+      <p>Chooses the cheapest provider that meets the minimum quality bar. Suited for simple tasks or large-scale data processing.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Privacy-first</h3>
+      <p>Prefers local providers (Ollama, LM Studio). Never sends data to the cloud. Requires at least one local provider to be configured.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Local-only</h3>
+      <p>Uses local providers exclusively. Fails if no local provider is available. Meant for fully isolated environments.</p>
+    </div>
+    <div class="detail-card">
+      <h3>Manual</h3>
+      <p>You pick the provider and model manually for each request: <code>aura --provider openai --model gpt-4o</code></p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Cost & Privacy</div>
+    <h2>Cost Optimization</h2>
+    <p>To reduce AI costs without sacrificing quality:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Use the cost-first policy</strong> for routine daily tasks (formatting, simple lookups, Q&A)</li>
+      <li><strong>Set a policy per project</strong> — production projects use quality-first, while experiments use cost-first</li>
+      <li><strong>Monitor token usage</strong> from the Dashboard to spot expensive patterns early</li>
+      <li><strong>Use Ollama locally</strong> for repeated development and testing at zero cost</li>
+      <li><strong>Set strict cost limits</strong> per task or per day to prevent unexpected bills</li>
+    </ul>
+
+    <h2 style="margin-top:2rem">Privacy-Based Routing</h2>
+    <p>When working with proprietary code, sensitive data, or personal information, the <strong>privacy-first</strong> policy ensures no data ever leaves your machine:</p>
+    <div class="detail-card">
+      <h3>🔒 How Privacy-first Works</h3>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li>The routing engine analyzes the sensitivity of the data in every request (passwords, keys, personal data)</li>
+        <li>If high sensitivity is detected, routing is restricted to local providers only</li>
+        <li>If no local provider is available, the task fails rather than sending sensitive data to the cloud</li>
+        <li>You can always enforce this behavior with the <strong>local-only</strong> policy regardless of detected sensitivity</li>
+      </ul>
+    </div>
   </section>
   <section class="section">
     <div class="section-label">Configuration</div>
@@ -1308,6 +1503,14 @@ function generateSkills() {
       <p>${s.summary || s.description}</p>
       ${s.tools.length ? `<div style="margin-top:.5rem"><strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">Tools:</strong> ${s.tools.map(t => `<code>${t.name}</code>`).join(" ")}</div>` : ""}
     </div>`).join("\n")}
+  </section>
+  <section class="section">
+    <div class="section-label">Built-in Skills</div>
+    <h2>Core Skills</h2>
+    <div class="detail-card">
+      <h3>web-search</h3>
+      <p>Searches the web and extracts up-to-date information along with source links. Supports multiple search engines.</p>
+    </div>
   </section>`;
   return wrapPage("Skills", body, "skills");
 }
@@ -1558,6 +1761,19 @@ function generateLanguages() {
         <li><strong>Review existing translations</strong> — check <code>en.json</code> for the complete list</li>
       </ul>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Contributing</div>
+    <h2>How to Contribute a New Language</h2>
+    <p>Anyone can add a new language to Aura Work. The process is simple and open to everyone:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> Open a discussion or issue on GitHub to let the team know you'd like to add a language</li>
+      <li><strong>2.</strong> Follow the "Adding a New Language" guide above to create the translation file</li>
+      <li><strong>3.</strong> Use machine translation tools as a starting point, then review manually for accuracy and cultural context</li>
+      <li><strong>4.</strong> Test your language across all app pages to make sure no text is cut off</li>
+      <li><strong>5.</strong> Submit the pull request and wait for the team's review</li>
+    </ol>
+    <p style="margin-top:.75rem">All contributions are appreciated, whether a full translation or small fixes to existing ones.</p>
   </section>`;
   return wrapPage("Languages", body, "languages");
 }
@@ -1638,6 +1854,20 @@ function generateThemes() {
     <div class="detail-card">
       <h3>📝 CSS Custom Properties</h3>
       <p>Themes use CSS custom properties for all colors:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Token</th><th>Description</th><th>Example (Light)</th></tr></thead>
+        <tbody>
+          <tr><td><code>--color-bg</code></td><td>Base page background</td><td>#faf9f5</td></tr>
+          <tr><td><code>--color-bg-card</code></td><td>Card and raised element background</td><td>#ffffff</td></tr>
+          <tr><td><code>--color-text</code></td><td>Primary text color</td><td>#5c5544</td></tr>
+          <tr><td><code>--color-text-strong</code></td><td>Prominent heading text</td><td>#28241d</td></tr>
+          <tr><td><code>--color-accent</code></td><td>Accent color for links and primary buttons</td><td>#c2683f</td></tr>
+          <tr><td><code>--color-success</code></td><td>Success states</td><td>#4f7d47</td></tr>
+          <tr><td><code>--color-warning</code></td><td>Warning states</td><td>#a9761f</td></tr>
+          <tr><td><code>--color-danger</code></td><td>Error states</td><td>#b8482f</td></tr>
+          <tr><td><code>--shadow-md</code></td><td>Medium shadow for cards</td><td>0 4px 16px rgba(...)</td></tr>
+        </tbody>
+      </table>
       <pre><code>:root {
   /* Backgrounds */
   --color-bg: #faf9f5;
@@ -1669,6 +1899,11 @@ function generateThemes() {
     </div>
 
     <div class="detail-card">
+      <h3>☀️🌙 Light and Dark Mode</h3>
+      <p>Every theme in Aura Work has a light and a dark variant (e.g. <code>ocean-light</code> and <code>ocean-dark</code>). Switching between them is instant with no page reload. The special <code>system</code> theme automatically follows your OS preference via the <code>prefers-color-scheme</code> property and switches automatically when your device's settings change (e.g. macOS sunset/sunrise).</p>
+    </div>
+
+    <div class="detail-card">
       <h3>🔧 Creating Custom Themes</h3>
       <p>Create your own theme by following these steps:</p>
       <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
@@ -1694,6 +1929,20 @@ function generateThemes() {
       </ul>
       <p style="margin-top:.75rem">The <code>system</code> theme automatically matches your OS preference, switching between light and dark mode.</p>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Custom Themes</div>
+    <h2>Creating a Custom Theme Manually</h2>
+    <p>You can create a custom theme by defining a set of CSS variables. Place the theme file in <code>~/.config/aura/themes/</code> and it will be loaded automatically.</p>
+    <pre><code>{
+  "name": "my-theme",
+  "colors": {
+    "bg-primary": "#1a1b26",
+    "fg-primary": "#c0caf5",
+    "accent": "#7aa2f7"
+  }
+}</code></pre>
+    <p style="margin-top:1rem">You can export themes and share them with the community. Featured community themes are added to the official gallery.</p>
   </section>`;
   return wrapPage("Themes", body, "themes");
 }
@@ -2138,6 +2387,48 @@ jobs:
 }</code></pre>
       <p style="margin-top:.75rem">Set <code>outputFormat</code> to <code>json</code> for machine-readable output in scripts.</p>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">Advanced Commands</div>
+    <h2>Advanced CLI Management</h2>
+    <div class="card-grid">
+      <div class="detail-card">
+        <h3>📋 Session Management</h3>
+        <pre><code>aura session list          # List active sessions
+aura session resume &lt;id&gt;  # Resume a previous session
+aura session kill &lt;id&gt;    # Terminate a session</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⭐ Skill Management</h3>
+        <pre><code>aura skill list            # List installed skills
+aura skill install &lt;name&gt;  # Install a skill from the marketplace
+aura skill create          # Create a new skill</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>🔌 MCP Management</h3>
+        <pre><code>aura mcp list              # List MCP servers
+aura mcp add &lt;name&gt;        # Add an MCP server
+aura mcp remove &lt;name&gt;     # Remove an MCP server</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>☁ Sync</h3>
+        <pre><code>aura sync push             # Push changes to the cloud
+aura sync pull              # Pull changes from the cloud
+aura sync status            # Check sync status</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⚙️ Configuration</h3>
+        <pre><code>aura config list           # List all settings
+aura config set &lt;k&gt; &lt;v&gt;    # Set a configuration value
+aura config reset           # Reset to defaults</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>📦 Projects</h3>
+        <pre><code>aura projects list         # List projects
+aura projects create &lt;name&gt; # Create a new project
+aura projects delete &lt;name&gt; # Delete a project</code></pre>
+      </div>
+    </div>
   </section>`;
   return wrapPage("CLI", body, "cli");
 }
@@ -2457,9 +2748,53 @@ function generateQuickStart() {
     </div>
   </section>
   <section class="section">
+    <div class="section-label">Troubleshooting</div>
+    <h2>Common Issues and Fixes</h2>
+    <table style="margin-top:.75rem">
+      <thead><tr><th>Issue</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>App won't start</td><td>Make sure WebView2 is up to date (Windows) or install the libwebkit2gtk requirements (Linux)</td></tr>
+        <tr><td>Cloud provider validation fails</td><td>Check that your API key is valid and that your provider account has sufficient credit</td></tr>
+        <tr><td>Ollama doesn't show up in the list</td><td>Make sure <code>ollama serve</code> is running and that you've pulled at least one model</td></tr>
+        <tr><td>A sidecar isn't responding</td><td>Check Settings → Diagnostics and manually restart the failed sidecar</td></tr>
+        <tr><td>Task stuck "waiting for approval"</td><td>Open the Approvals panel and review the requested action, or change your permission profile</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="section">
     <div class="section-label">Next Steps</div>
     <h2>Going deeper</h2>
     <p>Read about <a href="providers" style="color:var(--color-accent)">Providers</a>, <a href="routing" style="color:var(--color-accent)">Routing</a>, <a href="skills" style="color:var(--color-accent)">Skills</a>, or <a href="architecture" style="color:var(--color-accent)">Architecture</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md" style="color:var(--color-accent)">Contributing Guide</a> and <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md" style="color:var(--color-accent)">New Contributor Guide</a>.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">Advanced Installation</div>
+    <h2>Other Installation Options</h2>
+    <div class="detail-card">
+      <h3>Using Homebrew (macOS and Linux)</h3>
+      <pre><code>brew install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>Using Winget (Windows)</h3>
+      <pre><code>winget install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>Building from Source</h3>
+      <pre><code>git clone https://github.com/hbx12/aura-work.git
+cd aura-work
+npm install
+npm run build
+npm link</code></pre>
+    </div>
+    <p style="margin-top:1rem">Requires Node.js 18+. Supports Windows, macOS, and Linux with separate packages for each platform.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">First Usage</div>
+    <h2>Your First CLI Experience</h2>
+    <p>After installing, try these commands to get familiar with Aura Work:</p>
+    <pre><code>aura --help
+aura --version
+aura config list
+aura --dry-run "Create a new Node.js project"</code></pre>
   </section>`;
   return wrapPage("Quick Start", body, "quickstart");
 }
