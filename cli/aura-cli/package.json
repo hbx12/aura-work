@@ -12,7 +12,7 @@
     "start": "node dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.1.0",
     "typescript": "~5.8.3"
   }
 }
