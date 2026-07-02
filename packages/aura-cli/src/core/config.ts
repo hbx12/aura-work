@@ -24,6 +24,8 @@ export interface AuraConfig {
   lang?: "en" | "ar";
   /** Auto-approve low-risk actions */
   autoApprove?: boolean;
+  /** API keys for providers */
+  apiKeys?: Record<string, string>;
   /** Custom settings */
   [key: string]: unknown;
 }
