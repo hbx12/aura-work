@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — الأذونات">
 <meta property="og:title" content="الأذونات — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — الأذونات">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -228,6 +228,32 @@ pre:hover .copy-code-btn{opacity:1}
     }
   ]
 }</code></pre>
+  <section class="section">
+    <div class="section-label">نموذج الأذونات</div>
+    <h2>فهم نموذج الأذونات</h2>
+    <p>يستخدم Aura Work نظام أذونات خماسي المستويات للتحكم الكامل في ما يمكن للذكاء الاصطناعي فعله:</p>
+    <div class="detail-card">
+      <h3>المستوى 1: قراءة نظام الملفات</h3>
+      <p>السماح بقراءة الملفات والمجلدات. هذا هو المستوى الأساسي المطلوب لمعظم المهام. يمكن تقييده بمجلدات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 2: كتابة نظام الملفات</h3>
+      <p>السماح بإنشاء وتعديل وحذف الملفات. مطلوب لمهام البرمجة. يمكن تقييده بمسارات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 3: تنفيذ الأوامر</h3>
+      <p>السماح بتشغيل أوامر shell. مطلوب لتشغيل الاختبارات والبناء. يمكن تقييده بأوامر مسموحة فقط.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 4: الوصول للشبكة</h3>
+      <p>السماح بالاتصال بالإنترنت. مطلوب لاستدعاءات API والبحث على الويب. يمكن تقييده بنطاقات محددة.</p>
+    </div>
+    <div class="detail-card">
+      <h3>المستوى 5: التحكم الكامل</h3>
+      <p>وصول غير مقيد. يتطلب تأكيدا صريحا من المستخدم. غير موصى به للاستخدام اليومي.</p>
+    </div>
+    <p style="margin-top:1.5rem">يمكن تكوين الأذونات بشكل دقيق في ملف <code>aura.config.json</code>. كل طلب يعرض الأذونات المطلوبة قبل التنفيذ.</p>
+  </section>
   </section>
         </main>
        </div>

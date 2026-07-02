@@ -4,10 +4,10 @@
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>Aura Work — The open source AI agent platform</title>
- <meta name="description" content="Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable. 8 providers, 24 skills, 35 themes, 20 languages.">
+ <meta name="description" content="Open-source, multi-provider desktop AI agent platform — local-first, permission-gated, self-hostable. 10 providers, 18 skills, 34 themes, 20 languages, 7 sidecars.">
  <meta property="og:title" content="Aura Work">
- <meta property="og:description" content="Open-source, multi-provider desktop AI agent platform — 8 providers, 24 skills, 35 themes">
- <meta property="og:url" content="https://hbx12.github.io/aura-work/">
+ <meta property="og:description" content="Open-source, multi-provider desktop AI agent platform — 10 providers, 18 skills, 34 themes, 20 languages">
+ <meta property="og:url" content="https://aura-work.shop/">
  <meta property="og:image" content="https://raw.githubusercontent.com/hbx12/aura-work/main/assets/social-preview.svg">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hbx12/aura-work/main/apps/desktop/public/aura-logo.png">
@@ -25,7 +25,7 @@
    <nav class="nav-desktop">
     <ul>
      <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
-     <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+     <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
      <li><a href="https://github.com/hbx12/aura-work/releases/latest">Releases</a></li>
      <li class="lang-wrapper">
       <a href="#" class="lang-trigger" onclick="event.preventDefault();toggleLang(event)">
@@ -33,8 +33,8 @@
        EN
       </a>
       <div id="lang-menu" class="lang-dropdown">
-       <a href="https://hbx12.github.io/aura-work/" class="active">English</a>
-       <a href="https://hbx12.github.io/aura-work/index.ar.html">العربية</a>
+       <a href="https://aura-work.shop/" class="active">English</a>
+       <a href="https://aura-work.shop/index.ar.html">العربية</a>
        <a href="#" onclick="return switchLang('fr','Français')">Français</a>
        <a href="#" onclick="return switchLang('es','Español')">Español</a>
        <a href="#" onclick="return switchLang('de','Deutsch')">Deutsch</a>
@@ -68,7 +68,7 @@
 
   <section class="hero">
    <h1>The open source AI agent platform</h1>
-   <p>Free, local-first, multi-provider desktop AI agent. Use OpenAI, Anthropic, Gemini, DeepSeek, Ollama — or any provider — with full privacy and permission controls.</p>
+   <p>Free, local-first, multi-provider desktop AI agent. Connect to OpenAI, Anthropic, Gemini, DeepSeek, Ollama, LM Studio, Minimax, Qwen, or any custom endpoint. 18 built-in skills, 34 themes, 20 languages. Your data stays on your machine.</p>
    <div class="hero-btns">
     <a href="https://github.com/hbx12/aura-work" class="primary">
      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
@@ -99,16 +99,16 @@
      <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="16" cy="16" r="12"/><path d="M16 4a18 18 0 0 1 4 12 18 18 0 0 1-4 12 18 18 0 0 1-4-12 18 18 0 0 1 4-12z"/><path d="M4 16h24"/>
      </svg>
-     <h3>Multi-Provider</h3>
-     <p>OpenAI, Anthropic, Gemini, DeepSeek, Ollama — bring your own keys or use local models. Route tasks to the best model.</p>
+     <h3>10 AI Providers</h3>
+     <p>OpenAI, Anthropic, Gemini, DeepSeek, Ollama, LM Studio, Minimax, Qwen, Aura Cloud, or any custom endpoint. Bring your own keys or run 100% local with Ollama.</p>
     </div>
 
     <div class="feature-card">
      <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <rect x="6" y="10" width="20" height="18" rx="2"/><path d="M10 10V7a6 6 0 0 1 12 0v3"/><circle cx="16" cy="20" r="2"/>
      </svg>
-     <h3>Local-First</h3>
-     <p>Encrypted vault with OS-backed secure storage. No telemetry. Your keys never leave your machine.</p>
+     <h3>Local-First &amp; Private</h3>
+     <p>Encrypted vault with OS-backed secure storage (ChaCha20-Poly1305 + Argon2). No telemetry. Your keys never leave your machine.</p>
     </div>
 
     <div class="feature-card">
@@ -116,7 +116,15 @@
       <path d="M12 22V8l8-4v14"/><path d="M12 18l8 4"/><circle cx="12" cy="22" r="3"/><circle cx="20" cy="18" r="3"/>
      </svg>
      <h3>Permission-Gated</h3>
-     <p>High-impact actions require explicit approval. Full audit log of every operation.</p>
+     <p>3 permission levels: read-only, ask-first, act-without-asking. High-impact actions always require approval. Full audit log of every operation.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="10" height="10" rx="1"/><rect x="18" y="4" width="10" height="10" rx="1"/><rect x="4" y="18" width="10" height="10" rx="1"/><rect x="18" y="18" width="10" height="10" rx="1"/>
+     </svg>
+     <h3>18 Built-in Skills</h3>
+     <p>Documents, spreadsheets, presentations, PDFs, research, image generation, data analysis, browser automation, and more. One-click install from Marketplace.</p>
     </div>
 
     <div class="feature-card">
@@ -124,40 +132,171 @@
       <circle cx="16" cy="16" r="12"/><path d="M6 10h20"/><path d="M6 22h20"/><path d="M10 6v20"/><path d="M22 6v20"/>
      </svg>
      <h3>20 Languages</h3>
-     <p>Full RTL support for Arabic and Persian. Weblate-powered community translations.</p>
-    </div>
-
-    <div class="feature-card">
-     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="4" y="4" width="10" height="10" rx="1"/><rect x="18" y="4" width="10" height="10" rx="1"/><rect x="4" y="18" width="10" height="10" rx="1"/><rect x="18" y="18" width="10" height="10" rx="1"/>
-     </svg>
-     <h3>Extensible</h3>
-     <p>Plugin system, MCP support, and official Marketplace. Build and share your own extensions.</p>
+     <p>Full RTL support for Arabic and Persian. Weblate-powered community translations. 8 sans-serif fonts including Cairo, Tajawal, and Almarai for Arabic.</p>
     </div>
 
     <div class="feature-card">
      <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="16" cy="12" r="5"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="24" r="3"/><circle cx="16" cy="12" r="2" fill="currentColor"/>
      </svg>
-     <h3>17 Themes</h3>
-     <p>Nord, Dracula, Cyberpunk, Sakura, and more. Light, dark, and AMOLED modes.</p>
+     <h3>34 Themes</h3>
+     <p>Nord, Dracula, Cyberpunk, Sakura, Matrix, Ocean, and 28 more. Light, dark, AMOLED, and luxury variants. System-aware auto-switching.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="10"/><circle cx="16" cy="16" r="3"/><path d="M16 6v4M16 22v4M6 16h4M22 16h4"/>
+     </svg>
+     <h3>Smart Routing</h3>
+     <p>5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual. Auto-discovers available providers and picks the best model per task.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="24" height="24" rx="3"/><path d="M4 10h24"/><path d="M10 10v18"/>
+     </svg>
+     <h3>Monaco Editor</h3>
+     <p>Built-in code editor with syntax highlighting, language support, and pending edits approval system. Agent proposes changes, you review and approve.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M12 16l3 3 5-6"/>
+     </svg>
+     <h3>Task Engine</h3>
+     <p>8 task states from draft to completed. Approve plans, pause/resume, send messages to running tasks. Full cost tracking and token usage per task.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 12a8 8 0 0 1 16 0"/><path d="M4 12v10h16V12"/><path d="M12 8v4"/><circle cx="12" cy="6" r="2"/>
+     </svg>
+     <h3>MCP Servers</h3>
+     <p>Model Context Protocol integration. Pre-configured presets for GitHub, PostgreSQL, SQLite, Filesystem, and Puppeteer. Add custom MCP servers.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M16 8v8l4 4"/>
+     </svg>
+     <h3>Scheduled Tasks</h3>
+     <p>Recurring automation with hourly, daily, weekday, weekly, or custom cron schedules. Pre-approved permission profiles for unattended execution.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8a6 6 0 0 1 0 16"/><path d="M14 12a2 2 0 0 1 0 8"/><rect x="2" y="4" width="28" height="24" rx="3"/>
+     </svg>
+     <h3>Browser Automation</h3>
+     <p>AI can browse web pages, extract content, take screenshots, and fill forms. Prompt injection scanning keeps you safe from malicious pages.</p>
     </div>
 
    </div>
   </section>
 
   <section class="landing-stats">
-   <div class="landing-stat"><span class="value">20+</span><span class="label">Languages</span></div>
-   <div class="landing-stat"><span class="value">17</span><span class="label">Themes</span></div>
-   <div class="landing-stat"><span class="value">8</span><span class="label">Sidecars</span></div>
-   <div class="landing-stat"><span class="value">7</span><span class="label">Providers</span></div>
-   <div class="landing-stat"><span class="value">0.1</span><span class="label">Alpha</span></div>
+   <div class="landing-stat"><span class="value">20</span><span class="label">Languages</span></div>
+   <div class="landing-stat"><span class="value">34</span><span class="label">Themes</span></div>
+   <div class="landing-stat"><span class="value">18</span><span class="label">Skills</span></div>
+   <div class="landing-stat"><span class="value">10</span><span class="label">Providers</span></div>
+   <div class="landing-stat"><span class="value">7</span><span class="label">Sidecars</span></div>
+   <div class="landing-stat"><span class="value">5</span><span class="label">Routing Policies</span></div>
+  </section>
+
+  <section class="features-section">
+   <p class="section-label">Quick Start</p>
+   <h2>Get started in 3 steps</h2>
+   <p>No account required. No API key needed to explore. Just download and go.</p>
+   <div class="features-grid">
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 4h8l4 4v16a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M16 12v6"/><path d="M13 15h6"/>
+     </svg>
+     <h3>1. Download</h3>
+     <p>Grab the installer for Windows (.msi), macOS (.dmg), or Linux (.AppImage / .deb). Or install via npm: <code>npm i -g aura-work</code></p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8h24v18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><path d="M4 8l4-4h16l4 4"/><path d="M12 16h8M12 20h5"/>
+     </svg>
+     <h3>2. Create a Project</h3>
+     <p>Open Aura Work and create a new project by selecting any folder on your machine. The AI agent will understand your codebase automatically.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 8l8 8-8 8"/><circle cx="6" cy="16" r="2"/>
+     </svg>
+     <h3>3. Start a Task</h3>
+     <p>Describe what you want in natural language: "Analyze this codebase", "Create a document", "Research this topic". The agent plans, executes, and asks for approval when needed.</p>
+    </div>
+
+   </div>
+  </section>
+
+  <section class="features-section">
+   <p class="section-label">How It Works</p>
+   <h2>Under the hood</h2>
+   <p>Aura Work runs as a desktop app with 7 modular sidecars that handle different capabilities.</p>
+   <div class="features-grid">
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="24" height="24" rx="3"/><path d="M8 12h16M8 16h12M8 20h8"/>
+     </svg>
+     <h3>Desktop App</h3>
+     <p>Tauri 2 (Rust) + React 19. Manages projects, tasks, files, Git, terminal, settings, and the UI. SQLite database stores everything locally.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M12 12l4 4 4-4"/><path d="M12 20l4-4 4 4"/>
+     </svg>
+     <h3>Agent Sidecar</h3>
+     <p>Main AI brain. Routes tasks to providers, manages conversation, executes tools, handles streaming responses. Supports 9 AI providers.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="8" width="20" height="16" rx="2"/><path d="M6 12h20"/><circle cx="10" cy="10" r="1"/><circle cx="14" cy="10" r="1"/>
+     </svg>
+     <h3>Browser Sidecar</h3>
+     <p>Chromium-based browser automation. Browse pages, extract content, take screenshots. Prompt injection scanning for safety.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="6" width="24" height="20" rx="2"/><path d="M8 6V4h16v2"/><path d="M8 14h4M8 18h8"/>
+     </svg>
+     <h3>VM Sidecar</h3>
+     <p>Linux workspace sandbox for safe command execution. WSL2 on Windows, KVM on Linux. Mounts project folders, captures output, redacts secrets.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 12a8 8 0 0 1 16 0"/><path d="M16 12v12"/><path d="M8 24h16"/>
+     </svg>
+     <h3>Cloud Sync Sidecar</h3>
+     <p>End-to-end encrypted sync between devices. AES-256-GCM encryption. Device pairing via QR code. Remote dispatch to run tasks on other devices.</p>
+    </div>
+
+    <div class="feature-card">
+     <svg class="feature-card-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="12"/><path d="M10 16h12M16 10v12"/>
+     </svg>
+     <h3>Plugins Sidecar</h3>
+     <p>Load and execute plugins, MCP servers, and sync the Marketplace. Supports custom JavaScript/TypeScript tools with sandboxed execution.</p>
+    </div>
+
+   </div>
   </section>
 
   <section class="features-section">
    <p class="section-label">Supported Providers</p>
    <h2>Connect to any AI provider</h2>
-   <p>Aura Work supports 8 AI providers with automatic model discovery, key rotation, and intelligent routing.</p>
+   <p>Aura Work supports 10 AI providers with automatic model discovery, key rotation, and intelligent routing. Use cloud providers or run 100% local with Ollama.</p>
    <div class="provider-grid">
     <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9.205 8.658v-2.26c0-.19.072-.333.238-.428l4.543-2.616c.619-.357 1.356-.523 2.117-.523 2.854 0 4.662 2.212 4.662 4.566 0 .167 0 .357-.024.547l-4.71-2.759a.797.797 0 00-.856 0l-5.97 3.473zm10.609 8.8V12.06c0-.333-.143-.57-.429-.737l-5.97-3.473 1.95-1.118a.433.433 0 01.476 0l4.543 2.617c1.309.76 2.189 2.378 2.189 3.948 0 1.808-1.07 3.473-2.76 4.163zM7.802 12.703l-1.95-1.142c-.167-.095-.239-.238-.239-.428V5.899c0-2.545 1.95-4.472 4.591-4.472 1 0 1.927.333 2.712.928L8.23 5.067c-.285.166-.428.404-.428.737v6.898zM12 15.128l-2.795-1.57v-3.33L12 8.658l2.795 1.57v3.33L12 15.128zm1.796 7.23c-1 0-1.927-.332-2.712-.927l4.686-2.712c.285-.166.428-.404.428-.737v-6.898l1.974 1.142c.167.095.238.238.238.428v5.233c0 2.545-1.974 4.472-4.614 4.472zm-5.637-5.303l-4.544-2.617c-1.308-.761-2.188-2.378-2.188-3.948A4.482 4.482 0 014.21 6.327v5.423c0 .333.143.571.428.738l5.947 3.449-1.95 1.118a.432.432 0 01-.476 0zm-.262 3.9c-2.688 0-4.662-2.021-4.662-4.519 0-.19.024-.38.047-.57l4.686 2.71c.286.167.571.167.856 0l5.97-3.448v2.26c0 .19-.07.333-.237.428l-4.543 2.616c-.619.357-1.356.523-2.117.523zm5.899 2.83a5.947 5.947 0 005.827-4.756C22.287 18.339 24 15.84 24 13.296c0-1.665-.713-3.282-1.998-4.448.119-.5.19-.999.19-1.498 0-3.401-2.759-5.947-5.946-5.947-.642 0-1.26.095-1.88.31A5.962 5.962 0 0010.205 0a5.947 5.947 0 00-5.827 4.757C1.713 5.447 0 7.945 0 10.49c0 1.666.713 3.283 1.998 4.448-.119.5-.19 1-.19 1.499 0 3.401 2.759 5.946 5.946 5.946.642 0 1.26-.095 1.88-.309a5.96 5.96 0 004.162 1.713z"/></svg>OpenAI</div>
     <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13.827 3.52h3.603L24 20h-3.603l-6.57-16.48zm-7.258 0h3.767L16.906 20h-3.674l-1.343-3.461H5.017l-1.344 3.46H0L6.57 3.522zm4.132 9.959L8.453 7.687 6.205 13.48H10.7z"/></svg>Anthropic</div>
@@ -167,6 +306,8 @@
     <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M2.84 2a1.273 1.273 0 100 2.547h14.107a1.273 1.273 0 100-2.547H2.84zM7.935 5.33a1.273 1.273 0 000 2.548H22.04a1.274 1.274 0 000-2.547H7.935zM3.624 9.935c0-.704.57-1.274 1.274-1.274h14.106a1.274 1.274 0 010 2.547H4.898c-.703 0-1.274-.57-1.274-1.273zM1.273 12.188a1.273 1.273 0 100 2.547H15.38a1.274 1.274 0 000-2.547H1.273zM3.624 16.792c0-.704.57-1.274 1.274-1.274h14.106a1.273 1.273 0 110 2.547H4.898c-.703 0-1.274-.57-1.274-1.273zM13.029 18.849a1.273 1.273 0 100 2.547h9.698a1.273 1.273 0 100-2.547h-9.698z" fill-opacity=".3"/><path d="M2.84 2a1.273 1.273 0 100 2.547h10.287a1.274 1.274 0 000-2.547H2.84zM7.935 5.33a1.273 1.273 0 000 2.548H18.22a1.274 1.274 0 000-2.547H7.935zM3.624 9.935c0-.704.57-1.274 1.274-1.274h10.286a1.273 1.273 0 010 2.547H4.898c-.703 0-1.274-.57-1.274-1.273zM1.273 12.188a1.273 1.273 0 100 2.547H11.56a1.274 1.274 0 000-2.547H1.273zM3.624 16.792c0-.704.57-1.274 1.274-1.274h10.286a1.273 1.273 0 110 2.547H4.898c-.703 0-1.274-.57-1.274-1.273zM13.029 18.849a1.273 1.273 0 100 2.547h5.78a1.273 1.273 0 100-2.547h-5.78z"/></svg>LM Studio</div>
     <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.278 2c1.156 0 2.093.927 2.093 2.07v12.501a.74.74 0 00.744.709.74.74 0 00.743-.709V9.099a2.06 2.06 0 012.071-2.049A2.06 2.06 0 0124 9.1v6.561a.649.649 0 01-.652.645.649.649 0 01-.653-.645V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v7.472a2.037 2.037 0 01-2.048 2.026 2.037 2.037 0 01-2.048-2.026v-12.5a.785.785 0 00-.788-.753.785.785 0 00-.789.752l-.001 15.904A2.037 2.037 0 0113.441 22a2.037 2.037 0 01-2.048-2.026V18.04c0-.356.292-.645.652-.645.36 0 .652.289.652.645v1.934c0 .263.142.506.372.638.23.131.514.131.744 0a.734.734 0 00.372-.638V4.07c0-1.143.937-2.07 2.093-2.07zm-5.674 0c1.156 0 2.093.927 2.093 2.07v11.523a.648.648 0 01-.652.645.648.648 0 01-.652-.645V4.07a.785.785 0 00-.789-.78.785.785 0 00-.789.78v14.013a2.06 2.06 0 01-2.07 2.048 2.06 2.06 0 01-2.071-2.048V9.1a.762.762 0 00-.766-.758.762.762 0 00-.766.758v3.8a2.06 2.06 0 01-2.071 2.049A2.06 2.06 0 010 12.9v-1.378c0-.357.292-.646.652-.646.36 0 .653.29.653.646V12.9c0 .418.343.757.766.757s.766-.339.766-.757V9.099a2.06 2.06 0 012.07-2.048 2.06 2.06 0 012.071 2.048v8.984c0 .419.343.758.767.758.423 0 .766-.339.766-.758V4.07c0-1.143.937-2.07 2.093-2.07z"/></svg>Minimax</div>
     <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12.604 1.34c.393.69.784 1.382 1.174 2.075a.18.18 0 00.157.091h5.552c.174 0 .322.11.446.327l1.454 2.57c.19.337.24.478.024.837-.26.43-.513.864-.76 1.3l-.367.658c-.106.196-.223.28-.04.512l2.652 4.637c.172.301.111.494-.043.77-.437.785-.882 1.564-1.335 2.34-.159.272-.352.375-.68.37-.777-.016-1.552-.01-2.327.016a.099.099 0 00-.081.05 575.097 575.097 0 01-2.705 4.74c-.169.293-.38.363-.725.364-.997.003-2.002.004-3.017.002a.537.537 0 01-.465-.271l-1.335-2.323a.09.09 0 00-.083-.049H4.982c-.285.03-.553-.001-.805-.092l-1.603-2.77a.543.543 0 01-.002-.54l1.207-2.12a.198.198 0 000-.197 550.951 550.951 0 01-1.875-3.272l-.79-1.395c-.16-.31-.173-.496.095-.965.465-.813.927-1.625 1.387-2.436.132-.234.304-.334.584-.335a338.3 338.3 0 012.589-.001.124.124 0 00.107-.063l2.806-4.895a.488.488 0 01.422-.246c.524-.001 1.053 0 1.583-.006L11.704 1c.341-.003.724.032.9.34zm-3.432.403a.06.06 0 00-.052.03L6.254 6.788a.157.157 0 01-.135.078H3.253c-.056 0-.07.025-.041.074l5.81 10.156c.025.042.013.062-.034.063l-2.795.015a.218.218 0 00-.2.116l-1.32 2.31c-.044.078-.021.118.068.118l5.716.008c.046 0 .08.02.104.061l1.403 2.454c.046.081.092.082.139 0l5.006-8.76.783-1.382a.055.055 0 01.096 0l1.424 2.53a.122.122 0 00.107.062l2.763-.02a.04.04 0 00.035-.02.041.041 0 000-.04l-2.9-5.086a.108.108 0 010-.113l.293-.507 1.12-1.977c.024-.041.012-.062-.035-.062H9.2c-.059 0-.073-.026-.043-.077l1.434-2.505a.107.107 0 000-.114L9.225 1.774a.06.06 0 00-.053-.031zm6.29 8.02c.046 0 .058.02.034.06l-.832 1.465-2.613 4.585a.056.056 0 01-.05.029.058.058 0 01-.05-.029L8.498 9.841c-.02-.034-.01-.052.028-.054l.216-.012 6.722-.012z"/></svg>Qwen</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 12a4 4 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12v4" stroke="currentColor" stroke-width="1.5"/></svg>Aura Cloud</div>
+    <div class="provider-item"><svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>Custom Endpoint</div>
    </div>
   </section>
 
@@ -189,6 +330,10 @@
     </a>
     <a href="https://github.com/hbx12/aura-work/discussions" class="contribute-link">
      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Discussions</span>
+     <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://github.com/hbx12/aura-work/blob/main/docs/SKILLS.md" class="contribute-link">
+     <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Build a Skill</span>
      <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
     <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTORS.md" class="contribute-link">
@@ -221,7 +366,7 @@
       Which AI providers are supported?
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
      </button>
-     <div class="faq-answer"><div class="faq-answer-inner">OpenAI, Anthropic (Claude), Google Gemini, DeepSeek, Ollama (local models), LM Studio (local models), Minimax, and Qwen. The routing engine auto-discovers available providers and picks the best model per task.</div></div>
+     <div class="faq-answer"><div class="faq-answer-inner">Aura Cloud (managed, 2× cheaper), OpenAI, Anthropic (Claude), Google Gemini, DeepSeek, Ollama (local), LM Studio (local), Minimax, Qwen, and any Custom Endpoint. The routing engine auto-discovers available providers and picks the best model per task based on your routing policy.</div></div>
     </div>
 
     <div class="faq-item">
@@ -237,7 +382,7 @@
       Is Aura Work free?
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
      </button>
-     <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free and open source under the Apache 2.0 license. You only pay for API usage if you use cloud providers like OpenAI or Anthropic. Local models via Ollama cost nothing.</div></div>
+     <div class="faq-answer"><div class="faq-answer-inner">Yes, completely free and open source under the Apache 2.0 license. You only pay for API usage if you use cloud providers like OpenAI or Anthropic. Aura Cloud offers a free tier, and local models via Ollama cost nothing at all.</div></div>
     </div>
 
     <div class="faq-item">
@@ -245,7 +390,7 @@
       What are sidecars?
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
      </button>
-     <div class="faq-answer"><div class="faq-answer-inner">Sidecars are 8 modular background daemons that extend Aura Work's capabilities — agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each runs independently and can be enabled or disabled from the Settings panel.</div></div>
+     <div class="faq-answer"><div class="faq-answer-inner">Sidecars are 7 modular background daemons that extend Aura Work's capabilities — agent execution, bridge communication, browser automation, VM sandboxing, cloud sync, computer-use, and plugins. Each runs independently on its own port and can be enabled or disabled from the Settings panel.</div></div>
     </div>
 
     <div class="faq-item">
@@ -262,6 +407,78 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
      </button>
      <div class="faq-answer"><div class="faq-answer-inner">Yes — with Ollama you can run fully local models without any internet connection. The core platform, routing engine, and sidecars all work offline. Only cloud provider APIs require connectivity.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What is Aura Cloud?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Aura Cloud is our managed AI service that automatically picks the best model for each task. It's 2× cheaper than direct API pricing, offers a 10% top-up bonus, and includes a free tier to get started. No API key management needed — just connect and go.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do Skills work?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Skills are specialized AI modules — each is a curated bundle of tools, prompts, and best practices for a specific domain. The built-in library includes 18 skills (Documents, PDF, Research, Design, Data Analyst, Git Master, and more). The Marketplace lets you install community-built skills for additional frameworks and workflows.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What are MCP servers?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">MCP (Model Context Protocol) servers let Aura connect to external tools like databases, APIs, and services. Configure them per-project or globally in Settings → Extensions. Aura supports stdio, SSE, and HTTP MCP transports with built-in SSRF protection.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How does browser automation work?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Aura includes a built-in Chromium browser sidecar with full CDP (Chrome DevTools Protocol) support. Agents can navigate pages, click elements, fill forms, take screenshots, and execute JavaScript — all in isolated sandboxes with SSRF protection. Great for web testing, scraping, and UI automation.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What is the Computer Use feature?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Computer Use lets agents interact with your desktop — clicking, typing, taking screenshots, and navigating any application. Powered by a dedicated sidecar with vision model integration. Useful for testing UIs, automating desktop workflows, or controlling apps that don't have APIs.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How does cloud sync and encryption work?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Aura Cloud Sync provides end-to-end encrypted sync across your devices using AES-256-GCM encryption. Your data is encrypted before leaving your machine — we never see your keys, conversations, or files. Sync includes projects, settings, audit logs, and scheduled tasks.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      Can I schedule recurring tasks?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Yes! The Scheduled Tasks system lets you create recurring AI workflows — automated code reviews, documentation updates, dependency audits, and more. Tasks run via a built-in cron engine and can use any routing policy (quality-first, cost-first, local-only, etc.).</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      What are Pet Profiles?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Pet Profiles let you create custom AI personalities with unique avatars, system prompts, and behavioral preferences. Give your coding companion a name, personality, and appearance that matches your workflow style. Configure them in Settings → Pet.</div></div>
+    </div>
+
+    <div class="faq-item">
+     <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+      How do I contribute to Aura Work?
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+     </button>
+     <div class="faq-answer"><div class="faq-answer-inner">Aura Work is open-source! Contribute code via PRs on GitHub, build and share Skills or MCP servers in the Marketplace, help translate to new languages (20 supported), or report bugs and suggest features. Check the Contributing guide and good-first-issues label on GitHub.</div></div>
     </div>
 
    </div>
@@ -288,7 +505,7 @@
   }
   function switchLang(code, name) {
    var p = window.location.pathname.replace('/aura-work/','').replace(/^\//,'');
-   var base = 'https://hbx12.github.io/aura-work';
+   var base = 'https://aura-work.shop';
    if (code === 'en') { window.location.href = base + '/' + p; return false; }
    if (code === 'ar') {
     var ap = p.replace(/\.html$/, '.ar.html');

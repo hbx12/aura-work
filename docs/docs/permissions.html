@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — Permissions">
 <meta property="og:title" content="Permissions — Aura Work">
 <meta property="og:description" content="Permissions — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -304,7 +304,60 @@ pre:hover .copy-code-btn{opacity:1}
       <div class="stat-card fade-in delay-1"><div class="num">3</div><div class="lbl">Profiles</div></div>
       <div class="stat-card fade-in delay-2"><div class="num">ask-first</div><div class="lbl">Default mode</div></div>
     </div>
-    <p>Aura Work uses a three-tier permission system. Every action is categorized (file, shell, browser, network) and checked against the active permission profile. Users can override per-action with "always allow" or "always ask".</p>
+    <p>Aura Work uses a <strong>three-tier permission system</strong> to control what the agent can do. Every action is categorized (file, shell, browser, network, etc.) and checked against the active permission profile. This ensures the agent can never do anything you haven't approved.</p>
+    
+    <h2 style="margin-top:2rem">Why Permissions Matter</h2>
+    <p>AI agents are powerful — they can read/write files, execute shell commands, browse the web, and interact with external services. Without proper controls, an agent could:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li>Modify or delete important files</li>
+      <li>Execute destructive shell commands</li>
+      <li>Send data to external services</li>
+      <li>Install unwanted software</li>
+      <li>Make unauthorized API calls</li>
+    </ul>
+    <p style="margin-top:.75rem">The permission system prevents this by requiring explicit approval for high-impact actions. You stay in control at all times.</p>
+
+    <div class="detail-card">
+      <h3>🔐 Three Permission Levels</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Level</th><th>Description</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>read-only</code></td>
+            <td>Agent can only read files and data. No modifications allowed.</td>
+            <td>Code review, research, analysis</td>
+          </tr>
+          <tr>
+            <td><code>ask-first</code></td>
+            <td>Agent asks before each high-impact action. You approve or deny.</td>
+            <td>Default mode, balanced control</td>
+          </tr>
+          <tr>
+            <td><code>full-access</code></td>
+            <td>Agent can do anything without asking. Use with caution.</td>
+            <td>Trusted automation, CI/CD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 Permission Categories</h3>
+      <p>Actions are grouped into categories for fine-grained control:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Category</th><th>Controls</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr><td><code>file</code></td><td>File read/write operations</td><td>Read source code, write new files, delete files</td></tr>
+          <tr><td><code>shell</code></td><td>Shell command execution</td><td>Run npm install, execute scripts, compile code</td></tr>
+          <tr><td><code>browser</code></td><td>Browser automation</td><td>Browse websites, fill forms, extract data</td></tr>
+          <tr><td><code>network</code></td><td>Network requests</td><td>API calls, downloads, webhooks</td></tr>
+          <tr><td><code>git</code></td><td>Git operations</td><td>Commit, push, branch, merge</td></tr>
+          <tr><td><code>plugin</code></td><td>Plugin/MCP calls</td><td>Invoke MCP tools, run plugin functions</td></tr>
+          <tr><td><code>computer-use</code></td><td>Desktop automation</td><td>Click, type, screenshot, app control</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="detail-card fade-in delay-1">
       <h3>Read-only files</h3>
       <p>File read access to all paths. Agents can analyze code, search files, and read documentation — but cannot write or execute anything.</p>
@@ -334,12 +387,75 @@ pre:hover .copy-code-btn{opacity:1}
     </div>
   </section>
   <section class="section">
+    <div class="section-label">Configuration</div>
+    <h2>Setting up permissions</h2>
+    <p>Configure permissions in <strong>Settings → Permissions</strong>:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> Choose your default permission level (read-only, ask-first, or full-access)</li>
+      <li><strong>2.</strong> Select a pre-built profile or create a custom one</li>
+      <li><strong>3.</strong> Configure per-category permissions (file, shell, browser, etc.)</li>
+      <li><strong>4.</strong> Set "always allow" or "always deny" for specific operations</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>⚙️ Custom Profiles</h3>
+      <p>Create custom permission profiles for different workflows:</p>
+      <pre><code>{
+  "name": "Development Profile",
+  "description": "Full access for trusted development work",
+  "permissions": {
+    "file": { "read": true, "write": true, "delete": "ask" },
+    "shell": { "execute": "ask", "destructive": "deny" },
+    "browser": { "browse": true, "forms": "ask" },
+    "git": { "commit": true, "push": "ask" },
+    "plugin": { "invoke": "ask" }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Profiles can be per-project — use read-only for client projects and full-access for personal projects.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🚨 High-Impact Actions</h3>
+      <p>These actions always require explicit approval in <code>ask-first</code> mode:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Permanent delete</strong> — deleting files or data</li>
+        <li><strong>Shell execution</strong> — running commands (especially destructive ones)</li>
+        <li><strong>Computer use</strong> — controlling desktop applications</li>
+        <li><strong>Remote dispatch</strong> — sending tasks to Aura Cloud</li>
+        <li><strong>File writes</strong> — modifying existing files</li>
+        <li><strong>Git commits</strong> — creating commits or pushing</li>
+        <li><strong>Browser forms</strong> — submitting forms on websites</li>
+        <li><strong>Plugin/MCP calls</strong> — invoking external tools</li>
+      </ul>
+      <p style="margin-top:.75rem">You can set "always allow" for specific operations you trust, but this is not recommended for high-impact actions.</p>
+    </div>
+  </section>
+  <section class="section">
     <div class="section-label">Audit Trail</div>
     <h2>Every action is logged</h2>
-    <p>All permission requests, grants, and denials are recorded in the audit log (<code>AuditEntry</code>) with actor, category, action, target, risk level, decision, and result. Users can review their full permission history at any time.</p>
+    <p>All permission requests, grants, and denials are recorded in the audit log with complete details:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Actor</strong> — who performed the action (agent or user)</li>
+      <li><strong>Category</strong> — file, shell, browser, git, plugin, etc.</li>
+      <li><strong>Action</strong> — read, write, execute, commit, etc.</li>
+      <li><strong>Target</strong> — file path, URL, command, etc.</li>
+      <li><strong>Risk level</strong> — low, medium, high, critical</li>
+      <li><strong>Decision</strong> — allow, deny, approved, pending</li>
+      <li><strong>Result</strong> — success, failure, pending</li>
+    </ul>
+    <p style="margin-top:.75rem">View the audit log in the <strong>Audit Log</strong> page. You can filter by category, risk level, date range, and more. The audit log is append-only and cannot be modified.</p>
+
     <div class="detail-card">
-      <h3>🔐 Encrypted vault</h3>
-      <p>Secrets, API keys, and session tokens are stored in a device-bound encrypted vault (<code>VaultStatus</code>) with biometric unlock support. The vault supports versioned secrets and secure deletion.</p>
+      <h3>🔐 Encrypted Vault</h3>
+      <p>Secrets, API keys, and session tokens are stored in a device-bound encrypted vault:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Encryption</strong> — ChaCha20-Poly1305 with Argon2 key derivation</li>
+        <li><strong>Device-bound</strong> — keys are tied to your device (DPAPI/Keychain/Secret Service)</li>
+        <li><strong>Biometric unlock</strong> — supports fingerprint/face recognition on supported platforms</li>
+        <li><strong>Versioned secrets</strong> — track changes to API keys over time</li>
+        <li><strong>Secure deletion</strong> — secrets are securely wiped when removed</li>
+      </ul>
+      <p style="margin-top:.75rem">The vault is stored at <code>%APPDATA%\com.auraos.desktop\vault.enc</code> on Windows, <code>~/Library/Application Support/com.auraos.desktop/vault.enc</code> on macOS, and <code>~/.config/com.auraos.desktop/vault.enc</code> on Linux.</p>
     </div>
   </section>
         </main>

@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — واجهة الأوامر">
 <meta property="og:title" content="واجهة الأوامر — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — واجهة الأوامر">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -229,6 +229,40 @@ aura run "حلل هذا الكود" --json</code></pre>
     <div class="detail-card"><h3>التكامل مع خطوط CI/CD</h3></div>
     <div class="detail-card"><h3>إدارة جلسات متعددة</h3></div>
     <div class="detail-card"><h3>إخراج JSON للأدوات</h3></div>
+  <section class="section">
+    <div class="section-label">اوامر متقدمة</div>
+    <h2>اوامر CLI المتقدمة</h2>
+    <div class="detail-card">
+      <h3>ادارة الجلسات</h3>
+      <pre><code>aura session list          # عرض الجلسات النشطة
+aura session resume &lt;id&gt;  # استئناف جلسة سابقة
+aura session kill &lt;id&gt;    # إنهاء جلسة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>ادارة المهارات</h3>
+      <pre><code>aura skill list            # عرض المهارات المثبتة
+aura skill install &lt;name&gt;  # تثبيت مهارة
+aura skill create         # انشاء مهارة جديدة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>ادارة MCP</h3>
+      <pre><code>aura mcp list              # عرض خوادم MCP
+aura mcp add &lt;name&gt;       # اضافة خادم MCP
+aura mcp remove &lt;name&gt;    # ازالة خادم MCP</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>المزامنة</h3>
+      <pre><code>aura sync push             # رفع التغييرات
+aura sync pull             # تنزيل التغييرات
+aura sync status           # حالة المزامنة</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>التكوين</h3>
+      <pre><code>aura config list           # عرض الاعدادات
+aura config set &lt;k&gt; &lt;v&gt;   # تعيين اعداد
+aura config reset          # اعادة للافتراضي</code></pre>
+    </div>
+  </section>
   </section>
         </main>
        </div>

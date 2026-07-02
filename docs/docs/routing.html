@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — Routing">
 <meta property="og:title" content="Routing — Aura Work">
 <meta property="og:description" content="Routing — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -307,7 +307,37 @@ pre:hover .copy-code-btn{opacity:1}
 <div class="stat-card fade-in delay-4"><div class="num">local</div><div class="lbl">Local-only</div></div>
 <div class="stat-card fade-in delay-5"><div class="num">manual</div><div class="lbl">Manual model</div></div>
     </div>
-    <p>The routing engine evaluates each task based on its type (coding, research, document, data, browser, review, security, general), sensitivity level, required capabilities (vision, tool-calling, reasoning), and your configured routing policy to select the optimal model.</p>
+    <p>The routing engine is the brain of Aura Work's provider selection. It evaluates each task based on its type, sensitivity, required capabilities, and your configured policy to select the optimal model. This ensures you always get the best results while controlling costs and privacy.</p>
+    
+    <h2 style="margin-top:2rem">How Routing Works</h2>
+    <p>When you send a prompt, the routing engine:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Analyzes the task</strong> — determines if it's coding, research, document work, data analysis, browser automation, etc.</li>
+      <li><strong>2. Checks capabilities</strong> — does the task need vision? Tool calling? Long context? Reasoning?</li>
+      <li><strong>3. Evaluates sensitivity</strong> — is the data normal, sensitive, or secret-risk?</li>
+      <li><strong>4. Applies your policy</strong> — quality-first, cost-first, privacy-first, local-only, or manual</li>
+      <li><strong>5. Selects the model</strong> — picks the best provider + model combination</li>
+      <li><strong>6. Returns a decision</strong> — includes the selected model, estimated cost, and confidence</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>📊 Task Types</h3>
+      <p>The routing engine recognizes these task types:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Type</th><th>Description</th><th>Best Providers</th></tr></thead>
+        <tbody>
+          <tr><td><code>coding</code></td><td>Code generation, refactoring, debugging</td><td>Anthropic, DeepSeek, OpenAI</td></tr>
+          <tr><td><code>research</code></td><td>Information gathering, analysis</td><td>OpenAI, Gemini, Anthropic</td></tr>
+          <tr><td><code>document</code></td><td>Writing, editing, formatting</td><td>OpenAI, Anthropic, Gemini</td></tr>
+          <tr><td><code>data</code></td><td>Data analysis, spreadsheet work</td><td>OpenAI, Gemini, DeepSeek</td></tr>
+          <tr><td><code>browser</code></td><td>Web browsing, form filling</td><td>OpenAI, Anthropic (vision)</td></tr>
+          <tr><td><code>review</code></td><td>Code review, feedback</td><td>Anthropic, OpenAI</td></tr>
+          <tr><td><code>security</code></td><td>Security analysis, vulnerability detection</td><td>Anthropic, OpenAI</td></tr>
+          <tr><td><code>general</code></td><td>General conversation, Q&A</td><td>Any provider</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <div class="detail-card fade-in delay-1">
       <h3>Quality-first</h3>
       <div class="meta"><span>Best model for the job. Default.</span></div>
@@ -335,17 +365,52 @@ pre:hover .copy-code-btn{opacity:1}
     </div>
   </section>
   <section class="section">
-    <div class="section-label">How it works</div>
-    <h2>Routing decision flow</h2>
-    <p>When a task is created, the routing engine:</p>
-    <ul style="padding-left:1.25rem;margin-bottom:1.5rem;line-height:2">
-      <li><strong>1.</strong> Analyzes the task type and required capabilities</li>
-      <li><strong>2.</strong> Checks sensitivity level (normal / sensitive / secret-risk)</li>
-      <li><strong>3.</strong> Applies your configured routing policy</li>
-      <li><strong>4.</strong> Selects the best provider + model combination</li>
-      <li><strong>5.</strong> Returns a routing decision with cost estimate</li>
-    </ul>
-    <p>Each routing decision includes an estimated cost class (low / medium / high / unknown) and may require user approval for high-cost or sensitive operations.</p>
+    <div class="section-label">Configuration</div>
+    <h2>Setting up routing</h2>
+    <p>Configure your routing policy in <strong>Settings → Routing</strong>:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> Choose your default policy (applies to all tasks unless overridden)</li>
+      <li><strong>2.</strong> Optionally set per-project policies (override for specific projects)</li>
+      <li><strong>3.</strong> Configure fallback providers (what to use if primary fails)</li>
+      <li><strong>4.</strong> Set cost limits (maximum tokens/cost per task)</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>💡 When to Use Each Policy</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Policy</th><th>Best For</th><th>Trade-offs</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Quality-first</strong></td><td>Important tasks, production code, client work</td><td>Higher cost, slower</td></tr>
+          <tr><td><strong>Cost-first</strong></td><td>Routine tasks, development, testing</td><td>May use weaker models</td></tr>
+          <tr><td><strong>Privacy-first</strong></td><td>Sensitive data, proprietary code, personal info</td><td>Limited to local models</td></tr>
+          <tr><td><strong>Local-only</strong></td><td>Offline work, air-gapped environments</td><td>Requires local hardware</td></tr>
+          <tr><td><strong>Manual</strong></td><td>Learning, comparing providers, specific model needs</td><td>Slower workflow</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 Fallback Chain</h3>
+      <p>If the primary provider fails, the routing engine tries alternatives:</p>
+      <pre><code>// Example fallback configuration
+{
+  "routing": {
+    "policy": "quality-first",
+    "fallback": [
+      "anthropic/claude-3-5-sonnet",
+      "openai/gpt-4o",
+      "deepseek/deepseek-coder",
+      "ollama/llama3"
+    ],
+    "maxRetries": 3,
+    "costLimit": {
+      "perTask": 0.50,
+      "perDay": 10.00
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">The engine tries each fallback in order until one succeeds. If all fail, it notifies you and asks for manual intervention.</p>
+    </div>
   </section>
         </main>
        </div>

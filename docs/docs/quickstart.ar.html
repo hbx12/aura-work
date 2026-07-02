@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — بداية سريعة">
 <meta property="og:title" content="بداية سريعة — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — بداية سريعة">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -227,6 +227,36 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="section-label">الخطوات التالية</div>
     <h2>التعمق أكثر</h2>
     <p>Read about <a href="providers.ar.html">المزوّدون</a>, <a href="routing.ar.html">التوجيه</a>, <a href="skills.ar.html">المهارات</a>, or <a href="architecture.ar.html">الهندسة</a>. For contributors, see the <a href="https://github.com/hbx12/aura-work/blob/main/CONTRIBUTING.md">دليل المساهمة</a> و <a href="https://github.com/hbx12/aura-work/blob/main/docs/new-contributor.md">دليل المساهم الجديد</a>.</p>
+  <section class="section">
+    <div class="section-label">التثبيت المتقدم</div>
+    <h2>خيارات التثبيت الاخرى</h2>
+    <div class="detail-card">
+      <h3>باستخدام Homebrew (macOS و Linux)</h3>
+      <pre><code>brew install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>باستخدام Winget (Windows)</h3>
+      <pre><code>winget install aura-work</code></pre>
+    </div>
+    <div class="detail-card">
+      <h3>البناء من المصدر</h3>
+      <pre><code>git clone https://github.com/hbx12/aura-work.git
+cd aura-work
+npm install
+npm run build
+npm link</code></pre>
+    </div>
+    <p style="margin-top:1rem">يتطلب Node.js 18+. يدعم Windows و macOS و Linux مع حزم منفصلة لكل منصة.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">الاستخدام الاول</div>
+    <h2>تجربتك الاولى</h2>
+    <p>بعد التثبيت، جرب هذه الاوامر للتعرف على Aura Work:</p>
+    <pre><code>aura --help
+aura --version
+aura config list
+aura --dry-run "انشئ مشروع Node.js جديد"</code></pre>
+  </section>
   </section>
         </main>
        </div>

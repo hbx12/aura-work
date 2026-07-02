@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — MCP">
 <meta property="og:title" content="MCP — Aura Work">
 <meta property="og:description" content="MCP — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -300,25 +300,171 @@ pre:hover .copy-code-btn{opacity:1}
     <p class="subtitle">Model Context Protocol — extend agent capabilities with third-party tools.</p>
   </div>
   <section class="section">
-    <p>MCP (Model Context Protocol) is an open standard for connecting AI agents with external tools and data sources. Aura Work supports MCP servers as a first-class extension mechanism alongside built-in skills and plugins.</p>
+    <p>MCP (Model Context Protocol) is an <strong>open standard</strong> for connecting AI agents with external tools and data sources. Aura Work supports MCP servers as a first-class extension mechanism alongside built-in skills and plugins. MCP allows you to add new capabilities without modifying the core application — just install a server and the agent can use its tools.</p>
+    
+    <h2 style="margin-top:2rem">What is MCP?</h2>
+    <p>MCP is a protocol that lets AI agents communicate with external services through a standardized interface. Think of it as a <strong>universal adapter</strong> for AI tools — instead of building custom integrations for each service, MCP provides a common language that both the agent and the service understand.</p>
+    <p style="margin-top:.75rem">With MCP, you can connect the agent to:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Databases</strong> — query PostgreSQL, MySQL, SQLite, MongoDB</li>
+      <li><strong>APIs</strong> — interact with GitHub, Slack, Discord, Jira, etc.</li>
+      <li><strong>File systems</strong> — access cloud storage (S3, GCS, Azure Blob)</li>
+      <li><strong>Development tools</strong> — linters, formatters, test runners</li>
+      <li><strong>Custom services</strong> — your own internal tools and APIs</li>
+    </ul>
+
     <div class="detail-card">
-      <h3>How MCP works</h3>
-      <p>MCP servers are managed by the <strong>Plugins Helper</strong> sidecar. Each server defines tools, resources, and prompts that the agent can discover and invoke. Servers communicate over stdio or SSE transport.</p>
+      <h3>⚙️ How MCP Works in Aura Work</h3>
+      <p>MCP servers are managed by the <strong>Plugins Helper</strong> sidecar (port 47824). When you add an MCP server:</p>
+      <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> The Plugins Helper starts the server process (for stdio) or connects to it (for SSE)</li>
+        <li><strong>2.</strong> The server announces its capabilities (tools, resources, prompts)</li>
+        <li><strong>3.</strong> These capabilities are registered with the agent engine</li>
+        <li><strong>4.</strong> When the agent needs a tool, it can now call the MCP server's tools</li>
+        <li><strong>5.</strong> Each tool call goes through the permission gate for approval</li>
+      </ol>
+      <p style="margin-top:.75rem">The agent automatically discovers which MCP tools are available and selects them when appropriate — you don't need to explicitly tell it to use an MCP tool.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Supported transports</h3>
-      <ul>
-        <li><strong>stdio</strong> — subprocess-based, ideal for local tools</li>
-        <li><strong>SSE</strong> — HTTP-based, for remote or containerized servers</li>
+      <h3>🔌 Supported Transports</h3>
+      <p>MCP supports two transport mechanisms:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Transport</th><th>How it Works</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>stdio</code></td>
+            <td>Server runs as a subprocess. Communication happens via stdin/stdout pipes.</td>
+            <td>Local tools, CLI wrappers, simple integrations</td>
+          </tr>
+          <tr>
+            <td><code>SSE</code></td>
+            <td>Server runs as an HTTP service. Communication happens via Server-Sent Events.</td>
+            <td>Remote services, containerized servers, multi-client setups</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Most community MCP servers use <code>stdio</code> because it's simpler — no network configuration needed. Use <code>SSE</code> when the server needs to be shared across multiple clients or runs in a container.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📦 Installing MCP Servers</h3>
+      <p>There are three ways to add MCP servers:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 1: Marketplace (Recommended)</h4>
+      <p>Open the <strong>Plugins panel</strong> in the desktop app, search for an MCP server, and click Install. The marketplace handles versioning, updates, and dependency management.</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 2: Manual Configuration</h4>
+      <p>Add a server manually in Settings → Plugins → MCP Servers:</p>
+      <pre><code>{
+  "name": "my-database-server",
+  "command": "node",
+  "args": ["path/to/mcp-server.js"],
+  "env": {
+    "DATABASE_URL": "postgresql://localhost/mydb"
+  }
+}</code></pre>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">Method 3: Project-Level Config</h4>
+      <p>Add MCP servers to your project's <code>aura.jsonc</code> file:</p>
+      <pre><code>{
+  "mcp": {
+    "test-project-server": {
+      "type": "local",
+      "command": ["node", "/path/to/test-mcp-server.js"],
+      "enabled": true,
+      "environment": {
+        "TEST_ENV_VAR": "Hello from project-level config"
+      }
+    }
+  }
+}</code></pre>
+      <p style="margin-top:.75rem">Project-level servers are only available when working in that project — perfect for project-specific tools.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 Security & Permissions</h3>
+      <p>MCP tool calls are subject to the same permission system as built-in tools:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Per-tool approval</strong> — each MCP tool can be individually approved or denied</li>
+        <li><strong>Sandboxed execution</strong> — MCP servers run in isolated processes</li>
+        <li><strong>Permission declarations</strong> — servers must declare what they need access to</li>
+        <li><strong>Audit logging</strong> — all MCP calls are logged with tool name, arguments, and result</li>
       </ul>
+      <p style="margin-top:.75rem">In <code>ask-first</code> mode, you'll be prompted before each MCP tool call. You can set "always allow" for trusted servers in Settings → Permissions.</p>
     </div>
+
     <div class="detail-card">
-      <h3>Installing MCP servers</h3>
-      <p>From the Plugins panel in the desktop app, search the marketplace or add a custom MCP server by providing its command and arguments. The Plugins Helper handles discovery, lifecycle, and capability registration.</p>
+      <h3>🛒 Marketplace</h3>
+      <p>The marketplace (<code>registry/marketplace.json</code>) includes MCP servers alongside skills and plugins. Each entry includes:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Server manifest</strong> — command, args, env vars, transport type</li>
+        <li><strong>Tool descriptions</strong> — what each tool does and its parameters</li>
+        <li><strong>Localized descriptions</strong> — available in 20 languages</li>
+        <li><strong>Version info</strong> — for updates and compatibility checks</li>
+        <li><strong>Risk assessment</strong> — based on required permissions</li>
+      </ul>
+      <p style="margin-top:.75rem">Browse the marketplace in the Plugins panel or check <code>registry/mcp/</code> for available servers.</p>
     </div>
+
     <div class="detail-card">
-      <h3>📦 Marketplace</h3>
-      <p>The <code>MarketplaceEntry</code> system supports skills, MCP servers, and plugins with versioning, publisher verification, risk assessment, and localized descriptions.</p>
+      <h3>🛠️ Developing MCP Servers</h3>
+      <p>You can create your own MCP servers using the official MCP SDK:</p>
+      <pre><code>// my-mcp-server.js
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+const server = new Server({
+  name: "my-custom-server",
+  version: "1.0.0"
+}, {
+  capabilities: { tools: {} }
+});
+
+// Define a tool
+server.setRequestHandler("tools/list", async () => ({
+  tools: [{
+    name: "my_tool",
+    description: "Does something useful",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Input query" }
+      },
+      required: ["query"]
+    }
+  }]
+}));
+
+// Handle tool calls
+server.setRequestHandler("tools/call", async (request) => {
+  const { name, arguments: args } = request.params;
+  if (name === "my_tool") {
+    return { content: [{ type: "text", text: "Result: " + args.query }] };
+  }
+});
+
+// Start the server
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+      <p style="margin-top:.75rem">See <code>examples/mcp-server/</code> for a complete working example.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>💡 Common MCP Servers</h3>
+      <p>Popular community MCP servers include:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>Server</th><th>Purpose</th><th>Transport</th></tr></thead>
+        <tbody>
+          <tr><td><code>filesystem</code></td><td>Read/write files, search, list directories</td><td>stdio</td></tr>
+          <tr><td><code>github</code></td><td>Manage repos, issues, PRs via GitHub API</td><td>stdio</td></tr>
+          <tr><td><code>postgres</code></td><td>Query PostgreSQL databases</td><td>stdio</td></tr>
+          <tr><td><code>slack</code></td><td>Send messages, read channels</td><td>stdio</td></tr>
+          <tr><td><code>puppeteer</code></td><td>Browser automation with Chrome</td><td>stdio</td></tr>
+          <tr><td><code>brave-search</code></td><td>Web search via Brave API</td><td>stdio</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">Find more at <a href="https://github.com/modelcontextprotocol/servers" style="color:var(--color-accent)">github.com/modelcontextprotocol/servers</a></p>
     </div>
   </section>
         </main>

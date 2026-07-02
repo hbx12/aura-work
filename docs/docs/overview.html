@@ -7,7 +7,7 @@
 <meta name="description" content="Aura Work documentation — Overview">
 <meta property="og:title" content="Overview — Aura Work">
 <meta property="og:description" content="Overview — Aura Work documentation">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -243,8 +243,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >Home</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.html" class="active">Docs</a></li>
+        <li><a href="https://aura-work.shop/" >Home</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.html" class="active">Docs</a></li>
         <li><a href="https://github.com/hbx12/aura-work">GitHub</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -301,7 +301,34 @@ pre:hover .copy-code-btn{opacity:1}
   </div>
   <section class="section">
     <p>Aura Work is a <strong>multi-provider desktop AI agent platform</strong> built for developers who want <strong>local-first, permission-gated, self-hostable</strong> AI assistance. It supports 10 AI providers out of the box, with an intelligent routing engine that picks the right model for each task.</p>
-    <p>Unlike cloud-only tools, Aura Work keeps your data on your machine. It uses a plugin architecture with sandboxed execution, encrypted credential storage, and granular permission controls.</p>
+    <p>Unlike cloud-only tools, Aura Work keeps your data on your machine. It uses a plugin architecture with sandboxed execution, encrypted credential storage, and granular permission controls. The platform is designed for developers who want full control over their AI tools — no data leaves your device unless you explicitly choose to sync.</p>
+    
+    <h2 style="margin-top:2rem">Why Aura Work?</h2>
+    <p>Most AI coding tools are either cloud-only (sending your code to external servers) or limited to a single provider. Aura Work solves both problems:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>Multi-provider</strong> — use OpenAI, Anthropic, Gemini, DeepSeek, Ollama, and more from one interface</li>
+      <li><strong>Local-first</strong> — your data stays on your machine, encrypted with device-bound keys</li>
+      <li><strong>Permission-gated</strong> — every action requires explicit approval (or pre-configured profiles)</li>
+      <li><strong>Self-hostable</strong> — run your own cloud sync server, no dependency on our infrastructure</li>
+      <li><strong>Extensible</strong> — add capabilities via skills, MCP servers, and plugins</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🎯 Core Capabilities</h3>
+      <p>Aura Work is more than just a chat interface. It's a full development environment with:</p>
+      <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>Task Engine</strong> — multi-step task execution with planning, execution, and review phases</li>
+        <li><strong>File Operations</strong> — read, write, search, and manage files with permission controls</li>
+        <li><strong>Git Integration</strong> — status, diff, commit, branch management directly from the agent</li>
+        <li><strong>Browser Automation</strong> — browse websites, extract data, fill forms with Puppeteer</li>
+        <li><strong>Computer Use</strong> — control desktop applications via screenshots and mouse/keyboard</li>
+        <li><strong>VM Sandbox</strong> — execute shell commands in isolated WSL2 or container environments</li>
+        <li><strong>Cloud Sync</strong> — E2EE sync across devices with self-hostable server</li>
+        <li><strong>Scheduled Tasks</strong> — automate recurring tasks with cron-like scheduling</li>
+        <li><strong>18 Built-in Skills</strong> — documents, spreadsheets, PDFs, research, design, and more</li>
+        <li><strong>MCP Support</strong> — connect to any MCP server for unlimited extensibility</li>
+      </ul>
+    </div>
   </section>
   <section class="section">
     <div class="section-label">Key Facts</div>
@@ -313,21 +340,52 @@ pre:hover .copy-code-btn{opacity:1}
     </div>
     <h2 style="margin-top:2rem">Architecture at a glance</h2>
     <div class="detail-card">
-      <h3>Desktop App</h3>
-      <p>Tauri 2 shell hosting the React 19 frontend. Manages windows, system tray, native menus, and IPC with sidecar processes.</p>
+      <h3>🖥️ Desktop App</h3>
+      <p>Tauri 2 shell hosting the React 19 frontend. Manages windows, system tray, native menus, and IPC with sidecar processes. The Rust backend handles performance-critical operations and system integration.</p>
+      <p style="margin-top:.75rem">The desktop app provides 14 main pages: Dashboard, Tasks, Files, Git, Terminal, Providers, Plugins, Browser, Computer Use, Scheduled Tasks, Memory, Audit Log, Cloud, and Extensions.</p>
     </div>
     <div class="detail-card">
-      <h3>Sidecar Services</h3>
-      <p>8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more.</p>
+      <h3>⚙️ Sidecar Services</h3>
+      <p>8 independent Node.js daemons for agent execution, browser automation, VM sandboxing, cloud sync, computer-use, and more. Each sidecar runs in its own process space with its own lifecycle, communicating via IPC or HTTP.</p>
+      <p style="margin-top:.75rem">Sidecars: Agent (47821), VM Helper (47822), Browser Helper (47823), Plugins Helper (47824), Cloud Sync (47825), Bridge (47826), Computer Use (47828), Cloud Server (47830).</p>
     </div>
     <div class="detail-card">
-      <h3>Agent Engine</h3>
-      <p>Multi-agent orchestration with planner, executor, reviewer, and safety roles. Supports custom tools and MCP servers.</p>
+      <h3>🤖 Agent Engine</h3>
+      <p>Multi-agent orchestration with specialized roles: <strong>Planner</strong> decomposes tasks into steps, <strong>Executor</strong> runs each step, <strong>Reviewer</strong> validates output, and <strong>Safety</strong> enforces boundaries. Supports custom tools and MCP servers.</p>
+      <p style="margin-top:.75rem">The agent can use any combination of built-in tools, skills, MCP servers, and plugins to complete tasks. It automatically selects the best tool for each step based on the task requirements.</p>
     </div>
     <div class="detail-card">
-      <h3>Routing Engine</h3>
-      <p>Smart model router across 10 providers with 5 routing policies: quality-first, cost-first, privacy-first, local-only, or manual.</p>
+      <h3>🔀 Routing Engine</h3>
+      <p>Smart model router across 10 providers with 5 routing policies: <strong>quality-first</strong> (best model for the task), <strong>cost-first</strong> (cheapest option), <strong>privacy-first</strong> (local-only), <strong>local-only</strong> (Ollama/LM Studio), or <strong>manual</strong> (you choose).</p>
+      <p style="margin-top:.75rem">The routing engine analyzes each task's type, sensitivity, and required capabilities to select the optimal provider and model. It can also fall back to alternative providers if the primary one fails.</p>
     </div>
+  </section>
+  <section class="section">
+    <div class="section-label">How It Works</div>
+    <h2>Workflow</h2>
+    <p>When you type a prompt in Aura Work, here's what happens:</p>
+    <ol style="padding-left:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. Task Creation</strong> — Your prompt becomes a task in the SQLite database</li>
+      <li><strong>2. Planning</strong> — The Planner agent analyzes the task and creates a step-by-step plan</li>
+      <li><strong>3. Routing</strong> — The routing engine selects the best provider/model based on your policy</li>
+      <li><strong>4. Permission Check</strong> — Each step is checked against your permission profile</li>
+      <li><strong>5. Execution</strong> — The Executor agent runs each step, calling tools as needed</li>
+      <li><strong>6. Review</strong> — The Reviewer agent validates the output for correctness and safety</li>
+      <li><strong>7. Completion</strong> — Results are displayed and logged to the audit trail</li>
+    </ol>
+    <p style="margin-top:1.5rem">High-impact actions (file writes, shell commands, browser automation) require explicit approval in <code>ask-first</code> mode. You can configure auto-approval for trusted operations in Settings → Permissions.</p>
+  </section>
+  <section class="section">
+    <div class="section-label">Security & Privacy</div>
+    <h2>Your data stays yours</h2>
+    <p>Aura Work is built with security as a first-class concern:</p>
+    <ul style="padding-left:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>API keys never leave your device</strong> — stored in an encrypted vault using device-bound keys (DPAPI on Windows, Keychain on macOS, Secret Service on Linux)</li>
+      <li><strong>No telemetry by default</strong> — no usage data is collected unless you opt in</li>
+      <li><strong>E2EE cloud sync</strong> — if you use Aura Cloud, data is encrypted with XChaCha20-Poly1305 before leaving your device</li>
+      <li><strong>Audit logging</strong> — every action is recorded with actor, category, action, target, risk level, and result</li>
+      <li><strong>Permission system</strong> — granular control over what the agent can access (files, shell, browser, network)</li>
+    </ul>
   </section>
         </main>
        </div>

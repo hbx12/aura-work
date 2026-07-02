@@ -7,7 +7,7 @@
 <meta name="description" content="وثائق Aura Work — بروتوكول السياق">
 <meta property="og:title" content="بروتوكول السياق — Aura Work">
 <meta property="og:description" content="وثائق Aura Work — بروتوكول السياق">
-<meta property="og:url" content="https://hbx12.github.io/aura-work/">
+<meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,8 +152,8 @@ pre:hover .copy-code-btn{opacity:1}
     </a>
     <nav>
       <ul>
-        <li><a href="https://hbx12.github.io/aura-work/" >الرئيسية</a></li>
-        <li><a href="https://hbx12.github.io/aura-work/docs/docs.ar.html" class="active">الوثائق</a></li>
+        <li><a href="https://aura-work.shop/" >الرئيسية</a></li>
+        <li><a href="https://aura-work.shop/docs/docs.ar.html" class="active">الوثائق</a></li>
         <li><a href="https://github.com/hbx12/aura-work">غيت هاب</a></li>
         <li style="position:relative;display:flex;align-items:center;gap:1rem">
           <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" type="button">
@@ -218,6 +218,31 @@ pre:hover .copy-code-btn{opacity:1}
     <div class="detail-card"><h3>تسجيل أدوات ديناميكي أثناء التشغيل</h3></div>
     <div class="detail-card"><h3>تنفيذ معزول مع التحكم بالأذونات</h3></div>
     <div class="detail-card"><h3>سوق خوادم MCP المجتمعية</h3></div>
+  <section class="section">
+    <div class="section-label">تطوير خادم MCP</div>
+    <h2>انشاء خادم MCP خاص بك</h2>
+    <p>يمكنك انشاء خادم MCP باستخدام Node.js. هذا مثال بسيط:</p>
+    <pre><code>import { Server } from "@modelcontextprotocol/sdk";
+
+const server = new Server({
+  name: "my-tools",
+  version: "1.0.0"
+});
+
+server.tool("hello", {
+  description: "يقول مرحبا",
+  handler: async ({ name }) =&gt; ({
+    content: `مرحبا ${name}!`
+  })
+});
+
+server.start();</code></pre>
+    <p style="margin-top:1rem">ضع الخادم في <code>~/.config/aura/mcp-servers/</code> وسيتم تحميله تلقائيا عند بدء التشغيل.</p>
+    <div class="detail-card" style="margin-top:1.5rem">
+      <h3>مكتبة MCP الرسمية</h3>
+      <p>نحن نبني مكتبة MCP للغة العربية تسهل انشاء خوادم MCP للناطقين بالعربية. تشمل ادوات جاهزة للبحث، الترجمة، التحليل النصي، والمزيد.</p>
+    </div>
+  </section>
   </section>
         </main>
        </div>
