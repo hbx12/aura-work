@@ -1,0 +1,47 @@
+name: aura-bot Daily Health Scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * *"  # daily at 08:00 UTC
+
+concurrency:
+  group: aura-bot-daily
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: |
+            scripts/aura-bot
+            README.md
+            README.ar.md
+            CONTRIBUTING.md
+            SECURITY.md
+            LICENSE
+            NOTICE
+            ROADMAP.md
+            CHANGELOG.md
+            docs
+            registry
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run daily scan
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash' }}
+          AURA_BOT_NAME: ${{ vars.AURA_BOT_NAME || 'aura-bot' }}
+          AURA_BOT_OWNER: ${{ vars.AURA_BOT_OWNER || 'hbx12' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/aura-bot/daily-scan.mjs
