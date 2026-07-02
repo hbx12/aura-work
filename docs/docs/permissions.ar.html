@@ -100,54 +100,151 @@
         <main class="content">
           <div class="hero">
     <h1><span>الأذونات</span></h1>
-    <p class="subtitle">مستويات أذونات تتحكم في ما يمكن للوكلاء فعله</p>
+    <p class="subtitle">نظام أذونات دقيق قائم على الملفات الشخصية — أنت تتحكم فيما يمكن للوكلاء الوصول إليه.</p>
   </div>
   <section class="section">
-    <p>يستخدم Aura Work نظام أذونات متدرج مع 3 مستويات مدمجة. كل مستوى يمنح وصولاً متزايداً لموارد النظام والأدوات.</p>
-    <div class="section-label">مستويات الأذونات</div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> قراءة فقط</h3><p>قراءة ملفات، بحث في الكود، تصفح الويب. لا تعديلات على نظام الملفات ولا تنفيذ كود.</p></div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a9761f;flex-shrink:0"></span> أتمتة آمنة</h3><p>قراءة وكتابة ملفات، تنفيذ أوامر مصرح بها، وصول للشبكة. تنفيذ معزول مع حدود موارد وتسجيل تدقيق.</p></div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> بحث</h3><p>وصول كامل للنظام يشمل نظام الملفات والشبكة وتنفيذ الكود وأتمتة المتصفح. كل الإجراءات مسجلة وقابلة للتراجع.</p></div>
+    <div class="stats-bar">
+      <div class="stat-card fade-in delay-1"><div class="num">3</div><div class="lbl">ملف أذونات</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">ask-first</div><div class="lbl">الوضع الافتراضي</div></div>
+    </div>
+    <p>Aura Work يستخدم <strong>نظام أذونات ثلاثي المستويات</strong> للتحكم فيما يمكن للوكيل فعله. كل إجراء مصنف (ملفات، shell، متصفح، شبكة، إلخ) ويتم فحصه مقابل ملف الأذونات النشط. هذا يضمن أن الوكيل لا يمكنه أبداً فعل شيء لم توافق عليه.</p>
+    
+    <h2 style="margin-top:2rem">لماذا الأذونات مهمة</h2>
+    <p>وكلاء AI أقوياء — يمكنهم قراءة/كتابة الملفات، تنفيذ أوامر shell، تصفح الويب، والتفاعل مع الخدمات الخارجية. بدون ضوابط مناسبة، يمكن للوكيل:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li>تعديل أو حذف ملفات مهمة</li>
+      <li>تنفيذ أوامر shell مدمرة</li>
+      <li>إرسال بيانات لخدمات خارجية</li>
+      <li>تثبيت برامج غير مرغوب فيها</li>
+      <li>إجراء استدعاءات API غير مصرح بها</li>
+    </ul>
+    <p style="margin-top:.75rem">نظام الأذونات يمنع هذا بطلب موافقة صريحة للإجراءات عالية التأثير. أنت تبقى مسيطراً في جميع الأوقات.</p>
+
+    <div class="detail-card">
+      <h3>🔐 مستويات الأذونات الثلاثة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>المستوى</th><th>الوصف</th><th>حالة الاستخدام</th></tr></thead>
+        <tbody>
+          <tr><td><code>read-only</code></td><td>الوكيل يمكنه فقط قراءة الملفات والبيانات. لا تعديلات.</td><td>مراجعة الكود، البحث، التحليل</td></tr>
+          <tr><td><code>ask-first</code></td><td>الوكيل يسأل قبل كل إجراء عالي التأثير. أنت توافق أو ترفض.</td><td>الوضع الافتراضي، تحكم متوازن</td></tr>
+          <tr><td><code>full-access</code></td><td>الوكيل يمكنه فعل أي شيء بدون سؤال. استخدم بحذر.</td><td>أتمتة موثوقة، CI/CD</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 فئات الأذونات</h3>
+      <p>الإجراءات مجمعة في فئات للتحكم الدقيق:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الفئة</th><th>تتحكم في</th><th>أمثلة</th></tr></thead>
+        <tbody>
+          <tr><td><code>file</code></td><td>عمليات قراءة/كتابة الملفات</td><td>قراءة الكود، كتابة ملفات جديدة، حذف ملفات</td></tr>
+          <tr><td><code>shell</code></td><td>تنفيذ أوامر shell</td><td>npm install، تشغيل سكريبتات، ترجمة كود</td></tr>
+          <tr><td><code>browser</code></td><td>أتمتة المتصفح</td><td>تصفح المواقع، ملء النماذج، استخراج البيانات</td></tr>
+          <tr><td><code>network</code></td><td>طلبات الشبكة</td><td>استدعاءات API، تنزيلات، webhooks</td></tr>
+          <tr><td><code>git</code></td><td>عمليات Git</td><td>Commit، push، branch، merge</td></tr>
+          <tr><td><code>plugin</code></td><td>استدعاءات MCP/الإضافات</td><td>استدعاء أدوات MCP، تشغيل دوال الإضافات</td></tr>
+          <tr><td><code>computer-use</code></td><td>أتمتة سطح المكتب</td><td>نقر، كتابة، لقطة شاشة، تحكم بالتطبيقات</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card fade-in delay-1">
+      <h3>قراءة فقط</h3>
+      <p>وصول قراءة للملفات. يمكن للوكلاء تحليل الكود والبحث في الملفات وقراءة الوثائق — لكن لا يمكنهم الكتابة أو التنفيذ.</p>
+      <div style="margin-top:.75rem">
+        <strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">يمنح:</strong>
+        <ul><li><code>file</code> — read: <code>*</code></li></ul>
+      </div>
+    </div>
+<div class="detail-card fade-in delay-2">
+      <h3>أتمتة آمنة</h3>
+      <p>قراءة وكتابة الملفات مع وصول shell للقراءة. يمكن للوكلاء تعديل الكود وإنشاء الملفات — سير عمل تطوير كامل بدون تنفيذ.</p>
+      <div style="margin-top:.75rem">
+        <strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">يمنح:</strong>
+        <ul><li><code>file</code> — read: <code>*</code></li>
+<li><code>file</code> — write: <code>*</code></li>
+<li><code>shell</code> — read: <code>*</code></li></ul>
+      </div>
+    </div>
+<div class="detail-card fade-in delay-3">
+      <h3>بحث (قراءة + تصفح)</h3>
+      <p>وصول قراءة للملفات مع أتمتة المتصفح. يمكن للوكلاء البحث في الويب وتصفح الوثائق وتحليل الملفات المحلية.</p>
+      <div style="margin-top:.75rem">
+        <strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">يمنح:</strong>
+        <ul><li><code>file</code> — read: <code>*</code></li>
+<li><code>browser</code> — browse: <code>*</code></li></ul>
+      </div>
+    </div>
   </section>
+  
   <section class="section">
-    <div class="section-label">Customization</div>
-    <h2>إنشاء مستوى مخصص</h2>
-    <p>حدد مستويات مخصصة في settings.json بدمج أذونات فردية. كل إذن يمنح وصولاً لقدرة محددة.</p>
-    <pre><code>{
-  "profiles": [
-    {
-      "id": "my-custom-profile",
-      "permissions": ["files.read", "files.write", "network.http"],
-      "extends": "safe-automation"
-    }
-  ]
+    <div class="section-label">الإعدادات</div>
+    <h2>إعداد الأذونات</h2>
+    <p>اضبط الأذونات في <strong>الإعدادات → الأذونات</strong>:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> اختر مستوى الأذونات الافتراضي (read-only, ask-first, full-access)</li>
+      <li><strong>2.</strong> حدد ملف أذونات جاهز أو أنشئ ملفاً مخصصاً</li>
+      <li><strong>3.</strong> اضبط الأذونات لكل فئة (ملفات، shell، متصفح، إلخ)</li>
+      <li><strong>4.</strong> عيّن "السماح دائماً" أو "الرفض دائماً" لعمليات محددة</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>⚙️ ملفات أذونات مخصصة</h3>
+      <p>أنشئ ملفات أذونات مخصصة لسير العمل المختلف:</p>
+      <pre><code>{
+  "name": "Development Profile",
+  "description": "Full access for trusted development work",
+  "permissions": {
+    "file": { "read": true, "write": true, "delete": "ask" },
+    "shell": { "execute": "ask", "destructive": "deny" },
+    "browser": { "browse": true, "forms": "ask" },
+    "git": { "commit": true, "push": "ask" },
+    "plugin": { "invoke": "ask" }
+  }
 }</code></pre>
-  <section class="section">
-    <div class="section-label">نموذج الأذونات</div>
-    <h2>فهم نموذج الأذونات</h2>
-    <p>يستخدم Aura Work نظام أذونات خماسي المستويات للتحكم الكامل في ما يمكن للذكاء الاصطناعي فعله:</p>
-    <div class="detail-card">
-      <h3>المستوى 1: قراءة نظام الملفات</h3>
-      <p>السماح بقراءة الملفات والمجلدات. هذا هو المستوى الأساسي المطلوب لمعظم المهام. يمكن تقييده بمجلدات محددة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>المستوى 2: كتابة نظام الملفات</h3>
-      <p>السماح بإنشاء وتعديل وحذف الملفات. مطلوب لمهام البرمجة. يمكن تقييده بمسارات محددة.</p>
+      <h3>🚨 إجراءات عالية التأثير</h3>
+      <p>هذه الإجراءات تتطلب دائماً موافقة صريحة في وضع <code>ask-first</code>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>حذف دائم</strong> — حذف ملفات أو بيانات</li>
+        <li><strong>تنفيذ shell</strong> — تشغيل أوامر (خاصة المدمرة)</li>
+        <li><strong>التحكم بالحاسوب</strong> — التحكم بتطبيقات سطح المكتب</li>
+        <li><strong>إرسال عن بعد</strong> — إرسال مهام لـ Aura Cloud</li>
+        <li><strong>كتابة ملفات</strong> — تعديل ملفات موجودة</li>
+        <li><strong>Git commits</strong> — إنشاء commits أو push</li>
+        <li><strong>نماذج المتصفح</strong> — إرسال نماذج على المواقع</li>
+      </ul>
     </div>
-    <div class="detail-card">
-      <h3>المستوى 3: تنفيذ الأوامر</h3>
-      <p>السماح بتشغيل أوامر shell. مطلوب لتشغيل الاختبارات والبناء. يمكن تقييده بأوامر مسموحة فقط.</p>
-    </div>
-    <div class="detail-card">
-      <h3>المستوى 4: الوصول للشبكة</h3>
-      <p>السماح بالاتصال بالإنترنت. مطلوب لاستدعاءات API والبحث على الويب. يمكن تقييده بنطاقات محددة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>المستوى 5: التحكم الكامل</h3>
-      <p>وصول غير مقيد. يتطلب تأكيدا صريحا من المستخدم. غير موصى به للاستخدام اليومي.</p>
-    </div>
-    <p style="margin-top:1.5rem">يمكن تكوين الأذونات بشكل دقيق في ملف <code>aura.config.json</code>. كل طلب يعرض الأذونات المطلوبة قبل التنفيذ.</p>
   </section>
+  
+  <section class="section">
+    <div class="section-label">سجل التدقيق</div>
+    <h2>كل إجراء مسجل</h2>
+    <p>جميع طلبات الأذونات والموافقات والرفض مسجلة في سجل التدقيق بتفاصيل كاملة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>الفاعل</strong> — من قام بالإجراء (وكيل أو مستخدم)</li>
+      <li><strong>الفئة</strong> — ملفات، shell، متصفح، git، إضافات، إلخ</li>
+      <li><strong>الإجراء</strong> — قراءة، كتابة، تنفيذ، commit، إلخ</li>
+      <li><strong>الهدف</strong> — مسار الملف، URL، الأمر، إلخ</li>
+      <li><strong>مستوى المخاطرة</strong> — منخفض، متوسط، عالي، حرج</li>
+      <li><strong>القرار</strong> — سماح، رفض، موافقة، معلق</li>
+      <li><strong>النتيجة</strong> — نجاح، فشل، معلق</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🔐 الخزنة المشفرة</h3>
+      <p>الأسرار ومفاتيح API ورموز الجلسات تخزن في خزنة مشفرة مرتبطة بالجهاز:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>التشفير</strong> — ChaCha20-Poly1305 مع Argon2 لاشتقاق المفاتيح</li>
+        <li><strong>مرتبطة بالجهاز</strong> — المفاتيح مرتبطة بجهازك (DPAPI/Keychain/Secret Service)</li>
+        <li><strong>فتح بيومتري</strong> — يدعم بصمة الإصبع/الوجه على المنصات المدعومة</li>
+        <li><strong>أسرار مرقمة</strong> — تتبع تغييرات مفاتيح API عبر الزمن</li>
+        <li><strong>حذف آمن</strong> — الأسرار تمسح بشكل آمن عند إزالتها</li>
+      </ul>
+    </div>
   </section>
         </main>
        </div>

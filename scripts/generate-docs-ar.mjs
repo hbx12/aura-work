@@ -436,6 +436,36 @@ function getSidecars() {
   ];
 }
 
+function getPermissionProfiles() {
+  return [
+    {
+      id: "read-only",
+      name: "قراءة فقط",
+      desc: "وصول قراءة للملفات. يمكن للوكلاء تحليل الكود والبحث في الملفات وقراءة الوثائق — لكن لا يمكنهم الكتابة أو التنفيذ.",
+      grants: [{ category: "file", action: "read", target: "*" }],
+    },
+    {
+      id: "safe-automation",
+      name: "أتمتة آمنة",
+      desc: "قراءة وكتابة الملفات مع وصول shell للقراءة. يمكن للوكلاء تعديل الكود وإنشاء الملفات — سير عمل تطوير كامل بدون تنفيذ.",
+      grants: [
+        { category: "file", action: "read", target: "*" },
+        { category: "file", action: "write", target: "*" },
+        { category: "shell", action: "read", target: "*" },
+      ],
+    },
+    {
+      id: "research",
+      name: "بحث (قراءة + تصفح)",
+      desc: "وصول قراءة للملفات مع أتمتة المتصفح. يمكن للوكلاء البحث في الويب وتصفح الوثائق وتحليل الملفات المحلية.",
+      grants: [
+        { category: "file", action: "read", target: "*" },
+        { category: "browser", action: "browse", target: "*" },
+      ],
+    },
+  ];
+}
+
 // ─── Page Layout ────────────────────────────────────────────────────────────────
 
 function getSidebarArHTML(currentPage) {
@@ -1136,307 +1166,787 @@ function generateThemesAr() {
 }
 
 function generatePermissionsAr() {
+  const profiles = getPermissionProfiles();
   const body = `<div class="hero">
-    <h1><span>${tr("Permissions")}</span></h1>
-    <p class="subtitle">${tr("permission profiles controlling what agents can do")}</p>
+    <h1><span>الأذونات</span></h1>
+    <p class="subtitle">نظام أذونات دقيق قائم على الملفات الشخصية — أنت تتحكم فيما يمكن للوكلاء الوصول إليه.</p>
   </div>
   <section class="section">
-    <p>${tr("Aura Work uses a tiered permission system with 3 built-in profiles. Each profile grants progressively more access to system resources and tools.")}</p>
-    <div class="section-label">${tr("Permission Profiles")}</div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#4b5bb0;flex-shrink:0"></span> ${tr("Read-Only")}</h3><p>${tr("Read files, search code, browse the web. No modifications to the file system, no code execution, no network calls to external services.")}</p></div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#a9761f;flex-shrink:0"></span> ${tr("Safe Automation")}</h3><p>${tr("Read and write files, execute approved commands, access network. Sandboxed execution with resource limits and audit logging.")}</p></div>
-    <div class="detail-card"><h3><span style="display:inline-flex;width:10px;height:10px;border-radius:50%;background:#c2683f;flex-shrink:0"></span> ${tr("Research")}</h3><p>${tr("Full system access including file system, network, code execution, browser automation, and system commands. All actions are logged and reversible.")}</p></div>
+    <div class="stats-bar">
+      <div class="stat-card fade-in delay-1"><div class="num">${profiles.length}</div><div class="lbl">ملف أذونات</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">ask-first</div><div class="lbl">الوضع الافتراضي</div></div>
+    </div>
+    <p>Aura Work يستخدم <strong>نظام أذونات ثلاثي المستويات</strong> للتحكم فيما يمكن للوكيل فعله. كل إجراء مصنف (ملفات، shell، متصفح، شبكة، إلخ) ويتم فحصه مقابل ملف الأذونات النشط. هذا يضمن أن الوكيل لا يمكنه أبداً فعل شيء لم توافق عليه.</p>
+    
+    <h2 style="margin-top:2rem">لماذا الأذونات مهمة</h2>
+    <p>وكلاء AI أقوياء — يمكنهم قراءة/كتابة الملفات، تنفيذ أوامر shell، تصفح الويب، والتفاعل مع الخدمات الخارجية. بدون ضوابط مناسبة، يمكن للوكيل:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li>تعديل أو حذف ملفات مهمة</li>
+      <li>تنفيذ أوامر shell مدمرة</li>
+      <li>إرسال بيانات لخدمات خارجية</li>
+      <li>تثبيت برامج غير مرغوب فيها</li>
+      <li>إجراء استدعاءات API غير مصرح بها</li>
+    </ul>
+    <p style="margin-top:.75rem">نظام الأذونات يمنع هذا بطلب موافقة صريحة للإجراءات عالية التأثير. أنت تبقى مسيطراً في جميع الأوقات.</p>
+
+    <div class="detail-card">
+      <h3>🔐 مستويات الأذونات الثلاثة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>المستوى</th><th>الوصف</th><th>حالة الاستخدام</th></tr></thead>
+        <tbody>
+          <tr><td><code>read-only</code></td><td>الوكيل يمكنه فقط قراءة الملفات والبيانات. لا تعديلات.</td><td>مراجعة الكود، البحث، التحليل</td></tr>
+          <tr><td><code>ask-first</code></td><td>الوكيل يسأل قبل كل إجراء عالي التأثير. أنت توافق أو ترفض.</td><td>الوضع الافتراضي، تحكم متوازن</td></tr>
+          <tr><td><code>full-access</code></td><td>الوكيل يمكنه فعل أي شيء بدون سؤال. استخدم بحذر.</td><td>أتمتة موثوقة، CI/CD</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 فئات الأذونات</h3>
+      <p>الإجراءات مجمعة في فئات للتحكم الدقيق:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الفئة</th><th>تتحكم في</th><th>أمثلة</th></tr></thead>
+        <tbody>
+          <tr><td><code>file</code></td><td>عمليات قراءة/كتابة الملفات</td><td>قراءة الكود، كتابة ملفات جديدة، حذف ملفات</td></tr>
+          <tr><td><code>shell</code></td><td>تنفيذ أوامر shell</td><td>npm install، تشغيل سكريبتات، ترجمة كود</td></tr>
+          <tr><td><code>browser</code></td><td>أتمتة المتصفح</td><td>تصفح المواقع، ملء النماذج، استخراج البيانات</td></tr>
+          <tr><td><code>network</code></td><td>طلبات الشبكة</td><td>استدعاءات API، تنزيلات، webhooks</td></tr>
+          <tr><td><code>git</code></td><td>عمليات Git</td><td>Commit، push، branch، merge</td></tr>
+          <tr><td><code>plugin</code></td><td>استدعاءات MCP/الإضافات</td><td>استدعاء أدوات MCP، تشغيل دوال الإضافات</td></tr>
+          <tr><td><code>computer-use</code></td><td>أتمتة سطح المكتب</td><td>نقر، كتابة، لقطة شاشة، تحكم بالتطبيقات</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    ${profiles.map((p, i) => `<div class="detail-card fade-in delay-${i+1}">
+      <h3>${p.name}</h3>
+      <p>${p.desc}</p>
+      <div style="margin-top:.75rem">
+        <strong style="font-size:.75rem;font-family:var(--font-mono);color:var(--color-text-weak)">يمنح:</strong>
+        <ul>${p.grants.map(g => `<li><code>${g.category}</code> — ${g.action}: <code>${g.target}</code></li>`).join("\n")}</ul>
+      </div>
+    </div>`).join("\n")}
   </section>
+  
   <section class="section">
-    <div class="section-label">${tr("Customization")}</div>
-    <h2>${tr("Creating a custom profile")}</h2>
-    <p>${tr("Define custom profiles in your settings.json by combining individual permissions. Each permission grants access to a specific capability (files.read, files.write, network.http, etc.).")}</p>
-    <pre><code>{
-  "profiles": [
-    {
-      "id": "my-custom-profile",
-      "permissions": ["files.read", "files.write", "network.http"],
-      "extends": "safe-automation"
-    }
-  ]
+    <div class="section-label">الإعدادات</div>
+    <h2>إعداد الأذونات</h2>
+    <p>اضبط الأذونات في <strong>الإعدادات → الأذونات</strong>:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>1.</strong> اختر مستوى الأذونات الافتراضي (read-only, ask-first, full-access)</li>
+      <li><strong>2.</strong> حدد ملف أذونات جاهز أو أنشئ ملفاً مخصصاً</li>
+      <li><strong>3.</strong> اضبط الأذونات لكل فئة (ملفات، shell، متصفح، إلخ)</li>
+      <li><strong>4.</strong> عيّن "السماح دائماً" أو "الرفض دائماً" لعمليات محددة</li>
+    </ol>
+
+    <div class="detail-card">
+      <h3>⚙️ ملفات أذونات مخصصة</h3>
+      <p>أنشئ ملفات أذونات مخصصة لسير العمل المختلف:</p>
+      <pre><code>{
+  "name": "Development Profile",
+  "description": "Full access for trusted development work",
+  "permissions": {
+    "file": { "read": true, "write": true, "delete": "ask" },
+    "shell": { "execute": "ask", "destructive": "deny" },
+    "browser": { "browse": true, "forms": "ask" },
+    "git": { "commit": true, "push": "ask" },
+    "plugin": { "invoke": "ask" }
+  }
 }</code></pre>
-  <section class="section">
-    <div class="section-label">نموذج الأذونات</div>
-    <h2>فهم نموذج الأذونات</h2>
-    <p>يستخدم Aura Work نظام أذونات خماسي المستويات للتحكم الكامل في ما يمكن للذكاء الاصطناعي فعله:</p>
-    <div class="detail-card">
-      <h3>المستوى 1: قراءة نظام الملفات</h3>
-      <p>السماح بقراءة الملفات والمجلدات. هذا هو المستوى الأساسي المطلوب لمعظم المهام. يمكن تقييده بمجلدات محددة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>المستوى 2: كتابة نظام الملفات</h3>
-      <p>السماح بإنشاء وتعديل وحذف الملفات. مطلوب لمهام البرمجة. يمكن تقييده بمسارات محددة.</p>
+      <h3>🚨 إجراءات عالية التأثير</h3>
+      <p>هذه الإجراءات تتطلب دائماً موافقة صريحة في وضع <code>ask-first</code>:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>حذف دائم</strong> — حذف ملفات أو بيانات</li>
+        <li><strong>تنفيذ shell</strong> — تشغيل أوامر (خاصة المدمرة)</li>
+        <li><strong>التحكم بالحاسوب</strong> — التحكم بتطبيقات سطح المكتب</li>
+        <li><strong>إرسال عن بعد</strong> — إرسال مهام لـ Aura Cloud</li>
+        <li><strong>كتابة ملفات</strong> — تعديل ملفات موجودة</li>
+        <li><strong>Git commits</strong> — إنشاء commits أو push</li>
+        <li><strong>نماذج المتصفح</strong> — إرسال نماذج على المواقع</li>
+      </ul>
     </div>
-    <div class="detail-card">
-      <h3>المستوى 3: تنفيذ الأوامر</h3>
-      <p>السماح بتشغيل أوامر shell. مطلوب لتشغيل الاختبارات والبناء. يمكن تقييده بأوامر مسموحة فقط.</p>
-    </div>
-    <div class="detail-card">
-      <h3>المستوى 4: الوصول للشبكة</h3>
-      <p>السماح بالاتصال بالإنترنت. مطلوب لاستدعاءات API والبحث على الويب. يمكن تقييده بنطاقات محددة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>المستوى 5: التحكم الكامل</h3>
-      <p>وصول غير مقيد. يتطلب تأكيدا صريحا من المستخدم. غير موصى به للاستخدام اليومي.</p>
-    </div>
-    <p style="margin-top:1.5rem">يمكن تكوين الأذونات بشكل دقيق في ملف <code>aura.config.json</code>. كل طلب يعرض الأذونات المطلوبة قبل التنفيذ.</p>
   </section>
+  
+  <section class="section">
+    <div class="section-label">سجل التدقيق</div>
+    <h2>كل إجراء مسجل</h2>
+    <p>جميع طلبات الأذونات والموافقات والرفض مسجلة في سجل التدقيق بتفاصيل كاملة:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>الفاعل</strong> — من قام بالإجراء (وكيل أو مستخدم)</li>
+      <li><strong>الفئة</strong> — ملفات، shell، متصفح، git، إضافات، إلخ</li>
+      <li><strong>الإجراء</strong> — قراءة، كتابة، تنفيذ، commit، إلخ</li>
+      <li><strong>الهدف</strong> — مسار الملف، URL، الأمر، إلخ</li>
+      <li><strong>مستوى المخاطرة</strong> — منخفض، متوسط، عالي، حرج</li>
+      <li><strong>القرار</strong> — سماح، رفض، موافقة، معلق</li>
+      <li><strong>النتيجة</strong> — نجاح، فشل، معلق</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🔐 الخزنة المشفرة</h3>
+      <p>الأسرار ومفاتيح API ورموز الجلسات تخزن في خزنة مشفرة مرتبطة بالجهاز:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>التشفير</strong> — ChaCha20-Poly1305 مع Argon2 لاشتقاق المفاتيح</li>
+        <li><strong>مرتبطة بالجهاز</strong> — المفاتيح مرتبطة بجهازك (DPAPI/Keychain/Secret Service)</li>
+        <li><strong>فتح بيومتري</strong> — يدعم بصمة الإصبع/الوجه على المنصات المدعومة</li>
+        <li><strong>أسرار مرقمة</strong> — تتبع تغييرات مفاتيح API عبر الزمن</li>
+        <li><strong>حذف آمن</strong> — الأسرار تمسح بشكل آمن عند إزالتها</li>
+      </ul>
+    </div>
   </section>`;
-  return wrapPageAr(tr("Permissions"), body, "permissions");
+  return wrapPageAr("الأذونات", body, "permissions");
 }
 
 function generateArchitectureAr() {
   const body = `<div class="hero">
-    <h1><span>${tr("Architecture")}</span></h1>
-    <p class="subtitle">${tr("Deep dive into the multi-process architecture")}</p>
+    <h1><span>الهندسة المعمارية</span></h1>
+    <p class="subtitle">Tauri 2 + React 19 + Rust — منصة سطح مكتب متعددة العمليات حديثة.</p>
   </div>
   <section class="section">
-    <p>${tr("Aura Work is built on a multi-process architecture using Tauri 2 as the desktop shell, React 19 for the UI, and Rust for core services. Sidecar processes run independently and communicate via IPC.")}</p>
-    <div class="section-label">${tr("Tech Stack")}</div>
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">Tauri 2</div><div class="lbl">${tr("Desktop shell with native OS integration")}</div></div>
-      <div class="stat-card fade-in delay-2"><div class="num">React 19</div><div class="lbl">${tr("UI framework with streaming SSR support")}</div></div>
-      <div class="stat-card fade-in delay-3"><div class="num">Rust</div><div class="lbl">${tr("Core backend services and security")}</div></div>
-      <div class="stat-card fade-in delay-4"><div class="num">TypeScript</div><div class="lbl">${tr("Full-stack type safety across the project")}</div></div>
+    <p>Aura Work مبني على <strong>هندسة متعددة العمليات</strong> حيث يستضيف غلاف Tauri 2 واجهة React 19 ويدير 8 عمليات sidecar مستقلة، كل منها معزولة ومصادق عليها. هذا التصميم يضمن الأمان والعزل وقابلية التوسع.</p>
+    
+    <h2 style="margin-top:2rem">هندسة النظام</h2>
+    <pre><code>┌─────────────────────────────────────────────────────────┐
+│                    Desktop Shell (Tauri 2 + Rust)        │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Frontend (React 19 + Vite)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Tasks │ │Files │ │ Git  │ │Browse│ │Plugins│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ IPC                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Rust Backend (Commands)                │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Vault │ │SQLite│ │Shell │ │ FS   │ │Process│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ HTTP/IPC                    │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Sidecar Services (Node.js)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Agent │ │  VM  │ │Browse│ │Plugin│ │Cloud │     │ │
+│  │  │:47821│ │:47822│ │:47823│ │:47824│ │:47825│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐                        │ │
+│  │  │Bridge│ │CompU │ │CloudS│                        │ │
+│  │  │:47826│ │:47828│ │:47830│                        │ │
+│  │  └──────┘ └──────┘ └──────┘                        │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+    <div class="detail-card">
+      <h3>🖥️ غلاف سطح المكتب (Tauri 2 + Rust)</h3>
+      <p>الغلاف الخارجي مبني بـ Tauri 2 و Rust. يدير:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>إدارة النوافذ</strong> — نوافذ أصلية، علبة النظام، القوائم</li>
+        <li><strong>جسر IPC</strong> — التواصل بين الواجهة والخدمات المساعدة</li>
+        <li><strong>نظام الملفات</strong> — عمليات ملفات آمنة مع فحص الأذونات</li>
+        <li><strong>دورة حياة العمليات</strong> — تشغيل وإيقاف ومراقبة sidecars</li>
+        <li><strong>الخزنة</strong> — تخزين مشفر لمفاتيح API والأسرار</li>
+        <li><strong>قاعدة بيانات SQLite</strong> — تخزين محلي للمشاريع والمهام والإعدادات</li>
+      </ul>
+    </div>
+    
+    <div class="detail-card">
+      <h3>🎨 الواجهة الأمامية (React 19 + TypeScript)</h3>
+      <p>طبقة UI مبنية بـ React 19 و Vite. توفر:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>14 صفحة رئيسية</strong> — لوحة التحكم، المهام، الملفات، Git، الطرفية، المزوّدون، الإضافات، المتصفح، التحكم بالحاسوب، المهام المجدولة، الذاكرة، سجل التدقيق، السحابة، الامتدادات</li>
+        <li><strong>10 علامات تبويب إعدادات</strong> — عام، الخزنة، VM، السحابة، الامتداد، الحيوان الأليف، الجاهزية، التشخيص، النموذج المحلي، الموافقات</li>
+        <li><strong>واجهة محادثة</strong> — نقطة التفاعل الرئيسية مع الوكيل</li>
+        <li><strong>محرر Monaco</strong> — تحرير الأكواد مع تلوين الصيغة</li>
+        <li><strong>نظام تصميم</strong> — 35+ ثيم، دعم RTL، تخطيط متجاوب</li>
+      </ul>
+    </div>
+    
+    <div class="detail-card">
+      <h3>⚙️ محرك الوكيل (TypeScript)</h3>
+      <p>عقل Aura Work — نظام تنسيق متعدد الوكلاء:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>المخطط (Planner)</strong> — يفكك المهام إلى خطط خطوة بخطوة</li>
+        <li><strong>المنفذ (Executor)</strong> — ينفذ كل خطوة، مستدعياً الأدوات</li>
+        <li><strong>المراجع (Reviewer)</strong> — يتحقق من صحة وسلامة المخرجات</li>
+        <li><strong>الأمان (Safety)</strong> — يفرض الحدود وفحص الأذونات</li>
+      </ul>
+      <p style="margin-top:.75rem">الوكيل يدعم الأدوات المخصصة وخوادم MCP والإضافات. يمكنه استخدام أي مجموعة من القدرات لإكمال المهام.</p>
+    </div>
+    
+    <div class="detail-card">
+      <h3>🔗 جسر Bridge (TypeScript)</h3>
+      <p>API HTTP لربط العملاء الخارجيين:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>CLI</strong> — تحكم من الطرفية عبر أمر <code>aura</code></li>
+        <li><strong>Chrome extension</strong> — تكامل المتصفح لقراءة الصفحات</li>
+        <li><strong>Office add-in</strong> — تفويض المستندات من Word/Excel</li>
+      </ul>
+      <p style="margin-top:.75rem">الجسر يعمل على المنفذ 47826 ويتطلب مصادقة بالجلسة. يستمع فقط على localhost للأمان.</p>
     </div>
   </section>
+  
   <section class="section">
-    <div class="section-label">${tr("Process Model")}</div>
-    <h2>${tr("Process Model")}</h2>
-    <p>${tr("The desktop app spawns sidecar processes on startup. Each sidecar runs as a separate OS process with its own lifecycle. Communication happens over a secure IPC bridge.")}</p>
-    <pre><code>┌─────────────────────────────────────────┐
-│           Tauri 2 (Desktop Shell)        │
-│  ┌────────────────────────────────────┐  │
-│  │  React 19 UI (WebView)             │  │
-│  └─────────────┬──────────────────────┘  │
-│                │ IPC                      │
-│  ┌─────────────▼──────────────────────┐  │
-│  │  Bridge Sidecar (Rust/Node.js)     │  │
-│  └─────────────┬──────────────────────┘  │
-├────────────────┼─────────────────────────┤
-│  ┌─────────────▼──────────────┐          │
-│  │  Agent Sidecar             │          │
-│  │  • Planner                 │          │
-│  │  • Executor                │          │
-│  │  • Reviewer                │          │
-│  └─────────────────────────────┘          │
-│  ┌─────────────┬──────────────┐           │
-│  │ Skills      │  MCP Servers │           │
-│  └─────────────┴──────────────┘           │
-└─────────────────────────────────────────┘</code></pre>
+    <div class="section-label">تدفق البيانات</div>
+    <h2>كيف تتحرك البيانات</h2>
+    <p>عندما تكتب أمراً، هذا هو تدفق البيانات الكامل:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. إدخال المستخدم</strong> — تكتب في واجهة محادثة React</li>
+      <li><strong>2. استدعاء IPC</strong> — الواجهة ترسل الأمر لخلفية Rust عبر Tauri IPC</li>
+      <li><strong>3. إنشاء مهمة</strong> — Rust تنشئ مهمة في SQLite بحالة "planning"</li>
+      <li><strong>4. تنسيق الوكيل</strong> — Rust تستدعي Agent sidecar (المنفذ 47821)</li>
+      <li><strong>5. التخطيط</strong> — وكيل المخطط ينشئ خطة خطوة بخطوة</li>
+      <li><strong>6. التوجيه</strong> — محرك التوجيه يختار أفضل مزوّد/نموذج</li>
+      <li><strong>7. فحص الأذونات</strong> — كل خطوة تُفحص مقابل ملف الأذونات</li>
+      <li><strong>8. التنفيذ</strong> — وكيل المنفذ ينفذ كل خطوة</li>
+      <li><strong>9. استدعاءات الأدوات</strong> — الأدوات قد تستدعي sidecars أخرى</li>
+      <li><strong>10. المراجعة</strong> — وكيل المراجع يتحقق من المخرجات</li>
+      <li><strong>11. الرد</strong> — النتائج ترسل للواجهة عبر IPC</li>
+      <li><strong>12. العرض</strong> — الواجهة تعرض النتائج في المحادثة</li>
+    </ol>
+    <p style="margin-top:1.5rem">جميع التفاعلات تُسجل في سجل التدقيق. عمليات الملفات تمر عبر بوابة الأذونات قبل الوصول لنظام الملفات.</p>
   </section>
+  
   <section class="section">
-    <div class="section-label">${tr("Security Model")}</div>
-    <h2>${tr("Security Model")}</h2>
-    <p>${tr("All sidecar processes run with minimal permissions. The credential store uses OS-level encryption (Keytar). Code execution is sandboxed in isolated VMs.")}</p>
-  <section class="section">
-    <div class="section-label">هندسة النظام</div>
-    <h2>تفاصيل الهندسة المعمارية</h2>
-    <div class="detail-card">
-      <h3>طبقة CLI (واجهة سطر الأوامر)</h3>
-      <p>نقطة الدخول الرئيسية. تحلل الأوامر، تدير الجلسات، وتنسق بين الطبقات. مبنية على Commander.js مع دعم كامل للـ subcommands والإضافات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة TUI (واجهة المستخدم الطرفية)</h3>
-      <p>واجهة تفاعلية مبنية على Ink (React للطرفية). تدعم النوافذ المتعددة، التمرير، الموضوعات، وإدخال الفأرة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المحرك (Engine)</h3>
-      <p>قلب النظام. تدير حلقة Agent: التخطيط والتنفيذ والملاحظة والمراجعة. تستخدم نموذج ReAct مع تحسينات مخصصة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المزودين (Providers)</h3>
-      <p>طبقة تجريد موحدة لجميع مزودي LLM. تترجم الطلبات الداخلية إلى صيغ API الخاصة بكل مزود.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة Sidecars</h3>
-      <p>عمليات خلفية متخصصة: Sandbox (عزل التنفيذ)، FileWatcher (مراقبة التغييرات)، Search (فهرسة الملفات)، Browser (أتمتة المتصفح).</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المزامنة (Sync)</h3>
-      <p>مزامنة مشفرة من طرف إلى طرف (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال و SQLite للتخزين المحلي.</p>
-    </div>
+    <div class="section-label">المكدس التقني</div>
+    <h2>التقنيات المستخدمة</h2>
+    <table>
+      <thead><tr><th>الطبقة</th><th>التقنية</th><th>الغرض</th></tr></thead>
+      <tbody>
+        <tr><td>غلاف سطح المكتب</td><td>Tauri 2</td><td>نوافذ أصلية، قوائم، علبة نظام، IPC</td></tr>
+        <tr><td>الخلفية الأساسية</td><td>Rust</td><td>عمليات الأداء والأمان</td></tr>
+        <tr><td>الواجهة الأمامية</td><td>React 19 + Vite</td><td>عرض UI، تحديث فوري، TypeScript</td></tr>
+        <tr><td>Sidecars</td><td>Node.js / TypeScript</td><td>خدمات خلفية</td></tr>
+        <tr><td>محرك الوكيل</td><td>TypeScript</td><td>تنسيق متعدد الوكلاء</td></tr>
+        <tr><td>التخزين</td><td>SQLite (rusqlite)</td><td>تخزين بيانات محلي</td></tr>
+        <tr><td>التشفير</td><td>ChaCha20-Poly1305 + Argon2</td><td>أمان الاعتمادات</td></tr>
+        <tr><td>نظام البناء</td><td>npm workspaces + esbuild</td><td>أدوات monorepo</td></tr>
+      </tbody>
+    </table>
   </section>
+  
+  <section class="section">
+    <div class="section-label">هيكل المشروع</div>
+    <h2>تنظيم الكود</h2>
+    <pre><code>aura-work/
+├── apps/desktop/           # تطبيق Tauri المكتبي
+│   ├── src/                # مكونات وصفحات React
+│   └── src-tauri/src/      # أوامر Rust ومنطق الأعمال
+├── packages/
+│   ├── ui/src/             # نظام التصميم (tokens, components)
+│   ├── shared/             # أنواع TypeScript والثوابت
+│   ├── i18n/               # التعريب (20 لغة)
+│   └── aura-plugin/        # SDK الإضافات
+├── sidecar/
+│   ├── aura-agent/         # محرك المهام + المزوّدون
+│   ├── aura-vm-helper/     # تنفيذ VM/shell
+│   ├── aura-browser-helper/# أتمتة المتصفح
+│   ├── aura-plugins-helper/# إدارة MCP/الإضافات
+│   ├── aura-cloud-sync/    # عميل مزامنة E2EE
+│   ├── aura-bridge/        # جسر الامتدادات
+│   ├── aura-computer-use/  # مساعد التحكم بالحاسوب
+│   └── aura-cloud/         # خادم سحابي ذاتي الاستضافة
+├── cli/aura-cli/           # CLI المرافق
+├── registry/               # سجل marketplace
+├── docs/                   # توثيق الميزات
+├── examples/               # أمثلة إضافات وخوادم MCP
+├── qa/                     # مجموعة اختبارات القبول
+└── scripts/                # سكريبتات البناء والإصدار</code></pre>
   </section>`;
-  return wrapPageAr(tr("Architecture"), body, "architecture");
+  return wrapPageAr("الهندسة المعمارية", body, "architecture");
 }
 
 function generateCLIAr() {
   const body = `<div class="hero">
-    <h1><span>${tr("CLI")}</span></h1>
-    <p class="subtitle">${tr("The command-line interface for remote agent control, scriptable workflows, and CI/CD integration.")}</p>
+    <h1><span>واجهة الأوامر</span></h1>
+    <p class="subtitle">عميل أوامر للتحكم عن بعد بتطبيق Aura Work من الطرفية — أتمتة، CI/CD، وسير عمل قابل للبرمجة.</p>
   </div>
   <section class="section">
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">CLI</div><div class="lbl">${tr("CLI Features")}</div></div>
-    </div>
-    <p>${tr("The CLI client connects to a running Aura Work instance over a local socket. It authenticates using the same credential store as the desktop app and supports all the same skills, providers, and routing policies.")}</p>
-    <pre><code># ربط CLI بنسخة Aura Work عاملة
-aura connect
+    <p>أداة <code>aura</code> CLI تتصل بتطبيق Aura Work المكتبي عبر جسر Bridge. تسمح بإنشاء المهام، متابعة الحالة، وإدارة المشاريع — كل ذلك من الطرفية. CLI مثالي للأتمتة، خطوط CI/CD، والمطورين الذين يفضلون سير العمل عبر الطرفية.</p>
+    
+    <h2 style="margin-top:2rem">التثبيت</h2>
+    <p>ثبّت CLI عبر npm:</p>
+    <pre><code>npm install -g @aura-work/cli</code></pre>
+    <p style="margin-top:.75rem">أو استخدمها مباشرة مع npx:</p>
+    <pre><code>npx @aura-work/cli status</code></pre>
 
-# تشغيل مهمة
-aura run "اكتب اختبارات لوحدة المصادقة"
-
-# سير عمل قابل للبرمجة
-aura run --script workflow.json
-
-# إخراج JSON
-aura run "حلل هذا الكود" --json</code></pre>
-    <div class="detail-card"><h3>${tr("Remote agent control from terminal")}</h3></div>
-    <div class="detail-card"><h3>${tr("Scriptable workflows for automation")}</h3></div>
-    <div class="detail-card"><h3>${tr("CI/CD pipeline integration")}</h3></div>
-    <div class="detail-card"><h3>${tr("Multiple session management")}</h3></div>
-    <div class="detail-card"><h3>${tr("JSON output for tooling")}</h3></div>
-  <section class="section">
-    <div class="section-label">اوامر متقدمة</div>
-    <h2>اوامر CLI المتقدمة</h2>
     <div class="detail-card">
-      <h3>ادارة الجلسات</h3>
-      <pre><code>aura session list          # عرض الجلسات النشطة
+      <h3>📋 مرجع الأوامر الكامل</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الأمر</th><th>الوصف</th><th>مثال</th></tr></thead>
+        <tbody>
+          <tr><td><code>aura status</code></td><td>فحص حالة الجسر والاتصال</td><td><code>aura status</code></td></tr>
+          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>ربط CLI بالتطبيق المكتبي</td><td><code>aura pair --code ABC123</code></td></tr>
+          <tr><td><code>aura projects</code></td><td>عرض جميع المشاريع</td><td><code>aura projects</code></td></tr>
+          <tr><td><code>aura task create</code></td><td>إنشاء وبدء مهمة</td><td><code>aura task create --prompt "أضف مصادقة"</code></td></tr>
+          <tr><td><code>aura task get &lt;id&gt;</code></td><td>تفاصيل المهمة وحالتها</td><td><code>aura task get task_abc123</code></td></tr>
+          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>بث سجلات تنفيذ المهمة</td><td><code>aura task logs task_abc123</code></td></tr>
+          <tr><td><code>aura open task &lt;id&gt;</code></td><td>فتح المهمة في التطبيق المكتبي</td><td><code>aura open task task_abc123</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 عملية الاقتران</h3>
+      <p>تتصل CLI بالتطبيق المكتبي عبر جسر Bridge. إليك طريقة الإعداد:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> افتح التطبيق المكتبي واذهب إلى <strong>الإضافات → ربط جهاز جديد</strong></li>
+        <li><strong>2.</strong> سيظهر رمز اقتران (صالح لمدة 10 دقائق)</li>
+        <li><strong>3.</strong> شغّل <code>aura pair --code &lt;code&gt;</code> في الطرفية</li>
+        <li><strong>4.</strong> CLI تحفظ رمز الجلسة في <code>~/.aura/config.json</code></li>
+        <li><strong>5.</strong> جميع الأوامر اللاحقة تستخدم هذا الرمز للمصادقة</li>
+      </ol>
+      <p style="margin-top:.75rem">الاقتران ينشئ جلسة آمنة. يمكنك إلغاء الوصول في أي وقت من التطبيق المكتبي تحت الإضافات → الأجهزة المرتبطة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 أمثلة استخدام</h3>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">إنشاء مهمة من الطرفية</h4>
+      <pre><code># إنشاء مهمة في المشروع الحالي
+aura task create --prompt "أصلح خطأ تسجيل الدخول في auth.ts"
+
+# إنشاء مهمة في مشروع محدد
+aura task create --project my-web-app --prompt "أضف صفحة الملف الشخصي"
+
+# إنشاء مهمة بأذونات محددة
+aura task create --prompt "أعد هيكلة قاعدة البيانات" --permissions "file,shell"</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">متابعة تقدم المهمة</h4>
+      <pre><code># حالة المهمة
+aura task get task_abc123
+
+# بث مباشر للسجلات
+aura task logs task_abc123
+
+# فتح المهمة في التطبيق المكتبي للمراقبة البصرية
+aura open task task_abc123</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">سكريبت أتمتة</h4>
+      <pre><code>#!/bin/bash
+# تشغيل مهمة وانتظار اكتمالها
+TASK_ID=$(aura task create --prompt "شغّل الاختبارات" --json | jq -r '.id')
+echo "تم إنشاء المهمة: $TASK_ID"
+
+# استطلاع حتى الاكتمال
+while true; do
+  STATUS=$(aura task get $TASK_ID --json | jq -r '.status')
+  if [ "$STATUS" = "completed" ]; then
+    echo "اكتملت المهمة!"
+    break
+  elif [ "$STATUS" = "failed" ]; then
+    echo "فشلت المهمة!"
+    exit 1
+  fi
+  sleep 5
+done</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔒 نموذج الأمان</h3>
+      <p>تتصل CLI عبر جسر Bridge المحلي (المنفذ 47826). مميزات الأمان الرئيسية:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>مصادقة بالجلسة</strong> — كل جلسة CLI لها رمز فريد</li>
+        <li><strong>احترام الأذونات</strong> — CLI لا يمكنها تجاوز أي إذن، تتبع نفس ملفات الأذونات مثل التطبيق المكتبي</li>
+        <li><strong>محلي فقط</strong> — Bridge يستمع فقط على localhost، لا وصول عن بعد</li>
+        <li><strong>إلغاء الرمز</strong> — يمكنك إلغاء وصول CLI في أي وقت من التطبيق المكتبي</li>
+        <li><strong>سجل التدقيق</strong> — جميع إجراءات CLI مسجلة في سجل التدقيق</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>⚡ التكامل مع CI/CD</h3>
+      <p>استخدم CLI في خطوط الأتمتة:</p>
+      <pre><code># مثال GitHub Actions
+name: تشغيل مهمة AI
+on: push
+jobs:
+  ai-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @aura-work/cli
+      - run: aura pair --code \${{ secrets.AURA_PAIR_CODE }}
+      - run: aura task create --prompt "راجع تغييرات الكود" --wait</code></pre>
+      <p style="margin-top:.75rem">خزّن رمز الاقتران كـ GitHub secret. العلم <code>--wait</code> يمنع الاستمرار حتى اكتمال المهمة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ الإعدادات</h3>
+      <p>CLI تخزّن إعداداتها في <code>~/.aura/config.json</code>:</p>
+      <pre><code>{
+  "sessionToken": "abc123...",
+  "bridgeHost": "localhost",
+  "bridgePort": 47826,
+  "defaultProject": "my-project",
+  "outputFormat": "text"  // أو "json"
+}</code></pre>
+      <p style="margin-top:.75rem">اضبط <code>outputFormat</code> إلى <code>json</code> للإخراج المقروء آلياً في السكريبتات.</p>
+    </div>
+
+  <section class="section">
+    <div class="section-label">أوامر متقدمة</div>
+    <h2>إدارة متقدمة عبر CLI</h2>
+    <div class="card-grid">
+      <div class="detail-card">
+        <h3>📋 إدارة الجلسات</h3>
+        <pre><code>aura session list          # عرض الجلسات النشطة
 aura session resume &lt;id&gt;  # استئناف جلسة سابقة
 aura session kill &lt;id&gt;    # إنهاء جلسة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>ادارة المهارات</h3>
-      <pre><code>aura skill list            # عرض المهارات المثبتة
-aura skill install &lt;name&gt;  # تثبيت مهارة
-aura skill create         # انشاء مهارة جديدة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>ادارة MCP</h3>
-      <pre><code>aura mcp list              # عرض خوادم MCP
-aura mcp add &lt;name&gt;       # اضافة خادم MCP
-aura mcp remove &lt;name&gt;    # ازالة خادم MCP</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>المزامنة</h3>
-      <pre><code>aura sync push             # رفع التغييرات
-aura sync pull             # تنزيل التغييرات
-aura sync status           # حالة المزامنة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>التكوين</h3>
-      <pre><code>aura config list           # عرض الاعدادات
-aura config set &lt;k&gt; &lt;v&gt;   # تعيين اعداد
-aura config reset          # اعادة للافتراضي</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⭐ إدارة المهارات</h3>
+        <pre><code>aura skill list            # عرض المهارات المثبتة
+aura skill install &lt;name&gt;  # تثبيت مهارة من marketplace
+aura skill create          # إنشاء مهارة جديدة</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>🔌 إدارة MCP</h3>
+        <pre><code>aura mcp list              # عرض خوادم MCP
+aura mcp add &lt;name&gt;        # إضافة خادم MCP
+aura mcp remove &lt;name&gt;     # إزالة خادم MCP</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>☁ المزامنة</h3>
+        <pre><code>aura sync push             # رفع التغييرات للسحابة
+aura sync pull              # تنزيل التغييرات من السحابة
+aura sync status            # حالة المزامنة</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⚙️ التكوين</h3>
+        <pre><code>aura config list           # عرض جميع الإعدادات
+aura config set &lt;k&gt; &lt;v&gt;    # تعيين إعداد
+aura config reset           # إعادة للإعدادات الافتراضية</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>📦 المشاريع</h3>
+        <pre><code>aura projects list         # عرض المشاريع
+aura projects create &lt;name&gt; # إنشاء مشروع جديد
+aura projects delete &lt;name&gt; # حذف مشروع</code></pre>
+      </div>
     </div>
   </section>
   </section>`;
-  return wrapPageAr(tr("CLI"), body, "cli");
+  return wrapPageAr("واجهة الأوامر", body, "cli");
 }
 
 function generateMCPAr() {
   const body = `<div class="hero">
-    <h1><span>${tr("MCP")}</span></h1>
-    <p class="subtitle">${tr("The Model Context Protocol integration for connecting third-party tools and services.")}</p>
+    <h1><span>بروتوكول السياق</span></h1>
+    <p class="subtitle">بروتوكول MCP — وسّع قدرات الوكيل بأدوات وخدمات الطرف الثالث.</p>
   </div>
   <section class="section">
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">MCP</div><div class="lbl">${tr("MCP Features")}</div></div>
+    <p>MCP (Model Context Protocol) هو <strong>معيار مفتوح</strong> لربط وكلاء الذكاء الاصطناعي بالأدوات ومصادر البيانات الخارجية. Aura Work يدعم خوادم MCP كآلية توسيع من الدرجة الأولى إلى جانب المهارات المدمجة والإضافات. MCP يسمح لك بإضافة قدرات جديدة بدون تعديل التطبيق الأساسي — فقط ثبّت خادم وسيتمكن الوكيل من استخدام أدواته.</p>
+    
+    <h2 style="margin-top:2rem">ما هو MCP؟</h2>
+    <p>MCP هو بروتوكول يسمح لوكلاء الذكاء الاصطناعي بالتواصل مع الخدمات الخارجية عبر واجهة موحدة. فكّر فيه كـ <strong>محول عالمي</strong> لأدوات AI — بدلاً من بناء تكاملات مخصصة لكل خدمة، يوفر MCP لغة مشتركة يفهمها كل من الوكيل والخدمة.</p>
+    <p style="margin-top:.75rem">مع MCP، يمكنك ربط الوكيل بـ:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>قواعد البيانات</strong> — استعلام PostgreSQL و MySQL و SQLite و MongoDB</li>
+      <li><strong>واجهات API</strong> — تفاعل مع GitHub و Slack و Discord و Jira</li>
+      <li><strong>أنظمة الملفات</strong> — الوصول للتخزين السحابي (S3 و GCS و Azure Blob)</li>
+      <li><strong>أدوات التطوير</strong> — linters و formatters ومشغلات الاختبارات</li>
+      <li><strong>خدمات مخصصة</strong> — أدواتك و APIs الداخلية</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>⚙️ كيف يعمل MCP في Aura Work</h3>
+      <p>خوادم MCP تدار بواسطة خدمة <strong>مساعد الإضافات</strong> (المنفذ 47824). عند إضافة خادم MCP:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> مساعد الإضافات يشغّل عملية الخادم (stdio) أو يتصل به (SSE)</li>
+        <li><strong>2.</strong> الخادم يعلن عن قدراته (أدوات، موارد، أوامر)</li>
+        <li><strong>3.</strong> هذه القدرات تُسجّل في محرك الوكيل</li>
+        <li><strong>4.</strong> عندما يحتاج الوكيل أداة، يمكنه الآن استدعاء أدوات خادم MCP</li>
+        <li><strong>5.</strong> كل استدعاء أداة يمر عبر بوابة الأذونات للموافقة</li>
+      </ol>
+      <p style="margin-top:.75rem">الوكيل يكتشف تلقائياً أدوات MCP المتاحة ويختارها عندما تكون مناسبة — لا تحتاج أن تخبره صراحةً باستخدام أداة MCP.</p>
     </div>
-    <p>${tr("Aura Work implements the Model Context Protocol (MCP) specification. MCP servers register tools that the agent can discover and invoke at runtime. Each tool is sandboxed by the permission system and can be added dynamically without restarting the agent.")}</p>
-    <div class="detail-card"><h3>${tr("Third-party tool integration")}</h3></div>
-    <div class="detail-card"><h3>${tr("Standardized protocol for tool discovery")}</h3></div>
-    <div class="detail-card"><h3>${tr("Dynamic tool registration at runtime")}</h3></div>
-    <div class="detail-card"><h3>${tr("Sandboxed execution with permission gating")}</h3></div>
-    <div class="detail-card"><h3>${tr("Community MCP server marketplace")}</h3></div>
-  <section class="section">
-    <div class="section-label">تطوير خادم MCP</div>
-    <h2>انشاء خادم MCP خاص بك</h2>
-    <p>يمكنك انشاء خادم MCP باستخدام Node.js. هذا مثال بسيط:</p>
-    <pre><code>import { Server } from "@modelcontextprotocol/sdk";
+
+    <div class="detail-card">
+      <h3>🔌 طرق النقل المدعومة</h3>
+      <p>MCP يدعم آليتي نقل:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>النقل</th><th>كيف يعمل</th><th>الأفضل لـ</th></tr></thead>
+        <tbody>
+          <tr><td><code>stdio</code></td><td>الخادم يعمل كعملية فرعية. التواصل عبر stdin/stdout.</td><td>الأدوات المحلية، مغلفات CLI، التكاملات البسيطة</td></tr>
+          <tr><td><code>SSE</code></td><td>الخادم يعمل كخدمة HTTP. التواصل عبر Server-Sent Events.</td><td>الخدمات البعيدة، الخوادم في الحاويات</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">معظم خوادم MCP المجتمعية تستخدم <code>stdio</code> لأنه أبسط — لا حاجة لإعدادات الشبكة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📦 تثبيت خوادم MCP</h3>
+      <p>هناك ثلاث طرق لإضافة خوادم MCP:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 1: Marketplace (موصى بها)</h4>
+      <p>افتح <strong>لوحة الإضافات</strong> في التطبيق المكتبي، ابحث عن خادم MCP، واضغط تثبيت. marketplace يدير الإصدارات والتحديثات والتبعيات.</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 2: إعداد يدوي</h4>
+      <p>أضف خادم يدوياً في الإعدادات → الإضافات → خوادم MCP:</p>
+      <pre><code>{
+  "name": "my-database-server",
+  "command": "node",
+  "args": ["path/to/mcp-server.js"],
+  "env": { "DATABASE_URL": "postgresql://localhost/mydb" }
+}</code></pre>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 3: إعداد على مستوى المشروع</h4>
+      <p>أضف خوادم MCP إلى ملف <code>aura.jsonc</code> في مشروعك:</p>
+      <pre><code>{
+  "mcp": {
+    "test-project-server": {
+      "type": "local",
+      "command": ["node", "/path/to/test-mcp-server.js"],
+      "enabled": true,
+      "environment": { "TEST_ENV_VAR": "مرحباً" }
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 الأمان والأذونات</h3>
+      <p>استدعاءات أدوات MCP تخضع لنفس نظام الأذونات مثل الأدوات المدمجة:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>موافقة لكل أداة</strong> — كل أداة MCP يمكن الموافقة عليها أو رفضها بشكل فردي</li>
+        <li><strong>تنفيذ معزول</strong> — خوادم MCP تعمل في عمليات معزولة</li>
+        <li><strong>تصريح بالأذونات</strong> — الخوادم يجب أن تعلن ما تحتاج الوصول إليه</li>
+        <li><strong>سجل التدقيق</strong> — جميع استدعاءات MCP مسجلة بالتفصيل</li>
+      </ul>
+      <p style="margin-top:.75rem">في وضع <code>ask-first</code>، سيُطلب منك التأكيد قبل كل استدعاء أداة MCP.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛒 Marketplace</h3>
+      <p>المتجر (<code>registry/marketplace.json</code>) يتضمن خوادم MCP إلى جانب المهارات والإضافات. كل إدخال يتضمن: بيان الخادم، وصف الأدوات، وصف مترجم بـ 20 لغة، معلومات الإصدار، وتقييم المخاطر.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ تطوير خوادم MCP</h3>
+      <p>يمكنك إنشاء خوادم MCP خاصة بك باستخدام MCP SDK الرسمي:</p>
+      <pre><code>// my-mcp-server.js
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 const server = new Server({
-  name: "my-tools",
+  name: "my-custom-server",
   version: "1.0.0"
+}, { capabilities: { tools: {} } });
+
+// تعريف أداة
+server.setRequestHandler("tools/list", async () => ({
+  tools: [{
+    name: "my_tool",
+    description: "تقوم بشيء مفيد",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "نص الاستعلام" }
+      },
+      required: ["query"]
+    }
+  }]
+}));
+
+// معالجة استدعاءات الأدوات
+server.setRequestHandler("tools/call", async (request) => {
+  const { name, arguments: args } = request.params;
+  if (name === "my_tool") {
+    return { content: [{ type: "text", text: "النتيجة: " + args.query }] };
+  }
 });
 
-server.tool("hello", {
-  description: "يقول مرحبا",
-  handler: async ({ name }) =&gt; ({
-    content: \`مرحبا \${name}!\`
-  })
-});
-
-server.start();</code></pre>
-    <p style="margin-top:1rem">ضع الخادم في <code>~/.config/aura/mcp-servers/</code> وسيتم تحميله تلقائيا عند بدء التشغيل.</p>
-    <div class="detail-card" style="margin-top:1.5rem">
-      <h3>مكتبة MCP الرسمية</h3>
-      <p>نحن نبني مكتبة MCP للغة العربية تسهل انشاء خوادم MCP للناطقين بالعربية. تشمل ادوات جاهزة للبحث، الترجمة، التحليل النصي، والمزيد.</p>
+// بدء الخادم
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+      <p style="margin-top:.75rem">راجع <code>examples/mcp-server/</code> لمثال عملي كامل.</p>
     </div>
-  </section>
+
+    <div class="detail-card">
+      <h3>💡 خوادم MCP شائعة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الخادم</th><th>الغرض</th><th>النقل</th></tr></thead>
+        <tbody>
+          <tr><td><code>filesystem</code></td><td>قراءة/كتابة الملفات، البحث</td><td>stdio</td></tr>
+          <tr><td><code>github</code></td><td>إدارة المستودعات و issues و PRs</td><td>stdio</td></tr>
+          <tr><td><code>postgres</code></td><td>استعلام قواعد بيانات PostgreSQL</td><td>stdio</td></tr>
+          <tr><td><code>slack</code></td><td>إرسال رسائل وقراءة القنوات</td><td>stdio</td></tr>
+          <tr><td><code>puppeteer</code></td><td>أتمتة المتصفح مع Chrome</td><td>stdio</td></tr>
+          <tr><td><code>brave-search</code></td><td>بحث الويب عبر Brave API</td><td>stdio</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">اعثر على المزيد في <a href="https://github.com/modelcontextprotocol/servers" style="color:var(--color-accent)">github.com/modelcontextprotocol/servers</a></p>
+    </div>
   </section>`;
-  return wrapPageAr(tr("MCP"), body, "mcp");
+  return wrapPageAr("بروتوكول السياق", body, "mcp");
 }
 
 function generateSidecarsAr() {
   const sidecars = getSidecars();
   const sidecarNames = {
-    "agent": tr("Agent"), "bridge": tr("Bridge"), "browser-helper": tr("Browser Helper"),
-    "cloud-sync": tr("Cloud Sync"), "computer-use": tr("Computer Use"),
-    "vm-helper": tr("VM Helper"), "plugins-helper": tr("Plugins Helper"), "prompt-system": tr("Prompt System")
+    "agent": "المحرك الأساسي", "bridge": "جسر التواصل", "browser-helper": "مساعد المتصفح",
+    "cloud-sync": "مزامنة سحابية", "computer-use": "التحكم بالحاسوب",
+    "vm-helper": "مساعد الآلة الافتراضية", "plugins-helper": "مساعد الإضافات", "prompt-system": "نظام الأوامر"
   };
   const sidecarDesc = {
-    "agent": tr("Core agent execution engine"), "bridge": tr("Communication bridge between processes"),
-    "browser-helper": tr("Browser automation and web scraping"),
-    "cloud-sync": tr("Sync state and configuration across devices"),
-    "computer-use": tr("Desktop automation (mouse, keyboard, files)"),
-    "vm-helper": tr("Sandboxed code execution in isolated VMs"),
-    "plugins-helper": tr("Dynamic plugin loading and management"),
-    "prompt-system": tr("System prompt management and templating"),
+    "agent": "محرك تنفيذ الوكيل الأساسي — يدير تخطيط المهام وتنفيذها خطوة بخطوة مع دعم المزوّدين المتعددين",
+    "bridge": "جسر HTTP للتواصل مع التطبيقات الخارجية — يمكن CLI و Chrome extension من التحكم بالتطبيق",
+    "browser-helper": "أتمتة المتصفح واستخراج البيانات — يستخدم Playwright للتفاعل مع صفحات الويب",
+    "cloud-sync": "مزامنة الحالة والإعدادات عبر الأجهزة — بتشفير E2EE كامل",
+    "computer-use": "أتمتة سطح المكتب — تحكم كامل بالماوس ولوحة المفاتيح والملفات",
+    "vm-helper": "تنفيذ أكواد معزول في بيئة آمنة — يدعم Docker و WSL2",
+    "plugins-helper": "تحميل وإدارة الإضافات الديناميكية — يدير MCP والمهارات والمكونات الإضافية",
+    "prompt-system": "إدارة وقوالب الأوامر النظامية — يتحكم بكيفية تواصل الوكيل",
   };
   const sidecarIcons = { "agent": "◎", "bridge": "⇄", "browser-helper": "◉", "cloud-sync": "☁", "computer-use": "🖥", "vm-helper": "▣", "plugins-helper": "◆", "prompt-system": "☆" };
+  const sidecarDetails = {
+    "agent": "المحرك الرئيسي للوكيل — يستقبل المهام من المستخدم، يحللها، يخطط للخطوات، وينفذها. يتواصل مع جميع المزوّدين (OpenAI, Anthropic, Ollama, Gemini وغيرها) عبر محرك التوجيه. يدير دورة حياة المهمة كاملة من التخطيط إلى المراجعة. يدعم أكثر من 50 مهارة جاهزة ويمكن توسيعه بمهارات مخصصة.",
+    "bridge": "خادم HTTP يعمل كجسر بين تطبيق Aura المكتبي والعملاء الخارجيين. يُمكّن CLI من إنشاء المهام ومتابعتها من الطرفية، ويمكن إضافة Chrome extension للتحكم من المتصفح. يستمع على المنفذ 47826 ويتطلب مصادقة بالجلسة. لا يقبل الاتصالات إلا من localhost للأمان.",
+    "browser-helper": "محرك أتمتة متصفح كامل باستخدام Playwright. يمكنه فتح المواقع، ملء النماذج، التقاط لقطات الشاشة، استخراج البيانات، والتفاعل مع عناصر الصفحة. يدعم متصفحات Chromium و Firefox و WebKit. مثالي لمهام البحث والأتمتة على الويب.",
+    "cloud-sync": "خدمة مزامنة مشفرة بالكامل (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال الفوري وتشفير ChaCha20-Poly1305 لكل جهاز. تخزّن المفاتيح محلياً فقط — حتى خوادم Aura لا تستطيع قراءة بياناتك.",
+    "computer-use": "خدمة تحكم كامل بسطح المكتب — تحريك الماوس، النقر، الكتابة، التقاط الشاشة، وإدارة النوافذ. تسمح للوكيل بالتفاعل مع أي تطبيق على جهازك. تتطلب أذونات صريحة لكل إجراء. مثالية لأتمتة المهام المتكررة.",
+    "vm-helper": "بيئة تنفيذ معزولة وآمنة للأكواد. تدير حاويات Docker و WSL2 لتشغيل الأكواد في بيئة منفصلة تماماً عن النظام. تمنع الوصول غير المصرح للملفات والشبكة. مثالية لاختبار الأكواد وتجربة المكتبات الجديدة بأمان.",
+    "plugins-helper": "مدير الإضافات الديناميكي — يحمّل ويدير خوادم MCP والمهارات والمكونات الإضافية. يستمع على المنفذ 47824. يكتشف الإضافات تلقائياً من marketplace ويدير دورة حياتها (تثبيت، تشغيل، إيقاف، تحديث).",
+    "prompt-system": "نظام إدارة الأوامر النصية — يتحكم في كيفية تواصل الوكيل مع المستخدم والنظام. يدعم قوالب ديناميكية، تخصيص حسب المزوّد، وإدارة السياق. يضمن تجربة متسقة عبر جميع المزوّدين والنماذج.",
+  };
+  const sidecarPorts = {
+    "agent": "47821", "bridge": "47826", "browser-helper": "47823",
+    "cloud-sync": "47825", "computer-use": "47828",
+    "vm-helper": "47822", "plugins-helper": "47824", "prompt-system": "47829"
+  };
 
   const body = `<div class="hero">
-    <h1><span>${tr("Sidecars")}</span></h1>
-    <p class="subtitle">${sidecars.length} ${tr("modular background services that extend the agent platform")}</p>
+    <h1><span>الخدمات المساعدة</span></h1>
+    <p class="subtitle">${sidecars.length} خدمات خلفية معيارية تشغّل قدرات Aura Work</p>
   </div>
   <section class="section">
     <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">${sidecars.length}</div><div class="lbl">${tr("Total Sidecars")}</div></div>
+      <div class="stat-card fade-in delay-1"><div class="num">${sidecars.length}</div><div class="lbl">خدمات مساعدة</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">Node.js</div><div class="lbl">لغة البرمجة</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">IPC+HTTP</div><div class="lbl">آلية التواصل</div></div>
     </div>
-    <p>${tr("Aura Work runs 8 sidecar processes — independent Node.js daemons that provide specialized services to the agent engine. Each sidecar runs in its own process and communicates via IPC.")}</p>
+    <p>الخدمات المساعدة (Sidecars) هي <strong>عمليات Node.js مستقلة</strong> تديرها نواة Tauri. كل خدمة تعمل في مساحة عملية منفصلة مع دورة حياة مستقلة، وتتواصل عبر IPC أو HTTP. توفر هذه الخدمات قدرات معزولة وآمنة يمكن لمحرك الوكيل استدعاؤها.</p>
+    
+    <h2 style="margin-top:2rem">لماذا Sidecars؟</h2>
+    <p>هذه الهيكلية توفر عدة مزايا:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>العزل</strong> — كل خدمة في عملية منفصلة، الأعطال لا تؤثر على التطبيق الرئيسي</li>
+      <li><strong>الأمان</strong> — الخدمات معزولة ومصادق عليها، صلاحيات محدودة</li>
+      <li><strong>القابلية للتوسيع</strong> — إمكانيات جديدة تُضاف كخدمات جديدة بدون تعديل النواة</li>
+      <li><strong>إدارة الموارد</strong> — كل خدمة يمكن تشغيلها وإيقافها بشكل مستقل</li>
+      <li><strong>مرونة اللغة</strong> — الخدمات يمكن كتابتها بأي لغة (حالياً جميعها TypeScript)</li>
+    </ul>
+
+    <div class="section-label">الخدمات المساعدة</div>
     <div class="card-grid">
       ${sidecars.map((s, i) => `<div class="detail-card fade-in delay-${(i % 4) + 1}">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">${sidecarIcons[s] || "◆"}</span> ${sidecarNames[s] || s}</h3>
-        <p>${sidecarDesc[s] || ""}</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">${sidecarPorts[s] ? sidecarPorts[s].slice(-2) : "◆"}</span> ${sidecarNames[s] || s}</h3>
+        <p style="margin-top:.5rem">${sidecarDetails[s] || sidecarDesc[s] || ""}</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: ${sidecarPorts[s] || "N/A"}</span><span>${sidecarIcons[s] || ""} TypeScript</span></div>
       </div>`).join("\n")}
     </div>
+  </section>
+  
   <section class="section">
-    <div class="section-label">تفاصيل Sidecars</div>
-    <h2>كيف تعمل Sidecars</h2>
+    <div class="section-label">التواصل</div>
+    <h2>كيف تتواصل Sidecars</h2>
     <div class="detail-card">
-      <h3>Sandbox</h3>
-      <p>ينشئ بيئة معزولة لتشغيل الاكواد. يدعم Docker و WSL2 و VMs الخفيفة. يمنع الوصول غير المصرح للنظام.</p>
+      <h3>🔌 طرق التواصل</h3>
+      <p>تتواصل الخدمات المساعدة مع التطبيق الرئيسي عبر:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الطريقة</th><th>المنفذ</th><th>الاستخدام</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP API</strong></td><td>47821-47830</td><td>نقاط REST لإدارة المهام والفحص الصحي</td></tr>
+          <tr><td><strong>IPC</strong></td><td>—</td><td>تواصل مباشر بين العمليات للعمليات السريعة</td></tr>
+          <tr><td><strong>WebSocket</strong></td><td>47826</td><td>بث مباشر للسجلات والأحداث</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">جميع الخدمات تعرض نقطة <code>GET /health</code> تعيد الحالة والإصدار ومعلومات المرحلة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>FileWatcher</h3>
-      <p>يراقب تغييرات الملفات في الوقت الفعلي باستخدام fs.watch. يخطر المحرك بالتغييرات الخارجية لتجنب التعارضات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Search</h3>
-      <p>يفهرس الملفات باستخدام قاعدة بيانات مدمجة. يدعم البحث النصي الكامل (FTS5) والبحث بالتعبيرات النمطية.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Browser</h3>
-      <p>يوفر Playwright headless browser للتفاعل مع المواقع. يدعم التقاط الشاشة، ملء النماذج، واستخراج البيانات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Sync</h3>
-      <p>يدير مزامنة E2EE بين الاجهزة. يستخدم WebSocket مع تشفير لكل جهاز على حدة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Shell</h3>
-      <p>واجهة Shell تفاعلية مع دعم PTY كامل. تسمح بتشغيل اوامر مركبة والحفاظ على حالة الجلسة.</p>
+      <h3>📊 المنافذ والفحص الصحي</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الخدمة</th><th>المنفذ</th><th>نقطة الفحص</th></tr></thead>
+        <tbody>
+          ${sidecars.map(s => `<tr><td>${sidecarNames[s] || s}</td><td>${sidecarPorts[s] || "N/A"}</td><td>GET /health</td></tr>`).join("\n")}
+        </tbody>
+      </table>
     </div>
   </section>
+  
+  <section class="section">
+    <div class="section-label">الفحص الصحي</div>
+    <h2>مراقبة حالة الخدمات</h2>
+    <p>كل خدمة تعرض نقطة فحص صحي. يمكنك فحص جميع الخدمات دفعة واحدة:</p>
+    <pre><code># فحص صحة خدمة Agent
+curl http://localhost:47821/health
+
+# الاستجابة:
+{
+  "phase": 7,
+  "version": "0.1.0-alpha",
+  "status": "ready",
+  "uptime": 3600
+}</code></pre>
+    <p style="margin-top:.75rem">تطبيق سطح المكتب يراقب صحة الخدمات تلقائياً ويعيد تشغيل الخدمات المتعطلة. يمكنك أيضاً التحقق من الحالة في <strong>الإعدادات → التشخيص</strong>.</p>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">نموذج الأمان</div>
+    <h2>مصادقة Sidecars</h2>
+    <p>جميع الخدمات تستخدم نظام مصادقة موحد مع رموز (tokens):</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>مصادقة بالرمز</strong> — كل طلب بين العمليات يجب أن يتضمن رمز sidecar صالح</li>
+      <li><strong>تحميل وقت التشغيل</strong> — الرموز تُنشأ عند بدء التطبيق وتُحمّل في كل خدمة</li>
+      <li><strong>التحقق من الطلبات</strong> — كل طلب يُفحص مقابل الرمز</li>
+      <li><strong>رفض 401</strong> — الطلبات غير المصرحة تُرفض بـ <code>401 Unauthorized</code></li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🛡️ العزل</h3>
+      <p>كل خدمة تعمل في مساحة عملية منفصلة مع:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>عملية Node.js منفصلة</strong> — لا ذاكرة أو حالة مشتركة</li>
+        <li><strong>وصول محدود لنظام الملفات</strong> — فقط المجلدات التي تحتاجها</li>
+        <li><strong>لا وصول للشبكة افتراضياً</strong> — يجب منحه صراحة</li>
+        <li><strong>حدود الموارد</strong> — استخدام CPU والذاكرة مراقب</li>
+      </ul>
+    </div>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">التطوير</div>
+    <h2>بناء Sidecars</h2>
+    <p>الخدمات المساعدة تُبنى بـ TypeScript وتُجمع بـ esbuild:</p>
+    <pre><code># بناء جميع الخدمات
+npm run build:sidecars
+
+# بناء خدمة محددة
+npm run build:sidecar -w sidecar/aura-agent
+
+# تشغيل خدمة في وضع التطوير
+npm run sidecar          # Agent
+npm run vm-helper        # VM Helper
+npm run browser-helper   # Browser Helper</code></pre>
+
+    <div class="detail-card">
+      <h3>📝 إنشاء Sidecar جديدة</h3>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> أنشئ مجلد جديد في <code>sidecar/</code></li>
+        <li><strong>2.</strong> أضف <code>package.json</code> مع التبعيات</li>
+        <li><strong>3.</strong> نفّذ نقطة الفحص الصحي: <code>GET /health</code></li>
+        <li><strong>4.</strong> نفّذ نقاط منطق العمل الخاص بك</li>
+        <li><strong>5.</strong> أضف المصادقة باستخدام <code>sidecar-auth.ts</code></li>
+        <li><strong>6.</strong> سجّل الخدمة في مدير العمليات للتطبيق الرئيسي</li>
+        <li><strong>7.</strong> أضف سكريبت البناء إلى <code>package.json</code> الرئيسي</li>
+      </ol>
+    </div>
   </section>`;
-  return wrapPageAr(tr("Sidecars"), body, "sidecars");
+  return wrapPageAr("الخدمات المساعدة", body, "sidecars");
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────────

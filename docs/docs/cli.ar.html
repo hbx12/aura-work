@@ -100,61 +100,173 @@
         <main class="content">
           <div class="hero">
     <h1><span>واجهة الأوامر</span></h1>
-    <p class="subtitle">واجهة الأوامر للتحكم عن بعد في الوكيل وسير العمل القابلة للبرمجة والتكامل مع CI/CD.</p>
+    <p class="subtitle">عميل أوامر للتحكم عن بعد بتطبيق Aura Work من الطرفية — أتمتة، CI/CD، وسير عمل قابل للبرمجة.</p>
   </div>
   <section class="section">
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">CLI</div><div class="lbl">ميزات واجهة الأوامر</div></div>
-    </div>
-    <p>يتصل عميل CLI بنسخة Aura Work عاملة عبر socket محلي. يستخدم نفس مخزن بيانات الاعتماد ويدعم كل المهارات والمزوّدين.</p>
-    <pre><code># ربط CLI بنسخة Aura Work عاملة
-aura connect
+    <p>أداة <code>aura</code> CLI تتصل بتطبيق Aura Work المكتبي عبر جسر Bridge. تسمح بإنشاء المهام، متابعة الحالة، وإدارة المشاريع — كل ذلك من الطرفية. CLI مثالي للأتمتة، خطوط CI/CD، والمطورين الذين يفضلون سير العمل عبر الطرفية.</p>
+    
+    <h2 style="margin-top:2rem">التثبيت</h2>
+    <p>ثبّت CLI عبر npm:</p>
+    <pre><code>npm install -g @aura-work/cli</code></pre>
+    <p style="margin-top:.75rem">أو استخدمها مباشرة مع npx:</p>
+    <pre><code>npx @aura-work/cli status</code></pre>
 
-# تشغيل مهمة
-aura run "اكتب اختبارات لوحدة المصادقة"
-
-# سير عمل قابل للبرمجة
-aura run --script workflow.json
-
-# إخراج JSON
-aura run "حلل هذا الكود" --json</code></pre>
-    <div class="detail-card"><h3>تحكم عن بعد في الوكيل من الطرفية</h3></div>
-    <div class="detail-card"><h3>سير عمل قابل للبرمجة للأتمتة</h3></div>
-    <div class="detail-card"><h3>التكامل مع خطوط CI/CD</h3></div>
-    <div class="detail-card"><h3>إدارة جلسات متعددة</h3></div>
-    <div class="detail-card"><h3>إخراج JSON للأدوات</h3></div>
-  <section class="section">
-    <div class="section-label">اوامر متقدمة</div>
-    <h2>اوامر CLI المتقدمة</h2>
     <div class="detail-card">
-      <h3>ادارة الجلسات</h3>
-      <pre><code>aura session list          # عرض الجلسات النشطة
+      <h3>📋 مرجع الأوامر الكامل</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الأمر</th><th>الوصف</th><th>مثال</th></tr></thead>
+        <tbody>
+          <tr><td><code>aura status</code></td><td>فحص حالة الجسر والاتصال</td><td><code>aura status</code></td></tr>
+          <tr><td><code>aura pair --code &lt;code&gt;</code></td><td>ربط CLI بالتطبيق المكتبي</td><td><code>aura pair --code ABC123</code></td></tr>
+          <tr><td><code>aura projects</code></td><td>عرض جميع المشاريع</td><td><code>aura projects</code></td></tr>
+          <tr><td><code>aura task create</code></td><td>إنشاء وبدء مهمة</td><td><code>aura task create --prompt "أضف مصادقة"</code></td></tr>
+          <tr><td><code>aura task get &lt;id&gt;</code></td><td>تفاصيل المهمة وحالتها</td><td><code>aura task get task_abc123</code></td></tr>
+          <tr><td><code>aura task logs &lt;id&gt;</code></td><td>بث سجلات تنفيذ المهمة</td><td><code>aura task logs task_abc123</code></td></tr>
+          <tr><td><code>aura open task &lt;id&gt;</code></td><td>فتح المهمة في التطبيق المكتبي</td><td><code>aura open task task_abc123</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 عملية الاقتران</h3>
+      <p>تتصل CLI بالتطبيق المكتبي عبر جسر Bridge. إليك طريقة الإعداد:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> افتح التطبيق المكتبي واذهب إلى <strong>الإضافات → ربط جهاز جديد</strong></li>
+        <li><strong>2.</strong> سيظهر رمز اقتران (صالح لمدة 10 دقائق)</li>
+        <li><strong>3.</strong> شغّل <code>aura pair --code &lt;code&gt;</code> في الطرفية</li>
+        <li><strong>4.</strong> CLI تحفظ رمز الجلسة في <code>~/.aura/config.json</code></li>
+        <li><strong>5.</strong> جميع الأوامر اللاحقة تستخدم هذا الرمز للمصادقة</li>
+      </ol>
+      <p style="margin-top:.75rem">الاقتران ينشئ جلسة آمنة. يمكنك إلغاء الوصول في أي وقت من التطبيق المكتبي تحت الإضافات → الأجهزة المرتبطة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔄 أمثلة استخدام</h3>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">إنشاء مهمة من الطرفية</h4>
+      <pre><code># إنشاء مهمة في المشروع الحالي
+aura task create --prompt "أصلح خطأ تسجيل الدخول في auth.ts"
+
+# إنشاء مهمة في مشروع محدد
+aura task create --project my-web-app --prompt "أضف صفحة الملف الشخصي"
+
+# إنشاء مهمة بأذونات محددة
+aura task create --prompt "أعد هيكلة قاعدة البيانات" --permissions "file,shell"</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">متابعة تقدم المهمة</h4>
+      <pre><code># حالة المهمة
+aura task get task_abc123
+
+# بث مباشر للسجلات
+aura task logs task_abc123
+
+# فتح المهمة في التطبيق المكتبي للمراقبة البصرية
+aura open task task_abc123</code></pre>
+
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">سكريبت أتمتة</h4>
+      <pre><code>#!/bin/bash
+# تشغيل مهمة وانتظار اكتمالها
+TASK_ID=$(aura task create --prompt "شغّل الاختبارات" --json | jq -r '.id')
+echo "تم إنشاء المهمة: $TASK_ID"
+
+# استطلاع حتى الاكتمال
+while true; do
+  STATUS=$(aura task get $TASK_ID --json | jq -r '.status')
+  if [ "$STATUS" = "completed" ]; then
+    echo "اكتملت المهمة!"
+    break
+  elif [ "$STATUS" = "failed" ]; then
+    echo "فشلت المهمة!"
+    exit 1
+  fi
+  sleep 5
+done</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔒 نموذج الأمان</h3>
+      <p>تتصل CLI عبر جسر Bridge المحلي (المنفذ 47826). مميزات الأمان الرئيسية:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>مصادقة بالجلسة</strong> — كل جلسة CLI لها رمز فريد</li>
+        <li><strong>احترام الأذونات</strong> — CLI لا يمكنها تجاوز أي إذن، تتبع نفس ملفات الأذونات مثل التطبيق المكتبي</li>
+        <li><strong>محلي فقط</strong> — Bridge يستمع فقط على localhost، لا وصول عن بعد</li>
+        <li><strong>إلغاء الرمز</strong> — يمكنك إلغاء وصول CLI في أي وقت من التطبيق المكتبي</li>
+        <li><strong>سجل التدقيق</strong> — جميع إجراءات CLI مسجلة في سجل التدقيق</li>
+      </ul>
+    </div>
+
+    <div class="detail-card">
+      <h3>⚡ التكامل مع CI/CD</h3>
+      <p>استخدم CLI في خطوط الأتمتة:</p>
+      <pre><code># مثال GitHub Actions
+name: تشغيل مهمة AI
+on: push
+jobs:
+  ai-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @aura-work/cli
+      - run: aura pair --code ${{ secrets.AURA_PAIR_CODE }}
+      - run: aura task create --prompt "راجع تغييرات الكود" --wait</code></pre>
+      <p style="margin-top:.75rem">خزّن رمز الاقتران كـ GitHub secret. العلم <code>--wait</code> يمنع الاستمرار حتى اكتمال المهمة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ الإعدادات</h3>
+      <p>CLI تخزّن إعداداتها في <code>~/.aura/config.json</code>:</p>
+      <pre><code>{
+  "sessionToken": "abc123...",
+  "bridgeHost": "localhost",
+  "bridgePort": 47826,
+  "defaultProject": "my-project",
+  "outputFormat": "text"  // أو "json"
+}</code></pre>
+      <p style="margin-top:.75rem">اضبط <code>outputFormat</code> إلى <code>json</code> للإخراج المقروء آلياً في السكريبتات.</p>
+    </div>
+
+  <section class="section">
+    <div class="section-label">أوامر متقدمة</div>
+    <h2>إدارة متقدمة عبر CLI</h2>
+    <div class="card-grid">
+      <div class="detail-card">
+        <h3>📋 إدارة الجلسات</h3>
+        <pre><code>aura session list          # عرض الجلسات النشطة
 aura session resume &lt;id&gt;  # استئناف جلسة سابقة
 aura session kill &lt;id&gt;    # إنهاء جلسة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>ادارة المهارات</h3>
-      <pre><code>aura skill list            # عرض المهارات المثبتة
-aura skill install &lt;name&gt;  # تثبيت مهارة
-aura skill create         # انشاء مهارة جديدة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>ادارة MCP</h3>
-      <pre><code>aura mcp list              # عرض خوادم MCP
-aura mcp add &lt;name&gt;       # اضافة خادم MCP
-aura mcp remove &lt;name&gt;    # ازالة خادم MCP</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>المزامنة</h3>
-      <pre><code>aura sync push             # رفع التغييرات
-aura sync pull             # تنزيل التغييرات
-aura sync status           # حالة المزامنة</code></pre>
-    </div>
-    <div class="detail-card">
-      <h3>التكوين</h3>
-      <pre><code>aura config list           # عرض الاعدادات
-aura config set &lt;k&gt; &lt;v&gt;   # تعيين اعداد
-aura config reset          # اعادة للافتراضي</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⭐ إدارة المهارات</h3>
+        <pre><code>aura skill list            # عرض المهارات المثبتة
+aura skill install &lt;name&gt;  # تثبيت مهارة من marketplace
+aura skill create          # إنشاء مهارة جديدة</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>🔌 إدارة MCP</h3>
+        <pre><code>aura mcp list              # عرض خوادم MCP
+aura mcp add &lt;name&gt;        # إضافة خادم MCP
+aura mcp remove &lt;name&gt;     # إزالة خادم MCP</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>☁ المزامنة</h3>
+        <pre><code>aura sync push             # رفع التغييرات للسحابة
+aura sync pull              # تنزيل التغييرات من السحابة
+aura sync status            # حالة المزامنة</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>⚙️ التكوين</h3>
+        <pre><code>aura config list           # عرض جميع الإعدادات
+aura config set &lt;k&gt; &lt;v&gt;    # تعيين إعداد
+aura config reset           # إعادة للإعدادات الافتراضية</code></pre>
+      </div>
+      <div class="detail-card">
+        <h3>📦 المشاريع</h3>
+        <pre><code>aura projects list         # عرض المشاريع
+aura projects create &lt;name&gt; # إنشاء مشروع جديد
+aura projects delete &lt;name&gt; # حذف مشروع</code></pre>
+      </div>
     </div>
   </section>
   </section>

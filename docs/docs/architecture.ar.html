@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الهندسة — وثائق Aura Work</title>
-<meta name="description" content="وثائق Aura Work — الهندسة">
-<meta property="og:title" content="الهندسة — Aura Work">
-<meta property="og:description" content="وثائق Aura Work — الهندسة">
+<title>الهندسة المعمارية — وثائق Aura Work</title>
+<meta name="description" content="وثائق Aura Work — الهندسة المعمارية">
+<meta property="og:title" content="الهندسة المعمارية — Aura Work">
+<meta property="og:description" content="وثائق Aura Work — الهندسة المعمارية">
 <meta property="og:url" content="https://aura-work.shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../assets/css/main.css">
@@ -99,76 +99,157 @@
   </aside>
         <main class="content">
           <div class="hero">
-    <h1><span>الهندسة</span></h1>
-    <p class="subtitle">غوص في الهندسة متعددة العمليات</p>
+    <h1><span>الهندسة المعمارية</span></h1>
+    <p class="subtitle">Tauri 2 + React 19 + Rust — منصة سطح مكتب متعددة العمليات حديثة.</p>
   </div>
   <section class="section">
-    <p>Aura Work مبني على هندسة متعددة العمليات باستخدام Tauri 2 كغلاف سطح المكتب و React 19 للواجهة و Rust للخدمات الأساسية.</p>
-    <div class="section-label">مجموعة التقنيات</div>
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">Tauri 2</div><div class="lbl">غلاف سطح المكتب مع تكامل نظام التشغيل</div></div>
-      <div class="stat-card fade-in delay-2"><div class="num">React 19</div><div class="lbl">إطار واجهة مع دعم SSR للتدفق</div></div>
-      <div class="stat-card fade-in delay-3"><div class="num">Rust</div><div class="lbl">خدمات خلفية أساسية وأمان</div></div>
-      <div class="stat-card fade-in delay-4"><div class="num">TypeScript</div><div class="lbl">أمان أنواع شامل عبر المشروع</div></div>
+    <p>Aura Work مبني على <strong>هندسة متعددة العمليات</strong> حيث يستضيف غلاف Tauri 2 واجهة React 19 ويدير 8 عمليات sidecar مستقلة، كل منها معزولة ومصادق عليها. هذا التصميم يضمن الأمان والعزل وقابلية التوسع.</p>
+    
+    <h2 style="margin-top:2rem">هندسة النظام</h2>
+    <pre><code>┌─────────────────────────────────────────────────────────┐
+│                    Desktop Shell (Tauri 2 + Rust)        │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Frontend (React 19 + Vite)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Tasks │ │Files │ │ Git  │ │Browse│ │Plugins│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ IPC                          │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Rust Backend (Commands)                │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Vault │ │SQLite│ │Shell │ │ FS   │ │Process│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  └─────────────────────────────────────────────────────┘ │
+│                           │ HTTP/IPC                    │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │              Sidecar Services (Node.js)             │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐     │ │
+│  │  │Agent │ │  VM  │ │Browse│ │Plugin│ │Cloud │     │ │
+│  │  │:47821│ │:47822│ │:47823│ │:47824│ │:47825│     │ │
+│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘     │ │
+│  │  ┌──────┐ ┌──────┐ ┌──────┐                        │ │
+│  │  │Bridge│ │CompU │ │CloudS│                        │ │
+│  │  │:47826│ │:47828│ │:47830│                        │ │
+│  │  └──────┘ └──────┘ └──────┘                        │ │
+│  └─────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+    <div class="detail-card">
+      <h3>🖥️ غلاف سطح المكتب (Tauri 2 + Rust)</h3>
+      <p>الغلاف الخارجي مبني بـ Tauri 2 و Rust. يدير:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>إدارة النوافذ</strong> — نوافذ أصلية، علبة النظام، القوائم</li>
+        <li><strong>جسر IPC</strong> — التواصل بين الواجهة والخدمات المساعدة</li>
+        <li><strong>نظام الملفات</strong> — عمليات ملفات آمنة مع فحص الأذونات</li>
+        <li><strong>دورة حياة العمليات</strong> — تشغيل وإيقاف ومراقبة sidecars</li>
+        <li><strong>الخزنة</strong> — تخزين مشفر لمفاتيح API والأسرار</li>
+        <li><strong>قاعدة بيانات SQLite</strong> — تخزين محلي للمشاريع والمهام والإعدادات</li>
+      </ul>
+    </div>
+    
+    <div class="detail-card">
+      <h3>🎨 الواجهة الأمامية (React 19 + TypeScript)</h3>
+      <p>طبقة UI مبنية بـ React 19 و Vite. توفر:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>14 صفحة رئيسية</strong> — لوحة التحكم، المهام، الملفات، Git، الطرفية، المزوّدون، الإضافات، المتصفح، التحكم بالحاسوب، المهام المجدولة، الذاكرة، سجل التدقيق، السحابة، الامتدادات</li>
+        <li><strong>10 علامات تبويب إعدادات</strong> — عام، الخزنة، VM، السحابة، الامتداد، الحيوان الأليف، الجاهزية، التشخيص، النموذج المحلي، الموافقات</li>
+        <li><strong>واجهة محادثة</strong> — نقطة التفاعل الرئيسية مع الوكيل</li>
+        <li><strong>محرر Monaco</strong> — تحرير الأكواد مع تلوين الصيغة</li>
+        <li><strong>نظام تصميم</strong> — 35+ ثيم، دعم RTL، تخطيط متجاوب</li>
+      </ul>
+    </div>
+    
+    <div class="detail-card">
+      <h3>⚙️ محرك الوكيل (TypeScript)</h3>
+      <p>عقل Aura Work — نظام تنسيق متعدد الوكلاء:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>المخطط (Planner)</strong> — يفكك المهام إلى خطط خطوة بخطوة</li>
+        <li><strong>المنفذ (Executor)</strong> — ينفذ كل خطوة، مستدعياً الأدوات</li>
+        <li><strong>المراجع (Reviewer)</strong> — يتحقق من صحة وسلامة المخرجات</li>
+        <li><strong>الأمان (Safety)</strong> — يفرض الحدود وفحص الأذونات</li>
+      </ul>
+      <p style="margin-top:.75rem">الوكيل يدعم الأدوات المخصصة وخوادم MCP والإضافات. يمكنه استخدام أي مجموعة من القدرات لإكمال المهام.</p>
+    </div>
+    
+    <div class="detail-card">
+      <h3>🔗 جسر Bridge (TypeScript)</h3>
+      <p>API HTTP لربط العملاء الخارجيين:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>CLI</strong> — تحكم من الطرفية عبر أمر <code>aura</code></li>
+        <li><strong>Chrome extension</strong> — تكامل المتصفح لقراءة الصفحات</li>
+        <li><strong>Office add-in</strong> — تفويض المستندات من Word/Excel</li>
+      </ul>
+      <p style="margin-top:.75rem">الجسر يعمل على المنفذ 47826 ويتطلب مصادقة بالجلسة. يستمع فقط على localhost للأمان.</p>
     </div>
   </section>
+  
   <section class="section">
-    <div class="section-label">نموذج العمليات</div>
-    <h2>نموذج العمليات</h2>
-    <p>تطبيق سطح المكتب يُنشئ عمليات مساعدة عند بدء التشغيل. كل خدمة تعمل كعملية نظام تشغيل منفصلة. التواصل يتم عبر جسر IPC آمن.</p>
-    <pre><code>┌─────────────────────────────────────────┐
-│           Tauri 2 (Desktop Shell)        │
-│  ┌────────────────────────────────────┐  │
-│  │  React 19 UI (WebView)             │  │
-│  └─────────────┬──────────────────────┘  │
-│                │ IPC                      │
-│  ┌─────────────▼──────────────────────┐  │
-│  │  Bridge Sidecar (Rust/Node.js)     │  │
-│  └─────────────┬──────────────────────┘  │
-├────────────────┼─────────────────────────┤
-│  ┌─────────────▼──────────────┐          │
-│  │  Agent Sidecar             │          │
-│  │  • Planner                 │          │
-│  │  • Executor                │          │
-│  │  • Reviewer                │          │
-│  └─────────────────────────────┘          │
-│  ┌─────────────┬──────────────┐           │
-│  │ Skills      │  MCP Servers │           │
-│  └─────────────┴──────────────┘           │
-└─────────────────────────────────────────┘</code></pre>
+    <div class="section-label">تدفق البيانات</div>
+    <h2>كيف تتحرك البيانات</h2>
+    <p>عندما تكتب أمراً، هذا هو تدفق البيانات الكامل:</p>
+    <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2.5">
+      <li><strong>1. إدخال المستخدم</strong> — تكتب في واجهة محادثة React</li>
+      <li><strong>2. استدعاء IPC</strong> — الواجهة ترسل الأمر لخلفية Rust عبر Tauri IPC</li>
+      <li><strong>3. إنشاء مهمة</strong> — Rust تنشئ مهمة في SQLite بحالة "planning"</li>
+      <li><strong>4. تنسيق الوكيل</strong> — Rust تستدعي Agent sidecar (المنفذ 47821)</li>
+      <li><strong>5. التخطيط</strong> — وكيل المخطط ينشئ خطة خطوة بخطوة</li>
+      <li><strong>6. التوجيه</strong> — محرك التوجيه يختار أفضل مزوّد/نموذج</li>
+      <li><strong>7. فحص الأذونات</strong> — كل خطوة تُفحص مقابل ملف الأذونات</li>
+      <li><strong>8. التنفيذ</strong> — وكيل المنفذ ينفذ كل خطوة</li>
+      <li><strong>9. استدعاءات الأدوات</strong> — الأدوات قد تستدعي sidecars أخرى</li>
+      <li><strong>10. المراجعة</strong> — وكيل المراجع يتحقق من المخرجات</li>
+      <li><strong>11. الرد</strong> — النتائج ترسل للواجهة عبر IPC</li>
+      <li><strong>12. العرض</strong> — الواجهة تعرض النتائج في المحادثة</li>
+    </ol>
+    <p style="margin-top:1.5rem">جميع التفاعلات تُسجل في سجل التدقيق. عمليات الملفات تمر عبر بوابة الأذونات قبل الوصول لنظام الملفات.</p>
   </section>
+  
   <section class="section">
-    <div class="section-label">نموذج الأمان</div>
-    <h2>نموذج الأمان</h2>
-    <p>جميع العمليات المساعدة تعمل بأقل الصلاحيات. مخزن بيانات الاعتماد يستخدم تشفير نظام التشغيل. تنفيذ الكود معزول في آلات افتراضية.</p>
-  <section class="section">
-    <div class="section-label">هندسة النظام</div>
-    <h2>تفاصيل الهندسة المعمارية</h2>
-    <div class="detail-card">
-      <h3>طبقة CLI (واجهة سطر الأوامر)</h3>
-      <p>نقطة الدخول الرئيسية. تحلل الأوامر، تدير الجلسات، وتنسق بين الطبقات. مبنية على Commander.js مع دعم كامل للـ subcommands والإضافات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة TUI (واجهة المستخدم الطرفية)</h3>
-      <p>واجهة تفاعلية مبنية على Ink (React للطرفية). تدعم النوافذ المتعددة، التمرير، الموضوعات، وإدخال الفأرة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المحرك (Engine)</h3>
-      <p>قلب النظام. تدير حلقة Agent: التخطيط والتنفيذ والملاحظة والمراجعة. تستخدم نموذج ReAct مع تحسينات مخصصة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المزودين (Providers)</h3>
-      <p>طبقة تجريد موحدة لجميع مزودي LLM. تترجم الطلبات الداخلية إلى صيغ API الخاصة بكل مزود.</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة Sidecars</h3>
-      <p>عمليات خلفية متخصصة: Sandbox (عزل التنفيذ)، FileWatcher (مراقبة التغييرات)، Search (فهرسة الملفات)، Browser (أتمتة المتصفح).</p>
-    </div>
-    <div class="detail-card">
-      <h3>طبقة المزامنة (Sync)</h3>
-      <p>مزامنة مشفرة من طرف إلى طرف (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال و SQLite للتخزين المحلي.</p>
-    </div>
+    <div class="section-label">المكدس التقني</div>
+    <h2>التقنيات المستخدمة</h2>
+    <table>
+      <thead><tr><th>الطبقة</th><th>التقنية</th><th>الغرض</th></tr></thead>
+      <tbody>
+        <tr><td>غلاف سطح المكتب</td><td>Tauri 2</td><td>نوافذ أصلية، قوائم، علبة نظام، IPC</td></tr>
+        <tr><td>الخلفية الأساسية</td><td>Rust</td><td>عمليات الأداء والأمان</td></tr>
+        <tr><td>الواجهة الأمامية</td><td>React 19 + Vite</td><td>عرض UI، تحديث فوري، TypeScript</td></tr>
+        <tr><td>Sidecars</td><td>Node.js / TypeScript</td><td>خدمات خلفية</td></tr>
+        <tr><td>محرك الوكيل</td><td>TypeScript</td><td>تنسيق متعدد الوكلاء</td></tr>
+        <tr><td>التخزين</td><td>SQLite (rusqlite)</td><td>تخزين بيانات محلي</td></tr>
+        <tr><td>التشفير</td><td>ChaCha20-Poly1305 + Argon2</td><td>أمان الاعتمادات</td></tr>
+        <tr><td>نظام البناء</td><td>npm workspaces + esbuild</td><td>أدوات monorepo</td></tr>
+      </tbody>
+    </table>
   </section>
+  
+  <section class="section">
+    <div class="section-label">هيكل المشروع</div>
+    <h2>تنظيم الكود</h2>
+    <pre><code>aura-work/
+├── apps/desktop/           # تطبيق Tauri المكتبي
+│   ├── src/                # مكونات وصفحات React
+│   └── src-tauri/src/      # أوامر Rust ومنطق الأعمال
+├── packages/
+│   ├── ui/src/             # نظام التصميم (tokens, components)
+│   ├── shared/             # أنواع TypeScript والثوابت
+│   ├── i18n/               # التعريب (20 لغة)
+│   └── aura-plugin/        # SDK الإضافات
+├── sidecar/
+│   ├── aura-agent/         # محرك المهام + المزوّدون
+│   ├── aura-vm-helper/     # تنفيذ VM/shell
+│   ├── aura-browser-helper/# أتمتة المتصفح
+│   ├── aura-plugins-helper/# إدارة MCP/الإضافات
+│   ├── aura-cloud-sync/    # عميل مزامنة E2EE
+│   ├── aura-bridge/        # جسر الامتدادات
+│   ├── aura-computer-use/  # مساعد التحكم بالحاسوب
+│   └── aura-cloud/         # خادم سحابي ذاتي الاستضافة
+├── cli/aura-cli/           # CLI المرافق
+├── registry/               # سجل marketplace
+├── docs/                   # توثيق الميزات
+├── examples/               # أمثلة إضافات وخوادم MCP
+├── qa/                     # مجموعة اختبارات القبول
+└── scripts/                # سكريبتات البناء والإصدار</code></pre>
   </section>
         </main>
        </div>

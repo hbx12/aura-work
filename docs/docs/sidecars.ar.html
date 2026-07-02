@@ -100,75 +100,173 @@
         <main class="content">
           <div class="hero">
     <h1><span>الخدمات المساعدة</span></h1>
-    <p class="subtitle">8 خدمات خلفية معيارية توسّع منصة الوكيل</p>
+    <p class="subtitle">8 خدمات خلفية معيارية تشغّل قدرات Aura Work</p>
   </div>
   <section class="section">
     <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">8</div><div class="lbl">إجمالي الخدمات المساعدة</div></div>
+      <div class="stat-card fade-in delay-1"><div class="num">8</div><div class="lbl">خدمات مساعدة</div></div>
+      <div class="stat-card fade-in delay-2"><div class="num">Node.js</div><div class="lbl">لغة البرمجة</div></div>
+      <div class="stat-card fade-in delay-3"><div class="num">IPC+HTTP</div><div class="lbl">آلية التواصل</div></div>
     </div>
-    <p>يدير Aura Work 8 خدمات مساعدة — خدمات Node.js خلفية مستقلة تقدم خدمات متخصصة لمحرك الوكيل. كل خدمة تعمل في عمليتها الخاصة وتتواصل عبر IPC.</p>
+    <p>الخدمات المساعدة (Sidecars) هي <strong>عمليات Node.js مستقلة</strong> تديرها نواة Tauri. كل خدمة تعمل في مساحة عملية منفصلة مع دورة حياة مستقلة، وتتواصل عبر IPC أو HTTP. توفر هذه الخدمات قدرات معزولة وآمنة يمكن لمحرك الوكيل استدعاؤها.</p>
+    
+    <h2 style="margin-top:2rem">لماذا Sidecars؟</h2>
+    <p>هذه الهيكلية توفر عدة مزايا:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>العزل</strong> — كل خدمة في عملية منفصلة، الأعطال لا تؤثر على التطبيق الرئيسي</li>
+      <li><strong>الأمان</strong> — الخدمات معزولة ومصادق عليها، صلاحيات محدودة</li>
+      <li><strong>القابلية للتوسيع</strong> — إمكانيات جديدة تُضاف كخدمات جديدة بدون تعديل النواة</li>
+      <li><strong>إدارة الموارد</strong> — كل خدمة يمكن تشغيلها وإيقافها بشكل مستقل</li>
+      <li><strong>مرونة اللغة</strong> — الخدمات يمكن كتابتها بأي لغة (حالياً جميعها TypeScript)</li>
+    </ul>
+
+    <div class="section-label">الخدمات المساعدة</div>
     <div class="card-grid">
       <div class="detail-card fade-in delay-1">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◎</span> الوكيل</h3>
-        <p>محرك تنفيذ الوكيل الأساسي</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">21</span> المحرك الأساسي</h3>
+        <p style="margin-top:.5rem">المحرك الرئيسي للوكيل — يستقبل المهام من المستخدم، يحللها، يخطط للخطوات، وينفذها. يتواصل مع جميع المزوّدين (OpenAI, Anthropic, Ollama, Gemini وغيرها) عبر محرك التوجيه. يدير دورة حياة المهمة كاملة من التخطيط إلى المراجعة. يدعم أكثر من 50 مهارة جاهزة ويمكن توسيعه بمهارات مخصصة.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47821</span><span>◎ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-2">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">⇄</span> الجسر</h3>
-        <p>جسر تواصل بين العمليات</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">26</span> جسر التواصل</h3>
+        <p style="margin-top:.5rem">خادم HTTP يعمل كجسر بين تطبيق Aura المكتبي والعملاء الخارجيين. يُمكّن CLI من إنشاء المهام ومتابعتها من الطرفية، ويمكن إضافة Chrome extension للتحكم من المتصفح. يستمع على المنفذ 47826 ويتطلب مصادقة بالجلسة. لا يقبل الاتصالات إلا من localhost للأمان.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47826</span><span>⇄ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-3">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◉</span> مساعد المتصفح</h3>
-        <p>أتمتة المتصفح واستخراج بيانات الويب</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">23</span> مساعد المتصفح</h3>
+        <p style="margin-top:.5rem">محرك أتمتة متصفح كامل باستخدام Playwright. يمكنه فتح المواقع، ملء النماذج، التقاط لقطات الشاشة، استخراج البيانات، والتفاعل مع عناصر الصفحة. يدعم متصفحات Chromium و Firefox و WebKit. مثالي لمهام البحث والأتمتة على الويب.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47823</span><span>◉ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-4">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">☁</span> المزامنة السحابية</h3>
-        <p>مزامنة الحالة والإعدادات عبر الأجهزة</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">25</span> مزامنة سحابية</h3>
+        <p style="margin-top:.5rem">خدمة مزامنة مشفرة بالكامل (E2EE) بين الأجهزة. تستخدم WebSocket للاتصال الفوري وتشفير ChaCha20-Poly1305 لكل جهاز. تخزّن المفاتيح محلياً فقط — حتى خوادم Aura لا تستطيع قراءة بياناتك.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47825</span><span>☁ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-1">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">🖥</span> استخدام الحاسوب</h3>
-        <p>أتمتة سطح المكتب (فأرة، لوحة مفاتيح، ملفات)</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">28</span> التحكم بالحاسوب</h3>
+        <p style="margin-top:.5rem">خدمة تحكم كامل بسطح المكتب — تحريك الماوس، النقر، الكتابة، التقاط الشاشة، وإدارة النوافذ. تسمح للوكيل بالتفاعل مع أي تطبيق على جهازك. تتطلب أذونات صريحة لكل إجراء. مثالية لأتمتة المهام المتكررة.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47828</span><span>🖥 TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-2">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">▣</span> مساعد الآلة الافتراضية</h3>
-        <p>تنفيذ كود معزول في آلات افتراضية</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">22</span> مساعد الآلة الافتراضية</h3>
+        <p style="margin-top:.5rem">بيئة تنفيذ معزولة وآمنة للأكواد. تدير حاويات Docker و WSL2 لتشغيل الأكواد في بيئة منفصلة تماماً عن النظام. تمنع الوصول غير المصرح للملفات والشبكة. مثالية لاختبار الأكواد وتجربة المكتبات الجديدة بأمان.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47822</span><span>▣ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-3">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">◆</span> مساعد الإضافات</h3>
-        <p>تحميل وإدارة الإضافات الديناميكية</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">24</span> مساعد الإضافات</h3>
+        <p style="margin-top:.5rem">مدير الإضافات الديناميكي — يحمّل ويدير خوادم MCP والمهارات والمكونات الإضافية. يستمع على المنفذ 47824. يكتشف الإضافات تلقائياً من marketplace ويدير دورة حياتها (تثبيت، تشغيل، إيقاف، تحديث).</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47824</span><span>◆ TypeScript</span></div>
       </div>
 <div class="detail-card fade-in delay-4">
-        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#1988a2;color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">☆</span> نظام الأوامر</h3>
-        <p>إدارة أوامر النظام والقوالب</p>
+        <h3><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--color-accent);color:#fff;font-size:.75rem;font-family:var(--font-mono);flex-shrink:0">29</span> نظام الأوامر</h3>
+        <p style="margin-top:.5rem">نظام إدارة الأوامر النصية — يتحكم في كيفية تواصل الوكيل مع المستخدم والنظام. يدعم قوالب ديناميكية، تخصيص حسب المزوّد، وإدارة السياق. يضمن تجربة متسقة عبر جميع المزوّدين والنماذج.</p>
+        <div class="meta" style="margin-top:.5rem"><span>المنفذ: 47829</span><span>☆ TypeScript</span></div>
       </div>
     </div>
+  </section>
+  
   <section class="section">
-    <div class="section-label">تفاصيل Sidecars</div>
-    <h2>كيف تعمل Sidecars</h2>
+    <div class="section-label">التواصل</div>
+    <h2>كيف تتواصل Sidecars</h2>
     <div class="detail-card">
-      <h3>Sandbox</h3>
-      <p>ينشئ بيئة معزولة لتشغيل الاكواد. يدعم Docker و WSL2 و VMs الخفيفة. يمنع الوصول غير المصرح للنظام.</p>
+      <h3>🔌 طرق التواصل</h3>
+      <p>تتواصل الخدمات المساعدة مع التطبيق الرئيسي عبر:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الطريقة</th><th>المنفذ</th><th>الاستخدام</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTTP API</strong></td><td>47821-47830</td><td>نقاط REST لإدارة المهام والفحص الصحي</td></tr>
+          <tr><td><strong>IPC</strong></td><td>—</td><td>تواصل مباشر بين العمليات للعمليات السريعة</td></tr>
+          <tr><td><strong>WebSocket</strong></td><td>47826</td><td>بث مباشر للسجلات والأحداث</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">جميع الخدمات تعرض نقطة <code>GET /health</code> تعيد الحالة والإصدار ومعلومات المرحلة.</p>
     </div>
+
     <div class="detail-card">
-      <h3>FileWatcher</h3>
-      <p>يراقب تغييرات الملفات في الوقت الفعلي باستخدام fs.watch. يخطر المحرك بالتغييرات الخارجية لتجنب التعارضات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Search</h3>
-      <p>يفهرس الملفات باستخدام قاعدة بيانات مدمجة. يدعم البحث النصي الكامل (FTS5) والبحث بالتعبيرات النمطية.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Browser</h3>
-      <p>يوفر Playwright headless browser للتفاعل مع المواقع. يدعم التقاط الشاشة، ملء النماذج، واستخراج البيانات.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Sync</h3>
-      <p>يدير مزامنة E2EE بين الاجهزة. يستخدم WebSocket مع تشفير لكل جهاز على حدة.</p>
-    </div>
-    <div class="detail-card">
-      <h3>Shell</h3>
-      <p>واجهة Shell تفاعلية مع دعم PTY كامل. تسمح بتشغيل اوامر مركبة والحفاظ على حالة الجلسة.</p>
+      <h3>📊 المنافذ والفحص الصحي</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الخدمة</th><th>المنفذ</th><th>نقطة الفحص</th></tr></thead>
+        <tbody>
+          <tr><td>المحرك الأساسي</td><td>47821</td><td>GET /health</td></tr>
+<tr><td>جسر التواصل</td><td>47826</td><td>GET /health</td></tr>
+<tr><td>مساعد المتصفح</td><td>47823</td><td>GET /health</td></tr>
+<tr><td>مزامنة سحابية</td><td>47825</td><td>GET /health</td></tr>
+<tr><td>التحكم بالحاسوب</td><td>47828</td><td>GET /health</td></tr>
+<tr><td>مساعد الآلة الافتراضية</td><td>47822</td><td>GET /health</td></tr>
+<tr><td>مساعد الإضافات</td><td>47824</td><td>GET /health</td></tr>
+<tr><td>نظام الأوامر</td><td>47829</td><td>GET /health</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
+  
+  <section class="section">
+    <div class="section-label">الفحص الصحي</div>
+    <h2>مراقبة حالة الخدمات</h2>
+    <p>كل خدمة تعرض نقطة فحص صحي. يمكنك فحص جميع الخدمات دفعة واحدة:</p>
+    <pre><code># فحص صحة خدمة Agent
+curl http://localhost:47821/health
+
+# الاستجابة:
+{
+  "phase": 7,
+  "version": "0.1.0-alpha",
+  "status": "ready",
+  "uptime": 3600
+}</code></pre>
+    <p style="margin-top:.75rem">تطبيق سطح المكتب يراقب صحة الخدمات تلقائياً ويعيد تشغيل الخدمات المتعطلة. يمكنك أيضاً التحقق من الحالة في <strong>الإعدادات → التشخيص</strong>.</p>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">نموذج الأمان</div>
+    <h2>مصادقة Sidecars</h2>
+    <p>جميع الخدمات تستخدم نظام مصادقة موحد مع رموز (tokens):</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>مصادقة بالرمز</strong> — كل طلب بين العمليات يجب أن يتضمن رمز sidecar صالح</li>
+      <li><strong>تحميل وقت التشغيل</strong> — الرموز تُنشأ عند بدء التطبيق وتُحمّل في كل خدمة</li>
+      <li><strong>التحقق من الطلبات</strong> — كل طلب يُفحص مقابل الرمز</li>
+      <li><strong>رفض 401</strong> — الطلبات غير المصرحة تُرفض بـ <code>401 Unauthorized</code></li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>🛡️ العزل</h3>
+      <p>كل خدمة تعمل في مساحة عملية منفصلة مع:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>عملية Node.js منفصلة</strong> — لا ذاكرة أو حالة مشتركة</li>
+        <li><strong>وصول محدود لنظام الملفات</strong> — فقط المجلدات التي تحتاجها</li>
+        <li><strong>لا وصول للشبكة افتراضياً</strong> — يجب منحه صراحة</li>
+        <li><strong>حدود الموارد</strong> — استخدام CPU والذاكرة مراقب</li>
+      </ul>
+    </div>
+  </section>
+  
+  <section class="section">
+    <div class="section-label">التطوير</div>
+    <h2>بناء Sidecars</h2>
+    <p>الخدمات المساعدة تُبنى بـ TypeScript وتُجمع بـ esbuild:</p>
+    <pre><code># بناء جميع الخدمات
+npm run build:sidecars
+
+# بناء خدمة محددة
+npm run build:sidecar -w sidecar/aura-agent
+
+# تشغيل خدمة في وضع التطوير
+npm run sidecar          # Agent
+npm run vm-helper        # VM Helper
+npm run browser-helper   # Browser Helper</code></pre>
+
+    <div class="detail-card">
+      <h3>📝 إنشاء Sidecar جديدة</h3>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> أنشئ مجلد جديد في <code>sidecar/</code></li>
+        <li><strong>2.</strong> أضف <code>package.json</code> مع التبعيات</li>
+        <li><strong>3.</strong> نفّذ نقطة الفحص الصحي: <code>GET /health</code></li>
+        <li><strong>4.</strong> نفّذ نقاط منطق العمل الخاص بك</li>
+        <li><strong>5.</strong> أضف المصادقة باستخدام <code>sidecar-auth.ts</code></li>
+        <li><strong>6.</strong> سجّل الخدمة في مدير العمليات للتطبيق الرئيسي</li>
+        <li><strong>7.</strong> أضف سكريبت البناء إلى <code>package.json</code> الرئيسي</li>
+      </ol>
+    </div>
   </section>
         </main>
        </div>

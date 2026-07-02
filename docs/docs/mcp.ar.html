@@ -100,43 +100,151 @@
         <main class="content">
           <div class="hero">
     <h1><span>بروتوكول السياق</span></h1>
-    <p class="subtitle">تكامل بروتوكول سياق النماذج لربط أدوات وخدمات الطرف الثالث.</p>
+    <p class="subtitle">بروتوكول MCP — وسّع قدرات الوكيل بأدوات وخدمات الطرف الثالث.</p>
   </div>
   <section class="section">
-    <div class="stats-bar">
-      <div class="stat-card fade-in delay-1"><div class="num">MCP</div><div class="lbl">ميزات MCP</div></div>
+    <p>MCP (Model Context Protocol) هو <strong>معيار مفتوح</strong> لربط وكلاء الذكاء الاصطناعي بالأدوات ومصادر البيانات الخارجية. Aura Work يدعم خوادم MCP كآلية توسيع من الدرجة الأولى إلى جانب المهارات المدمجة والإضافات. MCP يسمح لك بإضافة قدرات جديدة بدون تعديل التطبيق الأساسي — فقط ثبّت خادم وسيتمكن الوكيل من استخدام أدواته.</p>
+    
+    <h2 style="margin-top:2rem">ما هو MCP؟</h2>
+    <p>MCP هو بروتوكول يسمح لوكلاء الذكاء الاصطناعي بالتواصل مع الخدمات الخارجية عبر واجهة موحدة. فكّر فيه كـ <strong>محول عالمي</strong> لأدوات AI — بدلاً من بناء تكاملات مخصصة لكل خدمة، يوفر MCP لغة مشتركة يفهمها كل من الوكيل والخدمة.</p>
+    <p style="margin-top:.75rem">مع MCP، يمكنك ربط الوكيل بـ:</p>
+    <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+      <li><strong>قواعد البيانات</strong> — استعلام PostgreSQL و MySQL و SQLite و MongoDB</li>
+      <li><strong>واجهات API</strong> — تفاعل مع GitHub و Slack و Discord و Jira</li>
+      <li><strong>أنظمة الملفات</strong> — الوصول للتخزين السحابي (S3 و GCS و Azure Blob)</li>
+      <li><strong>أدوات التطوير</strong> — linters و formatters ومشغلات الاختبارات</li>
+      <li><strong>خدمات مخصصة</strong> — أدواتك و APIs الداخلية</li>
+    </ul>
+
+    <div class="detail-card">
+      <h3>⚙️ كيف يعمل MCP في Aura Work</h3>
+      <p>خوادم MCP تدار بواسطة خدمة <strong>مساعد الإضافات</strong> (المنفذ 47824). عند إضافة خادم MCP:</p>
+      <ol style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>1.</strong> مساعد الإضافات يشغّل عملية الخادم (stdio) أو يتصل به (SSE)</li>
+        <li><strong>2.</strong> الخادم يعلن عن قدراته (أدوات، موارد، أوامر)</li>
+        <li><strong>3.</strong> هذه القدرات تُسجّل في محرك الوكيل</li>
+        <li><strong>4.</strong> عندما يحتاج الوكيل أداة، يمكنه الآن استدعاء أدوات خادم MCP</li>
+        <li><strong>5.</strong> كل استدعاء أداة يمر عبر بوابة الأذونات للموافقة</li>
+      </ol>
+      <p style="margin-top:.75rem">الوكيل يكتشف تلقائياً أدوات MCP المتاحة ويختارها عندما تكون مناسبة — لا تحتاج أن تخبره صراحةً باستخدام أداة MCP.</p>
     </div>
-    <p>يطبق Aura Work مواصفات MCP. خوادم MCP تسجل أدوات يمكن للوكيل اكتشافها واستدعائها أثناء التشغيل. كل أداة معزولة بنظام الأذونات ويمكن إضافتها ديناميكياً.</p>
-    <div class="detail-card"><h3>دمج أدوات الطرف الثالث</h3></div>
-    <div class="detail-card"><h3>بروتوكول موحد لاكتشاف الأدوات</h3></div>
-    <div class="detail-card"><h3>تسجيل أدوات ديناميكي أثناء التشغيل</h3></div>
-    <div class="detail-card"><h3>تنفيذ معزول مع التحكم بالأذونات</h3></div>
-    <div class="detail-card"><h3>سوق خوادم MCP المجتمعية</h3></div>
-  <section class="section">
-    <div class="section-label">تطوير خادم MCP</div>
-    <h2>انشاء خادم MCP خاص بك</h2>
-    <p>يمكنك انشاء خادم MCP باستخدام Node.js. هذا مثال بسيط:</p>
-    <pre><code>import { Server } from "@modelcontextprotocol/sdk";
+
+    <div class="detail-card">
+      <h3>🔌 طرق النقل المدعومة</h3>
+      <p>MCP يدعم آليتي نقل:</p>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>النقل</th><th>كيف يعمل</th><th>الأفضل لـ</th></tr></thead>
+        <tbody>
+          <tr><td><code>stdio</code></td><td>الخادم يعمل كعملية فرعية. التواصل عبر stdin/stdout.</td><td>الأدوات المحلية، مغلفات CLI، التكاملات البسيطة</td></tr>
+          <tr><td><code>SSE</code></td><td>الخادم يعمل كخدمة HTTP. التواصل عبر Server-Sent Events.</td><td>الخدمات البعيدة، الخوادم في الحاويات</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">معظم خوادم MCP المجتمعية تستخدم <code>stdio</code> لأنه أبسط — لا حاجة لإعدادات الشبكة.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>📦 تثبيت خوادم MCP</h3>
+      <p>هناك ثلاث طرق لإضافة خوادم MCP:</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 1: Marketplace (موصى بها)</h4>
+      <p>افتح <strong>لوحة الإضافات</strong> في التطبيق المكتبي، ابحث عن خادم MCP، واضغط تثبيت. marketplace يدير الإصدارات والتحديثات والتبعيات.</p>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 2: إعداد يدوي</h4>
+      <p>أضف خادم يدوياً في الإعدادات → الإضافات → خوادم MCP:</p>
+      <pre><code>{
+  "name": "my-database-server",
+  "command": "node",
+  "args": ["path/to/mcp-server.js"],
+  "env": { "DATABASE_URL": "postgresql://localhost/mydb" }
+}</code></pre>
+      
+      <h4 style="margin-top:1rem;margin-bottom:.5rem">الطريقة 3: إعداد على مستوى المشروع</h4>
+      <p>أضف خوادم MCP إلى ملف <code>aura.jsonc</code> في مشروعك:</p>
+      <pre><code>{
+  "mcp": {
+    "test-project-server": {
+      "type": "local",
+      "command": ["node", "/path/to/test-mcp-server.js"],
+      "enabled": true,
+      "environment": { "TEST_ENV_VAR": "مرحباً" }
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="detail-card">
+      <h3>🔐 الأمان والأذونات</h3>
+      <p>استدعاءات أدوات MCP تخضع لنفس نظام الأذونات مثل الأدوات المدمجة:</p>
+      <ul style="padding-right:1.25rem;margin-top:.75rem;line-height:2">
+        <li><strong>موافقة لكل أداة</strong> — كل أداة MCP يمكن الموافقة عليها أو رفضها بشكل فردي</li>
+        <li><strong>تنفيذ معزول</strong> — خوادم MCP تعمل في عمليات معزولة</li>
+        <li><strong>تصريح بالأذونات</strong> — الخوادم يجب أن تعلن ما تحتاج الوصول إليه</li>
+        <li><strong>سجل التدقيق</strong> — جميع استدعاءات MCP مسجلة بالتفصيل</li>
+      </ul>
+      <p style="margin-top:.75rem">في وضع <code>ask-first</code>، سيُطلب منك التأكيد قبل كل استدعاء أداة MCP.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛒 Marketplace</h3>
+      <p>المتجر (<code>registry/marketplace.json</code>) يتضمن خوادم MCP إلى جانب المهارات والإضافات. كل إدخال يتضمن: بيان الخادم، وصف الأدوات، وصف مترجم بـ 20 لغة، معلومات الإصدار، وتقييم المخاطر.</p>
+    </div>
+
+    <div class="detail-card">
+      <h3>🛠️ تطوير خوادم MCP</h3>
+      <p>يمكنك إنشاء خوادم MCP خاصة بك باستخدام MCP SDK الرسمي:</p>
+      <pre><code>// my-mcp-server.js
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 const server = new Server({
-  name: "my-tools",
+  name: "my-custom-server",
   version: "1.0.0"
+}, { capabilities: { tools: {} } });
+
+// تعريف أداة
+server.setRequestHandler("tools/list", async () => ({
+  tools: [{
+    name: "my_tool",
+    description: "تقوم بشيء مفيد",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "نص الاستعلام" }
+      },
+      required: ["query"]
+    }
+  }]
+}));
+
+// معالجة استدعاءات الأدوات
+server.setRequestHandler("tools/call", async (request) => {
+  const { name, arguments: args } = request.params;
+  if (name === "my_tool") {
+    return { content: [{ type: "text", text: "النتيجة: " + args.query }] };
+  }
 });
 
-server.tool("hello", {
-  description: "يقول مرحبا",
-  handler: async ({ name }) =&gt; ({
-    content: `مرحبا ${name}!`
-  })
-});
-
-server.start();</code></pre>
-    <p style="margin-top:1rem">ضع الخادم في <code>~/.config/aura/mcp-servers/</code> وسيتم تحميله تلقائيا عند بدء التشغيل.</p>
-    <div class="detail-card" style="margin-top:1.5rem">
-      <h3>مكتبة MCP الرسمية</h3>
-      <p>نحن نبني مكتبة MCP للغة العربية تسهل انشاء خوادم MCP للناطقين بالعربية. تشمل ادوات جاهزة للبحث، الترجمة، التحليل النصي، والمزيد.</p>
+// بدء الخادم
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+      <p style="margin-top:.75rem">راجع <code>examples/mcp-server/</code> لمثال عملي كامل.</p>
     </div>
-  </section>
+
+    <div class="detail-card">
+      <h3>💡 خوادم MCP شائعة</h3>
+      <table style="margin-top:.75rem">
+        <thead><tr><th>الخادم</th><th>الغرض</th><th>النقل</th></tr></thead>
+        <tbody>
+          <tr><td><code>filesystem</code></td><td>قراءة/كتابة الملفات، البحث</td><td>stdio</td></tr>
+          <tr><td><code>github</code></td><td>إدارة المستودعات و issues و PRs</td><td>stdio</td></tr>
+          <tr><td><code>postgres</code></td><td>استعلام قواعد بيانات PostgreSQL</td><td>stdio</td></tr>
+          <tr><td><code>slack</code></td><td>إرسال رسائل وقراءة القنوات</td><td>stdio</td></tr>
+          <tr><td><code>puppeteer</code></td><td>أتمتة المتصفح مع Chrome</td><td>stdio</td></tr>
+          <tr><td><code>brave-search</code></td><td>بحث الويب عبر Brave API</td><td>stdio</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:.75rem">اعثر على المزيد في <a href="https://github.com/modelcontextprotocol/servers" style="color:var(--color-accent)">github.com/modelcontextprotocol/servers</a></p>
+    </div>
   </section>
         </main>
        </div>
