@@ -1,6 +1,6 @@
 {
   "name": "aura-work",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.1",
   "type": "module",
   "description": "Aura CLI — standalone OpenCode-style terminal interface for Aura Work",
   "author": "hbx12",
@@ -26,6 +26,7 @@
     "copilot"
   ],
   "bin": {
+    "aura": "./bin/aura-work.js",
     "aura-work": "./bin/aura-work.js"
   },
   "main": "./dist/index.js",
@@ -53,29 +54,30 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "yargs": "^17.7.0",
+    "better-sqlite3": "^11.10.0",
     "chalk": "^5.3.0",
-    "node-fetch": "^3.3.0",
-    "open": "^10.1.0",
-    "semver": "^7.6.0",
-    "ora": "^8.0.0",
     "cli-highlight": "^2.1.0",
     "diff": "^7.0.0",
     "ink": "^6.1.0",
-    "ink-text-input": "^6.0.0",
     "ink-select-input": "^6.2.0",
     "ink-spinner": "^5.0.0",
-    "react": "^19.1.0"
+    "ink-text-input": "^6.0.0",
+    "node-fetch": "^3.3.0",
+    "open": "^10.1.0",
+    "ora": "^8.0.0",
+    "react": "^19.1.0",
+    "semver": "^7.6.0",
+    "yargs": "^17.7.0"
   },
   "devDependencies": {
     "@aura-os/shared": "*",
-    "@types/yargs": "^17.0.0",
     "@types/diff": "^7.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.0",
-    "typescript": "~5.8.3",
+    "@types/yargs": "^17.0.0",
     "tsup": "^8.0.0",
     "tsx": "^4.0.0",
+    "typescript": "~5.8.3",
     "vitest": "^4.1.8"
   }
 }
