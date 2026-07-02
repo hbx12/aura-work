@@ -16,8 +16,9 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup src/index.ts src/tui.tsx --format esm --dts --external react --external ink",
     "dev": "tsx src/index.ts",
+    "dev:tui": "tsx src/tui.tsx",
     "start": "node dist/index.js",
     "test": "vitest run",
     "lint": "eslint src/",
@@ -32,12 +33,18 @@
     "semver": "^7.6.0",
     "ora": "^8.0.0",
     "cli-highlight": "^2.1.0",
-    "diff": "^7.0.0"
+    "diff": "^7.0.0",
+    "ink": "^6.1.0",
+    "ink-text-input": "^6.0.0",
+    "ink-select-input": "^6.2.0",
+    "ink-spinner": "^5.0.0",
+    "react": "^19.1.0"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.0",
     "@types/diff": "^7.0.0",
     "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
     "typescript": "~5.8.3",
     "tsup": "^8.0.0",
     "tsx": "^4.0.0",

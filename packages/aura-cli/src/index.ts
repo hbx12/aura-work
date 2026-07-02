@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import React from 'react';
 /**
  * Aura CLI — standalone OpenCode-style terminal interface for Aura Work.
  *
@@ -193,6 +194,33 @@ async function main() {
       () => {},
       () => {
         doctorCommand();
+      },
+    )
+    .command(
+      "tui",
+      "Launch interactive TUI (Terminal UI)",
+      (y) =>
+        y
+          .option("session", {
+            alias: "s",
+            type: "string",
+            description: "Session ID to continue",
+          })
+          .option("model", {
+            alias: "m",
+            type: "string",
+            description: "Model to use",
+          }),
+      async (args) => {
+        const { render } = await import("ink");
+        const { App } = await import("./tui/App.js");
+        render(
+          React.createElement(App, {
+            sessionId: args.session as string | undefined,
+            model: args.model as string | undefined,
+            dir: args.dir as string | undefined,
+          })
+        );
       },
     )
     .command(
