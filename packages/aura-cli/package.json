@@ -63,7 +63,7 @@
     "ink-spinner": "^5.0.0",
     "ink-text-input": "^6.0.0",
     "node-fetch": "^3.3.0",
-    "open": "^10.1.0",
+    "open": "^11.0.0",
     "ora": "^8.0.0",
     "react": "^19.1.0",
     "semver": "^7.6.0",
