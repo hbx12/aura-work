@@ -35,14 +35,15 @@ export function Dashboard({
   const costText = cost > 0 ? `$${cost.toFixed(4)}` : "BYOK";
 
   return (
-    <div className="dashboard-root" style={{
+    <div className="dashboard-root" dir={isArabic ? "rtl" : "ltr"} style={{
       padding: "32px",
       display: "flex",
       flexDirection: "column",
       gap: "28px",
       height: "100%",
       overflowY: "auto",
-      fontFamily: isArabic ? "Cairo, sans-serif" : "inherit"
+      fontFamily: isArabic ? "Cairo, sans-serif" : "inherit",
+      direction: isArabic ? "rtl" : "ltr"
     }}>
       {/* Welcome Header */}
       <div className="dash-welcome" style={{
@@ -69,7 +70,8 @@ export function Dashboard({
       <div className="dash-grid" style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: "20px"
+        gap: "20px",
+        overflow: "hidden"
       }}>
         {/* Project Card */}
         <div className="dash-card glass" style={{
@@ -80,7 +82,9 @@ export function Dashboard({
           padding: "20px",
           display: "flex",
           flexDirection: "column",
-          gap: "16px"
+          gap: "16px",
+          overflow: "hidden",
+          minWidth: 0
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{
@@ -92,14 +96,14 @@ export function Dashboard({
             }}>
               <Icon name="folder" size={20} />
             </span>
-            <h3 style={{ margin: 0, color: "var(--fg-1)" }}>
+            <h3 style={{ margin: 0, color: "var(--fg-1)", overflowWrap: "break-word" }}>
               {isArabic ? "مساحة العمل" : "Workspace"}
             </h3>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.9rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--fg-3)" }}>{isArabic ? "المسار:" : "Path:"}</span>
-              <span className="text-ellipsis" style={{ color: "var(--fg-2)", maxWidth: "160px" }} title={projectPath}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", minWidth: 0 }}>
+              <span style={{ color: "var(--fg-3)", flexShrink: 0 }}>{isArabic ? "المسار:" : "Path:"}</span>
+              <span className="text-ellipsis" style={{ color: "var(--fg-2)", maxWidth: "160px", overflowWrap: "break-word", overflow: "hidden", textOverflow: "ellipsis" }} title={projectPath}>
                 {projectPath}
               </span>
             </div>
@@ -126,7 +130,9 @@ export function Dashboard({
           padding: "20px",
           display: "flex",
           flexDirection: "column",
-          gap: "16px"
+          gap: "16px",
+          overflow: "hidden",
+          minWidth: 0
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{
@@ -138,14 +144,14 @@ export function Dashboard({
             }}>
               <Icon name="brain" size={20} />
             </span>
-            <h3 style={{ margin: 0, color: "var(--fg-1)" }}>
+            <h3 style={{ margin: 0, color: "var(--fg-1)", overflowWrap: "break-word" }}>
               {isArabic ? "استهلاك الذكاء" : "AI Spending"}
             </h3>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.9rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--fg-3)" }}>{isArabic ? "النموذج:" : "Model:"}</span>
-              <span style={{ color: "var(--fg-2)" }}>{lastUsage ? `${lastUsage.providerId}/${lastUsage.modelId}` : "—"}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", minWidth: 0 }}>
+              <span style={{ color: "var(--fg-3)", flexShrink: 0 }}>{isArabic ? "النموذج:" : "Model:"}</span>
+              <span style={{ color: "var(--fg-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lastUsage ? `${lastUsage.providerId}/${lastUsage.modelId}` : "—"}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--fg-3)" }}>{isArabic ? "الرموز المستخدمة:" : "Total Tokens:"}</span>
@@ -167,9 +173,11 @@ export function Dashboard({
           padding: "20px",
           display: "flex",
           flexDirection: "column",
-          gap: "14px"
+          gap: "14px",
+          overflow: "hidden",
+          minWidth: 0
         }}>
-          <h3 style={{ margin: 0, color: "var(--fg-1)", fontSize: "1.1rem" }}>
+          <h3 style={{ margin: 0, color: "var(--fg-1)", fontSize: "1.1rem", overflowWrap: "break-word" }}>
             {isArabic ? "إجراءات سريعة" : "Quick Actions"}
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
