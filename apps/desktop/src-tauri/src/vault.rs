@@ -8,6 +8,8 @@ use chacha20poly1305::{
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
+#[cfg(windows)]
+use std::process::{Command, Stdio};
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -61,6 +63,7 @@ impl VaultStorageMode {
     }
 }
 
+#[derive(Debug)]
 struct LoadedDeviceKey {
     key: [u8; DEVICE_KEY_LEN],
     storage_mode: VaultStorageMode,
@@ -328,7 +331,34 @@ fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
     fs::set_permissions(path, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn enforce_fallback_key_permissions(path: &Path) -> Result<(), String> {
+    let whoami = Command::new("whoami")
+        .output()
+        .map_err(|e| format!("Cannot determine current Windows user for fallback vault key ACL: {e}"))?;
+    if !whoami.status.success() {
+        return Err("Cannot determine current Windows user for fallback vault key ACL.".into());
+    }
+    let user = String::from_utf8_lossy(&whoami.stdout).trim().to_string();
+    if user.is_empty() {
+        return Err("Cannot determine current Windows user for fallback vault key ACL.".into());
+    }
+    let grant = format!("{user}:(F)");
+    let status = Command::new("icacls")
+        .arg(path)
+        .args(["/inheritance:r", "/grant:r"])
+        .arg(&grant)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map_err(|e| format!("Failed to restrict fallback vault key ACL: {e}"))?;
+    if !status.success() {
+        return Err("Failed to restrict fallback vault key ACL.".into());
+    }
+    Ok(())
+}
+
+#[cfg(all(not(unix), not(windows)))]
 fn enforce_fallback_key_permissions(_path: &Path) -> Result<(), String> {
     Ok(())
 }
@@ -365,6 +395,47 @@ fn write_fallback_device_key(path: &Path, key: &[u8; DEVICE_KEY_LEN]) -> Result<
     enforce_fallback_key_permissions(path)
 }
 
+fn load_key_from_os_storage<F>(
+    stored: &str,
+    storage_mode: VaultStorageMode,
+    rewrite_if_invalid: F,
+) -> Result<Option<LoadedDeviceKey>, String>
+where
+    F: FnOnce() -> Result<(), String>,
+{
+    let decoded = B64.decode(stored.trim()).ok();
+    if let Some(bytes) = decoded {
+        if bytes.len() == DEVICE_KEY_LEN {
+            let mut key = [0u8; DEVICE_KEY_LEN];
+            key.copy_from_slice(&bytes);
+            return Ok(Some(LoadedDeviceKey { key, storage_mode }));
+        }
+    }
+    rewrite_if_invalid()?;
+    Ok(None)
+}
+
+fn store_device_key_in_os_storage<F>(
+    path: &Path,
+    key: &[u8; DEVICE_KEY_LEN],
+    remove_legacy_file: bool,
+    set_password: F,
+) -> Result<LoadedDeviceKey, String>
+where
+    F: FnOnce(&str) -> Result<(), String>,
+{
+    let encoded = B64.encode(key);
+    set_password(&encoded)?;
+    if remove_legacy_file && path.exists() {
+        fs::remove_file(path)
+            .map_err(|e| format!("Failed to remove migrated legacy device key file: {e}"))?;
+    }
+    Ok(LoadedDeviceKey {
+        key: *key,
+        storage_mode: VaultStorageMode::OsKeychain,
+    })
+}
+
 fn load_or_create_fallback_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
     if path.exists() {
         return Ok(LoadedDeviceKey {
@@ -398,29 +469,30 @@ fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
         }
     };
 
-    let stored_opt = entry.get_password().ok().and_then(|stored| {
-        B64.decode(stored.trim()).ok().and_then(|bytes| {
-            if bytes.len() == DEVICE_KEY_LEN {
-                let mut key = [0u8; DEVICE_KEY_LEN];
-                key.copy_from_slice(&bytes);
-                Some(key)
-            } else {
-                None
-            }
-        })
-    });
-
-    if let Some(key) = stored_opt {
-        return Ok(LoadedDeviceKey {
-            key,
-            storage_mode: VaultStorageMode::OsKeychain,
-        });
+    if let Ok(stored) = entry.get_password() {
+        if let Some(loaded) = load_key_from_os_storage(&stored, VaultStorageMode::OsKeychain, || {
+            entry
+                .delete_credential()
+                .map_err(|e| format!("Failed to clear invalid OS secure vault key: {e}"))
+        })? {
+            return Ok(loaded);
+        }
     }
 
     if path.exists() {
         let key = read_fallback_device_key(path)?;
-        let encoded = B64.encode(key);
-        let _ = entry.set_password(&encoded);
+        match store_device_key_in_os_storage(path, &key, true, |encoded| {
+            entry
+                .set_password(encoded)
+                .map_err(|e| format!("OS secure storage rejected legacy vault key migration: {e}"))
+        }) {
+            Ok(loaded) => return Ok(loaded),
+            Err(error) => {
+                eprintln!(
+                    "[vault] WARN: could not migrate legacy device key to OS secure storage ({error}). Using restricted fallback file."
+                );
+            }
+        }
         return Ok(LoadedDeviceKey {
             key,
             storage_mode: VaultStorageMode::FallbackFile,
@@ -429,8 +501,19 @@ fn load_or_create_device_key(path: &Path) -> Result<LoadedDeviceKey, String> {
 
     let mut key = [0u8; DEVICE_KEY_LEN];
     rand::thread_rng().fill_bytes(&mut key);
-    let _ = write_fallback_device_key(path, &key);
-    let _ = entry.set_password(&B64.encode(key));
+    match store_device_key_in_os_storage(path, &key, false, |encoded| {
+        entry
+            .set_password(encoded)
+            .map_err(|e| format!("OS secure storage rejected new vault key: {e}"))
+    }) {
+        Ok(loaded) => return Ok(loaded),
+        Err(error) => {
+            eprintln!(
+                "[vault] WARN: OS secure storage could not persist a new vault key ({error}). Using restricted fallback file."
+            );
+        }
+    }
+    write_fallback_device_key(path, &key)?;
 
     Ok(LoadedDeviceKey {
         key,
@@ -516,6 +599,73 @@ mod tests {
 
         assert!(error.contains("corrupt"));
         let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn os_storage_new_key_does_not_write_fallback_file() {
+        let dir = temp_vault_dir("os-new");
+        let path = dir.join("device.key");
+        let key = [3u8; DEVICE_KEY_LEN];
+
+        let loaded = store_device_key_in_os_storage(&path, &key, false, |encoded| {
+            assert!(!encoded.is_empty());
+            Ok(())
+        })
+        .expect("store in os storage");
+
+        assert_eq!(loaded.storage_mode, VaultStorageMode::OsKeychain);
+        assert_eq!(loaded.key, key);
+        assert!(!path.exists());
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn os_storage_migration_removes_legacy_fallback_file() {
+        let dir = temp_vault_dir("os-migrate");
+        let path = dir.join("device.key");
+        let key = [4u8; DEVICE_KEY_LEN];
+        write_fallback_device_key(&path, &key).expect("write legacy key");
+
+        let loaded = store_device_key_in_os_storage(&path, &key, true, |encoded| {
+            assert!(!encoded.is_empty());
+            Ok(())
+        })
+        .expect("migrate to os storage");
+
+        assert_eq!(loaded.storage_mode, VaultStorageMode::OsKeychain);
+        assert_eq!(loaded.key, key);
+        assert!(!path.exists());
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn os_storage_failure_keeps_legacy_fallback_file() {
+        let dir = temp_vault_dir("os-fail");
+        let path = dir.join("device.key");
+        let key = [5u8; DEVICE_KEY_LEN];
+        write_fallback_device_key(&path, &key).expect("write legacy key");
+
+        let error = store_device_key_in_os_storage(&path, &key, true, |_encoded| {
+            Err("simulated keychain failure".to_string())
+        })
+        .expect_err("failed keychain write should be reported");
+
+        assert!(error.contains("simulated keychain failure"));
+        assert!(path.exists());
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn invalid_os_storage_key_is_cleared_without_leaking_value() {
+        let mut cleared = false;
+        let loaded = load_key_from_os_storage("not-valid-base64-secret", VaultStorageMode::OsKeychain, || {
+            cleared = true;
+            Ok(())
+        })
+        .expect("invalid os key should be handled");
+
+        assert!(loaded.is_none());
+        assert!(cleared);
     }
 
     #[test]

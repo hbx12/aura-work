@@ -6,6 +6,7 @@
  *   resources/node/(node.exe|bin/node)
  *   resources/sidecars/<id>/dist/index.js
  */
+import { createHash } from "node:crypto";
 import {
   chmodSync,
   copyFileSync,
@@ -16,7 +17,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -26,9 +27,9 @@ const { buildSync } = require("esbuild");
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const isProduction = process.env.AURA_RELEASE_BUILD === "1";
 const releaseVersion = process.env.AURA_RELEASE_VERSION ?? "";
-const allowAlphaVmPlaceholder =
-  process.env.AURA_ALLOW_VM_PLACEHOLDER_RELEASE === "1" &&
-  releaseVersion.includes("-alpha");
+const vmPublicKey = process.env.AURA_VM_MINISIGN_PUBLIC_KEY?.trim() ?? "";
+const vmArtifactSource = process.env.AURA_VM_IMAGE_ARTIFACT_PATH?.trim() ?? "";
+const vmSignatureSource = process.env.AURA_VM_IMAGE_SIGNATURE_PATH?.trim() ?? "";
 
 const sidecars = [
   { id: "aura-agent", src: "sidecar/aura-agent/dist", port: 47821 },
@@ -47,6 +48,80 @@ function readJson(path) {
 function appVersion() {
   const pkg = readJson(join(root, "package.json"));
   return String(pkg.version ?? "0.0.0");
+}
+
+function sha256File(path) {
+  const hash = createHash("sha256");
+  hash.update(readFileSync(path));
+  return hash.digest("hex");
+}
+
+function expectedSignatureName(artifactName) {
+  return `${artifactName}.minisig`;
+}
+
+function hasPinnedVmPublicKey() {
+  return (
+    vmPublicKey.length >= 40 &&
+    !vmPublicKey.includes("REPLACE_WITH") &&
+    !vmPublicKey.includes("dev-placeholder")
+  );
+}
+
+function isVmPlaceholder(manifest) {
+  return (
+    String(manifest.artifact ?? "").includes("placeholder") ||
+    String(manifest.signature ?? "").includes("dev-placeholder") ||
+    !String(manifest.sha256 ?? "").trim() ||
+    manifest.sha256 === "pending-build"
+  );
+}
+
+function stageReleaseVmImageFromInputs() {
+  if (!isProduction || (!vmArtifactSource && !vmSignatureSource)) return;
+  if (!vmArtifactSource || !vmSignatureSource) {
+    throw new Error(
+      "[stage-bundle] AURA_VM_IMAGE_ARTIFACT_PATH and AURA_VM_IMAGE_SIGNATURE_PATH must be provided together.",
+    );
+  }
+  if (!existsSync(vmArtifactSource)) {
+    throw new Error(`[stage-bundle] VM image artifact does not exist: ${vmArtifactSource}`);
+  }
+  if (!existsSync(vmSignatureSource)) {
+    throw new Error(`[stage-bundle] VM image signature does not exist: ${vmSignatureSource}`);
+  }
+
+  const vmRoot = join(root, "bundle", "vm-image");
+  mkdirSync(vmRoot, { recursive: true });
+  const artifactName = basename(vmArtifactSource);
+  const signatureName = expectedSignatureName(artifactName);
+  const artifactDest = join(vmRoot, artifactName);
+  const signatureDest = join(vmRoot, signatureName);
+
+  if (basename(vmSignatureSource) !== signatureName) {
+    throw new Error(`[stage-bundle] VM signature file must be named ${signatureName}.`);
+  }
+
+  copyFileSync(vmArtifactSource, artifactDest);
+  copyFileSync(vmSignatureSource, signatureDest);
+  writeFileSync(
+    join(vmRoot, "manifest.json"),
+    `${JSON.stringify(
+      {
+        schemaVersion: "1.0",
+        imageId: "aura-linux-workspace",
+        version: releaseVersion || appVersion(),
+        description: "Signed Linux workspace image for Aura Work.",
+        sha256: sha256File(artifactDest),
+        signature: signatureName,
+        artifact: artifactName,
+        minHelperVersion: appVersion(),
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  console.log(`[stage-bundle] staged signed VM image: ${artifactName}`);
 }
 
 function stageNodeRuntime() {
@@ -116,6 +191,7 @@ for (const sidecar of sidecars) {
 }
 
 console.log(`[stage-bundle] done — ${sidecars.length}/${sidecars.length} sidecars bundled`);
+stageReleaseVmImageFromInputs();
 
 const manifest = {
   schemaVersion: "1.0",
@@ -162,22 +238,34 @@ console.log("[stage-bundle] manifest written and bundle layout verified");
 
 if (isProduction) {
   const vmManifest = join(root, "bundle", "vm-image", "manifest.json");
-  if (existsSync(vmManifest)) {
-    const raw = readFileSync(vmManifest, "utf8");
-    const manifest = JSON.parse(raw);
-    const hasPlaceholder =
-      String(manifest.signature ?? "").includes("dev-placeholder") ||
-      String(manifest.artifact ?? "").includes("placeholder");
-
-    if (hasPlaceholder && allowAlphaVmPlaceholder) {
-      console.warn(
-        `[stage-bundle] WARNING: VM placeholder artifact allowed for alpha release ${releaseVersion}. VM-backed isolation remains unavailable until a signed VM image is published.`,
-      );
-    } else if (hasPlaceholder) {
-      console.error(
-        "[stage-bundle] ERROR: VM placeholder artifact detected. Stable releases require a signed production VM image.",
-      );
-      process.exit(1);
-    }
+  if (!hasPinnedVmPublicKey()) {
+    throw new Error("[stage-bundle] AURA_VM_MINISIGN_PUBLIC_KEY is required for release builds.");
   }
+  if (!existsSync(vmManifest)) {
+    throw new Error("[stage-bundle] VM manifest missing. Release builds require a signed VM image.");
+  }
+
+  const manifest = readJson(vmManifest);
+  if (isVmPlaceholder(manifest)) {
+    throw new Error("[stage-bundle] VM placeholder artifact detected. Release builds require a signed VM image.");
+  }
+
+  const artifact = join(root, "bundle", "vm-image", manifest.artifact);
+  const signature = join(root, "bundle", "vm-image", manifest.signature);
+  const expectedSignature = expectedSignatureName(manifest.artifact);
+
+  if (manifest.signature !== expectedSignature) {
+    throw new Error(`[stage-bundle] VM signature file must be named ${expectedSignature}.`);
+  }
+  if (!existsSync(artifact)) {
+    throw new Error(`[stage-bundle] VM artifact missing: ${artifact}`);
+  }
+  if (!existsSync(signature)) {
+    throw new Error(`[stage-bundle] VM signature missing: ${signature}`);
+  }
+  const actualSha = sha256File(artifact);
+  if (actualSha.toLowerCase() !== String(manifest.sha256 ?? "").toLowerCase()) {
+    throw new Error("[stage-bundle] VM artifact SHA-256 does not match manifest.");
+  }
+  console.log("[stage-bundle] release VM image manifest, artifact, signature, and public key are present");
 }
